@@ -5,6 +5,9 @@
 import numpy
 import scipy, scipy.constants, scipy.integrate
 
+# import mis par BT pour des tests :)
+from matplotlib import pyplot
+
 
 def approx_binomial(n, p, size=None):
     '''Sample (64-bit) from a binomial distribution using the normal approximation.
@@ -19,6 +22,38 @@ def approx_binomial(n, p, size=None):
     gaussian = numpy.random.normal(n*p, numpy.sqrt(n*p*(1-p)), size=size)
     gaussian[is_0] = 0
     gaussian[gaussian < 0] = 0
+    # add the continuity correction to sample at the midpoint of each integral bin
+    gaussian += 0.5
+    if size is not None:
+        binomial = gaussian.astype(numpy.int64)
+    else:
+        # scalar
+        binomial = int(gaussian)
+    return binomial
+
+
+def approx_binomial_bt(n, p, size=None):
+    '''Sample (64-bit) from a binomial distribution using the normal approximation.
+
+    :param n: The number of trials (int or array of ints).
+    :param p: The probability of success (float).
+    :param size: The shape of the output (int or tuple of ints, optional).
+    :returns: 64-bit int or array of 64-bit ints.
+    ***** jfais des tests pas trop certain de ce que je fais :)))))))
+    '''
+    # is_0 = n == 0
+    # n[is_0] = 1
+    is_0 = 0
+    if n == 0:
+        is_0 = 1
+        n = 1   # pense que ça revient au même que ce qui est fait en haut pour un array
+    gaussian = numpy.random.normal(n * p, numpy.sqrt(n * p * (1 - p)), size=size)
+    # gaussian[is_0] = 0
+    if is_0:
+        gaussian = 0   # pense que ça revient au même que ce qui est fait en haut pour un array
+    # gaussian[gaussian < 0] = 0
+    if gaussian < 0:
+        gaussian = 0   # pense que ça revient au même que ce qui est fait en haut pour un array
     # add the continuity correction to sample at the midpoint of each integral bin
     gaussian += 0.5
     if size is not None:
@@ -223,3 +258,37 @@ def stack(datamap, data):
         frame[y:y+h_pad+1, x:x+w_pad+1] += data * nb
     return frame[int(h_pad/2):-int(h_pad/2), int(w_pad/2):-int(w_pad/2)]
 
+def stack_btmod(datamap, data):
+    '''Compute a new frame consisting in a replication of the given *data*
+    centered at every positions and multiplied by the factors given in the
+    *datamap*.
+
+    Example::
+
+        >>> datamap = numpy.array([[2, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0]])
+        >>> data = numpy.array([[1, 2, 1],
+                                [2, 3, 2],
+                                [1, 2, 1]])
+        >>> utils.stack_btmod(datamap, data)
+        numpy.array([[6, 4, 0, 0],
+                     [4, 2, 0, 0],
+                     [0, 0, 0, 0],
+                     [0, 0, 0, 0]])
+
+    :param datamap: A 2D array indicating how many data are positioned in every
+    :param data: A 2D array containing the data to replicate.
+    :returns: A 2D array shaped like *datamap*.
+    ******* VERSION QUE BT MODIFIE POUR DES TESTS DE PRISE D'IMAGE NON-RASTER SCANNED *******
+    '''
+    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
+    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
+    positions = numpy.where(datamap > 0)
+    numbers = datamap[positions]
+    print("in stack_btmod")
+    for nb, y, x in zip(numbers, *positions):
+        frame[y:y + h_pad + 1, x:x + w_pad + 1] += data * nb
+
+    return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]

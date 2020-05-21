@@ -76,8 +76,13 @@ import numpy
 import scipy.constants
 import scipy.signal
 
-from pysted import cUtils, utils
+# from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
+from pysted import utils
+import cUtils
 
+# import mis par BT pour des tests
+from matplotlib import pyplot
+from pysted.acquisition import rescue
 
 class GaussianBeam:
     '''This class implements a Gaussian beam (excitation).
@@ -445,6 +450,7 @@ class Detector:
                                            detection_efficiency,
                                            photons.shape) * dwelltime
         # add noise, background, and dark counts
+
         if self.noise:
             signal = numpy.random.poisson(signal, signal.shape)
         if self.background > 0:
@@ -459,6 +465,33 @@ class Detector:
             # dark counts during dwell time
             cts = (cts * dwelltime).astype(numpy.int64)
             signal += cts
+        return signal
+
+    def get_signal_bt(self, photons, dwelltime):
+        '''Compute the detected signal (in photons) given the number of emitted
+        photons and the time spent by the detector.
+
+        :param photons: An array of number of emitted photons.
+        :param dwelltime: The time spent to detect the emitted photons (s). It is
+                          either a scalar or an array shaped like *nb_photons*.
+        :returns: An array shaped like *nb_photons*.
+        ***** version BT dans laquelle je fais des tests pour essayer de faire les mesures autrement que g -> d basic
+        '''
+        print("you are now in the bt zone pt 2")
+        detection_efficiency = self.pcef * self.pdef  # ratio
+        signal = numpy.zeros(photons.shape)
+        rows = photons.shape[0]
+        columns = photons.shape[1]
+        for row in range(rows):
+            for col in range(columns):
+                # devrait faire la même chose que get_signal mais un pixel à la fois, je crois?
+                signal[row, col] = utils.approx_binomial_bt(photons.astype(numpy.int64)[row, col],
+                                                            detection_efficiency) * dwelltime
+                # y-a-t'il une meilleure façon de faire cela pixel par pixel? Cette méthode est genre 40x plus longue
+
+        # premier test serait de faire un double for pour itérer l'image au complet et caller utils.approx_binomial
+        # sur chaque pixel individuel pour voir le résultat
+
         return signal
 
 
@@ -764,6 +797,58 @@ class Microscope:
         intensity = utils.stack(datamap, effective)
         
         photons = self.fluo.get_photons(intensity)
+
+        return self.detector.get_signal(photons, pdt)
+
+    def get_signal_bt(self, datamap, pixelsize, pdt, p_ex, p_sted):
+        '''Compute the detected signal given some molecules disposition.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m).
+        :param pdt: The time spent on each pixel of the simulated image (s).
+        :param p_ex: The power of the excitation beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :returns: A 2D array of the number of detected photons on each pixel.
+        **** version BT, pareille à get_signal, sauf que j'appelle get_signal_bt du detector après au lieu de get_signal
+        normale
+        '''
+        # effective intensity across pixels (W)
+        effective = self.get_effective(pixelsize, p_ex, p_sted)
+
+        # stack one effective per molecule
+        intensity = utils.stack(datamap, effective)
+
+        photons = self.fluo.get_photons(intensity)
+
+        print("you are now in the bt zone")
+        return self.detector.get_signal_bt(photons, pdt)
+
+    def get_signal_stackmod(self, datamap, pixelsize, pdt, p_ex, p_sted):
+        '''Compute the detected signal given some molecules disposition.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m).
+        :param pdt: The time spent on each pixel of the simulated image (s).
+        :param p_ex: The power of the excitation beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :returns: A 2D array of the number of detected photons on each pixel.
+
+        ********* version où je modifierais la fonction stack utilisée *********
+        '''
+        print("in get_signal_stackmod")
+        # effective intensity across pixels (W)
+        effective = self.get_effective(pixelsize, p_ex, p_sted)
+
+        # stack one effective per molecule
+        # *** datamap contient les données crues, utils.stack_* génère l'intensité qui serait générée par ces donées
+        # soumises au beam d'exitation et STED beam
+        # ---> c'est donc ça qui m'intéresse pour la prise de données non-raster, right?
+        intensity = utils.stack_btmod(datamap, effective)
+
+        photons = self.fluo.get_photons(intensity)
+
         return self.detector.get_signal(photons, pdt)
     
     

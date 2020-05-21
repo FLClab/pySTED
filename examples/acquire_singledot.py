@@ -2,6 +2,7 @@
 import argparse
 
 from matplotlib import cm, pyplot
+import numpy
 import tifffile
 
 from pysted import base, utils
