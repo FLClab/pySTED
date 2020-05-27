@@ -835,7 +835,8 @@ class Microscope:
         :param p_sted: The power of the STED beam (W).
         :returns: A 2D array of the number of detected photons on each pixel.
 
-        ********* version où je modifierais la fonction stack utilisée *********
+        ********* version utilisant utils.stack_btmod *********
+        ********* fait donc de l'imagerie pixel par pixel au lieu de seulement les pixels avec des molécules *********
         '''
         print("in get_signal_stackmod")
         # effective intensity across pixels (W)
@@ -850,7 +851,45 @@ class Microscope:
         photons = self.fluo.get_photons(intensity)
 
         return self.detector.get_signal(photons, pdt)
-    
+
+    def get_signal_pixel_list(self, datamap, pixelsize, pdt, p_ex, p_sted, mode="default"):
+        '''Compute the detected signal given some molecules disposition.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m).
+        :param pdt: The time spent on each pixel of the simulated image (s).
+        :param p_ex: The power of the excitation beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :returns: A 2D array of the number of detected photons on each pixel.
+
+        ********* version où on passe en param le mode d'imagerie *********
+        ********* par default, pixel par pixel, shuffled pixel list, ... *********
+        '''
+        print("dans get_signal_pixel_list")
+        # effective intensity across pixels (W)
+        effective = self.get_effective(pixelsize, p_ex, p_sted)
+
+        # stack one effective per molecule
+        # devrait être un switch case
+        if mode == "default":
+            intensity = utils.stack(datamap, effective)
+        elif mode == "xy":
+            intensity = utils.stack_btmod(datamap, effective)
+        elif mode == "list":
+            intensity = utils.stack_btmod_list(datamap, effective)
+        elif mode == "shuffle":
+            intensity = utils.stack_btmod_list_shuffle(datamap, effective)
+        elif mode == "checkers":
+            intensity = utils.stack_btmod_checkers(datamap, effective)
+        else:
+            print("wrong choice retard")
+            intensity = 69
+            # TODO: mettre un exception catch ou qqchose
+
+        photons = self.fluo.get_photons(intensity)
+
+        return self.detector.get_signal(photons, pdt)
     
     def get_signal2(self, datamap, pixelsize, pdt, pmap_ex, pmap_sted):
         __i_ex, _, _ = self.cache(pixelsize)
@@ -944,3 +983,97 @@ class Microscope:
             new_datamap[y, x] = numpy.random.binomial(nb, prob_survival)
         return new_datamap
 
+    def bleach_basebt(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
+        """
+        Copie modifiée (lol) de la méthode bleach:
+            - fixed l'indexation dans la variable pdt dans la boucle, qui est un scalaire dans mon utilisation
+            - comme pdt est un scalaire dans mon, j'ai retiré des trucs qui n'auront plus besoin d'être recalculés
+              à chaque itération de la boucle
+        """
+        print("!!! DANS LA FONCTION bleach_basebt :) !!!")
+        __i_ex, __i_sted, _ = self.cache(pixelsize)
+
+        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+
+        pad = photons_ex.shape[0] // 2 * 2
+        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
+
+        prob_ex = numpy.prod(numpy.exp(-k_ex * pixeldwelltime))
+        prob_sted = numpy.prod(numpy.exp(-k_sted * pixeldwelltime))
+
+        positions = numpy.where(datamap > 0)
+        numbers = datamap[positions]
+        new_datamap = numpy.zeros(datamap.shape)
+        for nb, y, x in zip(numbers, *positions):
+            # dans la "vrai" fct il y a du indexage dans une variable pdtpad, mais pour un pixeldwelltime cte
+            # ça fait planter le script
+            new_datamap[y, x] = numpy.random.binomial(nb, prob_ex * prob_sted)
+        return new_datamap
+
+    def bleach_basebt2(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
+        """
+        Copie modifiée (lol) de la méthode bleach:
+            - fixed l'indexation dans la variable pdt dans la boucle, qui est un scalaire dans mon utilisation
+            - Le reste est pareil à bleach, cette méthode sert plus à comparer l'efficacité/vitesse et vérifier que tout
+              est constant en retirant les trucs de la boucle dans bleah_basebt, ce qui devrait être (et est) le cas
+        """
+        __i_ex, __i_sted, _ = self.cache(pixelsize)
+
+        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        pad = photons_ex.shape[0] // 2 * 2
+        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
+
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
+
+        positions = numpy.where(datamap > 0)
+        numbers = datamap[positions]
+        new_datamap = numpy.zeros(datamap.shape)
+        for nb, y, x in zip(numbers, *positions):
+            pdt = pdtpad   # normalement c'est indexé, mais ça fait planter le scripte :)
+            prob_ex = numpy.prod(numpy.exp(-k_ex * pdt))
+            prob_sted = numpy.prod(numpy.exp(-k_sted * pdt))
+            new_datamap[y, x] = numpy.random.binomial(nb, prob_ex * prob_sted)
+        return new_datamap
+
+
+    def bleach_pixbypixbt(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
+        """
+        Copie modifiée (lolxd) de la méthode bleach:
+            - fixed l'indexation dans la variable pdt dans la boucle, qui est un scalaire dans mon utilisation
+            - comme pdt est un scalaire dans mon, j'ai retiré des trucs qui n'auront plus besoin d'être recalculés
+              à chaque itération de la boucle
+            - itère sur chaaue pixel au lieu d'uniquement sur les pixels contenant des molécules
+        """
+        print("!!! DANS LA FONCTION bleach_pixbypixbt :) !!!")
+        __i_ex, __i_sted, _ = self.cache(pixelsize)
+
+        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+
+        pad = photons_ex.shape[0] // 2 * 2
+        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
+
+        new_datamap = numpy.zeros(datamap.shape)
+        prob_ex = numpy.prod(numpy.exp(-k_ex * pixeldwelltime))
+        prob_sted = numpy.prod(numpy.exp(-k_sted * pixeldwelltime))
+        for y in range(datamap.shape[0]):
+            for x in range(datamap.shape[1]):
+                new_datamap[y, x] = numpy.random.binomial(datamap[y, x], prob_ex * prob_sted)
+        return new_datamap

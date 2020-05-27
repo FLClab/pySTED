@@ -5,8 +5,12 @@
 import numpy
 import scipy, scipy.constants, scipy.integrate
 
+# import mis par BT
+import random
+
 # import mis par BT pour des tests :)
 from matplotlib import pyplot
+import time
 
 
 def approx_binomial(n, p, size=None):
@@ -283,12 +287,150 @@ def stack_btmod(datamap, data):
     :returns: A 2D array shaped like *datamap*.
     ******* VERSION QUE BT MODIFIE POUR DES TESTS DE PRISE D'IMAGE NON-RASTER SCANNED *******
     '''
-    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
-    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
-    positions = numpy.where(datamap > 0)
-    numbers = datamap[positions]
+    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2   # garde ça
+    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))   # garde ça
     print("in stack_btmod")
-    for nb, y, x in zip(numbers, *positions):
-        frame[y:y + h_pad + 1, x:x + w_pad + 1] += data * nb
-
+    for y in range(datamap.shape[0]):
+        for x in range(datamap.shape[1]):
+            frame[y:y + h_pad + 1, x:x + w_pad + 1] += data * datamap[y, x]
     return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
+
+
+def stack_btmod_list(datamap, data):
+    '''Compute a new frame consisting in a replication of the given *data*
+    centered at every positions and multiplied by the factors given in the
+    *datamap*.
+
+    Example::
+
+        >>> datamap = numpy.array([[2, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0]])
+        >>> data = numpy.array([[1, 2, 1],
+                                [2, 3, 2],
+                                [1, 2, 1]])
+        >>> utils.stack_btmod(datamap, data)
+        numpy.array([[6, 4, 0, 0],
+                     [4, 2, 0, 0],
+                     [0, 0, 0, 0],
+                     [0, 0, 0, 0]])
+
+    :param datamap: A 2D array indicating how many data are positioned in every
+    :param data: A 2D array containing the data to replicate.
+    :returns: A 2D array shaped like *datamap*.
+    ******* VERSION QUE BT MODIFIE POUR DES TESTS DE PRISE D'IMAGE NON-RASTER SCANNED *******
+    '''
+    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2   # garde ça
+    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))   # garde ça
+    pixel_list = pixel_sampling(datamap)
+    print("in stack_btmod_list")
+    for pixel in pixel_list:
+        frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
+    return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
+
+def stack_btmod_list_shuffle(datamap, data):
+    '''Compute a new frame consisting in a replication of the given *data*
+    centered at every positions and multiplied by the factors given in the
+    *datamap*.
+
+    Example::
+
+        >>> datamap = numpy.array([[2, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0]])
+        >>> data = numpy.array([[1, 2, 1],
+                                [2, 3, 2],
+                                [1, 2, 1]])
+        >>> utils.stack_btmod(datamap, data)
+        numpy.array([[6, 4, 0, 0],
+                     [4, 2, 0, 0],
+                     [0, 0, 0, 0],
+                     [0, 0, 0, 0]])
+
+    :param datamap: A 2D array indicating how many data are positioned in every
+    :param data: A 2D array containing the data to replicate.
+    :returns: A 2D array shaped like *datamap*.
+    ******* VERSION QUE BT MODIFIE POUR DES TESTS DE PRISE D'IMAGE NON-RASTER SCANNED + SHUFFLING *******
+    '''
+    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2   # garde ça
+    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))   # garde ça
+    pixel_list = pixel_sampling(datamap)
+    random.shuffle(pixel_list)
+    print("in stack_btmod_list_shuffle")
+    for pixel in pixel_list:
+        frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
+    return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
+
+def stack_btmod_checkers(datamap, data):
+    '''Compute a new frame consisting in a replication of the given *data*
+    centered at every positions and multiplied by the factors given in the
+    *datamap*.
+
+    Example::
+
+        >>> datamap = numpy.array([[2, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0]])
+        >>> data = numpy.array([[1, 2, 1],
+                                [2, 3, 2],
+                                [1, 2, 1]])
+        >>> utils.stack_btmod(datamap, data)
+        numpy.array([[6, 4, 0, 0],
+                     [4, 2, 0, 0],
+                     [0, 0, 0, 0],
+                     [0, 0, 0, 0]])
+
+    :param datamap: A 2D array indicating how many data are positioned in every
+    :param data: A 2D array containing the data to replicate.
+    :returns: A 2D array shaped like *datamap*.
+    ******* VERSION QUI SÉLECTIONNE JUSTE UNE RÉGION CHECKERS *******
+    '''
+    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2   # garde ça
+    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))   # garde ça
+    pixel_list = pixel_sampling(datamap, mode="checkers")
+    print("in stack_btmod_list")
+    for pixel in pixel_list:
+        frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
+    return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
+
+def pixel_sampling(datamap, mode="all"):
+    '''
+    Function to test different pixel sampling methods, instead of simply imaging pixel by pixel
+    :param datamap: A 2D array of the data to be imaged, used for its shape
+    :returns: A list (?) containing all the pixels in the order in which we want them to be imaged
+
+    '''
+    pixel_list = []
+    if mode == "all":
+        for row in range(datamap.shape[0]):
+            for col in range(datamap.shape[1]):
+                pixel_list.append((row, col))
+    elif mode == "checkers":
+        # TODO: ajouter checker_size comme param au lieu de hard codé ici
+        # TODO: regarder s'il y a une manière plus efficace de faire ça
+        checkers = numpy.zeros((datamap.shape[0], datamap.shape[1]))
+        cell_size = 10
+
+        even_row = True
+        cell_white = False
+        for row in range(0, checkers.shape[0], cell_size):
+            for col in range(0, checkers.shape[0], cell_size):
+                cell_white = not cell_white
+                if even_row:
+                    if cell_white:
+                        checkers[row:row + cell_size, col: col + cell_size] = 1
+                if not even_row:
+                    if not cell_white:
+                        checkers[row:row + cell_size, col: col + cell_size] = 1
+            even_row = not even_row
+
+        for row in range(datamap.shape[0]):
+            for col in range(datamap.shape[1]):
+                if checkers[row, col] == 1:
+                    pixel_list.append((row, col))
+
+    return pixel_list
+
