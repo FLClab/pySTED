@@ -36,38 +36,6 @@ def approx_binomial(n, p, size=None):
     return binomial
 
 
-def approx_binomial_bt(n, p, size=None):
-    '''Sample (64-bit) from a binomial distribution using the normal approximation.
-
-    :param n: The number of trials (int or array of ints).
-    :param p: The probability of success (float).
-    :param size: The shape of the output (int or tuple of ints, optional).
-    :returns: 64-bit int or array of 64-bit ints.
-    ***** jfais des tests pas trop certain de ce que je fais :)))))))
-    '''
-    # is_0 = n == 0
-    # n[is_0] = 1
-    is_0 = 0
-    if n == 0:
-        is_0 = 1
-        n = 1   # pense que ça revient au même que ce qui est fait en haut pour un array
-    gaussian = numpy.random.normal(n * p, numpy.sqrt(n * p * (1 - p)), size=size)
-    # gaussian[is_0] = 0
-    if is_0:
-        gaussian = 0   # pense que ça revient au même que ce qui est fait en haut pour un array
-    # gaussian[gaussian < 0] = 0
-    if gaussian < 0:
-        gaussian = 0   # pense que ça revient au même que ce qui est fait en haut pour un array
-    # add the continuity correction to sample at the midpoint of each integral bin
-    gaussian += 0.5
-    if size is not None:
-        binomial = gaussian.astype(numpy.int64)
-    else:
-        # scalar
-        binomial = int(gaussian)
-    return binomial
-
-
 def cart2pol(x, y):
     '''Convert the polar coordinates corresponding to the given cartesian
     coordinates.
@@ -262,6 +230,7 @@ def stack(datamap, data):
         frame[y:y+h_pad+1, x:x+w_pad+1] += data * nb
     return frame[int(h_pad/2):-int(h_pad/2), int(w_pad/2):-int(w_pad/2)]
 
+
 def stack_btmod(datamap, data):
     '''Compute a new frame consisting in a replication of the given *data*
     centered at every positions and multiplied by the factors given in the
@@ -329,6 +298,7 @@ def stack_btmod_list(datamap, data):
         frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
     return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
+
 def stack_btmod_list_shuffle(datamap, data):
     '''Compute a new frame consisting in a replication of the given *data*
     centered at every positions and multiplied by the factors given in the
@@ -363,6 +333,7 @@ def stack_btmod_list_shuffle(datamap, data):
         frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
     return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
+
 def stack_btmod_checkers(datamap, data):
     '''Compute a new frame consisting in a replication of the given *data*
     centered at every positions and multiplied by the factors given in the
@@ -395,6 +366,7 @@ def stack_btmod_checkers(datamap, data):
     for pixel in pixel_list:
         frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
     return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
+
 
 def pixel_sampling(datamap, mode="all"):
     '''
