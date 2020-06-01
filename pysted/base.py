@@ -884,7 +884,7 @@ class Microscope:
             prob_sted = numpy.prod(numpy.exp(-k_sted * pdt))
             new_datamap[y, x] = numpy.random.binomial(nb, prob_ex * prob_sted)
         return new_datamap
-      
+
     def bleach2(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
         __i_ex, __i_sted, _ = self.cache(pixelsize)
         photons_ex = self.fluo.get_photons(__i_ex * p_ex)
