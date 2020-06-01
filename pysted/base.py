@@ -353,7 +353,7 @@ class DonutBeam:
             intensity += self.zero_residual * old_max
             intensity /= numpy.max(intensity)
             intensity *= old_max
-            
+
         return intensity
 
 
@@ -465,33 +465,6 @@ class Detector:
             # dark counts during dwell time
             cts = (cts * dwelltime).astype(numpy.int64)
             signal += cts
-        return signal
-
-    def get_signal_bt(self, photons, dwelltime):
-        '''Compute the detected signal (in photons) given the number of emitted
-        photons and the time spent by the detector.
-
-        :param photons: An array of number of emitted photons.
-        :param dwelltime: The time spent to detect the emitted photons (s). It is
-                          either a scalar or an array shaped like *nb_photons*.
-        :returns: An array shaped like *nb_photons*.
-        ***** version BT dans laquelle je fais des tests pour essayer de faire les mesures autrement que g -> d basic
-        '''
-        print("you are now in the bt zone pt 2")
-        detection_efficiency = self.pcef * self.pdef  # ratio
-        signal = numpy.zeros(photons.shape)
-        rows = photons.shape[0]
-        columns = photons.shape[1]
-        for row in range(rows):
-            for col in range(columns):
-                # devrait faire la même chose que get_signal mais un pixel à la fois, je crois?
-                signal[row, col] = utils.approx_binomial_bt(photons.astype(numpy.int64)[row, col],
-                                                            detection_efficiency) * dwelltime
-                # y-a-t'il une meilleure façon de faire cela pixel par pixel? Cette méthode est genre 40x plus longue
-
-        # premier test serait de faire un double for pour itérer l'image au complet et caller utils.approx_binomial
-        # sur chaque pixel individuel pour voir le résultat
-
         return signal
 
 
@@ -800,58 +773,6 @@ class Microscope:
 
         return self.detector.get_signal(photons, pdt)
 
-    def get_signal_bt(self, datamap, pixelsize, pdt, p_ex, p_sted):
-        '''Compute the detected signal given some molecules disposition.
-
-        :param datamap: A 2D array map of integers indicating how many molecules
-                        are contained in each pixel of the simulated image.
-        :param pixelsize: The size of one pixel of the simulated image (m).
-        :param pdt: The time spent on each pixel of the simulated image (s).
-        :param p_ex: The power of the excitation beam (W).
-        :param p_sted: The power of the STED beam (W).
-        :returns: A 2D array of the number of detected photons on each pixel.
-        **** version BT, pareille à get_signal, sauf que j'appelle get_signal_bt du detector après au lieu de get_signal
-        normale
-        '''
-        # effective intensity across pixels (W)
-        effective = self.get_effective(pixelsize, p_ex, p_sted)
-
-        # stack one effective per molecule
-        intensity = utils.stack(datamap, effective)
-
-        photons = self.fluo.get_photons(intensity)
-
-        print("you are now in the bt zone")
-        return self.detector.get_signal_bt(photons, pdt)
-
-    def get_signal_stackmod(self, datamap, pixelsize, pdt, p_ex, p_sted):
-        '''Compute the detected signal given some molecules disposition.
-
-        :param datamap: A 2D array map of integers indicating how many molecules
-                        are contained in each pixel of the simulated image.
-        :param pixelsize: The size of one pixel of the simulated image (m).
-        :param pdt: The time spent on each pixel of the simulated image (s).
-        :param p_ex: The power of the excitation beam (W).
-        :param p_sted: The power of the STED beam (W).
-        :returns: A 2D array of the number of detected photons on each pixel.
-
-        ********* version utilisant utils.stack_btmod *********
-        ********* fait donc de l'imagerie pixel par pixel au lieu de seulement les pixels avec des molécules *********
-        '''
-        print("in get_signal_stackmod")
-        # effective intensity across pixels (W)
-        effective = self.get_effective(pixelsize, p_ex, p_sted)
-
-        # stack one effective per molecule
-        # *** datamap contient les données crues, utils.stack_* génère l'intensité qui serait générée par ces donées
-        # soumises au beam d'exitation et STED beam
-        # ---> c'est donc ça qui m'intéresse pour la prise de données non-raster, right?
-        intensity = utils.stack_btmod(datamap, effective)
-
-        photons = self.fluo.get_photons(intensity)
-
-        return self.detector.get_signal(photons, pdt)
-
     def get_signal_pixel_list(self, datamap, pixelsize, pdt, p_ex, p_sted, mode="default"):
         '''Compute the detected signal given some molecules disposition.
 
@@ -963,8 +884,7 @@ class Microscope:
             prob_sted = numpy.prod(numpy.exp(-k_sted * pdt))
             new_datamap[y, x] = numpy.random.binomial(nb, prob_ex * prob_sted)
         return new_datamap
-    
-    
+      
     def bleach2(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
         __i_ex, __i_sted, _ = self.cache(pixelsize)
         photons_ex = self.fluo.get_photons(__i_ex * p_ex)
@@ -982,71 +902,6 @@ class Microscope:
             prob_survival = numpy.prod(numpy.exp(-b * p_ex) / (a * pdt + 1))
             new_datamap[y, x] = numpy.random.binomial(nb, prob_survival)
         return new_datamap
-
-    def bleach_basebt(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
-        """
-        Copie modifiée (lol) de la méthode bleach:
-            - fixed l'indexation dans la variable pdt dans la boucle, qui est un scalaire dans mon utilisation
-            - comme pdt est un scalaire dans mon, j'ai retiré des trucs qui n'auront plus besoin d'être recalculés
-              à chaque itération de la boucle
-        """
-        print("!!! DANS LA FONCTION bleach_basebt :) !!!")
-        __i_ex, __i_sted, _ = self.cache(pixelsize)
-
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-
-
-        pad = photons_ex.shape[0] // 2 * 2
-        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
-
-        prob_ex = numpy.prod(numpy.exp(-k_ex * pixeldwelltime))
-        prob_sted = numpy.prod(numpy.exp(-k_sted * pixeldwelltime))
-
-        positions = numpy.where(datamap > 0)
-        numbers = datamap[positions]
-        new_datamap = numpy.zeros(datamap.shape)
-        for nb, y, x in zip(numbers, *positions):
-            # dans la "vrai" fct il y a du indexage dans une variable pdtpad, mais pour un pixeldwelltime cte
-            # ça fait planter le script
-            new_datamap[y, x] = numpy.random.binomial(nb, prob_ex * prob_sted)
-        return new_datamap
-
-    def bleach_basebt2(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
-        """
-        Copie modifiée (lol) de la méthode bleach:
-            - fixed l'indexation dans la variable pdt dans la boucle, qui est un scalaire dans mon utilisation
-            - Le reste est pareil à bleach, cette méthode sert plus à comparer l'efficacité/vitesse et vérifier que tout
-              est constant en retirant les trucs de la boucle dans bleah_basebt, ce qui devrait être (et est) le cas
-        """
-        __i_ex, __i_sted, _ = self.cache(pixelsize)
-
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-
-        pad = photons_ex.shape[0] // 2 * 2
-        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
-
-        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
-
-        positions = numpy.where(datamap > 0)
-        numbers = datamap[positions]
-        new_datamap = numpy.zeros(datamap.shape)
-        for nb, y, x in zip(numbers, *positions):
-            pdt = pdtpad   # normalement c'est indexé, mais ça fait planter le scripte :)
-            prob_ex = numpy.prod(numpy.exp(-k_ex * pdt))
-            prob_sted = numpy.prod(numpy.exp(-k_sted * pdt))
-            new_datamap[y, x] = numpy.random.binomial(nb, prob_ex * prob_sted)
-        return new_datamap
-
 
     def bleach_pixbypixbt(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
         """
@@ -1070,10 +925,13 @@ class Microscope:
         pad = photons_ex.shape[0] // 2 * 2
         h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
 
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
+
         new_datamap = numpy.zeros(datamap.shape)
-        prob_ex = numpy.prod(numpy.exp(-k_ex * pixeldwelltime))
-        prob_sted = numpy.prod(numpy.exp(-k_sted * pixeldwelltime))
         for y in range(datamap.shape[0]):
             for x in range(datamap.shape[1]):
+                pdt = pdtpad[y:y + pad + 1, x:x + pad + 1]
+                prob_ex = numpy.prod(numpy.exp(-k_ex * pdt))
+                prob_sted = numpy.prod(numpy.exp(-k_sted * pdt))
                 new_datamap[y, x] = numpy.random.binomial(datamap[y, x], prob_ex * prob_sted)
         return new_datamap
