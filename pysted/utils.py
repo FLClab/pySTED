@@ -265,7 +265,7 @@ def stack_btmod(datamap, data):
     return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
 
-def stack_btmod_list(datamap, data):
+def stack_btmod_list(datamap, data, list_mode="all"):
     '''Compute a new frame consisting in a replication of the given *data*
     centered at every positions and multiplied by the factors given in the
     *datamap*.
@@ -292,7 +292,7 @@ def stack_btmod_list(datamap, data):
     '''
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2   # garde ça
     frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))   # garde ça
-    pixel_list = pixel_sampling(datamap)
+    pixel_list = pixel_sampling(datamap, mode=list_mode)
     print("in stack_btmod_list")
     for pixel in pixel_list:
         frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
@@ -368,6 +368,61 @@ def stack_btmod_checkers(datamap, data):
     return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
 
+def stack_btmod_pixsize(datamap, data, data_pixelsize, img_pixelsize):
+    '''Compute a new frame consisting in a replication of the given *data*
+    centered at every positions and multiplied by the factors given in the
+    *datamap*.
+
+    Example::
+
+        >>> datamap = numpy.array([[2, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0]])
+        >>> data = numpy.array([[1, 2, 1],
+                                [2, 3, 2],
+                                [1, 2, 1]])
+        >>> utils.stack(datamap, data)
+        numpy.array([[6, 4, 0, 0],
+                     [4, 2, 0, 0],
+                     [0, 0, 0, 0],
+                     [0, 0, 0, 0]])
+
+    :param datamap: A 2D array indicating how many data are positioned in every
+    :param data: A 2D array containing the data to replicate.
+    :returns: A 2D array shaped like *datamap*.
+    *** VERSION QUI TIENT EN COMPTE LE PIXELSIZE DES DONNÉES BRUTES :)
+    '''
+    #------------------------ TEST ZONE UH OH --------------------------------------------------------------------------
+    print("DANS LA VERSION DE utils.stack QUE JE DOIS MODIFIER")
+    print(f"data_pixelsize = {data_pixelsize}")
+    print(f"img_pixelsize = {img_pixelsize}")
+
+    img_pixelsize_int = float(str(img_pixelsize)[0: str(img_pixelsize).find('e')])
+    data_pixelsize_int = float(str(data_pixelsize)[0: str(data_pixelsize).find('e')])
+    if img_pixelsize < data_pixelsize or img_pixelsize_int % data_pixelsize_int != 0:
+        # lancer une erreur ou qqchose si j'arrive ici
+        raise Exception("pixelsize has to be a multiple of data_pixelsize")
+    else:
+        print("letsa go")
+        ratio = img_pixelsize_int / data_pixelsize_int
+        modif_returned_array = numpy.zeros((int(datamap.shape[0] / ratio), int(datamap.shape[1] / ratio)))
+        row_idx = 0
+        col_idx = 0
+        for row in range(0, datamap.shape[0], int(ratio)):
+            for col in range(0, datamap.shape[1], int(ratio)):
+                # live je fais tous les pixels, il faut que j'en skip en fonction de img_pixelsize :)
+                modif_returned_array[row_idx, col_idx] += numpy.max(data * datamap[row, col])
+                col_idx += 1
+                if col_idx >= modif_returned_array.shape[1]:
+                    col_idx = 0
+            row_idx += 1
+            if row_idx >= modif_returned_array.shape[0]:
+                row_idx = 0
+
+    #-------------------------------------------------------------------------------------------------------------------
+    return modif_returned_array
+
 def pixel_sampling(datamap, mode="all"):
     '''
     Function to test different pixel sampling methods, instead of simply imaging pixel by pixel
@@ -403,6 +458,8 @@ def pixel_sampling(datamap, mode="all"):
             for col in range(datamap.shape[1]):
                 if checkers[row, col] == 1:
                     pixel_list.append((row, col))
+    else:
+        print(f"list_mode = {mode}")
 
     return pixel_list
 

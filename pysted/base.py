@@ -82,7 +82,6 @@ import cUtils
 
 # import mis par BT pour des tests
 from matplotlib import pyplot
-from pysted.acquisition import rescue
 
 class GaussianBeam:
     '''This class implements a Gaussian beam (excitation).
@@ -700,6 +699,7 @@ class Microscope:
                                                       na, transmission,
                                                       pixelsize)
             self.__cache[pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
+
         return self.__cache[pixelsize_nm]
     
     def clear_cache(self):
@@ -752,7 +752,7 @@ class Microscope:
         # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
     
-    def get_signal(self, datamap, pixelsize, pdt, p_ex, p_sted):
+    def get_signal(self, datamap, pixelsize, pdt, p_ex, p_sted, data_pixelsize=None):
         '''Compute the detected signal given some molecules disposition.
         
         :param datamap: A 2D array map of integers indicating how many molecules
@@ -763,6 +763,7 @@ class Microscope:
         :param p_sted: The power of the STED beam (W).
         :returns: A 2D array of the number of detected photons on each pixel.
         '''
+
         # effective intensity across pixels (W)
         effective = self.get_effective(pixelsize, p_ex, p_sted)
         
@@ -771,7 +772,42 @@ class Microscope:
         
         photons = self.fluo.get_photons(intensity)
 
-        return self.detector.get_signal(photons, pdt)
+        default_returned_array = self.detector.get_signal(photons, pdt)
+
+        if data_pixelsize != None:
+            # si je peux coder toutes mes modifs ici ça serait  :)
+            # pixelsize > data_pixelsize doit être respecté, et pixel_size doit être un multiple de data_pixelsize
+            pixelsize_int = float(str(pixelsize)[0: str(pixelsize).find('e')])
+            data_pixelsize_int = float(str(data_pixelsize)[0: str(data_pixelsize).find('e')])
+            if pixelsize < data_pixelsize or pixelsize_int % data_pixelsize_int != 0:
+                # lancer une erreur ou qqchose si j'arrive ici
+                raise Exception("pixelsize has to be a multiple of data_pixelsize")
+            else:
+                """
+                TODO : marche si les 2 valeurs ont le même "range de dizaines", e.g. si mon data_pixelsize = 10e-9,
+                ça marche pour pixelsize = [10e-9, ..., 99e-9], mais pas pour 100e-9, car il va lire le string comme
+                1e-7 et faire les calculs avec juste 1. Trouver une façon de régler cela,
+                """
+                ratio = pixelsize_int / data_pixelsize_int
+                modif_returned_array = numpy.zeros((int(datamap.shape[0] / ratio), int(datamap.shape[1] / ratio)))
+                row_idx = 0
+                col_idx = 0
+                for row in range(modif_returned_array.shape[0]):
+                    for col in range(modif_returned_array.shape[1]):
+                        modif_returned_array[row, col] = numpy.max(default_returned_array[
+                                                                    row_idx: row_idx + int(ratio),
+                                                                    col_idx: col_idx + int(ratio)])
+                        col_idx += int(ratio)
+                        if col_idx >= default_returned_array.shape[1]:
+                            col_idx = 0
+                    row_idx += int(ratio)
+                    if row_idx >= default_returned_array.shape[0]:
+                        row_idx = 0
+
+                return modif_returned_array
+            # exit()   # juste pcq les tests que je fais live ne portent pas sur plus loin qu'ici :)
+
+        return default_returned_array
 
     def get_signal_pixel_list(self, datamap, pixelsize, pdt, p_ex, p_sted, mode="default"):
         '''Compute the detected signal given some molecules disposition.
@@ -811,6 +847,33 @@ class Microscope:
         photons = self.fluo.get_photons(intensity)
 
         return self.detector.get_signal(photons, pdt)
+
+    def get_signal_pxsize_test(self, datamap, pixelsize, pdt, p_ex, p_sted, data_pixelsize=None):
+        '''Compute the detected signal given some molecules disposition.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m).
+        :param pdt: The time spent on each pixel of the simulated image (s).
+        :param p_ex: The power of the excitation beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :returns: A 2D array of the number of detected photons on each pixel.
+        *** VERSION MODIFIÉE POUR IMAGER JUSTE CERTAINS PIXELS DES DONNÉES BRUTE EN FONCTION DU PIXELSIZE ***
+        '''
+
+        print("DANS LA VERSION DE microscope.get_signal QUE JE DOIS MODIFIER")
+
+        # effective intensity across pixels (W)
+        effective = self.get_effective(pixelsize, p_ex, p_sted)
+
+        # stack one effective per molecule
+        intensity = utils.stack_btmod_pixsize(datamap, effective, data_pixelsize, pixelsize)
+
+        photons = self.fluo.get_photons(intensity)
+
+        default_returned_array = self.detector.get_signal(photons, pdt)
+
+        return default_returned_array
     
     def get_signal2(self, datamap, pixelsize, pdt, pmap_ex, pmap_sted):
         __i_ex, _, _ = self.cache(pixelsize)
