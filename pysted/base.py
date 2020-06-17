@@ -779,6 +779,10 @@ class Microscope:
             # pixelsize > data_pixelsize doit être respecté, et pixel_size doit être un multiple de data_pixelsize
             pixelsize_int = float(str(pixelsize)[0: str(pixelsize).find('e')])
             data_pixelsize_int = float(str(data_pixelsize)[0: str(data_pixelsize).find('e')])
+            pixelsize_exp = int(str(pixelsize)[str(pixelsize).find('e') + 1:])
+            data_pixelsize_exp = int(str(data_pixelsize)[str(data_pixelsize).find('e') + 1:])
+            exp = pixelsize_exp - data_pixelsize_exp
+            pixelsize_int *= 10 ** exp
             if pixelsize < data_pixelsize or pixelsize_int % data_pixelsize_int != 0:
                 # lancer une erreur ou qqchose si j'arrive ici
                 raise Exception("pixelsize has to be a multiple of data_pixelsize")
@@ -860,8 +864,6 @@ class Microscope:
         :returns: A 2D array of the number of detected photons on each pixel.
         *** VERSION MODIFIÉE POUR IMAGER JUSTE CERTAINS PIXELS DES DONNÉES BRUTE EN FONCTION DU PIXELSIZE ***
         '''
-
-        print("DANS LA VERSION DE microscope.get_signal QUE JE DOIS MODIFIER")
 
         # effective intensity across pixels (W)
         effective = self.get_effective(pixelsize, p_ex, p_sted)

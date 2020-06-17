@@ -394,17 +394,17 @@ def stack_btmod_pixsize(datamap, data, data_pixelsize, img_pixelsize):
     *** VERSION QUI TIENT EN COMPTE LE PIXELSIZE DES DONNÉES BRUTES :)
     '''
     #------------------------ TEST ZONE UH OH --------------------------------------------------------------------------
-    print("DANS LA VERSION DE utils.stack QUE JE DOIS MODIFIER")
-    print(f"data_pixelsize = {data_pixelsize}")
-    print(f"img_pixelsize = {img_pixelsize}")
 
     img_pixelsize_int = float(str(img_pixelsize)[0: str(img_pixelsize).find('e')])
     data_pixelsize_int = float(str(data_pixelsize)[0: str(data_pixelsize).find('e')])
+    pixelsize_exp = int(str(img_pixelsize)[str(img_pixelsize).find('e') + 1:])
+    data_pixelsize_exp = int(str(data_pixelsize)[str(data_pixelsize).find('e') + 1:])
+    exp = pixelsize_exp - data_pixelsize_exp
+    img_pixelsize_int *= 10 ** exp
     if img_pixelsize < data_pixelsize or img_pixelsize_int % data_pixelsize_int != 0:
         # lancer une erreur ou qqchose si j'arrive ici
         raise Exception("pixelsize has to be a multiple of data_pixelsize")
     else:
-        print("letsa go")
         ratio = img_pixelsize_int / data_pixelsize_int
         modif_returned_array = numpy.zeros((int(datamap.shape[0] / ratio), int(datamap.shape[1] / ratio)))
         row_idx = 0

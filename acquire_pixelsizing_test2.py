@@ -25,8 +25,9 @@ parser.add_argument("--pixelsize", type=float, default=10e-9, help="pixel size (
 parser.add_argument("--pdt", type=float, default=10e-6, help="pixel dwell time (in s)")
 parser.add_argument("--exc", type=float, default=1e-6,  help="excitation power (in W)")
 parser.add_argument("--sted", type=float, default=30e-3, help="STED power (in W)")
-data_pixelsize = 10e-9
+parser.add_argument("--dpxsz", type=float, default=10e-9, help="Pixel size of raw data")
 args = parser.parse_args()
+data_pixelsize = args.dpxsz
 
 print("Running pixel sizing test, second implementation...")
 
@@ -52,7 +53,7 @@ egfp = {"lambda_": 535e-9,
 
 laser_ex = base.GaussianBeam(488e-9)
 laser_sted = base.DonutBeam(575e-9, distortion=0.04)
-detector = base.Detector(noise=True)
+detector = base.Detector(noise=True)   # background=10e6
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
 microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
@@ -69,9 +70,6 @@ signal_base = microscope.get_signal_pxsize_test(datamap, args.pixelsize, args.pd
 if signal_most_basic.shape == signal_base.shape:
     rms = rms_calculator(signal_most_basic, signal_base)
     print(f"rms = {rms}")
-
-print(f"raw data shape = {datamap.shape}")
-print(f"acquisition shape = {signal_base.shape}")
 
 
 def pix2meters_acq(x):
