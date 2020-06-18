@@ -775,8 +775,8 @@ class Microscope:
         default_returned_array = self.detector.get_signal(photons, pdt)
 
         if data_pixelsize != None:
-            # si je peux coder toutes mes modifs ici ça serait  :)
             # pixelsize > data_pixelsize doit être respecté, et pixel_size doit être un multiple de data_pixelsize
+            # ma technique fonctionne jusqu'à 0.000x
             pixelsize_int = float(str(pixelsize)[0: str(pixelsize).find('e')])
             data_pixelsize_int = float(str(data_pixelsize)[0: str(data_pixelsize).find('e')])
             pixelsize_exp = int(str(pixelsize)[str(pixelsize).find('e') + 1:])
