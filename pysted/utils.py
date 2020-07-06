@@ -477,7 +477,7 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
             row = pixel[0]
             col = pixel[1]
             if previous_pixel is not None:
-                if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:  # absolues?
+                if abs(row - previous_pixel[0]) < ratio and abs(col - previous_pixel[1]) < ratio:  # absolues?
                     continue
             if iterated_pixels[row, col] == 0:   # pas acquérir 2 fois le même pixel pour rien
                 modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
@@ -495,11 +495,11 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
                 if col - int(data.shape[1] / 2) < 0:
                     left_edge = 0
                 else:
-                    left_edge = row - int(data.shape[1] / 2)
+                    left_edge = col - int(data.shape[1] / 2)
                 if col + int(data.shape[1] / 2) >= datamap.shape[1]:
                     right_edge = datamap.shape[1] - 1
                 else:
-                    right_edge = row + int(data.shape[1] / 2)
+                    right_edge = col + int(data.shape[1] / 2)
 
                 # basically il me faut un if datamap[upper:lower, left:right] > 1 -> mettre ces pixels dans la liste,
                 # sinon ajouter le prochain pixel du raster scan
@@ -523,16 +523,6 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
             else:
                 continue   # skip si c'est un pixel qui a déjà été itéré
             previous_pixel = pixel
-
-        print(f"number of iterations = {number_of_it}")
-        pixels_iterated_over = numpy.zeros(datamap.shape)
-        for pixel in pixel_list:
-            row = pixel[0]
-            col = pixel[1]
-            pixels_iterated_over[row, col] = 1
-        pyplot.imshow(pixels_iterated_over)
-        pyplot.title("Pixels iterated over")
-        pyplot.show()
 
     else:
         print("default list mode :)")
