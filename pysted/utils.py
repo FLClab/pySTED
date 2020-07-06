@@ -457,7 +457,8 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
         print("nouveau mode à implémenter :)")
 
         # Verification matrix to see if a pixel has already been imaged
-        pixels_to_add_to_list = numpy.zeros(datamap.shape)
+        # j'essaie de créer la variable pixels_to_add_to_list à chaque iter la boucle pour voir si ça accélère ou pas
+        # pixels_to_add_to_list = numpy.zeros(datamap.shape)
         pixels_added_to_list = numpy.zeros(datamap.shape)
         iterated_pixels = numpy.zeros(datamap.shape)
 
@@ -470,10 +471,11 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
         # Apply laser to the pixels, still have to watch out for pixel jumping due to ratio
         previous_pixel = None
         went_in_if = 0
-        number_of_it = 0   # juste pour la verif
+        iterated_pixels_useful = 0
         # pour une certaine raison il fait juste faire une diagonale comme acquisition, need to figure out why
         for pixel in pixel_list:
-            number_of_it += 1   # juste pour la verif
+            # j'essaie de créer la variable pixels_to_add_to_list à chaque iter la boucle pour voir si ça accélère ou pas
+            pixels_to_add_to_list = numpy.zeros(datamap.shape)
             row = pixel[0]
             col = pixel[1]
             if previous_pixel is not None:
@@ -515,12 +517,12 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
                             pixels_added_to_list[pixel_to_add[0], pixel_to_add[1]] = 1
                 elif went_in_if == 0:
                     # ajouter le prochain pixel du raster scan :)
-                    # faudrait aussi que j'aille un mode pour pas qu'il retourne ici s'il a ever été dans le if
                     pixel_list.append(raster_scan_list[0])
                     raster_scan_list.pop(0)
                 iterated_pixels[row, col] = 1
 
             else:
+                iterated_pixels_useful += 1
                 continue   # skip si c'est un pixel qui a déjà été itéré
             previous_pixel = pixel
 
@@ -536,6 +538,7 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
             modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
             previous_pixel = pixel
 
+    print(f"iterated_pixels_useful = {iterated_pixels_useful}")
     return modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
 
