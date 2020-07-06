@@ -393,35 +393,161 @@ def stack_btmod_pixsize(datamap, data, data_pixelsize, img_pixelsize):
     :returns: A 2D array shaped like *datamap*.
     *** VERSION QUI TIENT EN COMPTE LE PIXELSIZE DES DONNÉES BRUTES :)
     '''
-    #------------------------ TEST ZONE UH OH --------------------------------------------------------------------------
-
-    img_pixelsize_int = float(str(img_pixelsize)[0: str(img_pixelsize).find('e')])
-    data_pixelsize_int = float(str(data_pixelsize)[0: str(data_pixelsize).find('e')])
-    pixelsize_exp = int(str(img_pixelsize)[str(img_pixelsize).find('e') + 1:])
-    data_pixelsize_exp = int(str(data_pixelsize)[str(data_pixelsize).find('e') + 1:])
-    exp = pixelsize_exp - data_pixelsize_exp
-    img_pixelsize_int *= 10 ** exp
-    if img_pixelsize < data_pixelsize or img_pixelsize_int % data_pixelsize_int != 0:
-        # lancer une erreur ou qqchose si j'arrive ici
-        raise Exception("pixelsize has to be a multiple of data_pixelsize")
-    else:
-        ratio = img_pixelsize_int / data_pixelsize_int
-        modif_returned_array = numpy.zeros((int(datamap.shape[0] / ratio), int(datamap.shape[1] / ratio)))
-        row_idx = 0
-        col_idx = 0
-        for row in range(0, datamap.shape[0], int(ratio)):
-            for col in range(0, datamap.shape[1], int(ratio)):
-                # live je fais tous les pixels, il faut que j'en skip en fonction de img_pixelsize :)
-                modif_returned_array[row_idx, col_idx] += numpy.max(data * datamap[row, col])
-                col_idx += 1
-                if col_idx >= modif_returned_array.shape[1]:
-                    col_idx = 0
-            row_idx += 1
-            if row_idx >= modif_returned_array.shape[0]:
-                row_idx = 0
-
-    #-------------------------------------------------------------------------------------------------------------------
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    ratio = img_pixelsize_int / data_pixelsize_int
+    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
+    modif_returned_array = numpy.zeros((int(datamap.shape[0] / ratio) + h_pad, int(datamap.shape[1] / ratio) + w_pad))
+    row_idx = 0
+    col_idx = 0
+    for row in range(0, datamap.shape[0], int(ratio)):
+        for col in range(0, datamap.shape[1], int(ratio)):
+            # j'essaie qqchose qui je pense devrait donner la même chose pour des pixelsize identique,
+            # pas certain de comment ça fonctionnerait pour différents pixelsize, mais c'est un bon starting point
+            modif_returned_array[row_idx:row_idx+h_pad+1, col_idx:col_idx+w_pad+1] += data * datamap[row, col]
+            col_idx += 1
+            if col_idx >= int(datamap.shape[0] / ratio):
+                col_idx = 0
+        row_idx += 1
+        if row_idx >= int(datamap.shape[1] / ratio):
+            row_idx = 0
+    modif_returned_array = modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
     return modif_returned_array
+
+
+def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel_list):
+    '''Compute a new frame consisting in a replication of the given *data*
+    centered at every positions and multiplied by the factors given in the
+    *datamap*.
+
+    Example::
+
+        >>> datamap = numpy.array([[2, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0]])
+        >>> data = numpy.array([[1, 2, 1],
+                                [2, 3, 2],
+                                [1, 2, 1]])
+        >>> utils.stack(datamap, data)
+        numpy.array([[6, 4, 0, 0],
+                     [4, 2, 0, 0],
+                     [0, 0, 0, 0],
+                     [0, 0, 0, 0]])
+
+    :param datamap: A 2D array indicating how many data are positioned in every
+    :param data: A 2D array containing the data to replicate.
+    :returns: A 2D array shaped like *datamap*.
+    *** VERSION QUI TIENT EN COMPTE LE PIXELSIZE DES DONNÉES BRUTES :)
+    - je veux juste vérifier que le saut entre 2 acquisitions de pixels est d'au moins un ratio
+    - je place le résultat dans une matrice de la même taille que les données brutes, peu importe quel autre facteur
+    - ceci veut donc dire que même si j'ai un ratio de 2, si je passe une liste de tous les pixels, l'image résultante
+      aura la même taille que les données brutes, et non les dimensions divisées par 2 :)
+    - si je passe une pixel_list d'un seul pixel, je pars alors en mode "trouver un poil"
+        ce mode part du pixel de la pixel_list, vérifie s'il y a des poils proches, embarque sur ceux si si oui, passe
+        au prochain pixel du raster scan si non (mieux décrit dans mes notes sur iPad)
+    '''
+    if pixel_list is None:
+        raise Exception("No pixel_list passed bruh, programmer error if we ever get here :)")
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    ratio = img_pixelsize_int / data_pixelsize_int
+    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
+    modif_returned_array = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
+
+    if len(pixel_list) == 1:
+        print("nouveau mode à implémenter :)")
+
+        # Verification matrix to see if a pixel has already been imaged
+        pixels_to_add_to_list = numpy.zeros(datamap.shape)
+        pixels_added_to_list = numpy.zeros(datamap.shape)
+        iterated_pixels = numpy.zeros(datamap.shape)
+
+        # Creating a list for a raster scan starting at the passed pixel
+        # The goal is to continue raster scanning until we find a molecule
+        raster_scan_list = pixel_sampling(datamap, mode="all")
+        start_pos_idx = raster_scan_list.index(pixel_list[0])
+        raster_scan_list = raster_scan_list[start_pos_idx + 1:]
+
+        # Apply laser to the pixels, still have to watch out for pixel jumping due to ratio
+        previous_pixel = None
+        went_in_if = 0
+        number_of_it = 0   # juste pour la verif
+        # pour une certaine raison il fait juste faire une diagonale comme acquisition, need to figure out why
+        for pixel in pixel_list:
+            number_of_it += 1   # juste pour la verif
+            row = pixel[0]
+            col = pixel[1]
+            if previous_pixel is not None:
+                if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:  # absolues?
+                    continue
+            if iterated_pixels[row, col] == 0:   # pas acquérir 2 fois le même pixel pour rien
+                modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
+                iterated_pixels[row, col] = 1
+
+                # Finding the area covered by the gaussian in the datamap
+                if row - int(data.shape[0] / 2) < 0:
+                    upper_edge = 0
+                else:
+                    upper_edge = row - int(data.shape[0] / 2)
+                if row + int(data.shape[0] / 2) >= datamap.shape[0]:
+                    lower_edge = datamap.shape[0] - 1
+                else:
+                    lower_edge = row + int(data.shape[0] / 2)
+                if col - int(data.shape[1] / 2) < 0:
+                    left_edge = 0
+                else:
+                    left_edge = row - int(data.shape[1] / 2)
+                if col + int(data.shape[1] / 2) >= datamap.shape[1]:
+                    right_edge = datamap.shape[1] - 1
+                else:
+                    right_edge = row + int(data.shape[1] / 2)
+
+                # basically il me faut un if datamap[upper:lower, left:right] > 1 -> mettre ces pixels dans la liste,
+                # sinon ajouter le prochain pixel du raster scan
+                if numpy.any(datamap[upper_edge:lower_edge, left_edge:right_edge] > 0):
+                    # print("va dans le if :)")
+                    went_in_if = 1
+                    pixels_to_add_to_list[upper_edge:lower_edge, left_edge:right_edge] = \
+                        datamap[upper_edge:lower_edge, left_edge:right_edge] > 0
+                    xd = numpy.where(pixels_to_add_to_list > 0)
+                    for pixel_to_add in zip(xd[0], xd[1]):
+                        if pixels_added_to_list[pixel_to_add[0], pixel_to_add[1]] == 0:
+                            pixel_list.append(pixel_to_add)
+                            pixels_added_to_list[pixel_to_add[0], pixel_to_add[1]] = 1
+                elif went_in_if == 0:
+                    # ajouter le prochain pixel du raster scan :)
+                    # faudrait aussi que j'aille un mode pour pas qu'il retourne ici s'il a ever été dans le if
+                    pixel_list.append(raster_scan_list[0])
+                    raster_scan_list.pop(0)
+                iterated_pixels[row, col] = 1
+
+            else:
+                continue   # skip si c'est un pixel qui a déjà été itéré
+            previous_pixel = pixel
+
+        print(f"number of iterations = {number_of_it}")
+        pixels_iterated_over = numpy.zeros(datamap.shape)
+        for pixel in pixel_list:
+            row = pixel[0]
+            col = pixel[1]
+            pixels_iterated_over[row, col] = 1
+        pyplot.imshow(pixels_iterated_over)
+        pyplot.title("Pixels iterated over")
+        pyplot.show()
+
+    else:
+        print("default list mode :)")
+        previous_pixel = None
+        for pixel in pixel_list:
+            row = pixel[0]
+            col = pixel[1]
+            if previous_pixel is not None:
+                if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:  # absolues?
+                    continue
+            modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
+            previous_pixel = pixel
+
+    return modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
+
 
 def pixel_sampling(datamap, mode="all"):
     '''
@@ -439,7 +565,7 @@ def pixel_sampling(datamap, mode="all"):
         # TODO: ajouter checker_size comme param au lieu de hard codé ici
         # TODO: regarder s'il y a une manière plus efficace de faire ça
         checkers = numpy.zeros((datamap.shape[0], datamap.shape[1]))
-        cell_size = 10
+        cell_size = 100
 
         even_row = True
         cell_white = False
@@ -463,3 +589,48 @@ def pixel_sampling(datamap, mode="all"):
 
     return pixel_list
 
+
+def pxsize_comp(img_pixelsize, data_pixelsize):
+    """
+    Function to compare the pixelsize of the raw data to the acquisition pixelsize in order to verify compatibility.
+    :param image_pixelsize: acquisition pixelsize. Has to be a multiple of data_pixelsize
+    :param data_pixelsize: raw data pixelsize.
+    """
+    # VÉRIFIER ET TESTER TOUT CELA, DEVRAIT MARCHER :)
+    # je pense qu'il faut une condition de plus sur la forme de l'image...
+    if data_pixelsize is None:
+        print(f"no data pixelsize, set as image pixelsize = {img_pixelsize}...")
+        data_pixelsize = img_pixelsize
+    img_pixelsize_int = float(str(img_pixelsize)[0: str(img_pixelsize).find('e')])
+    data_pixelsize_int = float(str(data_pixelsize)[0: str(data_pixelsize).find('e')])
+    pixelsize_exp = int(str(img_pixelsize)[str(img_pixelsize).find('e') + 1:])
+    data_pixelsize_exp = int(str(data_pixelsize)[str(data_pixelsize).find('e') + 1:])
+    exp = pixelsize_exp - data_pixelsize_exp
+    img_pixelsize_int *= 10 ** exp
+    if img_pixelsize < data_pixelsize or img_pixelsize_int % data_pixelsize_int != 0:
+        # lancer une erreur ou qqchose si j'arrive ici
+        raise Exception("pixelsize has to be a multiple of data_pixelsize")
+    return img_pixelsize_int, data_pixelsize_int
+
+
+def image_squisher(datamap, data_pixelsize, img_pixelsize):
+    """
+    le but est d'essayer de squisher une image en fonction du ratio entre data_pixelsize et img_pixelsize :)
+    """
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    ratio = int(img_pixelsize_int / data_pixelsize_int)
+    squished_datamap = numpy.zeros((int(datamap.shape[0] / ratio), int(datamap.shape[1] / ratio)))
+    row_idx = 0
+    col_idx = 0
+    for row in range(0, datamap.shape[0], int(ratio)):
+        for col in range(0, datamap.shape[1], int(ratio)):
+            # j'essaie qqchose qui je pense devrait donner la même chose pour des pixelsize identique,
+            # pas certain de comment ça fonctionnerait pour différents pixelsize, mais c'est un bon starting point
+            squished_datamap[row_idx, col_idx] = numpy.sum(datamap[row:row+ratio, col:col+ratio])
+            col_idx += 1
+            if col_idx >= int(datamap.shape[0] / ratio):
+                col_idx = 0
+        row_idx += 1
+        if row_idx >= int(datamap.shape[1] / ratio):
+            row_idx = 0
+    return squished_datamap
