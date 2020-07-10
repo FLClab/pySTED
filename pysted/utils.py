@@ -450,17 +450,16 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
         raise Exception("No pixel_list passed bruh, programmer error if we ever get here :)")
     img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
     ratio = img_pixelsize_int / data_pixelsize_int
+    # est-ce que je dois aussi m'assurer que le pixelsize fit avec la shape de l'image? i.e. que les 2 shapes soient
+    # divisibles par le pixelsize? ou le ratio? ???
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
     modif_returned_array = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
 
     if len(pixel_list) == 1:
-        print("nouveau mode à implémenter :)")
-
+        print("YES")
+        print(f"0 + int(ratio) - 1 = {0 + int(ratio) - 1}")
         # Verification matrix to see if a pixel has already been imaged
-        # j'essaie de créer la variable pixels_to_add_to_list à chaque iter la boucle pour voir si ça accélère ou pas
-        # pixels_to_add_to_list = numpy.zeros(datamap.shape)
         pixels_added_to_list = numpy.zeros(datamap.shape)
-        iterated_pixels = numpy.zeros(datamap.shape)
 
         # Creating a list for a raster scan starting at the passed pixel
         # The goal is to continue raster scanning until we find a molecule
@@ -471,59 +470,52 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
         # Apply laser to the pixels, still have to watch out for pixel jumping due to ratio
         previous_pixel = None
         went_in_if = 0
-        iterated_pixels_useful = 0
-        # pour une certaine raison il fait juste faire une diagonale comme acquisition, need to figure out why
         for pixel in pixel_list:
-            # j'essaie de créer la variable pixels_to_add_to_list à chaque iter la boucle pour voir si ça accélère ou pas
             pixels_to_add_to_list = numpy.zeros(datamap.shape)
             row = pixel[0]
             col = pixel[1]
             if previous_pixel is not None:
                 if abs(row - previous_pixel[0]) < ratio and abs(col - previous_pixel[1]) < ratio:  # absolues?
                     continue
-            if iterated_pixels[row, col] == 0:   # pas acquérir 2 fois le même pixel pour rien
-                modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
-                iterated_pixels[row, col] = 1
 
-                # Finding the area covered by the gaussian in the datamap
-                if row - int(data.shape[0] / 2) < 0:
-                    upper_edge = 0
-                else:
-                    upper_edge = row - int(data.shape[0] / 2)
-                if row + int(data.shape[0] / 2) >= datamap.shape[0]:
-                    lower_edge = datamap.shape[0] - 1
-                else:
-                    lower_edge = row + int(data.shape[0] / 2)
-                if col - int(data.shape[1] / 2) < 0:
-                    left_edge = 0
-                else:
-                    left_edge = col - int(data.shape[1] / 2)
-                if col + int(data.shape[1] / 2) >= datamap.shape[1]:
-                    right_edge = datamap.shape[1] - 1
-                else:
-                    right_edge = col + int(data.shape[1] / 2)
+            modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
 
-                # basically il me faut un if datamap[upper:lower, left:right] > 1 -> mettre ces pixels dans la liste,
-                # sinon ajouter le prochain pixel du raster scan
-                if numpy.any(datamap[upper_edge:lower_edge, left_edge:right_edge] > 0):
-                    # print("va dans le if :)")
-                    went_in_if = 1
-                    pixels_to_add_to_list[upper_edge:lower_edge, left_edge:right_edge] = \
-                        datamap[upper_edge:lower_edge, left_edge:right_edge] > 0
-                    xd = numpy.where(pixels_to_add_to_list > 0)
-                    for pixel_to_add in zip(xd[0], xd[1]):
-                        if pixels_added_to_list[pixel_to_add[0], pixel_to_add[1]] == 0:
-                            pixel_list.append(pixel_to_add)
-                            pixels_added_to_list[pixel_to_add[0], pixel_to_add[1]] = 1
-                elif went_in_if == 0:
-                    # ajouter le prochain pixel du raster scan :)
-                    pixel_list.append(raster_scan_list[0])
-                    raster_scan_list.pop(0)
-                iterated_pixels[row, col] = 1
-
+            # Finding the area covered by the gaussian in the datamap
+            if row - int(data.shape[0] / 2) < 0:
+                upper_edge = 0
             else:
-                iterated_pixels_useful += 1
-                continue   # skip si c'est un pixel qui a déjà été itéré
+                upper_edge = row - int(data.shape[0] / 2)
+            if row + int(data.shape[0] / 2) >= datamap.shape[0]:
+                lower_edge = datamap.shape[0] - 1
+            else:
+                lower_edge = row + int(data.shape[0] / 2)
+            if col - int(data.shape[1] / 2) < 0:
+                left_edge = 0
+            else:
+                left_edge = col - int(data.shape[1] / 2)
+            if col + int(data.shape[1] / 2) >= datamap.shape[1]:
+                right_edge = datamap.shape[1] - 1
+            else:
+                right_edge = col + int(data.shape[1] / 2)
+
+            # basically il me faut un if datamap[upper:lower, left:right] > 0 -> mettre ces pixels dans la liste,
+            # sinon ajouter le prochain pixel du raster scan
+            if numpy.any(datamap[upper_edge:lower_edge, left_edge:right_edge] > 0):
+                went_in_if = 1
+                pixels_to_add_to_list[upper_edge:lower_edge, left_edge:right_edge] = \
+                    datamap[upper_edge:lower_edge, left_edge:right_edge] > 0
+                xd = numpy.where(pixels_to_add_to_list > 0)
+                for pixel_to_add in zip(xd[0], xd[1]):
+                    if pixels_added_to_list[pixel_to_add[0], pixel_to_add[1]] == 0:
+                        pixel_list.append(pixel_to_add)
+                        pixels_added_to_list[pixel_to_add[0], pixel_to_add[1]] = 1
+            elif went_in_if == 0:
+                # ajouter le prochain pixel du raster scan :)
+                pixel_list.append(raster_scan_list[0 + int(ratio) - 1])   # 0 + int(ratio) - 1 ?
+                # raster_scan_list.pop(0)
+                for i in range(0, int(ratio)):
+                    raster_scan_list.pop(0)
+
             previous_pixel = pixel
 
     else:
@@ -538,7 +530,6 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
             modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
             previous_pixel = pixel
 
-    print(f"iterated_pixels_useful = {iterated_pixels_useful}")
     return modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
 

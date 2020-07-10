@@ -909,22 +909,22 @@ class Microscope:
         # intensity
         photons = self.fluo.get_photons(frame)
         return self.detector.get_signal(photons, pdt)
-    
-    def bleach(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
+
+    def bleach(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
         '''Compute the bleached data map using the following survival
         probability per molecule:
-        
+
         .. math:: exp(-k \cdot t)
-        
+
         where
-        
+
         .. math::
-        
+
            k = \\frac{k_{ISC} \sigma_{abs} I^2}{\sigma_{abs} I (\\tau_{triplet}^{-1} + k_{ISC}) + (\\tau_{triplet} \\tau_{fluo})} \sigma_{triplet} {phy}_{react}
-        
+
         where :math:`c` is a constant, :math:`I` is the intensity, and :math:`t`
         if the pixel dwell time [Jerker1999]_ [Garcia2000]_ [Staudt2009]_.
-        
+
         :param datamap: A 2D array map of integers indicating how many molecules
                         are contained in each pixel of the simulated image.
         :param pixelsize: The size of one pixel of the simulated image (m).
@@ -934,103 +934,6 @@ class Microscope:
         :param p_sted: The power of the STED beam (W).
         :returns: A 2D array of the new data map.
         '''
-        __i_ex, __i_sted, _ = self.cache(pixelsize)
-        
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-        
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-        
-        pad = photons_ex.shape[0] // 2 * 2
-        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
-
-        pixeldwelltime = numpy.asarray(pixeldwelltime)
-        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
-        if pixeldwelltime.shape == ():
-            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
-        else:
-            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
-            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
-            print(f"pixeldwelltime.shape = {pixeldwelltime.shape}")
-        pdtpad = numpy.pad(pixeldwelltime, pad//2, mode="constant", constant_values=0)
-        
-        positions = numpy.where(datamap > 0)
-        numbers = datamap[positions]
-        new_datamap = numpy.zeros(datamap.shape)
-        for nb, y, x in zip(numbers, *positions):
-            pdt = pdtpad[y:y+pad+1, x:x+pad+1]
-            prob_ex = numpy.prod(numpy.exp(-k_ex * pdt))
-            prob_sted = numpy.prod(numpy.exp(-k_sted * pdt))
-            new_datamap[y, x] = numpy.random.binomial(nb, prob_ex * prob_sted)
-        return new_datamap
-
-    def bleach2(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
-        __i_ex, __i_sted, _ = self.cache(pixelsize)
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        
-        a, b = 1e-1, 100
-        
-        pad = photons_ex.shape[0] // 2 * 2
-        pdtpad = numpy.pad(pixeldwelltime, pad//2, mode="constant", constant_values=0)
-                
-        positions = numpy.where(datamap > 0)
-        numbers = datamap[positions]
-        new_datamap = numpy.zeros(datamap.shape)
-        for nb, y, x in zip(numbers, *positions):
-            pdt = pdtpad[y:y+pad+1, x:x+pad+1]
-            prob_survival = numpy.prod(numpy.exp(-b * p_ex) / (a * pdt + 1))
-            new_datamap[y, x] = numpy.random.binomial(nb, prob_survival)
-        return new_datamap
-
-    def bleach_pixbypixbt(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize):
-        """
-        Copie modifiée (lolxd) de la méthode bleach:
-            - itère sur chaaue pixel au lieu d'uniquement sur les pixels contenant des molécules
-
-        Depuis bleach_pixel_list je crois que cette fonction n'a plus d'utilité, je la garde pour l'instant pour
-        m'assurer que bleach_pixel_list fonctionne comme il faut
-        """
-        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
-
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-
-
-        pad = photons_ex.shape[0] // 2 * 2
-        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
-
-        pixeldwelltime = numpy.asarray(pixeldwelltime)
-        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
-        if pixeldwelltime.shape == ():
-            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
-        else:
-            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
-            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
-            verif_array = numpy.asarray([1, 2, 3])
-            if type(verif_array) != type(pixeldwelltime):
-                print("faudrait je retourne une erreur :)")
-        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
-
-        # à place de faire ça, je devrais faire comme je fais pour ma modif de pixelsize pour skipper certains pixels :)
-        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp(pixelsize, datamap_pixelsize)
-        ratio = img_pixelsize_int / data_pixelsize_int
-        # set egal à datamap initiallement, certains pixels seront bleachés dépendant du ratio des pixelsize
-        new_datamap = numpy.copy(datamap)
-        for row in range(0, datamap.shape[0], int(ratio)):
-            for col in range(0, datamap.shape[1], int(ratio)):
-                pdt = pdtpad[row:row + pad + 1, col:col + pad + 1]
-                prob_ex = numpy.prod(numpy.exp(-k_ex * pdt))
-                prob_sted = numpy.prod(numpy.exp(-k_sted * pdt))
-                new_datamap[row, col] = numpy.random.binomial(datamap[row, col], prob_ex * prob_sted)
-        return new_datamap
-
-    def bleach_pixel_list(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
         """
         Version de bleach qui prend en entrée une liste de pixels sur lesquels runner le bleaching :)
         Doit aussi tenir compte du ratio entre les pixelsize... :)
@@ -1071,11 +974,8 @@ class Microscope:
         new_datamap = numpy.copy(datamap)
         previous_pixel = None
         for pixel in pixel_list:
-            # aucun pixel skipping live
-            # comment vérifier si le bon nombre de pixels a été skippé entre les itérations?
-            # stoquer pixel dans une var previous_pixel à la fin
-            # au tout début, comparer row et col aux valeurs de previous_pixel et vérifier que les différences sont
-            # >= ratio... fait du sens vite de même, faire une trace pour vérifier
+            # fait le pixel skipping comme il faut pour une liste raster scan normale, mais ne fonctionne pas pour un
+            # ordre abitraire / raster inversé, need to figure out why et faire marche ça pour get_signal aussi :)
             row = pixel[0]
             col = pixel[1]
             if previous_pixel is not None:
