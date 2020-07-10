@@ -777,29 +777,6 @@ class Microscope:
         sigma_abs = self.fluo.get_sigma_abs(self.excitation.lambda_)
         excitation_probability = sigma_abs * i_ex * self.fluo.qy
 
-        #---------------------------------------------------------------------------------------------------------------
-        # je veux plotter effective et les sted, ex, psf pour voir lesquels sont affectés par le pixelsize
-        # et donc lesquels je devrai changer à data_pixelsize :)
-        """print("rentre dans la section d'affichage :)")
-        fig, axes = pyplot.subplots(2, 2)
-
-        axes[0, 0].imshow(__i_ex, interpolation="nearest")
-        axes[0, 0].set_title(f"Excitation beam, shape = {__i_ex.shape}")
-
-        axes[0, 1].imshow(__i_sted, interpolation="nearest")
-        axes[0, 1].set_title(f"STED beam, shape = {__i_sted.shape}")
-
-        axes[1, 0].imshow(psf_det, interpolation="nearest")
-        axes[1, 0].set_title(f"Detection PSF, shape = {psf_det.shape}")
-
-        acq_gauss = excitation_probability * eta * psf_det
-        axes[1, 1].imshow(acq_gauss, interpolation="nearest")
-        axes[1, 1].set_title(f"Acquisition gaussian, shape = {acq_gauss.shape}")
-
-        pyplot.show()
-        print(f"sort de la section d'affichage :)")
-        exit()"""
-        #---------------------------------------------------------------------------------------------------------------
         # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
     
