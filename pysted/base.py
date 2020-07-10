@@ -925,19 +925,24 @@ class Microscope:
         where :math:`c` is a constant, :math:`I` is the intensity, and :math:`t`
         if the pixel dwell time [Jerker1999]_ [Garcia2000]_ [Staudt2009]_.
 
+        This version generates the lasers using datamap_pixelsize, and determines how many pixels to skip by the ratio
+        between datamap_pixelsize and pixelsize.
+
         :param datamap: A 2D array map of integers indicating how many molecules
                         are contained in each pixel of the simulated image.
-        :param pixelsize: The size of one pixel of the simulated image (m).
+        :param pixelsize: The size of one pixel of the simulated image (m). This determines how many pixels are skipped
+                          between each laser application.
         :param pixeldwelltime: The time spent on each pixel of the simulated
                                image (s).
         :param p_ex: The power of the depletion beam (W).
         :param p_sted: The power of the STED beam (W).
+        :param datamap_pixelsize: The size of one pixel of the datamap. This is the resolution at which the lasers are
+                                  generated.
+        :param pixel_list: List of pixels on which we apply the lasers. If None is passed, a normal raster scan is done.
         :returns: A 2D array of the new data map.
+
+        TODO: correctly skip pixels when a non raster scan list is passed.
         '''
-        """
-        Version de bleach qui prend en entrée une liste de pixels sur lesquels runner le bleaching :)
-        Doit aussi tenir compte du ratio entre les pixelsize... :)
-        """
         if pixel_list is None:
             print("No pixel list passed, Running a raster scan :)")
             pixel_list = utils.pixel_sampling(datamap, mode="all")
@@ -949,7 +954,6 @@ class Microscope:
         duty_cycle = self.sted.tau * self.sted.rate
         photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
         k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-
 
         pad = photons_ex.shape[0] // 2 * 2
         h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
