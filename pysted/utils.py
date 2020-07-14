@@ -454,7 +454,6 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
     # divisibles par le pixelsize? ou le ratio? ???
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
     modif_returned_array = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
-
     if len(pixel_list) == 1:
         print("YES")
         print(f"0 + int(ratio) - 1 = {0 + int(ratio) - 1}")
@@ -568,8 +567,27 @@ def pixel_sampling(datamap, mode="all"):
             for col in range(datamap.shape[1]):
                 if checkers[row, col] == 1:
                     pixel_list.append((row, col))
+    elif mode == "forsenCD":
+        positions = numpy.where(datamap > 0)
+        pixel_list = list(zip(positions[0], positions[1]))
+    elif mode == "besides":
+        print("testing to see if I can isolate pixels next to molecules")
+        pixel_list = []
+        positions = numpy.where(datamap > 0)
+        molecules = list(zip(positions[0], positions[1]))
+        padded_datamap = numpy.pad(numpy.zeros(datamap.shape), 1, mode="constant")
+        verif_matrix = numpy.zeros(datamap.shape)
+        for (row, col) in molecules:
+            interim_pixel_list = []
+            xd = numpy.where(datamap[row-1:row+2, col-1:col+2] == 0)
+            interim_pixel_list.append(list(zip(xd[0], xd[1])))
+            interim_pixel_list = interim_pixel_list[0]
+            for pixel in interim_pixel_list:
+                if verif_matrix[pixel[0] + row - 1, pixel[1] + col - 1] == 0:
+                    pixel_list.append((pixel[0] + row - 1, pixel[1] + col - 1))
+                verif_matrix[pixel[0] + row - 1, pixel[1] + col - 1] = 1
     else:
-        print(f"list_mode = {mode}")
+        print(f"list_mode = {mode} is not valid, retard")
 
     return pixel_list
 

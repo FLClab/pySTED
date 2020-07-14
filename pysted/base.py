@@ -780,7 +780,7 @@ class Microscope:
         # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
     
-    def get_signal(self, datamap, pixelsize, pdt, p_ex, p_sted, data_pixelsize=None, pixel_list=None):
+    def get_signal(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None):
         '''Compute the detected signal given some molecules disposition.
         
         :param datamap: A 2D array map of integers indicating how many molecules
@@ -805,17 +805,17 @@ class Microscope:
 
         # effective intensity across pixels (W)
         # acquisition gaussian is computed using data_pixelsize
-        if data_pixelsize is None:
+        if datamap_pixelsize is None:
             effective = self.get_effective(pixelsize, p_ex, p_sted)
         else:
-            effective = self.get_effective(data_pixelsize, p_ex, p_sted)
+            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
 
         # stack one effective per molecule
         if pixel_list is None:
-            intensity = utils.stack_btmod_pixsize(datamap, effective, data_pixelsize, pixelsize)
+            intensity = utils.stack_btmod_pixsize(datamap, effective, datamap_pixelsize, pixelsize)
         else:
             # caller la fonction stack qui prend en compte la liste et le pixelsizes :)
-            intensity = utils.stack_btmod_pixsize_list(datamap, effective, data_pixelsize, pixelsize, pixel_list)
+            intensity = utils.stack_btmod_pixsize_list(datamap, effective, datamap_pixelsize, pixelsize, pixel_list)
 
         photons = self.fluo.get_photons(intensity)
 
@@ -968,3 +968,167 @@ class Microscope:
             new_datamap[row, col] = numpy.random.binomial(datamap[row, col], prob_ex * prob_sted)
             previous_pixel = pixel
         return new_datamap
+
+    def bleach2(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
+        '''Compute the bleached data map using the following survival
+        probability per molecule:
+
+        .. math:: exp(-k \cdot t)
+
+        where
+
+        .. math::
+
+           k = \\frac{k_{ISC} \sigma_{abs} I^2}{\sigma_{abs} I (\\tau_{triplet}^{-1} + k_{ISC}) + (\\tau_{triplet} \\tau_{fluo})} \sigma_{triplet} {phy}_{react}
+
+        where :math:`c` is a constant, :math:`I` is the intensity, and :math:`t`
+        if the pixel dwell time [Jerker1999]_ [Garcia2000]_ [Staudt2009]_.
+
+        This version generates the lasers using datamap_pixelsize, and determines how many pixels to skip by the ratio
+        between datamap_pixelsize and pixelsize.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m). This determines how many pixels are skipped
+                          between each laser application.
+        :param pixeldwelltime: The time spent on each pixel of the simulated
+                               image (s).
+        :param p_ex: The power of the depletion beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :param datamap_pixelsize: The size of one pixel of the datamap. This is the resolution at which the lasers are
+                                  generated.
+        :param pixel_list: List of pixels on which we apply the lasers. If None is passed, a normal raster scan is done.
+        :returns: A 2D array of the new data map.
+
+        TODO: correctly skip pixels when a non raster scan list is passed.
+        LE BUT DE BLEACH 2 EST DE TESTER UN BLEACH QUI S'APPLIQUE SUR UN VOISINNAGE DE PIXELS ET NON SEULEMENT LE PIXEL
+        ITÉRÉ
+        '''
+        print("VOUS ÊTES DANS bleach2 :)")
+        if pixel_list is None:
+            print("No pixel list passed, Running a raster scan :)")
+            pixel_list = utils.pixel_sampling(datamap, mode="all")
+        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
+
+        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        pad = photons_ex.shape[0] // 2 * 2
+        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
+
+        pixeldwelltime = numpy.asarray(pixeldwelltime)
+        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
+        if pixeldwelltime.shape == ():
+            # pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+            # je devrais tu juste mettre les pixels dans pixel_list à une valeur non nulle? ce serait ce qui est ici
+            pixeldwelltime_arr = numpy.zeros(datamap.shape)
+            for (row, col) in pixel_list:
+                pixeldwelltime_arr[row, col] += pixeldwelltime
+            pixeldwelltime = pixeldwelltime_arr
+        else:
+            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
+            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
+            verif_array = numpy.asarray([1, 2, 3])
+            if type(verif_array) != type(pixeldwelltime):
+                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
+                raise Exception("pixeldwelltime parameter must be array type")
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
+
+        # à place de faire ça, je devrais faire comme je fais pour ma modif de pixelsize pour skipper certains pixels :)
+        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp(pixelsize, datamap_pixelsize)
+        ratio = img_pixelsize_int / data_pixelsize_int
+        # set egal à datamap initiallement, certains pixels seront bleachés dépendant du ratio des pixelsize
+        new_datamap = numpy.copy(datamap).astype(float)
+        prob_ex = numpy.pad((numpy.copy(datamap) > 0).astype(float), pad // 2, mode="constant")
+        prob_sted = numpy.pad((numpy.copy(datamap) > 0).astype(float), pad // 2, mode="constant")
+        previous_pixel = None
+        for (row, col) in pixel_list:
+            # fait le pixel skipping comme il faut pour une liste raster scan normale, mais ne fonctionne pas pour un
+            # ordre abitraire / raster inversé, need to figure out why et faire marche ça pour get_signal aussi :)
+            if previous_pixel is not None:
+                if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:   # absolues?
+                    continue
+
+            pdt = pdtpad[row:row + pad + 1, col:col + pad + 1]
+            # pdt.shape = (91, 91), prob_x[...].shape = (91, 91), numpy.exp(...).shape = (91, 91)
+            prob_ex[row:row + pad + 1, col:col + pad + 1] = prob_ex[row:row + pad + 1, col:col + pad + 1] * \
+                                                            numpy.exp(-k_ex * pdt)
+            prob_sted[row:row + pad + 1, col:col + pad + 1] = prob_sted[row:row + pad + 1, col:col + pad + 1] * \
+                                                              numpy.exp(-k_sted * pdt)
+            previous_pixel = (row, col)
+        datamap = datamap.astype(int)   # sinon il lance une erreur, à vérifier si c'est legit de faire ça
+        prob_ex = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        prob_sted = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        new_datamap = numpy.random.binomial(datamap, prob_ex * prob_sted)
+        return new_datamap
+
+    def laser_dans_face(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
+        """
+        Test function to see how much laser each pixel receives in the face ;)
+        """
+        # variable qui sera retournée, chaque pixel contiendra la quantité de photons reçus par la datamap à cause
+        # des lasers
+        laser_received = numpy.zeros(datamap.shape)
+
+        # effective intensity across pixels (W)
+        # acquisition gaussian is computed using data_pixelsize
+        if datamap_pixelsize is None:
+            print(f"datamap_pixelsize is None")
+            effective = self.get_effective(pixelsize, p_ex, p_sted)
+        else:
+            print(f"datamap_pixelsize = {datamap_pixelsize}")
+            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        # variable qui sera retournée, chaque pixel contiendra la quantité de photons reçus par la datamap à cause
+        # des lasers
+        # dans stack, on utilise data pour calculer le pad, qui est effective
+        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp(pixelsize, datamap_pixelsize)
+        ratio = int(img_pixelsize_int / data_pixelsize_int)
+        h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
+        laser_received = numpy.zeros(
+            (int(datamap.shape[0] / ratio) + h_pad, int(datamap.shape[1] / ratio) + w_pad))
+
+        __i_ex, __i_sted, psf_det = self.cache(pixelsize, datamap_pixelsize)
+
+        """# plot les cache shit vs effective pour voir si les pts sont du même ordre de grandeur
+        fig, axes = pyplot.subplots(2, 2)
+
+        ex_imshow = axes[0, 0].imshow(__i_ex * p_ex, interpolation="nearest")
+        axes[0, 0].set_title(f"Excitation beam, shape = {__i_ex.shape}")
+        fig.colorbar(ex_imshow, ax=axes[0, 0], fraction=0.04, pad=0.05)
+
+        sted_imshow = axes[0, 1].imshow(__i_sted * p_sted, interpolation="nearest")
+        axes[0, 1].set_title(f"STED beam, shape = {__i_sted.shape}")
+        fig.colorbar(sted_imshow, ax=axes[0, 1], fraction=0.04, pad=0.05)
+
+        psf_imshow = axes[1, 0].imshow(psf_det, interpolation="nearest")
+        axes[1, 0].set_title(f"PSF det, shape = {psf_det.shape}")
+        fig.colorbar(psf_imshow, ax=axes[1, 0], fraction=0.04, pad=0.05)
+
+        effective_imshow = axes[1, 1].imshow(effective, interpolation="nearest")
+        axes[1, 1].set_title(f"Effective beam, shape = {effective.shape}")
+        fig.colorbar(effective_imshow, ax=axes[1, 1], fraction=0.04, pad=0.05)
+
+        pyplot.show()
+        exit()"""
+
+        # verif bullshit, to remove eventually
+        iterated_pixels = numpy.zeros(datamap.shape)
+
+        # si aucune pixel_list n'est passée, on fait un raster scan complet :)
+        if pixel_list is None:
+            pixel_list = utils.pixel_sampling(datamap, mode="all")
+        for pixel in pixel_list:
+            row = pixel[0]
+            col = pixel[1]
+            laser_received[row:row+h_pad+1, col:col+w_pad+1] += effective
+            iterated_pixels[row, col] = 1
+        # k cool je regarde la qté de laser que chaque pixel reçoit avec effective
+        # ceci me donne une idée du laser reçu quand get_signal est utilisé,
+        # maintenant je veux regarder ce que la méthode d'application du laser de bleach ferait comme résultat?
+
+        return laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)], iterated_pixels
