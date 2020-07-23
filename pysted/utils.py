@@ -571,7 +571,6 @@ def pixel_sampling(datamap, mode="all"):
         positions = numpy.where(datamap > 0)
         pixel_list = list(zip(positions[0], positions[1]))
     elif mode == "besides":
-        print("testing to see if I can isolate pixels next to molecules")
         pixel_list = []
         positions = numpy.where(datamap > 0)
         molecules = list(zip(positions[0], positions[1]))
