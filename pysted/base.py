@@ -1131,7 +1131,7 @@ class Microscope:
         prob_sted = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
         new_datamap = numpy.random.binomial(datamap, prob_ex * prob_sted)
 
-        return prob_ex, prob_sted, new_datamap
+        return new_datamap
 
     def laser_dans_face(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
         """
