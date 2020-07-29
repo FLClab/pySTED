@@ -816,77 +816,13 @@ class Microscope:
             intensity = utils.stack_btmod_pixsize(datamap, effective, datamap_pixelsize, pixelsize)
         else:
             # caller la fonction stack qui prend en compte la liste et le pixelsizes :)
-            intensity = utils.stack_btmod_pixsize_list(datamap, effective, datamap_pixelsize, pixelsize, pixel_list)
+            intensity = utils.stack_btmod_definitive(datamap, effective, datamap_pixelsize, pixelsize, pixel_list)
 
         photons = self.fluo.get_photons(intensity)
 
         default_returned_array = self.detector.get_signal(photons, pdt)
 
         return default_returned_array
-
-    def get_signal_pixel_list(self, datamap, pixelsize, pdt, p_ex, p_sted, mode="default"):
-        '''Compute the detected signal given some molecules disposition.
-
-        :param datamap: A 2D array map of integers indicating how many molecules
-                        are contained in each pixel of the simulated image.
-        :param pixelsize: The size of one pixel of the simulated image (m).
-        :param pdt: The time spent on each pixel of the simulated image (s).
-        :param p_ex: The power of the excitation beam (W).
-        :param p_sted: The power of the STED beam (W).
-        :returns: A 2D array of the number of detected photons on each pixel.
-
-        ********* version où on passe en param le mode d'imagerie *********
-        ********* par default, pixel par pixel, shuffled pixel list, ... *********
-        '''
-        print("dans get_signal_pixel_list")
-        # effective intensity across pixels (W)
-        effective = self.get_effective(pixelsize, p_ex, p_sted)
-
-        # stack one effective per molecule
-        # devrait être un switch case
-        if mode == "default":
-            intensity = utils.stack(datamap, effective)
-        elif mode == "xy":
-            intensity = utils.stack_btmod(datamap, effective)
-        elif mode == "list":
-            intensity = utils.stack_btmod_list(datamap, effective)
-        elif mode == "shuffle":
-            intensity = utils.stack_btmod_list_shuffle(datamap, effective)
-        elif mode == "checkers":
-            intensity = utils.stack_btmod_checkers(datamap, effective)
-        else:
-            print("wrong choice retard")
-            intensity = 69
-            # TODO: mettre un exception catch ou qqchose
-
-        photons = self.fluo.get_photons(intensity)
-
-        return self.detector.get_signal(photons, pdt)
-    
-    def get_signal2(self, datamap, pixelsize, pdt, pmap_ex, pmap_sted):
-        __i_ex, _, _ = self.cache(pixelsize)
-        shape = __i_ex.shape[0]
-        pad = shape // 2
-        
-        effectives = {}
-        
-        frame = numpy.zeros(datamap.shape)
-        datapad = numpy.pad(datamap, pad, "constant", constant_values=0)
-        
-        for y in range(datamap.shape[0]):
-            for x in range(datamap.shape[1]):
-                p_ex, p_sted = pmap_ex[y, x], pmap_sted[y, x]
-                if (p_ex, p_sted) not in effectives:
-                    effective = self.get_effective(pixelsize, p_ex, p_sted)
-                    effectives[(p_ex, p_sted)] = effective
-                else:
-                    effective = effectives[(p_ex, p_sted)]
-                data = datapad[y:y+shape, x:x+shape]
-                frame[y, x] += numpy.sum(effective * data)
-
-        # intensity
-        photons = self.fluo.get_photons(frame)
-        return self.detector.get_signal(photons, pdt)
 
     def bleach(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
         '''Compute the bleached data map using the following survival
@@ -1078,7 +1014,6 @@ class Microscope:
         return traversed_array_padded
 
     def bleach2(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
-        print("VOUS ÊTES DANS bleach2 QUI RETOURNE LES MATRICES DE PROB")
         if pixel_list is None:
             print("No pixel list passed, Running a raster scan :)")
             pixel_list = utils.pixel_sampling(datamap, mode="all")
