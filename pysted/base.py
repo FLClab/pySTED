@@ -824,92 +824,6 @@ class Microscope:
 
         return default_returned_array
 
-    def bleach(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
-        '''Compute the bleached data map using the following survival
-        probability per molecule:
-
-        .. math:: exp(-k \cdot t)
-
-        where
-
-        .. math::
-
-           k = \\frac{k_{ISC} \sigma_{abs} I^2}{\sigma_{abs} I (\\tau_{triplet}^{-1} + k_{ISC}) + (\\tau_{triplet} \\tau_{fluo})} \sigma_{triplet} {phy}_{react}
-
-        where :math:`c` is a constant, :math:`I` is the intensity, and :math:`t`
-        if the pixel dwell time [Jerker1999]_ [Garcia2000]_ [Staudt2009]_.
-
-        This version generates the lasers using datamap_pixelsize, and determines how many pixels to skip by the ratio
-        between datamap_pixelsize and pixelsize.
-
-        :param datamap: A 2D array map of integers indicating how many molecules
-                        are contained in each pixel of the simulated image.
-        :param pixelsize: The size of one pixel of the simulated image (m). This determines how many pixels are skipped
-                          between each laser application.
-        :param pixeldwelltime: The time spent on each pixel of the simulated
-                               image (s).
-        :param p_ex: The power of the depletion beam (W).
-        :param p_sted: The power of the STED beam (W).
-        :param datamap_pixelsize: The size of one pixel of the datamap. This is the resolution at which the lasers are
-                                  generated.
-        :param pixel_list: List of pixels on which we apply the lasers. If None is passed, a normal raster scan is done.
-        :returns: A 2D array of the new data map.
-
-        TODO: correctly skip pixels when a non raster scan list is passed.
-        (((: EN THÉORIE, ON S'EN CALISSE DE CETTE FONCTION LÀ MAINTENANT QUE BLEACH2 MARCHE :)))
-        '''
-        if pixel_list is None:
-            print("No pixel list passed, Running a raster scan :)")
-            pixel_list = utils.pixel_sampling(datamap, mode="all")
-        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
-
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-
-        pad = photons_ex.shape[0] // 2 * 2
-        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
-
-        pixeldwelltime = numpy.asarray(pixeldwelltime)
-        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
-        if pixeldwelltime.shape == ():
-            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
-        else:
-            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
-            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
-            verif_array = numpy.asarray([1, 2, 3])
-            if type(verif_array) != type(pixeldwelltime):
-                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
-                raise Exception("pixeldwelltime parameter must be array type")
-        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
-
-        # à place de faire ça, je devrais faire comme je fais pour ma modif de pixelsize pour skipper certains pixels :)
-        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp(pixelsize, datamap_pixelsize)
-        ratio = img_pixelsize_int / data_pixelsize_int
-        # set egal à datamap initiallement, certains pixels seront bleachés dépendant du ratio des pixelsize
-        new_datamap = numpy.copy(datamap)
-        # new_datamap = numpy.zeros(datamap.shape)
-        previous_pixel = None
-        for pixel in pixel_list:
-            # fait le pixel skipping comme il faut pour une liste raster scan normale, mais ne fonctionne pas pour un
-            # ordre abitraire / raster inversé, need to figure out why et faire marche ça pour get_signal aussi :)
-            row = pixel[0]
-            col = pixel[1]
-            if previous_pixel is not None:
-                if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:   # absolues?
-                    continue
-
-            pdt = pdtpad[row:row + pad + 1, col:col + pad + 1]
-            prob_ex = numpy.prod(numpy.exp(-k_ex * pdt))
-            prob_sted = numpy.prod(numpy.exp(-k_sted * pdt))
-            new_datamap[row, col] = numpy.random.binomial(datamap[row, col], prob_ex * prob_sted)
-            previous_pixel = pixel
-
-        return new_datamap
-
     def am_i_centered(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
         """
         Le but de cette fonction est de vérifier si je me centre bien sur le pixel itéré lorsque je fais mon acquisition
@@ -1013,7 +927,38 @@ class Microscope:
         # print(f"iterated over {counter} pixels out of {datamap.shape[0] * datamap.shape[1]}")
         return traversed_array_padded
 
-    def bleach2(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
+    def bleach(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
+        '''
+        Compute the bleached data map using the following survival
+        probability per molecule:
+
+        .. math:: exp(-k \cdot t)
+
+        where
+
+        .. math::
+
+           k = \\frac{k_{ISC} \sigma_{abs} I^2}{\sigma_{abs} I (\\tau_{triplet}^{-1} + k_{ISC}) + (\\tau_{triplet} \\tau_{fluo})} \sigma_{triplet} {phy}_{react}
+
+        where :math:`c` is a constant, :math:`I` is the intensity, and :math:`t`
+        if the pixel dwell time [Jerker1999]_ [Garcia2000]_ [Staudt2009]_.
+
+        This version generates the lasers using datamap_pixelsize, and determines how many pixels to skip by the ratio
+        between datamap_pixelsize and pixelsize.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m). This determines how many pixels are skipped
+                          between each laser application.
+        :param pixeldwelltime: The time spent on each pixel of the simulated
+                               image (s).
+        :param p_ex: The power of the depletion beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :param datamap_pixelsize: The size of one pixel of the datamap. This is the resolution at which the lasers are
+                                  generated.
+        :param pixel_list: List of pixels on which we apply the lasers. If None is passed, a normal raster scan is done.
+        :returns: A 2D array of the new data map.
+        '''
         if pixel_list is None:
             print("No pixel list passed, Running a raster scan :)")
             pixel_list = utils.pixel_sampling(datamap, mode="all")
@@ -1043,25 +988,15 @@ class Microscope:
         pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
 
         # à place de faire ça, je devrais faire comme je fais pour ma modif de pixelsize pour skipper certains pixels :)
-        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp(pixelsize, datamap_pixelsize)
-        ratio = img_pixelsize_int / data_pixelsize_int
-
+        filtered_pixel_list = utils.pixel_list_filter(pixel_list, pixelsize, datamap_pixelsize)
         prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
         prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
-        previous_pixel = None
-        for (row, col) in pixel_list:
-            # fait le pixel skipping comme il faut pour une liste raster scan normale, mais ne fonctionne pas pour un
-            # ordre abitraire / raster inversé, need to figure out why et faire marche ça pour get_signal aussi :)
-            if previous_pixel is not None:
-                if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:   # absolues?
-                    continue
-
+        for (row, col) in filtered_pixel_list:
             pdt = pdtpad[row:row + pad + 1, col:col + pad + 1]
             prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt)
             prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt)
-            previous_pixel = (row, col)
 
-        datamap = datamap.astype(int)   # sinon il lance une erreur, à vérifier si c'est legit de faire ça
+        datamap = datamap.astype(int)  # sinon il lance une erreur, à vérifier si c'est legit de faire ça
         prob_ex = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
         prob_sted = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
         new_datamap = numpy.random.binomial(datamap, prob_ex * prob_sted)
