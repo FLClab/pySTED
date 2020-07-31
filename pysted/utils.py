@@ -231,143 +231,6 @@ def stack(datamap, data):
     return frame[int(h_pad/2):-int(h_pad/2), int(w_pad/2):-int(w_pad/2)]
 
 
-def stack_btmod(datamap, data):
-    '''Compute a new frame consisting in a replication of the given *data*
-    centered at every positions and multiplied by the factors given in the
-    *datamap*.
-
-    Example::
-
-        >>> datamap = numpy.array([[2, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0]])
-        >>> data = numpy.array([[1, 2, 1],
-                                [2, 3, 2],
-                                [1, 2, 1]])
-        >>> utils.stack_btmod(datamap, data)
-        numpy.array([[6, 4, 0, 0],
-                     [4, 2, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0]])
-
-    :param datamap: A 2D array indicating how many data are positioned in every
-    :param data: A 2D array containing the data to replicate.
-    :returns: A 2D array shaped like *datamap*.
-    ******* VERSION QUE BT MODIFIE POUR DES TESTS DE PRISE D'IMAGE NON-RASTER SCANNED *******
-    '''
-    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2   # garde ça
-    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))   # garde ça
-    print("in stack_btmod")
-    for y in range(datamap.shape[0]):
-        for x in range(datamap.shape[1]):
-            frame[y:y + h_pad + 1, x:x + w_pad + 1] += data * datamap[y, x]
-    return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-
-
-def stack_btmod_list(datamap, data, list_mode="all"):
-    '''Compute a new frame consisting in a replication of the given *data*
-    centered at every positions and multiplied by the factors given in the
-    *datamap*.
-
-    Example::
-
-        >>> datamap = numpy.array([[2, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0]])
-        >>> data = numpy.array([[1, 2, 1],
-                                [2, 3, 2],
-                                [1, 2, 1]])
-        >>> utils.stack_btmod(datamap, data)
-        numpy.array([[6, 4, 0, 0],
-                     [4, 2, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0]])
-
-    :param datamap: A 2D array indicating how many data are positioned in every
-    :param data: A 2D array containing the data to replicate.
-    :returns: A 2D array shaped like *datamap*.
-    ******* VERSION QUE BT MODIFIE POUR DES TESTS DE PRISE D'IMAGE NON-RASTER SCANNED *******
-    '''
-    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2   # garde ça
-    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))   # garde ça
-    pixel_list = pixel_sampling(datamap, mode=list_mode)
-    print("in stack_btmod_list")
-    for pixel in pixel_list:
-        frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
-    return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-
-
-def stack_btmod_list_shuffle(datamap, data):
-    '''Compute a new frame consisting in a replication of the given *data*
-    centered at every positions and multiplied by the factors given in the
-    *datamap*.
-
-    Example::
-
-        >>> datamap = numpy.array([[2, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0]])
-        >>> data = numpy.array([[1, 2, 1],
-                                [2, 3, 2],
-                                [1, 2, 1]])
-        >>> utils.stack_btmod(datamap, data)
-        numpy.array([[6, 4, 0, 0],
-                     [4, 2, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0]])
-
-    :param datamap: A 2D array indicating how many data are positioned in every
-    :param data: A 2D array containing the data to replicate.
-    :returns: A 2D array shaped like *datamap*.
-    ******* VERSION QUE BT MODIFIE POUR DES TESTS DE PRISE D'IMAGE NON-RASTER SCANNED + SHUFFLING *******
-    '''
-    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2   # garde ça
-    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))   # garde ça
-    pixel_list = pixel_sampling(datamap)
-    random.shuffle(pixel_list)
-    print("in stack_btmod_list_shuffle")
-    for pixel in pixel_list:
-        frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
-    return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-
-
-def stack_btmod_checkers(datamap, data):
-    '''Compute a new frame consisting in a replication of the given *data*
-    centered at every positions and multiplied by the factors given in the
-    *datamap*.
-
-    Example::
-
-        >>> datamap = numpy.array([[2, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0]])
-        >>> data = numpy.array([[1, 2, 1],
-                                [2, 3, 2],
-                                [1, 2, 1]])
-        >>> utils.stack_btmod(datamap, data)
-        numpy.array([[6, 4, 0, 0],
-                     [4, 2, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0]])
-
-    :param datamap: A 2D array indicating how many data are positioned in every
-    :param data: A 2D array containing the data to replicate.
-    :returns: A 2D array shaped like *datamap*.
-    ******* VERSION QUI SÉLECTIONNE JUSTE UNE RÉGION CHECKERS *******
-    '''
-    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2   # garde ça
-    frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))   # garde ça
-    pixel_list = pixel_sampling(datamap, mode="checkers")
-    print("in stack_btmod_list")
-    for pixel in pixel_list:
-        frame[pixel[0]:pixel[0] + h_pad + 1, pixel[1]:pixel[1] + w_pad + 1] += data * datamap[pixel[0], pixel[1]]
-    return frame[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-
-
 def stack_btmod_pixsize(datamap, data, data_pixelsize, img_pixelsize):
     '''Compute a new frame consisting in a replication of the given *data*
     centered at every positions and multiplied by the factors given in the
@@ -393,30 +256,6 @@ def stack_btmod_pixsize(datamap, data, data_pixelsize, img_pixelsize):
     :returns: A 2D array shaped like *datamap*.
     *** VERSION QUI TIENT EN COMPTE LE PIXELSIZE DES DONNÉES BRUTES :)
     '''
-    """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pxsz, data_pxsz)
-    ratio = img_pixelsize_int / data_pixelsize_int
-    h_pad, w_pad = int(laser.shape[0] / 2) * 2, int(laser.shape[1] / 2) * 2
-    datamap_to_fill = pxsize_comp2(img_pxsz, data_pxsz, datamap)
-    print(f"datamap_to_fill.shape = {datamap_to_fill.shape}")
-    modif_returned_array = numpy.pad(datamap_to_fill, h_pad // 2, mode="constant", constant_values=0)
-    print(f"modif_returned_array.shape = {modif_returned_array.shape}")
-    row_idx = 0
-    col_idx = 0
-    for row in range(0, datamap.shape[0], int(ratio)):
-        for col in range(0, datamap.shape[1], int(ratio)):
-            if datamap[row, col] > 0:
-                modif_returned_array[(row_idx + row_idx + h_pad + 1) // 2, (col_idx + col_idx + w_pad + 1) // 2] += 1
-            col_idx += 1
-            if col_idx >= int(numpy.ceil(datamap.shape[0] / ratio)):
-                col_idx = 0
-        row_idx += 1
-        if row_idx >= int(numpy.ceil(datamap.shape[1] / ratio)):
-            row_idx = 0
-
-    modif_returned_array = modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-    return modif_returned_array
-    """
     img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
     ratio = img_pixelsize_int / data_pixelsize_int
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
@@ -571,19 +410,43 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
 
 
 def stack_btmod_definitive(datamap, data, data_pixelsize, img_pixelsize, pixel_list):
-    """
-    This should be the definitive stack function for when a pixel_list is passed :)
-    """
+    '''Compute a new frame consisting in a replication of the given *data*
+    centered at every positions and multiplied by the factors given in the
+    *datamap*.
+
+    Example::
+
+        >>> datamap = numpy.array([[2, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0],
+                                   [0, 0, 0, 0]])
+        >>> data = numpy.array([[1, 2, 1],
+                                [2, 3, 2],
+                                [1, 2, 1]])
+        >>> utils.stack(datamap, data)
+        numpy.array([[6, 4, 0, 0],
+                     [4, 2, 0, 0],
+                     [0, 0, 0, 0],
+                     [0, 0, 0, 0]])
+
+    :param datamap: A 2D array indicating how many data are positioned in every
+    :param data: A 2D array containing the data to replicate.
+    :param data_pixelsize: Length of a pixel in the datamap (m)
+    :param img_pixelsize: Distance the laser moves in between each application of data. Must be a multiple of the
+                          data_pixelsize (m)
+    :param pixel_list: List of pixels on which we want to do the acquisition.
+    :returns: A 2D array shaped like *datamap*.
+    '''
     filtered_pixel_list = pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize)
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
     modif_returned_array = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
+    padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0)
+
     for (row, col) in filtered_pixel_list:
-        modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
-        # uh oh, si j'itère à côté, est-ce que je devrais acquérir du signal? j'imagine que oui, mais ça va à
-        # l'encontre de comment le calcul est décrit dans l'exemple de la doc...
-        # ce que je crois quil faudrait faire :
-        # modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * padded_datamap[row:row + h_pad + 1,
-        #                                                                                         col:col + w_pad + 1]
+        modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * padded_datamap[row:row + h_pad + 1,
+                                                                                                col:col + w_pad + 1]
+
+        # modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
     return modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
 def pixel_sampling(datamap, mode="all"):
