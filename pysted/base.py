@@ -824,6 +824,124 @@ class Microscope:
 
         return default_returned_array
 
+    def get_signal_bleach_mod(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None):
+        '''Compute the detected signal given some molecules disposition.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m).
+        :param pdt: The time spent on each pixel of the simulated image (s).
+        :param p_ex: The power of the excitation beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :returns: A 2D array of the number of detected photons on each pixel.
+        ********** NOTES *************
+        Cette version doit effectuer le pixel skipping comme il faut, en imaginant que la laser peut uniquement se
+        déplacer sur une "grid" déterminée par le ratio entre datamap_pixelsize et pixelsize.
+        Elle doit aussi appliquer le bleaching à chaque itération
+        De plus, elle doit placer le résultat de l'acquisition dans le seul pixel itéré au lieu de la slice
+        Finalement, l'output devrait la forme de la datamap divisé par le ratio entre les pixelsizes
+        Hypothèse : Si je fais une acquisition avec un ratio de 1, cette fonction devrait me retourner le même résultat
+                    que get_signal. Sinon, non, j'pense pas :) (SANS LE BLEACHING POUR CETTE HYPOTHÈSE)
+        '''
+        print(f"Tu es dans la nouvelle version de get_signal :)")
+        # effective intensity across pixels (W)
+        # acquisition gaussian is computed using data_pixelsize
+        if datamap_pixelsize is None:
+            effective = self.get_effective(pixelsize, p_ex, p_sted)
+        else:
+            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        # figure out valid pixels to iterate on based on ratio between pixel sizes
+        # imagine the laser is fixed on a grid, which is determined by the ratio
+        valid_pixels_grid = utils.pxsize_grid(pixelsize, datamap_pixelsize, datamap)
+
+        test1 = numpy.zeros(datamap.shape)
+        for (row, col) in valid_pixels_grid:
+            test1[row, col] += 1
+
+        # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
+        # if pixel_list is passed, keep only those which are also in valid_pixels_grid
+        if pixel_list is None:
+            pixel_list = valid_pixels_grid
+        else:
+            # CETTE PARTIE LÀ EST FUCKING LONGUE SI JE RUN SUR POILS, À VÉRIFIER
+            new_list = pixel_list.copy()   # pas le choix de faire ça pour itérer dedans sans que ça chie :)
+            for pixel in pixel_list:
+                if pixel not in valid_pixels_grid:
+                    new_list.remove(pixel)
+            pixel_list = new_list
+
+        # prepping acquisition matrix
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        datamap_rows, datamap_cols = datamap.shape
+        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_rows / ratio)), int(numpy.ceil(datamap_cols / ratio))))
+        h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
+        padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0)
+
+        # computing bullshit needed to compute bleach :)
+        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
+
+        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        pad = photons_ex.shape[0] // 2 * 2
+        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
+
+        # pixeldwelltime array bull shit, À VÉRIFIER SI C'EST BON
+        pixeldwelltime = numpy.asarray(pdt)
+        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
+        if pixeldwelltime.shape == ():
+            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+        else:
+            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
+            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
+            verif_array = numpy.asarray([1, 2, 3])
+            if type(verif_array) != type(pixeldwelltime):
+                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
+                raise Exception("pixeldwelltime parameter must be array type")
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
+
+        prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+        prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+        """
+        for (row, col) in filtered_pixel_list:
+            pdt = pdtpad[row:row + pad + 1, col:col + pad + 1]
+            prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt)
+            prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt)
+
+        datamap = datamap.astype(int)  # sinon il lance une erreur, à vérifier si c'est legit de faire ça
+        prob_ex = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        prob_sted = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        new_datamap = numpy.random.binomial(datamap, prob_ex * prob_sted)
+        """
+
+        # live comme ça c'est pareil comme stacks, mais dans un output plus petit
+        datamap = datamap.astype(int)  # sinon il lance une erreur, à vérifier si c'est legit de faire ça
+        for (row, col) in pixel_list:
+            # pas besoin de travailler dans une matrice paddée, acquired_intensity est déjà de la bonne forme, et le
+            # résultat du calcul s'en va dans 1 seul pixel de mon output :)
+            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
+                                                                      padded_datamap[row:row + h_pad + 1,
+                                                                                     col:col + w_pad + 1])
+
+            # bleach stuff
+            pdt = pdtpad[row:row + pad + 1, col:col + pad + 1]
+            prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt)
+            prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt)
+            prob_ex_interim = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+            prob_sted_interim = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+            datamap = numpy.random.binomial(datamap, prob_ex_interim * prob_sted_interim)
+
+        photons = self.fluo.get_photons(acquired_intensity)
+
+        default_returned_array = self.detector.get_signal(photons, pdt)   # plante ici !!
+
+        return default_returned_array
+
     def am_i_centered(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
         """
         Le but de cette fonction est de vérifier si je me centre bien sur le pixel itéré lorsque je fais mon acquisition

@@ -549,6 +549,40 @@ def pxsize_comp_array_maker(img_pixelsize, data_pixelsize, datamap):
     return datamap_to_fill
 
 
+def pxsize_grid(img_pixelsize, data_pixelsize, datamap):
+    """
+    Function which creates a grid of the pixels which can be iterated on based on the ratio between img_pixelsize and
+    data_pixelsize. Imagine the laser is fixed on a grid and can only make discrete movements, and this grid size is
+    determined by the ratio
+    :param img_pixelsize: Size of the minimum distance the laser must do between acquisitions (m). Must be a multiple of
+                          data_pixelsize.
+    :param data_pixelsize: Size of a pixel of the datamap (m).
+    :param datamap: Raw molecule dispotion on which we wish to do an acquisition.
+    :returns: A list of the pixels which can be iterated on (?)
+    """
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    ratio = int(img_pixelsize_int / data_pixelsize_int)
+
+    valid_pixels = []
+    for row in range(0, datamap.shape[0], ratio):
+        for col in range(0, datamap.shape[1], ratio):
+            valid_pixels.append((row, col))
+
+    return valid_pixels
+
+
+def pxsize_ratio(img_pixelsize, data_pixelsize):
+    """
+    Computes the ratio between the acquisition pixel size and the datamap pixel size
+    :param img_pixelsize: Minimum distance the laser must move during application. Multiple of data_pixelsize (m).
+    :param data_pixelsize: Size of a pixel in the datamap (m).
+    :returns: the ratio between pixel sizes
+    """
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    ratio = int(img_pixelsize_int / data_pixelsize_int)
+    return ratio
+
+
 def image_squisher(datamap, data_pixelsize, img_pixelsize):
     """
     le but est d'essayer de squisher une image en fonction du ratio entre data_pixelsize et img_pixelsize :)
