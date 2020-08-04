@@ -824,7 +824,8 @@ class Microscope:
 
         return default_returned_array
 
-    def get_signal_bleach_mod(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None):
+    def get_signal_bleach_mod(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
+                              bleach=True):
         '''Compute the detected signal given some molecules disposition.
 
         :param datamap: A 2D array map of integers indicating how many molecules
@@ -833,6 +834,7 @@ class Microscope:
         :param pdt: The time spent on each pixel of the simulated image (s).
         :param p_ex: The power of the excitation beam (W).
         :param p_sted: The power of the STED beam (W).
+        :param bleach: Determines whether or not the laser applies bleach with each iteration. True by default.
         :returns: A 2D array of the number of detected photons on each pixel.
         ********** NOTES *************
         Cette version doit effectuer le pixel skipping comme il faut, en imaginant que la laser peut uniquement se
@@ -876,7 +878,7 @@ class Microscope:
         datamap_rows, datamap_cols = datamap.shape
         acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_rows / ratio)), int(numpy.ceil(datamap_cols / ratio))))
         h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
-        padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0)
+        padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0).astype(int)
 
         # computing bullshit needed to compute bleach :)
         __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
@@ -907,40 +909,30 @@ class Microscope:
 
         prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
         prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
-        """
-        for (row, col) in filtered_pixel_list:
-            pdt = pdtpad[row:row + pad + 1, col:col + pad + 1]
-            prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt)
-            prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt)
 
-        datamap = datamap.astype(int)  # sinon il lance une erreur, à vérifier si c'est legit de faire ça
-        prob_ex = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-        prob_sted = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-        new_datamap = numpy.random.binomial(datamap, prob_ex * prob_sted)
-        """
-
-        # live comme ça c'est pareil comme stacks, mais dans un output plus petit
-        datamap = datamap.astype(int)  # sinon il lance une erreur, à vérifier si c'est legit de faire ça
         for (row, col) in pixel_list:
             # pas besoin de travailler dans une matrice paddée, acquired_intensity est déjà de la bonne forme, et le
             # résultat du calcul s'en va dans 1 seul pixel de mon output :)
             acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
                                                                       padded_datamap[row:row + h_pad + 1,
                                                                                      col:col + w_pad + 1])
+            if bleach is True:
+                # bleach stuff
+                pdt_loop = pdtpad[row:row + pad + 1, col:col + pad + 1]
+                prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt_loop)
+                prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt_loop)
+                prob_ex_interim = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+                prob_sted_interim = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
 
-            # bleach stuff
-            pdt = pdtpad[row:row + pad + 1, col:col + pad + 1]
-            prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt)
-            prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt)
-            prob_ex_interim = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-            prob_sted_interim = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-            datamap = numpy.random.binomial(datamap, prob_ex_interim * prob_sted_interim)
+                padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)] = \
+                    numpy.random.binomial(padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)],
+                                          prob_ex_interim * prob_sted_interim)
 
         photons = self.fluo.get_photons(acquired_intensity)
 
-        default_returned_array = self.detector.get_signal(photons, pdt)   # plante ici !!
+        default_returned_array = self.detector.get_signal(photons, pdt)
 
-        return default_returned_array
+        return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
 
     def am_i_centered(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
         """
