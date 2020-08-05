@@ -820,7 +820,17 @@ class Microscope:
 
         photons = self.fluo.get_photons(intensity)
 
-        default_returned_array = self.detector.get_signal(photons, pdt)
+        # plante si mon acq avait un ratio autre que 1 et que pdt est un array, car les 2 matrices ne seront pas de la
+        # même forme. Idée de fix 1 : juste prendre les pdt des pixels correspondants :)
+        if type(pdt) is float or photons.shape == pdt.shape:
+            default_returned_array = self.detector.get_signal(photons, pdt)
+        else:
+            ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+            new_pdt = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)), int(numpy.ceil(pdt.shape[1] / ratio))))
+            for row in range(0, new_pdt.shape[0]):
+                for col in range(0, new_pdt.shape[1]):
+                    new_pdt[row, col] += pdt[row * ratio, col * ratio]
+            default_returned_array = self.detector.get_signal(photons, new_pdt)
 
         return default_returned_array
 
@@ -845,7 +855,6 @@ class Microscope:
         Hypothèse : Si je fais une acquisition avec un ratio de 1, cette fonction devrait me retourner le même résultat
                     que get_signal. Sinon, non, j'pense pas :) (SANS LE BLEACHING POUR CETTE HYPOTHÈSE)
         '''
-        print(f"Tu es dans la nouvelle version de get_signal :)")
         # effective intensity across pixels (W)
         # acquisition gaussian is computed using data_pixelsize
         if datamap_pixelsize is None:
@@ -930,7 +939,15 @@ class Microscope:
 
         photons = self.fluo.get_photons(acquired_intensity)
 
-        default_returned_array = self.detector.get_signal(photons, pdt)
+        if type(pdt) is float or photons.shape == pdt.shape:
+            default_returned_array = self.detector.get_signal(photons, pdt)
+        else:
+            ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+            new_pdt = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)), int(numpy.ceil(pdt.shape[1] / ratio))))
+            for row in range(0, new_pdt.shape[0]):
+                for col in range(0, new_pdt.shape[1]):
+                    new_pdt[row, col] += pdt[row * ratio, col * ratio]
+            default_returned_array = self.detector.get_signal(photons, new_pdt)
 
         return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
 
