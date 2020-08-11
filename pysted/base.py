@@ -82,6 +82,7 @@ import cUtils
 
 # import mis par BT pour des tests
 from matplotlib import pyplot
+import time
 
 
 class GaussianBeam:
@@ -866,21 +867,19 @@ class Microscope:
         # imagine the laser is fixed on a grid, which is determined by the ratio
         valid_pixels_grid = utils.pxsize_grid(pixelsize, datamap_pixelsize, datamap)
 
-        test1 = numpy.zeros(datamap.shape)
-        for (row, col) in valid_pixels_grid:
-            test1[row, col] += 1
-
         # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
         # if pixel_list is passed, keep only those which are also in valid_pixels_grid
         if pixel_list is None:
             pixel_list = valid_pixels_grid
         else:
-            # CETTE PARTIE LÀ EST FUCKING LONGUE SI JE RUN SUR POILS, À VÉRIFIER
-            new_list = pixel_list.copy()   # pas le choix de faire ça pour itérer dedans sans que ça chie :)
-            for pixel in pixel_list:
-                if pixel not in valid_pixels_grid:
-                    new_list.remove(pixel)
-            pixel_list = new_list
+            valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in valid_pixels_grid:
+                valid_pixels_grid_matrix[row, col] = 1
+            pixel_list_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in pixel_list:
+                pixel_list_matrix[row, col] = 1
+            final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
+            pixel_list = numpy.argwhere(final_valid_pixels_matrix > 0)
 
         # prepping acquisition matrix
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
@@ -889,7 +888,7 @@ class Microscope:
         h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
         padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0).astype(int)
 
-        # computing bullshit needed to compute bleach :)
+        # computing stuff needed to compute bleach :)
         __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
 
         photons_ex = self.fluo.get_photons(__i_ex * p_ex)
@@ -920,13 +919,12 @@ class Microscope:
         prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
 
         for (row, col) in pixel_list:
-            # pas besoin de travailler dans une matrice paddée, acquired_intensity est déjà de la bonne forme, et le
-            # résultat du calcul s'en va dans 1 seul pixel de mon output :)
             acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
                                                                       padded_datamap[row:row + h_pad + 1,
                                                                                      col:col + w_pad + 1])
             if bleach is True:
                 # bleach stuff
+                # identifier quel calcul est le plus long ici :)
                 pdt_loop = pdtpad[row:row + pad + 1, col:col + pad + 1]
                 prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt_loop)
                 prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt_loop)
