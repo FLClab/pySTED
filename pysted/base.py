@@ -1014,7 +1014,7 @@ class Microscope:
         pad = photons_ex.shape[0] // 2 * 2
         h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
 
-        # pixeldwelltime array bull shit, À VÉRIFIER SI C'EST BON
+        """# pixeldwelltime array bull shit, À VÉRIFIER SI C'EST BON
         pixeldwelltime = numpy.asarray(pdt)
         # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
         if pixeldwelltime.shape == ():
@@ -1026,7 +1026,18 @@ class Microscope:
             if type(verif_array) != type(pixeldwelltime):
                 # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
                 raise Exception("pixeldwelltime parameter must be array type")
-        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)"""
+        # Pour la fct RESCUe, ma gestion du pixeldwelltime va être différente, comme le pixeldwelltime est déterminé
+        # pixel par pixel au fur et à mesure de l'acquisition
+        pdt = numpy.asarray(pdt)
+        if pdt.shape == ():
+            # si pdt est déjà passé comme scalaire, j'utilise cette val comme max qu'on aurait
+            pixeldwelltime = numpy.zeros(datamap.shape)
+        else:
+            # si il a passé un array, j'utilise le max de l'array comme val max qu'on aurait
+            pdt_max = numpy.amax(pdt)
+            pdt = pdt_max
+            pixeldwelltime = numpy.zeros(datamap.shape)
 
         prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
         prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
@@ -1048,6 +1059,7 @@ class Microscope:
             numpy.sum(effective) comme threshold. 
             Je multiplie ensuite ce ratio au pdt du pixel itéré. Par contre, le pdt pourrait être arbitraire à cette
             étape, you know?
+            IL ME FAUT AUSSI UN LOWER THRESHOLD : S'IL DETECTE RIEN, JE INSTA MOVE ON, LE STED TIME EST À 0
             """
 
 
@@ -1055,14 +1067,22 @@ class Microscope:
                                                                                 padded_datamap[row:row + h_pad + 1,
                                                                                 col:col + w_pad + 1])
 
+            pdt_covered_area = numpy.ones(effective.shape)
             nb_molecs = acquired_intensity[int(row / ratio), int(col / ratio)] / single_molecule
-            print(f"{nb_molecs} molecules in the pixel at {(row, col)}")
-            exit()
+            # bleach trop vite si j'itère sur tout, j'ai besoin d'un lower threshold pour contrer ça :)
+
+            if nb_molecs >= 1:
+                pdt_covered_area *= pdt # / nb_molecs
+                pixeldwelltime[row, col] = pdt # / nb_molecs
+            else:
+                pdt_covered_area *= 0   # doit dépendre du pixeldwelltime
+                pixeldwelltime[row, col] = 0   # ^^^^^^^^
+
 
             if bleach is True:
                 # bleach stuff
                 # identifier quel calcul est le plus long ici :)
-                pdt_loop = pdtpad[row:row + pad + 1, col:col + pad + 1]
+                pdt_loop = pdt_covered_area
                 prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt_loop)
                 prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt_loop)
                 prob_ex_interim = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
@@ -1072,19 +1092,22 @@ class Microscope:
                     numpy.random.binomial(padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)],
                                           prob_ex_interim * prob_sted_interim)
 
-        photons = self.fluo.get_photons(acquired_intensity)
+        photons = self.fluo.get_photons(acquired_intensity)   # faire une version 2 de cette fonction
 
-        if type(pdt) is float or photons.shape == pdt.shape:
-            default_returned_array = self.detector.get_signal(photons, pdt)
+        if photons.shape == pixeldwelltime.shape:
+            default_returned_array = self.detector.get_signal(photons, pixeldwelltime)    # ^^^^^^^^^^^^
         else:
             ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-            new_pdt = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)), int(numpy.ceil(pdt.shape[1] / ratio))))
+            new_pdt = numpy.zeros((int(numpy.ceil(pixeldwelltime.shape[0] / ratio)),
+                                   int(numpy.ceil(pixeldwelltime.shape[1] / ratio))))
             for row in range(0, new_pdt.shape[0]):
                 for col in range(0, new_pdt.shape[1]):
-                    new_pdt[row, col] += pdt[row * ratio, col * ratio]
-            default_returned_array = self.detector.get_signal(photons, new_pdt)
+                    new_pdt[row, col] += pixeldwelltime[row * ratio, col * ratio]
+            pixeldwelltime = new_pdt
+            default_returned_array = self.detector.get_signal(photons, pixeldwelltime)
 
-        return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)], \
+            pixeldwelltime
 
     def am_i_centered(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
         """
