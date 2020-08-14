@@ -76,7 +76,13 @@ import numpy
 import scipy.constants
 import scipy.signal
 
-from pysted import cUtils, utils
+# from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
+from pysted import utils
+import cUtils
+
+# import mis par BT pour des tests
+from matplotlib import pyplot
+import time
 
 
 class GaussianBeam:
@@ -108,7 +114,7 @@ class GaussianBeam:
         self.beta = kwargs.get("beta", numpy.pi/4)
     
     # FIXME: pass Objective object instead of f, n, na, transmission
-    def get_intensity(self, power, f, n, na, transmission, pixelsize):
+    def get_intensity(self, power, f, n, na, transmission, pixelsize, data_pixelsize=None):
         '''Compute the transmitted excitation intensity field (W/m²). The
         technique essentially follows the method described in [Xie2013]_,
         where :math:`z = 0`, along with some equations from [Deng2010]_, and
@@ -123,6 +129,11 @@ class GaussianBeam:
         :param pixelsize: The size of an element in the intensity matrix (m).
         :returns: A 2D array.
         '''
+        if data_pixelsize is None:
+            data_pixelsize = pixelsize
+        else:
+            pixelsize = data_pixelsize
+
         def fun1(theta, kr):
             return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta) *\
                    scipy.special.jv(0, kr * numpy.sin(theta)) * (1 + numpy.cos(theta))
@@ -232,7 +243,7 @@ class DonutBeam:
         self.zero_residual = kwargs.get("zero_residual", 0)
     
     # FIXME: pass Objective object instead of f, n, na, transmission
-    def get_intensity(self, power, f, n, na, transmission, pixelsize):
+    def get_intensity(self, power, f, n, na, transmission, pixelsize, data_pixelsize=None):
         '''Compute the transmitted STED intensity field (W/m²). The technique
         essentially follows the method described in [Xie2013]_, where
         :math:`z = 0`, along with some equations from [Deng2010]_, and
@@ -245,7 +256,13 @@ class DonutBeam:
         :param transmission: The transmission ratio of the objective (given the
                              wavelength of the STED beam).
         :param pixelsize: The size of an element in the intensity matrix (m).
+        :param data_pixelsize: The size of a pixel in the raw data matrix (m).
         '''
+        if data_pixelsize is None:
+            data_pixelsize = pixelsize
+        else:
+            pixelsize = data_pixelsize
+
         def fun1(theta, kr):
             return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta) *\
                    scipy.special.jv(1, kr * numpy.sin(theta)) * (1 + numpy.cos(theta))
@@ -348,7 +365,7 @@ class DonutBeam:
             intensity += self.zero_residual * old_max
             intensity /= numpy.max(intensity)
             intensity *= old_max
-            
+
         return intensity
 
 
@@ -445,6 +462,7 @@ class Detector:
                                            detection_efficiency,
                                            photons.shape) * dwelltime
         # add noise, background, and dark counts
+
         if self.noise:
             signal = numpy.random.poisson(signal, signal.shape)
         if self.background > 0:
@@ -653,39 +671,50 @@ class Microscope:
     def __str__(self):
         return str(self.__cache.keys())
     
-    def is_cached(self, pixelsize):
+    def is_cached(self, pixelsize, data_pixelsize=None):
         '''Indicate the presence of a cache entry for the given pixel size.
         
         :param pixelsize: The size of a pixel in the simulated image (m).
         :returns: A boolean.
         '''
+        if data_pixelsize is None:
+            data_pixelsize = pixelsize
+        else:
+            pixelsize = data_pixelsize
+
         pixelsize_nm = int(pixelsize * 1e9)
         return pixelsize_nm in self.__cache
     
-    def cache(self, pixelsize):
+    def cache(self, pixelsize, data_pixelsize=None):
         '''Compute and cache the excitation and STED intensities, and the
         fluorescence PSF. These intensities are computed with a power of 1 W
         such that they can serve as a basis to compute intensities with any
         power.
         
         :param pixelsize: The size of a pixel in the simulated image (m).
+        :param data_pixelsize: The size of a pixel in the raw data (m)
         :returns: A tuple containing:
         
                   * A 2D array of the excitation intensity for a power of 1 W;
                   * A 2D array of the STED intensity for a a power of 1 W;
                   * A 2D array of the detection PSF.
         '''
+        if data_pixelsize is None:
+            data_pixelsize = pixelsize
+        else:
+            pixelsize = data_pixelsize
+
         pixelsize_nm = int(pixelsize * 1e9)
         if pixelsize_nm not in self.__cache:
             f, n, na = self.objective.f, self.objective.n, self.objective.na
             
             transmission = self.objective.get_transmission(self.excitation.lambda_)
             i_ex = self.excitation.get_intensity(1, f, n, na,
-                                                 transmission, pixelsize)
+                                                 transmission, pixelsize, data_pixelsize)
             
             transmission = self.objective.get_transmission(self.sted.lambda_)
             i_sted = self.sted.get_intensity(1, f, n, na,
-                                             transmission, pixelsize)
+                                             transmission, pixelsize, data_pixelsize)
             
             
             transmission = self.objective.get_transmission(self.fluo.lambda_)
@@ -694,6 +723,7 @@ class Microscope:
                                                       na, transmission,
                                                       pixelsize)
             self.__cache[pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
+
         return self.__cache[pixelsize_nm]
     
     def clear_cache(self):
@@ -707,21 +737,27 @@ class Microscope:
         '''
         self.__cache = {}
     
-    def get_effective(self, pixelsize, p_ex, p_sted):
+    def get_effective(self, pixelsize, p_ex, p_sted, data_pixelsize=None):
         '''Compute the detected signal given some molecules disposition.
         
         :param pixelsize: The size of one pixel of the simulated image (m).
         :param p_ex: The power of the depletion beam (W).
         :param p_sted: The power of the STED beam (W).
+        :param data_pixelsize: The size of one pixel of the raw data (m).
         :returns: A 2D array of the effective intensity (W) of a single molecule.
         
         The technique follows the method and equations described in
         [Willig2006]_, [Leutenegger2010]_ and [Holler2011]_.
         '''
+        if data_pixelsize is None:
+            data_pixelsize = pixelsize
+        else:
+            pixelsize = data_pixelsize
+
         h, c = scipy.constants.h, scipy.constants.c
         f, n, na = self.objective.f, self.objective.n, self.objective.na
         
-        __i_ex, __i_sted, psf_det = self.cache(pixelsize)
+        __i_ex, __i_sted, psf_det = self.cache(pixelsize, data_pixelsize)
         i_ex = __i_ex * p_ex
         i_sted = __i_sted * p_sted
         
@@ -742,11 +778,11 @@ class Microscope:
         # molecular brigthness [Holler2011]
         sigma_abs = self.fluo.get_sigma_abs(self.excitation.lambda_)
         excitation_probability = sigma_abs * i_ex * self.fluo.qy
-        
+
         # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
     
-    def get_signal(self, datamap, pixelsize, pdt, p_ex, p_sted):
+    def get_signal(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None):
         '''Compute the detected signal given some molecules disposition.
         
         :param datamap: A 2D array map of integers indicating how many molecules
@@ -757,6 +793,8 @@ class Microscope:
         :param p_sted: The power of the STED beam (W).
         :returns: A 2D array of the number of detected photons on each pixel.
         '''
+
+        """# old version, does not take in count pixelsize ratio, keeping here in case
         # effective intensity across pixels (W)
         effective = self.get_effective(pixelsize, p_ex, p_sted)
         
@@ -764,98 +802,556 @@ class Microscope:
         intensity = utils.stack(datamap, effective)
         
         photons = self.fluo.get_photons(intensity)
-        return self.detector.get_signal(photons, pdt)
-    
-    
-    def get_signal2(self, datamap, pixelsize, pdt, pmap_ex, pmap_sted):
-        __i_ex, _, _ = self.cache(pixelsize)
-        shape = __i_ex.shape[0]
-        pad = shape // 2
-        
-        effectives = {}
-        
-        frame = numpy.zeros(datamap.shape)
-        datapad = numpy.pad(datamap, pad, "constant", constant_values=0)
-        
-        for y in range(datamap.shape[0]):
-            for x in range(datamap.shape[1]):
-                p_ex, p_sted = pmap_ex[y, x], pmap_sted[y, x]
-                if (p_ex, p_sted) not in effectives:
-                    effective = self.get_effective(pixelsize, p_ex, p_sted)
-                    effectives[(p_ex, p_sted)] = effective
-                else:
-                    effective = effectives[(p_ex, p_sted)]
-                data = datapad[y:y+shape, x:x+shape]
-                frame[y, x] += numpy.sum(effective * data)
 
-        # intensity
-        photons = self.fluo.get_photons(frame)
-        return self.detector.get_signal(photons, pdt)
-    
-    def bleach(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
-        '''Compute the bleached data map using the following survival
-        probability per molecule:
-        
-        .. math:: exp(-k \cdot t)
-        
-        where
-        
-        .. math::
-        
-           k = \\frac{k_{ISC} \sigma_{abs} I^2}{\sigma_{abs} I (\\tau_{triplet}^{-1} + k_{ISC}) + (\\tau_{triplet} \\tau_{fluo})} \sigma_{triplet} {phy}_{react}
-        
-        where :math:`c` is a constant, :math:`I` is the intensity, and :math:`t`
-        if the pixel dwell time [Jerker1999]_ [Garcia2000]_ [Staudt2009]_.
-        
+        return self.detector.get_signal(photons, pdt)"""
+
+        # effective intensity across pixels (W)
+        # acquisition gaussian is computed using data_pixelsize
+        if datamap_pixelsize is None:
+            effective = self.get_effective(pixelsize, p_ex, p_sted)
+        else:
+            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        # stack one effective per molecule
+        if pixel_list is None:
+            intensity = utils.stack_btmod_pixsize(datamap, effective, datamap_pixelsize, pixelsize)
+        else:
+            # caller la fonction stack qui prend en compte la liste et le pixelsizes :)
+            intensity = utils.stack_btmod_definitive(datamap, effective, datamap_pixelsize, pixelsize, pixel_list)
+
+        photons = self.fluo.get_photons(intensity)
+
+        # plante si mon acq avait un ratio autre que 1 et que pdt est un array, car les 2 matrices ne seront pas de la
+        # même forme. Idée de fix 1 : juste prendre les pdt des pixels correspondants :)
+        if type(pdt) is float or photons.shape == pdt.shape:
+            default_returned_array = self.detector.get_signal(photons, pdt)
+        else:
+            ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+            new_pdt = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)), int(numpy.ceil(pdt.shape[1] / ratio))))
+            for row in range(0, new_pdt.shape[0]):
+                for col in range(0, new_pdt.shape[1]):
+                    new_pdt[row, col] += pdt[row * ratio, col * ratio]
+            default_returned_array = self.detector.get_signal(photons, new_pdt)
+
+        return default_returned_array
+
+    def get_signal_bleach_mod(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
+                              bleach=True):
+        '''Compute the detected signal given some molecules disposition.
+
         :param datamap: A 2D array map of integers indicating how many molecules
                         are contained in each pixel of the simulated image.
         :param pixelsize: The size of one pixel of the simulated image (m).
+        :param pdt: The time spent on each pixel of the simulated image (s).
+        :param p_ex: The power of the excitation beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :param bleach: Determines whether or not the laser applies bleach with each iteration. True by default.
+        :returns: A 2D array of the number of detected photons on each pixel.
+        ********** NOTES *************
+        Cette version doit effectuer le pixel skipping comme il faut, en imaginant que la laser peut uniquement se
+        déplacer sur une "grid" déterminée par le ratio entre datamap_pixelsize et pixelsize.
+        Elle doit aussi appliquer le bleaching à chaque itération
+        De plus, elle doit placer le résultat de l'acquisition dans le seul pixel itéré au lieu de la slice
+        Finalement, l'output devrait la forme de la datamap divisé par le ratio entre les pixelsizes
+        Hypothèse : Si je fais une acquisition avec un ratio de 1, cette fonction devrait me retourner le même résultat
+                    que get_signal. Sinon, non, j'pense pas :) (SANS LE BLEACHING POUR CETTE HYPOTHÈSE)
+        '''
+
+        # effective intensity across pixels (W)
+        # acquisition gaussian is computed using data_pixelsize
+        if datamap_pixelsize is None:
+            effective = self.get_effective(pixelsize, p_ex, p_sted)
+        else:
+            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        # figure out valid pixels to iterate on based on ratio between pixel sizes
+        # imagine the laser is fixed on a grid, which is determined by the ratio
+        valid_pixels_grid = utils.pxsize_grid(pixelsize, datamap_pixelsize, datamap)
+
+        # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
+        # if pixel_list is passed, keep only those which are also in valid_pixels_grid
+        if pixel_list is None:
+            pixel_list = valid_pixels_grid
+        else:
+            valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in valid_pixels_grid:
+                valid_pixels_grid_matrix[row, col] = 1
+            pixel_list_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in pixel_list:
+                pixel_list_matrix[row, col] = 1
+            final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
+            pixel_list = numpy.argwhere(final_valid_pixels_matrix > 0)
+
+        # prepping acquisition matrix
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        datamap_rows, datamap_cols = datamap.shape
+        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_rows / ratio)), int(numpy.ceil(datamap_cols / ratio))))
+        h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
+        padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0).astype(int)
+
+        # computing stuff needed to compute bleach :)
+        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
+
+        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        pad = photons_ex.shape[0] // 2 * 2
+        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
+
+        # pixeldwelltime array bull shit, À VÉRIFIER SI C'EST BON
+        pixeldwelltime = numpy.asarray(pdt)
+        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
+        if pixeldwelltime.shape == ():
+            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+        else:
+            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
+            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
+            verif_array = numpy.asarray([1, 2, 3])
+            if type(verif_array) != type(pixeldwelltime):
+                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
+                raise Exception("pixeldwelltime parameter must be array type")
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
+
+        prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+        prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+
+        for (row, col) in pixel_list:
+            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
+                                                                      padded_datamap[row:row + h_pad + 1,
+                                                                                     col:col + w_pad + 1])
+            if bleach is True:
+                # bleach stuff
+                # identifier quel calcul est le plus long ici :)
+                pdt_loop = pdtpad[row:row + pad + 1, col:col + pad + 1]
+                prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt_loop)
+                prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt_loop)
+                prob_ex_interim = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+                prob_sted_interim = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+
+                padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)] = \
+                    numpy.random.binomial(padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)],
+                                          prob_ex_interim * prob_sted_interim)
+
+        photons = self.fluo.get_photons(acquired_intensity)
+
+        if type(pdt) is float or photons.shape == pdt.shape:
+            default_returned_array = self.detector.get_signal(photons, pdt)
+        else:
+            ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+            new_pdt = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)), int(numpy.ceil(pdt.shape[1] / ratio))))
+            for row in range(0, new_pdt.shape[0]):
+                for col in range(0, new_pdt.shape[1]):
+                    new_pdt[row, col] += pdt[row * ratio, col * ratio]
+            default_returned_array = self.detector.get_signal(photons, new_pdt)
+
+        return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+
+    def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
+                              bleach=True, rescue=False):
+        '''Compute the detected signal given some molecules disposition.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m).
+        :param pdt: The time spent on each pixel of the simulated image (s).
+        :param p_ex: The power of the excitation beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :param bleach: Determines whether or not the laser applies bleach with each iteration. True by default.
+        :param rescue: Determines whether or not RESCUe acquisition mode is active. False by default
+        :returns: A 2D array of the number of detected photons on each pixel.
+        ********** NOTES *************
+        Cette fonction est une copie de get_signal_bleach_mod avec l'ajout d'un premier essai à une implémentation du
+        type d'acquisition RESCUe :)
+        '''
+
+        print("Dans la fonction RESCUe :)")
+        # effective intensity across pixels (W)
+        # acquisition gaussian is computed using data_pixelsize
+        if datamap_pixelsize is None:
+            effective = self.get_effective(pixelsize, p_ex, p_sted)
+        else:
+            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        # figure out valid pixels to iterate on based on ratio between pixel sizes
+        # imagine the laser is fixed on a grid, which is determined by the ratio
+        valid_pixels_grid = utils.pxsize_grid(pixelsize, datamap_pixelsize, datamap)
+
+        # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
+        # if pixel_list is passed, keep only those which are also in valid_pixels_grid
+        if pixel_list is None:
+            pixel_list = valid_pixels_grid
+        else:
+            valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in valid_pixels_grid:
+                valid_pixels_grid_matrix[row, col] = 1
+            pixel_list_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in pixel_list:
+                pixel_list_matrix[row, col] = 1
+            final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
+            pixel_list = numpy.argwhere(final_valid_pixels_matrix > 0)
+
+        # prepping acquisition matrix
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        datamap_rows, datamap_cols = datamap.shape
+        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_rows / ratio)), int(numpy.ceil(datamap_cols / ratio))))
+        h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
+        padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0).astype(int)
+
+        # computing stuff needed to compute bleach :)
+        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
+
+        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        pad = photons_ex.shape[0] // 2 * 2
+        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
+
+        """# pixeldwelltime array bull shit, À VÉRIFIER SI C'EST BON
+        pixeldwelltime = numpy.asarray(pdt)
+        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
+        if pixeldwelltime.shape == ():
+            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+        else:
+            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
+            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
+            verif_array = numpy.asarray([1, 2, 3])
+            if type(verif_array) != type(pixeldwelltime):
+                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
+                raise Exception("pixeldwelltime parameter must be array type")
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)"""
+        # Pour la fct RESCUe, ma gestion du pixeldwelltime va être différente, comme le pixeldwelltime est déterminé
+        # pixel par pixel au fur et à mesure de l'acquisition
+        pdt = numpy.asarray(pdt)
+        if pdt.shape == ():
+            # si pdt est déjà passé comme scalaire, j'utilise cette val comme max qu'on aurait
+            pixeldwelltime = numpy.zeros(datamap.shape)
+        else:
+            # si il a passé un array, j'utilise le max de l'array comme val max qu'on aurait
+            pdt_max = numpy.amax(pdt)
+            pdt = pdt_max
+            pixeldwelltime = numpy.zeros(datamap.shape)
+
+        prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+        prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+
+        # RESCUe threshold
+        centered_dot = numpy.zeros(effective.shape)
+        centered_dot[int(centered_dot.shape[0] / 2), int(centered_dot.shape[1] / 2)] = 1
+        single_molecule = numpy.sum(effective * centered_dot)
+
+        for (row, col) in pixel_list:
+            # JPENSE QUIL VA Y AVOIR UN IF RESCUE ICI :)
+
+            """
+            plan de match :
+            Je ne suis pas trop certain de comment gérer le pdt : est-ce qu'il doit être vide initiallement?
+            La meilleure idée que j'ai pour cela est d'utiliser le ratio entre le signal détecté au pixel itéré et le
+            signal d'une molécule (voir ligne plus bas)
+            je pense que je veux la détection d'une molécule comme threshold, ceci veut donc dire que j'utilise
+            numpy.sum(effective) comme threshold. 
+            Je multiplie ensuite ce ratio au pdt du pixel itéré. Par contre, le pdt pourrait être arbitraire à cette
+            étape, you know?
+            IL ME FAUT AUSSI UN LOWER THRESHOLD : S'IL DETECTE RIEN, JE INSTA MOVE ON, LE STED TIME EST À 0
+            """
+
+
+            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
+                                                                                padded_datamap[row:row + h_pad + 1,
+                                                                                col:col + w_pad + 1])
+
+            pdt_covered_area = numpy.ones(effective.shape)
+            nb_molecs = acquired_intensity[int(row / ratio), int(col / ratio)] / single_molecule
+            # bleach trop vite si j'itère sur tout, j'ai besoin d'un lower threshold pour contrer ça :)
+
+            if nb_molecs >= 1:
+                pdt_covered_area *= pdt # / nb_molecs
+                pixeldwelltime[row, col] = pdt # / nb_molecs
+            else:
+                pdt_covered_area *= 0   # doit dépendre du pixeldwelltime
+                pixeldwelltime[row, col] = 0   # ^^^^^^^^
+
+
+            if bleach is True:
+                # bleach stuff
+                # identifier quel calcul est le plus long ici :)
+                pdt_loop = pdt_covered_area
+                prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt_loop)
+                prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt_loop)
+                prob_ex_interim = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+                prob_sted_interim = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+
+                padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)] = \
+                    numpy.random.binomial(padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)],
+                                          prob_ex_interim * prob_sted_interim)
+
+        photons = self.fluo.get_photons(acquired_intensity)   # faire une version 2 de cette fonction
+
+        if photons.shape == pixeldwelltime.shape:
+            default_returned_array = self.detector.get_signal(photons, pixeldwelltime)    # ^^^^^^^^^^^^
+        else:
+            ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+            new_pdt = numpy.zeros((int(numpy.ceil(pixeldwelltime.shape[0] / ratio)),
+                                   int(numpy.ceil(pixeldwelltime.shape[1] / ratio))))
+            for row in range(0, new_pdt.shape[0]):
+                for col in range(0, new_pdt.shape[1]):
+                    new_pdt[row, col] += pixeldwelltime[row * ratio, col * ratio]
+            pixeldwelltime = new_pdt
+            default_returned_array = self.detector.get_signal(photons, pixeldwelltime)
+
+        return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)], \
+            pixeldwelltime
+
+    def am_i_centered(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
+        """
+        Le but de cette fonction est de vérifier si je me centre bien sur le pixel itéré lorsque je fais mon acquisition
+        / bleaching avec mes matrices de lasers superposées à mes données :)
+        """
+        print("VOUS ÊTES DANS LA FONCTION POUR VÉRIFIER SI VOUS ÊTES BIEN CENTRÉ :)")
+        if pixel_list is None:
+            print("No pixel list passed, Running a raster scan :)")
+            pixel_list = utils.pixel_sampling(datamap, mode="all")
+        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
+
+        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        pad = photons_ex.shape[0] // 2 * 2
+        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
+
+        pixeldwelltime = numpy.asarray(pixeldwelltime)
+        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
+        if pixeldwelltime.shape == ():
+            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+            # je devrais tu juste mettre les pixels dans pixel_list à une valeur non nulle? ce serait ce qui est ici
+            """pixeldwelltime_arr = numpy.zeros(datamap.shape)
+            for (row, col) in pixel_list:
+                pixeldwelltime_arr[row, col] += pixeldwelltime
+            pixeldwelltime = pixeldwelltime_arr"""
+        else:
+            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
+            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
+            verif_array = numpy.asarray([1, 2, 3])
+            if type(verif_array) != type(pixeldwelltime):
+                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
+                raise Exception("pixeldwelltime parameter must be array type")
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
+
+        # à place de faire ça, je devrais faire comme je fais pour ma modif de pixelsize pour skipper certains pixels :)
+        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp(pixelsize, datamap_pixelsize)
+        ratio = img_pixelsize_int / data_pixelsize_int
+
+        traversed_array_padded = numpy.pad(datamap, pad // 2, mode="constant")
+        traversed_array_roi = numpy.copy(datamap)
+        acq_matrix = numpy.ones(photons_ex.shape)
+        previous_pixel = None
+        for (row, col) in pixel_list:
+            # fait le pixel skipping comme il faut pour une liste raster scan normale, mais ne fonctionne pas pour un
+            # ordre abitraire / raster inversé, need to figure out why et faire marche ça pour get_signal aussi :)
+            if previous_pixel is not None:
+                if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:   # absolues?
+                    continue
+
+            # setting up mes plots pour trouver le pixel itéré
+            traversed_array_padded[row:row + pad + 1, col:col + pad + 1] += acq_matrix
+            if row + pad // 2 == (row + row + pad + 1) // 2 and col + pad // 2 == (col + col + pad + 1) // 2:
+                traversed_array_roi[row, col] += 1
+                traversed_array_padded[(row + row + pad + 1) // 2, (col + col + pad + 1) // 2] += 1
+
+            list_over = traversed_array_padded[row:(row + row + pad + 1) // 2, col]
+            list_under = traversed_array_padded[(row + row + pad + 1) // 2 + 1:row + pad + 1, col]
+            list_left = traversed_array_padded[row, col:(col + col + pad + 1) // 2]
+            list_right = traversed_array_padded[row, (col + col + pad + 1) // 2 + 1:col + pad + 1]
+
+            # plot mes shit
+            fig, axes = pyplot.subplots(1, 2)
+
+            padded_imshow = axes[0].imshow(traversed_array_padded)
+            axes[0].set_title(f"Padded array, with region covered by acquisition array and original datamap highlighted"
+                              f"\n"
+                              f"Acquisition array shape = "
+                              f"{traversed_array_padded[row:row + pad + 1, col:col + pad + 1].shape} \n"
+                              f"Center of region covered by acquisition array also highlighted \n"
+                              f"{len(list_over)} pixels over iterated pixel inside acquisition array, "
+                              f"{len(list_under)} pixels under iterated pixel inside acquisition array, \n"
+                              f"{len(list_left)} pixels left of iterated pixel inside acquisition array, "
+                              f"{len(list_right)} pixels right of iterated pixel inside acquisition array")
+            fig.colorbar(padded_imshow, ax=axes[0], fraction=0.04, pad=0.05)
+
+            roi_imshow = axes[1].imshow(traversed_array_roi)
+            axes[1].set_title(f"Pixel iterated over in the original datamap frame of reference")
+            fig.colorbar(roi_imshow, ax=axes[1], fraction=0.04, pad=0.05)
+
+            fig.suptitle(f'Iteration on pixel {(row, col)}', fontsize=16)
+
+            figManager = pyplot.get_current_fig_manager()
+            figManager.window.showMaximized()
+
+            pyplot.show()
+
+            # reverte les modifs que j'ai fait plus haut :)
+            traversed_array_padded[row:row + pad + 1, col:col + pad + 1] -= 1
+            if row + pad // 2 == (row + row + pad + 1) // 2 and col + pad // 2 == (col + col + pad + 1) // 2:
+                traversed_array_roi[row, col] -= 1
+                traversed_array_padded[(row + row + pad + 1) // 2, (col + col + pad + 1) // 2] -= 1
+
+            previous_pixel = (row, col)
+
+        traversed_array_padded = traversed_array_padded[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        # print(f"iterated over {counter} pixels out of {datamap.shape[0] * datamap.shape[1]}")
+        return traversed_array_padded
+
+    def bleach(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
+        '''
+        Compute the bleached data map using the following survival
+        probability per molecule:
+
+        .. math:: exp(-k \cdot t)
+
+        where
+
+        .. math::
+
+           k = \\frac{k_{ISC} \sigma_{abs} I^2}{\sigma_{abs} I (\\tau_{triplet}^{-1} + k_{ISC}) + (\\tau_{triplet} \\tau_{fluo})} \sigma_{triplet} {phy}_{react}
+
+        where :math:`c` is a constant, :math:`I` is the intensity, and :math:`t`
+        if the pixel dwell time [Jerker1999]_ [Garcia2000]_ [Staudt2009]_.
+
+        This version generates the lasers using datamap_pixelsize, and determines how many pixels to skip by the ratio
+        between datamap_pixelsize and pixelsize.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m). This determines how many pixels are skipped
+                          between each laser application.
         :param pixeldwelltime: The time spent on each pixel of the simulated
                                image (s).
         :param p_ex: The power of the depletion beam (W).
         :param p_sted: The power of the STED beam (W).
+        :param datamap_pixelsize: The size of one pixel of the datamap. This is the resolution at which the lasers are
+                                  generated.
+        :param pixel_list: List of pixels on which we apply the lasers. If None is passed, a normal raster scan is done.
         :returns: A 2D array of the new data map.
         '''
-        __i_ex, __i_sted, _ = self.cache(pixelsize)
-        
+        if pixel_list is None:
+            print("No pixel list passed, Running a raster scan :)")
+            pixel_list = utils.pixel_sampling(datamap, mode="all")
+        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
+
         photons_ex = self.fluo.get_photons(__i_ex * p_ex)
         k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-        
+
         duty_cycle = self.sted.tau * self.sted.rate
         photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
         k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-        
+
         pad = photons_ex.shape[0] // 2 * 2
         h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
-        
-        pdtpad = numpy.pad(pixeldwelltime, pad//2, mode="constant", constant_values=0)
-        
-        positions = numpy.where(datamap > 0)
-        numbers = datamap[positions]
-        new_datamap = numpy.zeros(datamap.shape)
-        for nb, y, x in zip(numbers, *positions):
-            pdt = pdtpad[y:y+pad+1, x:x+pad+1]
-            prob_ex = numpy.prod(numpy.exp(-k_ex * pdt))
-            prob_sted = numpy.prod(numpy.exp(-k_sted * pdt))
-            new_datamap[y, x] = numpy.random.binomial(nb, prob_ex * prob_sted)
-        return new_datamap
-    
-    
-    def bleach2(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted):
-        __i_ex, __i_sted, _ = self.cache(pixelsize)
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        
-        a, b = 1e-1, 100
-        
-        pad = photons_ex.shape[0] // 2 * 2
-        pdtpad = numpy.pad(pixeldwelltime, pad//2, mode="constant", constant_values=0)
-                
-        positions = numpy.where(datamap > 0)
-        numbers = datamap[positions]
-        new_datamap = numpy.zeros(datamap.shape)
-        for nb, y, x in zip(numbers, *positions):
-            pdt = pdtpad[y:y+pad+1, x:x+pad+1]
-            prob_survival = numpy.prod(numpy.exp(-b * p_ex) / (a * pdt + 1))
-            new_datamap[y, x] = numpy.random.binomial(nb, prob_survival)
+
+        pixeldwelltime = numpy.asarray(pixeldwelltime)
+        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
+        if pixeldwelltime.shape == ():
+            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+        else:
+            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
+            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
+            verif_array = numpy.asarray([1, 2, 3])
+            if type(verif_array) != type(pixeldwelltime):
+                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
+                raise Exception("pixeldwelltime parameter must be array type")
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
+
+        # à place de faire ça, je devrais faire comme je fais pour ma modif de pixelsize pour skipper certains pixels :)
+        filtered_pixel_list = utils.pixel_list_filter(pixel_list, pixelsize, datamap_pixelsize)
+        prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+        prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+        for (row, col) in filtered_pixel_list:
+            pdt = pdtpad[row:row + pad + 1, col:col + pad + 1]
+            prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt)
+            prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt)
+
+        datamap = datamap.astype(int)  # sinon il lance une erreur, à vérifier si c'est legit de faire ça
+        prob_ex = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        prob_sted = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        new_datamap = numpy.random.binomial(datamap, prob_ex * prob_sted)
+
         return new_datamap
 
+    def laser_dans_face(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
+        """
+        Test function to see how much laser each pixel receives in the face ;)
+        """
+        # variable qui sera retournée, chaque pixel contiendra la quantité de photons reçus par la datamap à cause
+        # des lasers
+        laser_received = numpy.zeros(datamap.shape)
+
+        # effective intensity across pixels (W)
+        # acquisition gaussian is computed using data_pixelsize
+        if datamap_pixelsize is None:
+            print(f"datamap_pixelsize is None")
+            effective = self.get_effective(pixelsize, p_ex, p_sted)
+        else:
+            print(f"datamap_pixelsize = {datamap_pixelsize}")
+            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        # variable qui sera retournée, chaque pixel contiendra la quantité de photons reçus par la datamap à cause
+        # des lasers
+        # dans stack, on utilise data pour calculer le pad, qui est effective
+        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp(pixelsize, datamap_pixelsize)
+        ratio = int(img_pixelsize_int / data_pixelsize_int)
+        h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
+        laser_received = numpy.zeros(
+            (int(datamap.shape[0] / ratio) + h_pad, int(datamap.shape[1] / ratio) + w_pad))
+
+        __i_ex, __i_sted, psf_det = self.cache(pixelsize, datamap_pixelsize)
+
+        """# plot les cache shit vs effective pour voir si les pts sont du même ordre de grandeur
+        fig, axes = pyplot.subplots(2, 2)
+
+        ex_imshow = axes[0, 0].imshow(__i_ex * p_ex, interpolation="nearest")
+        axes[0, 0].set_title(f"Excitation beam, shape = {__i_ex.shape}")
+        fig.colorbar(ex_imshow, ax=axes[0, 0], fraction=0.04, pad=0.05)
+
+        sted_imshow = axes[0, 1].imshow(__i_sted * p_sted, interpolation="nearest")
+        axes[0, 1].set_title(f"STED beam, shape = {__i_sted.shape}")
+        fig.colorbar(sted_imshow, ax=axes[0, 1], fraction=0.04, pad=0.05)
+
+        psf_imshow = axes[1, 0].imshow(psf_det, interpolation="nearest")
+        axes[1, 0].set_title(f"PSF det, shape = {psf_det.shape}")
+        fig.colorbar(psf_imshow, ax=axes[1, 0], fraction=0.04, pad=0.05)
+
+        effective_imshow = axes[1, 1].imshow(effective, interpolation="nearest")
+        axes[1, 1].set_title(f"Effective beam, shape = {effective.shape}")
+        fig.colorbar(effective_imshow, ax=axes[1, 1], fraction=0.04, pad=0.05)
+
+        pyplot.show()
+        exit()"""
+
+        # verif bullshit, to remove eventually
+        iterated_pixels = numpy.zeros(datamap.shape)
+
+        # si aucune pixel_list n'est passée, on fait un raster scan complet :)
+        if pixel_list is None:
+            pixel_list = utils.pixel_sampling(datamap, mode="all")
+        for pixel in pixel_list:
+            row = pixel[0]
+            col = pixel[1]
+            # 1 W = 1 J / s, donc si je multiplie par le pixeldwelltime, mon output va être en J :)
+            laser_received[row:row+h_pad+1, col:col+w_pad+1] += (__i_ex * p_ex + __i_sted * p_sted) * pixeldwelltime
+            iterated_pixels[row, col] = 1
+        # k cool je regarde la qté de laser que chaque pixel reçoit avec effective
+        # ceci me donne une idée du laser reçu quand get_signal est utilisé,
+        # maintenant je veux regarder ce que la méthode d'application du laser de bleach ferait comme résultat?
+
+        return laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)], iterated_pixels
