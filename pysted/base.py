@@ -951,6 +951,170 @@ class Microscope:
 
         return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
 
+    def get_signal_bleach_mod2(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
+                              bleach=True):
+        '''Compute the detected signal given some molecules disposition.
+
+        :param datamap: A 2D array map of integers indicating how many molecules
+                        are contained in each pixel of the simulated image.
+        :param pixelsize: The size of one pixel of the simulated image (m).
+        :param pdt: The time spent on each pixel of the simulated image (s).
+        :param p_ex: The power of the excitation beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :param bleach: Determines whether or not the laser applies bleach with each iteration. True by default.
+        :returns: A 2D array of the number of detected photons on each pixel.
+        ********** NOTES *************
+        Cette version doit effectuer le pixel skipping comme il faut, en imaginant que la laser peut uniquement se
+        déplacer sur une "grid" déterminée par le ratio entre datamap_pixelsize et pixelsize.
+        Elle doit aussi appliquer le bleaching à chaque itération
+        De plus, elle doit placer le résultat de l'acquisition dans le seul pixel itéré au lieu de la slice
+        Finalement, l'output devrait la forme de la datamap divisé par le ratio entre les pixelsizes
+        Hypothèse : Si je fais une acquisition avec un ratio de 1, cette fonction devrait me retourner le même résultat
+                    que get_signal. Sinon, non, j'pense pas :) (SANS LE BLEACHING POUR CETTE HYPOTHÈSE)
+        '''
+
+        # effective intensity across pixels (W)
+        # acquisition gaussian is computed using data_pixelsize
+        if datamap_pixelsize is None:
+            effective = self.get_effective(pixelsize, p_ex, p_sted)
+        else:
+            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        # figure out valid pixels to iterate on based on ratio between pixel sizes
+        # imagine the laser is fixed on a grid, which is determined by the ratio
+        valid_pixels_grid = utils.pxsize_grid(pixelsize, datamap_pixelsize, datamap)
+
+        # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
+        # if pixel_list is passed, keep only those which are also in valid_pixels_grid
+        if pixel_list is None:
+            pixel_list = valid_pixels_grid
+        else:
+            # problème avec cette méthode : ne conserve pas l'orde original de la liste
+            # fine si la liste originale suit un raster scan, mais convertit tous les ordres en raster scan, ce qui
+            # n'est pas fine
+            # how to fix?
+            # idée : avoir une autre matrice qui tient l'ordre des pixels ?
+            valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in valid_pixels_grid:
+                valid_pixels_grid_matrix[row, col] = 1
+            pixel_list_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in pixel_list:
+                pixel_list_matrix[row, col] = 1
+            final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
+            pixel_list = numpy.argwhere(final_valid_pixels_matrix > 0)
+
+        # prepping acquisition matrix
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        datamap_rows, datamap_cols = datamap.shape
+        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_rows / ratio)), int(numpy.ceil(datamap_cols / ratio))))
+        h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
+        padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0).astype(int)
+
+        # computing stuff needed to compute bleach :)
+        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
+
+        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        pad = photons_ex.shape[0] // 2 * 2
+        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
+
+        # pixeldwelltime array bull shit, À VÉRIFIER SI C'EST BON
+        pixeldwelltime = numpy.asarray(pdt)
+        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
+        if pixeldwelltime.shape == ():
+            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+        else:
+            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
+            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
+            verif_array = numpy.asarray([1, 2, 3])
+            if type(verif_array) != type(pixeldwelltime):
+                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
+                raise Exception("pixeldwelltime parameter must be array type")
+        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
+
+        prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+        prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+
+        # TESTING WHY IT BLEACHES MORE ON TOP THAN ON THE BOTTOM
+        previous_iter_probs = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+        number_of_iters = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
+
+        for (row, col) in pixel_list:
+            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
+                                                                      padded_datamap[row:row + h_pad + 1,
+                                                                                     col:col + w_pad + 1])
+            if bleach is True:
+                # bleach stuff
+                # identifier quel calcul est le plus long ici :)
+                pdt_loop = pdtpad[row:row + pad + 1, col:col + pad + 1]
+                prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt_loop)
+                prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt_loop)
+                prob_ex_interim = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+                prob_sted_interim = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+
+                padded_datamap[row:row + h_pad + 1, col:col + w_pad + 1] = \
+                    numpy.random.binomial(padded_datamap[row:row + h_pad + 1, col:col + w_pad + 1],
+                                          prob_ex[row:row + h_pad + 1, col:col + w_pad + 1] *
+                                          prob_sted[row:row + h_pad + 1, col:col + w_pad + 1])
+
+                # TESTING WHY IT BLEACHES MORE ON TOP THAN ON THE BOTTOM
+                previous_iter_probs[row:row + h_pad + 1, col:col + w_pad + 1] *= \
+                    prob_ex[row:row + h_pad + 1, col:col + w_pad + 1] * \
+                    prob_sted[row:row + h_pad + 1, col:col + w_pad + 1]
+                number_of_iters[row:row + h_pad + 1, col:col + w_pad + 1] += 1
+
+        # TESTING WHY IT BLEACHES MORE ON TOP THAN ON THE BOTTOM
+        previous_iter_probs_display = previous_iter_probs[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        final_probs = prob_ex * prob_sted
+        final_probs_display = final_probs[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+        number_of_iters_display = number_of_iters[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+
+        perceived_upper = previous_iter_probs_display[0:int(previous_iter_probs_display.shape[0] / 2), :]
+        perceived_lower = previous_iter_probs_display[int(previous_iter_probs_display.shape[0] / 2):, :]
+        perceived_lower_flipped = numpy.flip(perceived_lower, 0)
+        diff_upper_lower = perceived_upper - perceived_lower_flipped
+
+        fig, axes = pyplot.subplots(1, 4)
+
+        final_probs_imshow = axes[0].imshow(final_probs_display, interpolation="nearest")
+        axes[0].set_title(f"Final pixel-wise probabilities, \n"
+                             f"shape = {final_probs_display.shape}")
+        fig.colorbar(final_probs_imshow, ax=axes[0], fraction=0.04, pad=0.05)
+
+        perceived_probs_imshow = axes[1].imshow(previous_iter_probs_display, interpolation="nearest")
+        axes[1].set_title(f"Perceived pixel-wise probabilities, \n"
+                          f"shape = {previous_iter_probs_display.shape}")
+        fig.colorbar(perceived_probs_imshow, ax=axes[1], fraction=0.04, pad=0.05)
+
+        number_imshow = axes[2].imshow(number_of_iters_display, interpolation="nearest")
+        axes[2].set_title(f"Number of times each pixel has been sampled")
+        fig.colorbar(number_imshow, ax=axes[2], fraction=0.04, pad=0.05)
+
+        diff_imshow = axes[3].imshow(diff_upper_lower, interpolation="nearest")
+        axes[3].set_title(f"Verifying if perceived pixel-wise probabilities is symmetrical")
+        fig.colorbar(diff_imshow, ax=axes[3], fraction=0.04, pad=0.05)
+
+        pyplot.show()
+
+        photons = self.fluo.get_photons(acquired_intensity)
+
+        if type(pdt) is float or photons.shape == pdt.shape:
+            default_returned_array = self.detector.get_signal(photons, pdt)
+        else:
+            ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+            new_pdt = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)), int(numpy.ceil(pdt.shape[1] / ratio))))
+            for row in range(0, new_pdt.shape[0]):
+                for col in range(0, new_pdt.shape[1]):
+                    new_pdt[row, col] += pdt[row * ratio, col * ratio]
+            default_returned_array = self.detector.get_signal(photons, new_pdt)
+
+        return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
+
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
                               bleach=True, rescue=False):
         '''Compute the detected signal given some molecules disposition.
@@ -969,7 +1133,9 @@ class Microscope:
         type d'acquisition RESCUe :)
         '''
 
-        print("Dans la fonction RESCUe :)")
+        print("Hello World! :)")
+
+
         # effective intensity across pixels (W)
         # acquisition gaussian is computed using data_pixelsize
         if datamap_pixelsize is None:
@@ -1523,3 +1689,125 @@ class Microscope:
         # maintenant je veux regarder ce que la méthode d'application du laser de bleach ferait comme résultat?
 
         return laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)], iterated_pixels
+
+
+class Datamap:
+    """This class implements a datamap
+
+    :param molecules: The disposition of the molecules in the sample.
+    :param datamap_pixelsize: The size of a pixel of the datamap
+    """
+    def __init__(self, molecules, datamap_pixelsize):
+        self.molecules = molecules
+        self.shape = molecules.shape
+        self.datamap_pixelsize = datamap_pixelsize
+
+    def show(self):
+        def pix2m(x):
+            return x * self.datamap_pixelsize
+
+        def m2pix(x):
+            return x / self.datamap_pixelsize
+
+        x_size = self.shape[0] * self.datamap_pixelsize
+        y_size = self.shape[1] * self.datamap_pixelsize
+        fig, ax = pyplot.subplots(constrained_layout=False)
+        display = ax.imshow(self.molecules, extent=[0, x_size, y_size, 0])
+        ax.set_xlabel(f"Position [m]")
+        ax.set_ylabel(f"Position [m]")
+        ax.set_title(f"Molecule disposition, \n"
+                     f"shape = {self.shape}")
+        ax.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
+        secxax = ax.secondary_xaxis('top', functions=(m2pix, pix2m))
+        secxax.set_xlabel(f"Position [pixel]")
+        secyax = ax.secondary_yaxis('right', functions=(m2pix, pix2m))
+        secyax.set_ylabel(f"Position [pixel]")
+        fig.colorbar(display, ax=ax, fraction=0.04, pad=0.05)
+        pyplot.show()
+
+    def add_sphere(self, width, position, max_molecs=3, randomness=1, distribution="random"):
+        """
+        Function to add a sphere containing molecules at a certain position
+        TODO:
+            - ajouter un param qui détermine comment les molécules sont distribuées dans la sphère
+                (genre constant, random distribution, en gaussienne, gaussienne inverse, idk)
+        """
+        valid_distributions = ["random", "gaussian", "periphery"]
+        if distribution not in valid_distributions:
+            print(f"Wrong distribution choice, retard")
+            print(f"Valid distributions are : ")
+            for possibilites in valid_distributions:
+                print(possibilites)
+            raise Exception("Invalid distribution choice")
+
+        pixels_width = utils.pxsize_ratio(width, self.datamap_pixelsize)
+
+        # padder la datamap pour m'assurer que je puisse ajouter une sphère en périphérie de l'img aussi
+        pad = pixels_width
+        padded_molecules = numpy.pad(self.molecules, pad, mode="constant")
+
+        if distribution == "random":
+            for i in range(0, 360):
+                x = pixels_width / 2 * numpy.cos(i * numpy.pi / 180)
+                y = pixels_width / 2 * numpy.sin(i * numpy.pi / 180)
+
+                area_covered_shape = padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]),
+                                                      int(y + pad + position[1])].shape
+                molecs_to_place = numpy.ones(area_covered_shape[0]).astype(numpy.int) * max_molecs
+
+                probability = randomness
+
+                padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]), int(y + pad + position[1])] = \
+                    numpy.random.binomial(molecs_to_place, probability)
+
+        elif distribution == "gaussian":
+            x, y = numpy.meshgrid(numpy.linspace(-1, 1, pixels_width),
+                                  numpy.linspace(-1, 1, pixels_width))
+            d = numpy.sqrt(x*x+y*y)
+            sigma, mu = randomness, 0.0
+            g = numpy.exp(-((d-mu)**2 / (2.0 * sigma**2)))
+
+            probabilities = numpy.zeros(padded_molecules.shape)
+            probabilities[position[0] + pad // 2: position[0] + pad + pad // 2,
+                          position[1] + pad // 2: position[1] + pad + pad // 2] = g
+
+            for i in range(0, 360):
+                x = pixels_width / 2 * numpy.cos(i * numpy.pi / 180)
+                y = pixels_width / 2 * numpy.sin(i * numpy.pi / 180)
+
+                area_covered_shape = padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]),
+                                                      int(y + pad + position[1])].shape
+                molecs_to_place = numpy.ones(area_covered_shape[0]).astype(numpy.int) * max_molecs
+
+                padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]), int(y + pad + position[1])] = \
+                    numpy.random.binomial(molecs_to_place,
+                                          probabilities[int(pad + position[0] - x): int(x + pad + position[0]),
+                                                        int(y + pad + position[1])])
+
+        elif distribution == "periphery":
+            x, y = numpy.meshgrid(numpy.linspace(-1, 1, pixels_width),
+                                  numpy.linspace(-1, 1, pixels_width))
+            d = numpy.sqrt(x*x+y*y)
+            sigma, mu = randomness, 0.0
+            g = numpy.exp(-((d-mu)**2 / (2.0 * sigma**2)))
+
+            probabilities = numpy.zeros(padded_molecules.shape)
+            probabilities[position[0] + pad // 2: position[0] + pad + pad // 2,
+                          position[1] + pad // 2: position[1] + pad + pad // 2] = g
+            probabilities = 1 - probabilities
+
+            for i in range(0, 360):
+                x = pixels_width / 2 * numpy.cos(i * numpy.pi / 180)
+                y = pixels_width / 2 * numpy.sin(i * numpy.pi / 180)
+
+                area_covered_shape = padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]),
+                                                      int(y + pad + position[1])].shape
+                molecs_to_place = numpy.ones(area_covered_shape[0]).astype(numpy.int) * max_molecs
+
+                padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]), int(y + pad + position[1])] = \
+                    numpy.random.binomial(molecs_to_place,
+                                          probabilities[int(pad + position[0] - x): int(x + pad + position[0]),
+                                                        int(y + pad + position[1])])
+
+        # ligne pour un-pad
+        self.molecules = padded_molecules[pad:-pad, pad:-pad]
