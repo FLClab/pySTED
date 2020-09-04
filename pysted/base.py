@@ -1483,7 +1483,7 @@ class Microscope:
         pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
 
         # à place de faire ça, je devrais faire comme je fais pour ma modif de pixelsize pour skipper certains pixels :)
-        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp(pixelsize, datamap_pixelsize)
+        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp2(pixelsize, datamap_pixelsize)
         ratio = img_pixelsize_int / data_pixelsize_int
 
         traversed_array_padded = numpy.pad(datamap, pad // 2, mode="constant")
@@ -1642,7 +1642,7 @@ class Microscope:
         # variable qui sera retournée, chaque pixel contiendra la quantité de photons reçus par la datamap à cause
         # des lasers
         # dans stack, on utilise data pour calculer le pad, qui est effective
-        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp(pixelsize, datamap_pixelsize)
+        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp2(pixelsize, datamap_pixelsize)
         ratio = int(img_pixelsize_int / data_pixelsize_int)
         h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
         laser_received = numpy.zeros(
@@ -1728,9 +1728,6 @@ class Datamap:
     def add_sphere(self, width, position, max_molecs=3, randomness=1, distribution="random"):
         """
         Function to add a sphere containing molecules at a certain position
-        TODO:
-            - ajouter un param qui détermine comment les molécules sont distribuées dans la sphère
-                (genre constant, random distribution, en gaussienne, gaussienne inverse, idk)
         """
         valid_distributions = ["random", "gaussian", "periphery"]
         if distribution not in valid_distributions:

@@ -6,6 +6,7 @@ import numpy
 import scipy, scipy.constants, scipy.integrate
 
 # import mis par BT
+import math
 import random
 
 # import mis par BT pour des tests :)
@@ -256,7 +257,7 @@ def stack_btmod_pixsize(datamap, data, data_pixelsize, img_pixelsize):
     :returns: A 2D array shaped like *datamap*.
     *** VERSION QUI TIENT EN COMPTE LE PIXELSIZE DES DONNÉES BRUTES :)
     '''
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = img_pixelsize_int / data_pixelsize_int
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
     datamap_to_fill = pxsize_comp_array_maker(img_pixelsize, data_pixelsize, datamap)
@@ -312,7 +313,7 @@ def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel
     '''
     if pixel_list is None:
         raise Exception("No pixel_list passed bruh, programmer error if we ever get here :)")
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = img_pixelsize_int / data_pixelsize_int
     # est-ce que je dois aussi m'assurer que le pixelsize fit avec la shape de l'image? i.e. que les 2 shapes soient
     # divisibles par le pixelsize? ou le ratio? ???
@@ -513,6 +514,8 @@ def pxsize_comp(img_pixelsize, data_pixelsize):
     :param image_pixelsize: acquisition pixelsize. Has to be a multiple of data_pixelsize
     :param data_pixelsize: raw data pixelsize.
     :returns: Integer values of the pixelsizes which can later be used to compute ratios and stuff :)
+    *** OBSOLETE FUNCTION DUE TO BUGS, USE pxsize_comp2 UNTIL I MAKE SURE THE 2ND VERSION WORKS PERFECTLY SO I CAN
+    DELETE THIS ONE ***
     """
     # VÉRIFIER ET TESTER TOUT CELA, DEVRAIT MARCHER :)
     # je pense qu'il faut une condition de plus sur la forme de l'image...
@@ -530,6 +533,31 @@ def pxsize_comp(img_pixelsize, data_pixelsize):
         raise Exception("pixelsize has to be a multiple of data_pixelsize")
     return img_pixelsize_int, data_pixelsize_int
 
+def pxsize_comp2(img_pixelsize, data_pixelsize):
+    """
+    Try number 2 for my float comparison function that hopefully will give the right values this time :)
+    :param img_pixelsize: Acquisition pixel size. Has to be a multiple of data_pixelsize (m).
+    :param data_pixelsize: Raw data pixelsize (m).
+    :returns: Integer values of the pixelsizes which can later be used to compute ratios and stuff :)
+    """
+    # test = img_pixelsize / data_pixelsize
+    # test_int = int(img_pixelsize / data_pixelsize)
+    # test3 = img_pixelsize % data_pixelsize
+    # if img_pixelsize < data_pixelsize or not math.isclose(test3, 0):
+    #     raise Exception("img_pixelsize has to be a multiple of data_pixelsize")
+    img_pixelsize_int = float(str(img_pixelsize)[0: str(img_pixelsize).find('e')])
+    data_pixelsize_int = float(str(data_pixelsize)[0: str(data_pixelsize).find('e')])
+    img_pixelsize_exp = int(str(img_pixelsize)[str(img_pixelsize).find('e') + 1:])
+    data_pixelsize_exp = int(str(data_pixelsize)[str(data_pixelsize).find('e') + 1:])
+    exp = img_pixelsize_exp - data_pixelsize_exp
+    img_pixelsize_int *= 10 ** exp
+    img_pixelsize_int = int(img_pixelsize_int)
+    data_pixelsize_int = int(data_pixelsize_int)
+    test3 = img_pixelsize_int % data_pixelsize_int
+    if img_pixelsize < data_pixelsize or not math.isclose(test3, 0):
+        raise Exception("img_pixelsize has to be a multiple of data_pixelsize")
+    return img_pixelsize_int, data_pixelsize_int
+
 
 def pxsize_comp_array_maker(img_pixelsize, data_pixelsize, datamap):
     """
@@ -541,7 +569,7 @@ def pxsize_comp_array_maker(img_pixelsize, data_pixelsize, datamap):
     :param datamap: The datamap on which the acquisition is made
     :returns: An empty datamap of shape (ceil(datamap.shape[0] / ratio), ceil(datamap.shape[1] / ratio))
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = img_pixelsize_int / data_pixelsize_int
     nb_rows = int(numpy.ceil(datamap.shape[0] / ratio))
     nb_cols = int(numpy.ceil(datamap.shape[1] / ratio))
@@ -560,7 +588,7 @@ def pxsize_grid(img_pixelsize, data_pixelsize, datamap):
     :param datamap: Raw molecule dispotion on which we wish to do an acquisition.
     :returns: A list of the pixels which can be iterated on (?)
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = int(img_pixelsize_int / data_pixelsize_int)
 
     valid_pixels = []
@@ -578,7 +606,7 @@ def pxsize_ratio(img_pixelsize, data_pixelsize):
     :param data_pixelsize: Size of a pixel in the datamap (m).
     :returns: the ratio between pixel sizes
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = int(img_pixelsize_int / data_pixelsize_int)
     return ratio
 
@@ -587,7 +615,7 @@ def image_squisher(datamap, data_pixelsize, img_pixelsize):
     """
     le but est d'essayer de squisher une image en fonction du ratio entre data_pixelsize et img_pixelsize :)
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = int(img_pixelsize_int / data_pixelsize_int)
     squished_datamap = numpy.zeros((int(datamap.shape[0] / ratio), int(datamap.shape[1] / ratio)))
     row_idx = 0
@@ -624,7 +652,7 @@ def pixels_iterated_on(img_pxsz, data_pxsz, datamap, laser):
     """
     Le but ici est de vérifier sur quels pixels j'itère quand je fais un raster scan avec un ratio entre les pxsz
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pxsz, data_pxsz)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pxsz, data_pxsz)
     ratio = img_pixelsize_int / data_pixelsize_int
     h_pad, w_pad = int(laser.shape[0] / 2) * 2, int(laser.shape[1] / 2) * 2
     datamap_to_fill = pxsize_comp_array_maker(img_pxsz, data_pxsz, datamap)
@@ -656,7 +684,7 @@ def pixels_iterated_on_list_skipping(img_pxsz, data_pxsz, datamap, laser, pixel_
     """
     if pixel_list is None:
         raise Exception("No pixel_list passed bruh, programmer error if we ever get here :)")
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pxsz, data_pxsz)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pxsz, data_pxsz)
     ratio = img_pixelsize_int / data_pixelsize_int
     # est-ce que je dois aussi m'assurer que le pixelsize fit avec la shape de l'image? i.e. que les 2 shapes soient
     # divisibles par le pixelsize? ou le ratio? ???
@@ -698,7 +726,7 @@ def pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize):
     :returns: A filtered version of the input pixel_list, from which the pixels which can't be iterated over due to the
               pixel sizes have been removed
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = int(img_pixelsize_int / data_pixelsize_int)
 
     previous_pixel = None
