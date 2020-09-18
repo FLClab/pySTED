@@ -740,6 +740,7 @@ def pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize):
         previous_pixel = (row, col)
     return new_pixel_list
 
+
 def symmetry_verifier(array, direction="vertical", plot=False):
     """
     Verifies if the given array is symmetrical along the vertical or horizontal direction
@@ -794,3 +795,41 @@ def symmetry_verifier(array, direction="vertical", plot=False):
         pyplot.show()
 
     return symmetry
+
+
+def array_padder(base, laser, pad_value=0):
+    """
+    Function used to pad an array (base) according to the size of the secondary array being iterated over it (laser).
+    :param base: Base array on which we wish to iterate another array.
+    :param laser: Secondary array which will be iterated over the base array. Axes have to be of odd lengths in order
+                  for it to have a well defined single pixel center.
+    :param pad_value: Value of the padded region.
+    :returns: Padded version of the base array.
+    TODO: maybe returning the values used to pad could be of use?
+    """
+
+    laser_rows, laser_cols = laser.shape
+    if laser_rows % 2 == 0 or laser_cols % 2 == 0:
+        raise Exception(f"Laser shape has to be odd in order to have a well defined single pixel center")
+    rows_pad, cols_pad = laser_rows // 2, laser_cols // 2
+    padded_base = numpy.pad(base, ((rows_pad, rows_pad), (cols_pad, cols_pad)), 'constant', constant_values=pad_value)
+    return padded_base
+
+
+def array_unpadder(padded_base, laser):
+    """
+    Function used to unpad a padded array (padded_base) according to the size of the secondary array being iterated over
+    it (laser).
+    :param padded_base: Padded Base array which we wish to unpad.
+    :param laser: Secondary array which has been iterated over padded_base. Axes have to be of odd lengths in order for
+                  it to have a well defined single pixel center.
+    :returns: An unpadded version of the padded_base.
+    """
+
+    laser_rows, laser_cols = laser.shape
+    if laser_rows % 2 == 0 or laser_cols % 2 == 0:
+        raise Exception(f"Laser shape has to be odd in order to have a well defined single pixel center")
+    rows_pad, cols_pad = laser_rows // 2, laser_cols // 2
+    # laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
+    unpadded_base = padded_base[rows_pad:-rows_pad, cols_pad:-cols_pad]
+    return unpadded_base
