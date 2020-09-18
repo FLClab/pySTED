@@ -739,3 +739,58 @@ def pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize):
         new_pixel_list.append((row, col))
         previous_pixel = (row, col)
     return new_pixel_list
+
+def symmetry_verifier(array, direction="vertical", plot=False):
+    """
+    Verifies if the given array is symmetrical along the vertical or horizontal direction
+    :param array: Array to be verified for symmetry
+    :param direction: Direction along which to verify the symmetry. Vertical to see upper vs lower half, Horizontal to
+                      see left vs right half.
+    :param plot: Determines whether or not graphs of array and its symmetry will be displayed.
+    :returns: Array(s) displaying the symmetry
+    """
+
+    direction_lc = direction.lower()
+    valid_directions = ["vertical", "horizontal"]
+    if direction_lc not in valid_directions:
+        raise Exception(f"{direction} is not a valid direction, valid directions are {valid_directions}")
+
+    nb_rows, nb_cols = array.shape
+    if direction_lc == "vertical":
+        if nb_rows % 2 == 0:
+            halfway = nb_rows // 2
+            upper_half = array[0:halfway, :]
+            lower_half = array[halfway:, :]
+        else:
+            halfway = nb_rows // 2 + 1
+            upper_half = array[0:halfway, :]
+            lower_half = array[halfway - 1:, :]
+        symmetry = upper_half - numpy.flip(lower_half, 0)
+    elif direction_lc == "horizontal":
+        if nb_cols % 2 == 0:
+            halfway = nb_cols // 2
+            left_half = array[:, 0:halfway]
+            right_half = array[:, halfway:]
+        else:
+            halfway = nb_cols // 2 + 1
+            left_half = array[:, 0:halfway]
+            right_half = array[:, halfway - 1:]
+        symmetry = left_half - numpy.flip(right_half, 1)
+    else:
+        # forbidden zone, shouldn't go there ever because of previous error handling
+        raise Exception(f"Forbidden zone, call BT if you get here")
+
+    if plot:
+        fig, axes = pyplot.subplots(1, 2)
+
+        base_imshow = axes[0].imshow(array)
+        axes[0].set_title(f"Base input array")
+        fig.colorbar(base_imshow, ax=axes[0], fraction=0.04, pad=0.05)
+
+        symmetry_imshow = axes[1].imshow(symmetry)
+        axes[1].set_title(f"{direction_lc.capitalize()} symmetry verification")
+        fig.colorbar(symmetry_imshow, ax=axes[1], fraction=0.04, pad=0.05)
+
+        pyplot.show()
+
+    return symmetry
