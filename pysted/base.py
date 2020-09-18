@@ -2058,6 +2058,52 @@ class Microscope:
         # return laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)], iterated_pixels[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
         return laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)], iterated_pixels
 
+    def laser_dans_face_2(self, datamap, pixelsize, datamap_pixelsize, pixeldwelltime, p_ex, p_sted, pixel_list=None):
+        """
+        2nd test function to visualize how much laser each pixel receives
+        :param datamap: Datamap (array) on which the lasers will be applied.
+        :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_pixelsize. (m)
+        :param datamap_pixelsize: Size of a pixel of the datamap. (m)
+        :param pixeldwelltime: Time spent by the lasers on each pixel. If single value, this value will be used for each
+                               pixel iterated on. If array, the according pixeldwelltime will be used for each pixel
+                               iterated on.
+        :param p_ex: Power of the excitation beam. (W)
+        :param p_sted: Power of the STED beam. (W)
+        :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
+                           pixel will be done.
+        """
+        # VÉRIFIER LAQUELLE DES 2 MÉTHODES QUI SUIVENT EST LA BONNE
+        # si je me souviens bien, on avait déterminé qu'un grid préfixé en fonction du ratio était plus approprié,
+        # donc je crois que la seconde méthode est plus appropriée, par contre, elle ne conserve pas l'ordre des pixels
+
+        # MÉTHODE 1
+        if pixel_list is None:
+            pixel_list = utils.pixel_sampling(datamap, mode="all")
+        pixel_list = utils.pixel_list_filter(pixel_list, pixelsize, datamap_pixelsize)
+
+        # figure out valid pixels to iterate on based on ratio between pixel sizes
+        # imagine the laser is fixed on a grid, which is determined by the ratio
+        valid_pixels_grid = utils.pxsize_grid(pixelsize, datamap_pixelsize, datamap)
+
+        # MÉTHODE 2
+        # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
+        # if pixel_list is passed, keep only those which are also in valid_pixels_grid
+        if pixel_list is None:
+            pixel_list = valid_pixels_grid
+        else:
+            # problème avec cette méthode : ne conserve pas l'orde original de la liste
+            # fine si la liste originale suit un raster scan, mais convertit tous les ordres en raster scan, ce qui
+            # n'est pas fine
+            # how to fix?
+            # idée : avoir une autre matrice qui tient l'ordre des pixels ?
+            valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in valid_pixels_grid:
+                valid_pixels_grid_matrix[row, col] = 1
+            pixel_list_matrix = numpy.zeros(datamap.shape)
+            for (row, col) in pixel_list:
+                pixel_list_matrix[row, col] = 1
+            final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
+            pixel_list = numpy.argwhere(final_valid_pixels_matrix > 0)
 
 class Datamap:
     """This class implements a datamap
