@@ -276,6 +276,7 @@ def stack_btmod_definitive(datamap, data, data_pixelsize, img_pixelsize, pixel_l
         # modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
     return modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
+
 def pixel_sampling(datamap, mode="all"):
     '''
     Function to test different pixel sampling methods, instead of simply imaging pixel by pixel
@@ -437,23 +438,7 @@ def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize):
     :param data_pixelsize: The data pixelsize (m)
     :returns: A filtered version of the input pixel_list, from which the pixels which can't be iterated over due to the
               pixel sizes have been removed
-    *** JE PENSE PAS QUE CETTE FONCTION EST UTILE, JE CROIS QU'ON GARDE LA MÉTHODE QUI PRÉFAIT UN GRID ***
-    *** REMPLACER CE CODE PAR LA MÉTHODE QUE J'AI DÉVELOPPÉ DANS microscope.laser_dans_face_2 ***
     """
-    """img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
-    ratio = int(img_pixelsize_int / data_pixelsize_int)
-
-    previous_pixel = None
-    new_pixel_list = []
-    for (row, col) in pixel_list:
-        if previous_pixel is not None:
-            if abs(row - previous_pixel[0]) < ratio and abs(col - previous_pixel[1]) < ratio:
-                continue
-
-        new_pixel_list.append((row, col))
-        previous_pixel = (row, col)
-    return new_pixel_list"""
-
     # figure out valid pixels to iterate on based on ratio between pixel sizes
     # imagine the laser is fixed on a grid, which is determined by the ratio
     valid_pixels_grid = pxsize_grid(img_pixelsize, data_pixelsize, datamap)
@@ -560,7 +545,7 @@ def array_padder(base, laser, pad_value=0):
         raise Exception(f"Laser shape has to be odd in order to have a well defined single pixel center")
     rows_pad, cols_pad = laser_rows // 2, laser_cols // 2
     padded_base = numpy.pad(base, ((rows_pad, rows_pad), (cols_pad, cols_pad)), 'constant', constant_values=pad_value)
-    return padded_base
+    return padded_base, rows_pad, cols_pad
 
 
 def array_unpadder(padded_base, laser):

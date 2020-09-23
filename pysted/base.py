@@ -81,6 +81,7 @@ from pysted import utils
 import cUtils
 
 # import mis par BT pour des tests
+import warnings
 from matplotlib import pyplot
 import time
 
@@ -969,10 +970,8 @@ class Microscope:
 
         # stack one effective per molecule
         if pixel_list is None:
-            intensity = utils.stack_btmod_pixsize(datamap, effective, datamap_pixelsize, pixelsize)
-        else:
-            # caller la fonction stack qui prend en compte la liste et le pixelsizes :)
-            intensity = utils.stack_btmod_definitive(datamap, effective, datamap_pixelsize, pixelsize, pixel_list)
+            pixel_list = utils.pixel_sampling(datamap, mode="all")
+        intensity = utils.stack_btmod_definitive(datamap, effective, datamap_pixelsize, pixelsize, pixel_list)
 
         photons = self.fluo.get_photons(intensity)
 
@@ -1903,7 +1902,7 @@ class Microscope:
         pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
 
         # à place de faire ça, je devrais faire comme je fais pour ma modif de pixelsize pour skipper certains pixels :)
-        filtered_pixel_list = utils.pixel_list_filter(pixel_list, pixelsize, datamap_pixelsize)
+        filtered_pixel_list = utils.pixel_list_filter(datamap, pixel_list, pixelsize, datamap_pixelsize)
         prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
         prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
         for (row, col) in filtered_pixel_list:
@@ -2072,38 +2071,30 @@ class Microscope:
         :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
                            pixel will be done.
         """
-        # VÉRIFIER LAQUELLE DES 2 MÉTHODES QUI SUIVENT EST LA BONNE
-        # si je me souviens bien, on avait déterminé qu'un grid préfixé en fonction du ratio était plus approprié,
-        # donc je crois que la seconde méthode est plus appropriée, par contre, elle ne conserve pas l'ordre des pixels
+        pixel_list = utils.pixel_list_filter(datamap, pixel_list, pixelsize, datamap_pixelsize)
 
-        # MÉTHODE 1
-        if pixel_list is None:
-            pixel_list = utils.pixel_sampling(datamap, mode="all")
-        pixel_list = utils.pixel_list_filter(pixel_list, pixelsize, datamap_pixelsize)
+        i_ex, i_sted, psf_det = self.cache(pixelsize, datamap_pixelsize)
 
-        # figure out valid pixels to iterate on based on ratio between pixel sizes
-        # imagine the laser is fixed on a grid, which is determined by the ratio
-        valid_pixels_grid = utils.pxsize_grid(pixelsize, datamap_pixelsize, datamap)
+        laser_received, _, _ = utils.array_padder(numpy.zeros(datamap.shape), i_ex)
+        sampled, rows_pad, cols_pad = utils.array_padder(numpy.zeros(datamap.shape), i_ex)
 
-        # MÉTHODE 2
-        # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
-        # if pixel_list is passed, keep only those which are also in valid_pixels_grid
-        if pixel_list is None:
-            pixel_list = valid_pixels_grid
-        else:
-            # problème avec cette méthode : ne conserve pas l'orde original de la liste
-            # fine si la liste originale suit un raster scan, mais convertit tous les ordres en raster scan, ce qui
-            # n'est pas fine
-            # how to fix?
-            # idée : avoir une autre matrice qui tient l'ordre des pixels ?
-            valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
-            for (row, col) in valid_pixels_grid:
-                valid_pixels_grid_matrix[row, col] = 1
-            pixel_list_matrix = numpy.zeros(datamap.shape)
-            for (row, col) in pixel_list:
-                pixel_list_matrix[row, col] = 1
-            final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
-            pixel_list = numpy.argwhere(final_valid_pixels_matrix > 0)
+        for (row, col) in pixel_list:
+            if type(pixeldwelltime) != type(laser_received):
+                # tester si cette vérification fonctionne bien :)
+                pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+            laser_applied = (i_ex * p_ex + i_sted * p_sted) * pixeldwelltime[row, col]
+            sampled[row:row+2*rows_pad+1, col:col+2*cols_pad+1] += 1
+            laser_received[row:row+2*rows_pad+1, col:col+2*cols_pad+1] += laser_applied
+
+        sampled = utils.array_unpadder(sampled, i_ex)
+        laser_received = utils.array_unpadder(laser_received, i_ex)
+
+        # la fonction en tant que telle est finit, mais je serais rendu à ajouter qqchose pour traquer l'évolution
+        # des coins opposés. Je crois que si j'avais de quoi de symmétrique, je m'attendrais à voir 2 listes inverses
+        # l'une de l'autre, pas trop certain de ce que je m'attends dans mon cas actuel, à faire!!
+
+        return laser_received, sampled
+
 
 class Datamap:
     """This class implements a datamap
