@@ -8,6 +8,7 @@ import scipy, scipy.constants, scipy.integrate
 # import mis par BT
 import math
 import random
+import warnings
 
 # import mis par BT pour des tests :)
 from matplotlib import pyplot
@@ -234,54 +235,6 @@ def stack(datamap, data):
     return frame[int(h_pad/2):-int(h_pad/2), int(w_pad/2):-int(w_pad/2)]
 
 
-def stack_btmod_pixsize(datamap, data, data_pixelsize, img_pixelsize):
-    '''Compute a new frame consisting in a replication of the given *data*
-    centered at every positions and multiplied by the factors given in the
-    *datamap*.
-
-    Example::
-
-        >>> datamap = numpy.array([[2, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0]])
-        >>> data = numpy.array([[1, 2, 1],
-                                [2, 3, 2],
-                                [1, 2, 1]])
-        >>> utils.stack(datamap, data)
-        numpy.array([[6, 4, 0, 0],
-                     [4, 2, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0]])
-
-    :param datamap: A 2D array indicating how many data are positioned in every
-    :param data: A 2D array containing the data to replicate.
-    :returns: A 2D array shaped like *datamap*.
-    *** VERSION QUI TIENT EN COMPTE LE PIXELSIZE DES DONNÉES BRUTES :)
-    *** CALLED ONLY ONCE IN microscope.get_signal IF NO PIXEL LIST IS PASSED (23/09)***
-    '''
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
-    ratio = img_pixelsize_int / data_pixelsize_int
-    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
-    datamap_to_fill = pxsize_comp_array_maker(img_pixelsize, data_pixelsize, datamap)
-    modif_returned_array = numpy.pad(datamap_to_fill, h_pad // 2, mode="constant", constant_values=0)
-    row_idx = 0
-    col_idx = 0
-    for row in range(0, datamap.shape[0], int(ratio)):
-        for col in range(0, datamap.shape[1], int(ratio)):
-            # j'essaie qqchose qui je pense devrait donner la même chose pour des pixelsize identique,
-            # pas certain de comment ça fonctionnerait pour différents pixelsize, mais c'est un bon starting point
-            modif_returned_array[row_idx:row_idx+h_pad+1, col_idx:col_idx+w_pad+1] += data * datamap[row, col]
-            col_idx += 1
-            if col_idx >= int(numpy.ceil(datamap.shape[0] / ratio)):
-                col_idx = 0
-        row_idx += 1
-        if row_idx >= int(numpy.ceil(datamap.shape[1] / ratio)):
-            row_idx = 0
-    modif_returned_array = modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-    return modif_returned_array
-
-
 def stack_btmod_definitive(datamap, data, data_pixelsize, img_pixelsize, pixel_list):
     '''Compute a new frame consisting in a replication of the given *data*
     centered at every positions and multiplied by the factors given in the
@@ -311,7 +264,7 @@ def stack_btmod_definitive(datamap, data, data_pixelsize, img_pixelsize, pixel_l
     :returns: A 2D array shaped like *datamap*.
     *** CALLED ONCE IN microscope.get_signal WHEN A PIXEL LIST IS PASSED (23/09) ***
     '''
-    filtered_pixel_list = pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize)
+    filtered_pixel_list = pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize)
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
     modif_returned_array = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
     padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0)
@@ -475,7 +428,7 @@ def mse_calculator(array1, array2):
     return mean_squared_error
 
 
-def pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize):
+def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize):
     """
     Function to pre-filter a pixel list. Depending on the ratio between the data_pixelsize and acquisition pixelsize,
     a certain number of pixels must be skipped between laser applications.
@@ -485,8 +438,9 @@ def pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize):
     :returns: A filtered version of the input pixel_list, from which the pixels which can't be iterated over due to the
               pixel sizes have been removed
     *** JE PENSE PAS QUE CETTE FONCTION EST UTILE, JE CROIS QU'ON GARDE LA MÉTHODE QUI PRÉFAIT UN GRID ***
+    *** REMPLACER CE CODE PAR LA MÉTHODE QUE J'AI DÉVELOPPÉ DANS microscope.laser_dans_face_2 ***
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
+    """img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = int(img_pixelsize_int / data_pixelsize_int)
 
     previous_pixel = None
@@ -498,7 +452,40 @@ def pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize):
 
         new_pixel_list.append((row, col))
         previous_pixel = (row, col)
-    return new_pixel_list
+    return new_pixel_list"""
+
+    # figure out valid pixels to iterate on based on ratio between pixel sizes
+    # imagine the laser is fixed on a grid, which is determined by the ratio
+    valid_pixels_grid = pxsize_grid(img_pixelsize, data_pixelsize, datamap)
+
+    # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
+    # if pixel_list is passed, keep only those which are also in valid_pixels_grid
+    if pixel_list is None:
+        pixel_list = valid_pixels_grid
+    else:
+        valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
+        nb_valid_pixels = 0
+        for (row, col) in valid_pixels_grid:
+            valid_pixels_grid_matrix[row, col] = 1
+            nb_valid_pixels += 1
+        pixel_list_matrix = numpy.zeros(datamap.shape)
+        order = 1
+        for (row, col) in pixel_list:
+            pixel_list_matrix[row, col] = order
+            order += 1
+        final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
+        if numpy.array_equal(final_valid_pixels_matrix, numpy.zeros(datamap.shape)):
+            warnings.warn(" \nNo pixels in the list passed is valid given the ratio between pixel sizes, \n"
+                          "Iterating on valid pixels in a raster scan instead.")
+            pixel_list = valid_pixels_grid  # itérer sur les pixels valides seulement
+        else:
+            pixel_list_interim = numpy.argsort(final_valid_pixels_matrix, axis=None)
+            pixel_list_interim = numpy.unravel_index(pixel_list_interim, datamap.shape)
+            pixel_list = [(pixel_list_interim[0][i], pixel_list_interim[1][i])
+                          for i in range(len(pixel_list_interim[0]))]
+            pixel_list = pixel_list[-numpy.count_nonzero(final_valid_pixels_matrix):]
+
+    return pixel_list
 
 
 def symmetry_verifier(array, direction="vertical", plot=False):
