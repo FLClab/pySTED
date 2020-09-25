@@ -6,7 +6,9 @@ import numpy
 import scipy, scipy.constants, scipy.integrate
 
 # import mis par BT
+import math
 import random
+import warnings
 
 # import mis par BT pour des tests :)
 from matplotlib import pyplot
@@ -221,6 +223,8 @@ def stack(datamap, data):
     :param datamap: A 2D array indicating how many data are positioned in every
     :param data: A 2D array containing the data to replicate.
     :returns: A 2D array shaped like *datamap*.
+    *** EN DATE DU 23/09 CETTE FONCTION N'EST PAS UTILISÉE NUL PART ***
+    *** JE VAIS TOUT DE MÊME LA GARDER, CAR C'EST LA RÉFÉRENCE ORIGINALES POUR TOUTES LES FONCTIONS STACK ***
     '''
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
     frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
@@ -229,184 +233,6 @@ def stack(datamap, data):
     for nb, y, x in zip(numbers, *positions):
         frame[y:y+h_pad+1, x:x+w_pad+1] += data * nb
     return frame[int(h_pad/2):-int(h_pad/2), int(w_pad/2):-int(w_pad/2)]
-
-
-def stack_btmod_pixsize(datamap, data, data_pixelsize, img_pixelsize):
-    '''Compute a new frame consisting in a replication of the given *data*
-    centered at every positions and multiplied by the factors given in the
-    *datamap*.
-
-    Example::
-
-        >>> datamap = numpy.array([[2, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0]])
-        >>> data = numpy.array([[1, 2, 1],
-                                [2, 3, 2],
-                                [1, 2, 1]])
-        >>> utils.stack(datamap, data)
-        numpy.array([[6, 4, 0, 0],
-                     [4, 2, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0]])
-
-    :param datamap: A 2D array indicating how many data are positioned in every
-    :param data: A 2D array containing the data to replicate.
-    :returns: A 2D array shaped like *datamap*.
-    *** VERSION QUI TIENT EN COMPTE LE PIXELSIZE DES DONNÉES BRUTES :)
-    '''
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
-    ratio = img_pixelsize_int / data_pixelsize_int
-    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
-    datamap_to_fill = pxsize_comp_array_maker(img_pixelsize, data_pixelsize, datamap)
-    modif_returned_array = numpy.pad(datamap_to_fill, h_pad // 2, mode="constant", constant_values=0)
-    row_idx = 0
-    col_idx = 0
-    for row in range(0, datamap.shape[0], int(ratio)):
-        for col in range(0, datamap.shape[1], int(ratio)):
-            # j'essaie qqchose qui je pense devrait donner la même chose pour des pixelsize identique,
-            # pas certain de comment ça fonctionnerait pour différents pixelsize, mais c'est un bon starting point
-            modif_returned_array[row_idx:row_idx+h_pad+1, col_idx:col_idx+w_pad+1] += data * datamap[row, col]
-            col_idx += 1
-            if col_idx >= int(numpy.ceil(datamap.shape[0] / ratio)):
-                col_idx = 0
-        row_idx += 1
-        if row_idx >= int(numpy.ceil(datamap.shape[1] / ratio)):
-            row_idx = 0
-    modif_returned_array = modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-    return modif_returned_array
-
-
-def stack_btmod_pixsize_list(datamap, data, data_pixelsize, img_pixelsize, pixel_list):
-    '''Compute a new frame consisting in a replication of the given *data*
-    centered at every positions and multiplied by the factors given in the
-    *datamap*.
-
-    Example::
-
-        >>> datamap = numpy.array([[2, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0],
-                                   [0, 0, 0, 0]])
-        >>> data = numpy.array([[1, 2, 1],
-                                [2, 3, 2],
-                                [1, 2, 1]])
-        >>> utils.stack(datamap, data)
-        numpy.array([[6, 4, 0, 0],
-                     [4, 2, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0]])
-
-    :param datamap: A 2D array indicating how many data are positioned in every
-    :param data: A 2D array containing the data to replicate.
-    :returns: A 2D array shaped like *datamap*.
-    *** VERSION QUI TIENT EN COMPTE LE PIXELSIZE DES DONNÉES BRUTES :)
-    - je veux juste vérifier que le saut entre 2 acquisitions de pixels est d'au moins un ratio
-    - je place le résultat dans une matrice de la même taille que les données brutes, peu importe quel autre facteur
-    - ceci veut donc dire que même si j'ai un ratio de 2, si je passe une liste de tous les pixels, l'image résultante
-      aura la même taille que les données brutes, et non les dimensions divisées par 2 :)
-    - si je passe une pixel_list d'un seul pixel, je pars alors en mode "trouver un poil"
-        ce mode part du pixel de la pixel_list, vérifie s'il y a des poils proches, embarque sur ceux si si oui, passe
-        au prochain pixel du raster scan si non (mieux décrit dans mes notes sur iPad)
-    '''
-    if pixel_list is None:
-        raise Exception("No pixel_list passed bruh, programmer error if we ever get here :)")
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
-    ratio = img_pixelsize_int / data_pixelsize_int
-    # est-ce que je dois aussi m'assurer que le pixelsize fit avec la shape de l'image? i.e. que les 2 shapes soient
-    # divisibles par le pixelsize? ou le ratio? ???
-    h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
-    modif_returned_array = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
-    if len(pixel_list) == 1:
-        # mode cabochon pour imager uniquement les pixels avec des molécules dedans, mais genre de façon quon le sait
-        # pas d'Avance, tkt c'était plus pour mon personnal curiosity qu'autre chose :)
-        print("YES")
-        print(f"0 + int(ratio) - 1 = {0 + int(ratio) - 1}")
-        # Verification matrix to see if a pixel has already been imaged
-        pixels_added_to_list = numpy.zeros(datamap.shape)
-
-        # Creating a list for a raster scan starting at the passed pixel
-        # The goal is to continue raster scanning until we find a molecule
-        raster_scan_list = pixel_sampling(datamap, mode="all")
-        start_pos_idx = raster_scan_list.index(pixel_list[0])
-        raster_scan_list = raster_scan_list[start_pos_idx + 1:]
-
-        # Apply laser to the pixels, still have to watch out for pixel jumping due to ratio
-        previous_pixel = None
-        went_in_if = 0
-        for pixel in pixel_list:
-            pixels_to_add_to_list = numpy.zeros(datamap.shape)
-            row = pixel[0]
-            col = pixel[1]
-            if previous_pixel is not None:
-                if abs(row - previous_pixel[0]) < ratio and abs(col - previous_pixel[1]) < ratio:  # absolues?
-                    continue
-
-            modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
-
-            # Finding the area covered by the gaussian in the datamap
-            if row - int(data.shape[0] / 2) < 0:
-                upper_edge = 0
-            else:
-                upper_edge = row - int(data.shape[0] / 2)
-            if row + int(data.shape[0] / 2) >= datamap.shape[0]:
-                lower_edge = datamap.shape[0] - 1
-            else:
-                lower_edge = row + int(data.shape[0] / 2)
-            if col - int(data.shape[1] / 2) < 0:
-                left_edge = 0
-            else:
-                left_edge = col - int(data.shape[1] / 2)
-            if col + int(data.shape[1] / 2) >= datamap.shape[1]:
-                right_edge = datamap.shape[1] - 1
-            else:
-                right_edge = col + int(data.shape[1] / 2)
-
-            # basically il me faut un if datamap[upper:lower, left:right] > 0 -> mettre ces pixels dans la liste,
-            # sinon ajouter le prochain pixel du raster scan
-            if numpy.any(datamap[upper_edge:lower_edge, left_edge:right_edge] > 0):
-                went_in_if = 1
-                pixels_to_add_to_list[upper_edge:lower_edge, left_edge:right_edge] = \
-                    datamap[upper_edge:lower_edge, left_edge:right_edge] > 0
-                xd = numpy.where(pixels_to_add_to_list > 0)
-                for pixel_to_add in zip(xd[0], xd[1]):
-                    if pixels_added_to_list[pixel_to_add[0], pixel_to_add[1]] == 0:
-                        pixel_list.append(pixel_to_add)
-                        pixels_added_to_list[pixel_to_add[0], pixel_to_add[1]] = 1
-            elif went_in_if == 0:
-                # ajouter le prochain pixel du raster scan :)
-                pixel_list.append(raster_scan_list[0 + int(ratio) - 1])   # 0 + int(ratio) - 1 ?
-                # raster_scan_list.pop(0)
-                for i in range(0, int(ratio)):
-                    raster_scan_list.pop(0)
-
-            previous_pixel = pixel
-
-    else:
-        previous_pixel = None
-        invalid_px_in_sequence = 0
-        valid_px_in_sequence = 0
-        for pixel in pixel_list:
-            row = pixel[0]
-            col = pixel[1]
-            if previous_pixel is not None:
-                # if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:  # absolues?
-                if abs(row - previous_pixel[0]) < ratio and abs(col - previous_pixel[1]) < ratio:  # absolues?
-                    invalid_px_in_sequence += 1
-                    continue
-            valid_px_in_sequence += 1
-            modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
-            # uh oh, si j'itère à côté, est-ce que je devrais acquérir du signal? j'imagine que oui, mais ça va à
-            # l'encontre de comment le calcul est décrit dans l'exemple de la doc...
-            # ce que je crois quil faudrait faire :
-            # modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * padded_datamap[row:row + h_pad + 1,
-            #                                                                                         col:col + w_pad + 1]
-            previous_pixel = pixel
-
-        # print(f"invalid_px_in_sequence = {invalid_px_in_sequence}")
-        # print(f"valid_px_in_sequence = {valid_px_in_sequence}")
-    return modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
 
 def stack_btmod_definitive(datamap, data, data_pixelsize, img_pixelsize, pixel_list):
@@ -436,8 +262,9 @@ def stack_btmod_definitive(datamap, data, data_pixelsize, img_pixelsize, pixel_l
                           data_pixelsize (m)
     :param pixel_list: List of pixels on which we want to do the acquisition.
     :returns: A 2D array shaped like *datamap*.
+    *** CALLED ONCE IN microscope.get_signal WHEN A PIXEL LIST IS PASSED (23/09) ***
     '''
-    filtered_pixel_list = pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize)
+    filtered_pixel_list = pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize)
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
     modif_returned_array = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
     padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0)
@@ -449,11 +276,14 @@ def stack_btmod_definitive(datamap, data, data_pixelsize, img_pixelsize, pixel_l
         # modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += data * datamap[row, col]
     return modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
 
+
 def pixel_sampling(datamap, mode="all"):
     '''
     Function to test different pixel sampling methods, instead of simply imaging pixel by pixel
-    :param datamap: A 2D array of the data to be imaged, used for its shape
-    :returns: A list (?) containing all the pixels in the order in which we want them to be imaged
+    :param datamap: A 2D array of the data to be imaged, used for its shape.
+    :param mode: A keyword to determine the order of pixels in the returned list. By default, all pixels are added in a
+                 raster scan (left to right, row by row) order.
+    :returns: A list containing all the pixels in the order in which we want them to be imaged.
     '''
     pixel_list = []
     if mode == "all":
@@ -507,27 +337,29 @@ def pixel_sampling(datamap, mode="all"):
     return pixel_list
 
 
-def pxsize_comp(img_pixelsize, data_pixelsize):
+def pxsize_comp2(img_pixelsize, data_pixelsize):
     """
-    Function to compare the pixelsize of the raw data to the acquisition pixelsize in order to verify compatibility.
-    :param image_pixelsize: acquisition pixelsize. Has to be a multiple of data_pixelsize
-    :param data_pixelsize: raw data pixelsize.
+    Try number 2 for my float comparison function that hopefully will give the right values this time :)
+    :param img_pixelsize: Acquisition pixel size. Has to be a multiple of data_pixelsize (m).
+    :param data_pixelsize: Raw data pixelsize (m).
     :returns: Integer values of the pixelsizes which can later be used to compute ratios and stuff :)
     """
-    # VÉRIFIER ET TESTER TOUT CELA, DEVRAIT MARCHER :)
-    # je pense qu'il faut une condition de plus sur la forme de l'image...
-    if data_pixelsize is None:
-        print(f"no data pixelsize, set as image pixelsize = {img_pixelsize}...")
-        data_pixelsize = img_pixelsize
+    # test = img_pixelsize / data_pixelsize
+    # test_int = int(img_pixelsize / data_pixelsize)
+    # test3 = img_pixelsize % data_pixelsize
+    # if img_pixelsize < data_pixelsize or not math.isclose(test3, 0):
+    #     raise Exception("img_pixelsize has to be a multiple of data_pixelsize")
     img_pixelsize_int = float(str(img_pixelsize)[0: str(img_pixelsize).find('e')])
     data_pixelsize_int = float(str(data_pixelsize)[0: str(data_pixelsize).find('e')])
-    pixelsize_exp = int(str(img_pixelsize)[str(img_pixelsize).find('e') + 1:])
+    img_pixelsize_exp = int(str(img_pixelsize)[str(img_pixelsize).find('e') + 1:])
     data_pixelsize_exp = int(str(data_pixelsize)[str(data_pixelsize).find('e') + 1:])
-    exp = pixelsize_exp - data_pixelsize_exp
+    exp = img_pixelsize_exp - data_pixelsize_exp
     img_pixelsize_int *= 10 ** exp
-    if img_pixelsize < data_pixelsize or img_pixelsize_int % data_pixelsize_int != 0:
-        # lancer une erreur ou qqchose si j'arrive ici
-        raise Exception("pixelsize has to be a multiple of data_pixelsize")
+    img_pixelsize_int = int(img_pixelsize_int)
+    data_pixelsize_int = int(data_pixelsize_int)
+    test3 = img_pixelsize_int % data_pixelsize_int
+    if img_pixelsize < data_pixelsize or not math.isclose(test3, 0):
+        raise Exception("img_pixelsize has to be a multiple of data_pixelsize")
     return img_pixelsize_int, data_pixelsize_int
 
 
@@ -541,7 +373,7 @@ def pxsize_comp_array_maker(img_pixelsize, data_pixelsize, datamap):
     :param datamap: The datamap on which the acquisition is made
     :returns: An empty datamap of shape (ceil(datamap.shape[0] / ratio), ceil(datamap.shape[1] / ratio))
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = img_pixelsize_int / data_pixelsize_int
     nb_rows = int(numpy.ceil(datamap.shape[0] / ratio))
     nb_cols = int(numpy.ceil(datamap.shape[1] / ratio))
@@ -560,7 +392,7 @@ def pxsize_grid(img_pixelsize, data_pixelsize, datamap):
     :param datamap: Raw molecule dispotion on which we wish to do an acquisition.
     :returns: A list of the pixels which can be iterated on (?)
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = int(img_pixelsize_int / data_pixelsize_int)
 
     valid_pixels = []
@@ -578,32 +410,9 @@ def pxsize_ratio(img_pixelsize, data_pixelsize):
     :param data_pixelsize: Size of a pixel in the datamap (m).
     :returns: the ratio between pixel sizes
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
+    img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = int(img_pixelsize_int / data_pixelsize_int)
     return ratio
-
-
-def image_squisher(datamap, data_pixelsize, img_pixelsize):
-    """
-    le but est d'essayer de squisher une image en fonction du ratio entre data_pixelsize et img_pixelsize :)
-    """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
-    ratio = int(img_pixelsize_int / data_pixelsize_int)
-    squished_datamap = numpy.zeros((int(datamap.shape[0] / ratio), int(datamap.shape[1] / ratio)))
-    row_idx = 0
-    col_idx = 0
-    for row in range(0, datamap.shape[0], int(ratio)):
-        for col in range(0, datamap.shape[1], int(ratio)):
-            # j'essaie qqchose qui je pense devrait donner la même chose pour des pixelsize identique,
-            # pas certain de comment ça fonctionnerait pour différents pixelsize, mais c'est un bon starting point
-            squished_datamap[row_idx, col_idx] = numpy.sum(datamap[row:row+ratio, col:col+ratio])
-            col_idx += 1
-            if col_idx >= int(datamap.shape[0] / ratio):
-                col_idx = 0
-        row_idx += 1
-        if row_idx >= int(datamap.shape[1] / ratio):
-            row_idx = 0
-    return squished_datamap
 
 
 def mse_calculator(array1, array2):
@@ -620,75 +429,7 @@ def mse_calculator(array1, array2):
     return mean_squared_error
 
 
-def pixels_iterated_on(img_pxsz, data_pxsz, datamap, laser):
-    """
-    Le but ici est de vérifier sur quels pixels j'itère quand je fais un raster scan avec un ratio entre les pxsz
-    """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pxsz, data_pxsz)
-    ratio = img_pixelsize_int / data_pixelsize_int
-    h_pad, w_pad = int(laser.shape[0] / 2) * 2, int(laser.shape[1] / 2) * 2
-    datamap_to_fill = pxsize_comp_array_maker(img_pxsz, data_pxsz, datamap)
-    print(f"datamap_to_fill.shape = {datamap_to_fill.shape}")
-    modif_returned_array = numpy.pad(datamap_to_fill, h_pad // 2, mode="constant", constant_values=0)
-    print(f"modif_returned_array.shape = {modif_returned_array.shape}")
-    row_idx = 0
-    col_idx = 0
-    for row in range(0, datamap.shape[0], int(ratio)):
-        for col in range(0, datamap.shape[1], int(ratio)):
-            if datamap[row, col] > 0:
-                modif_returned_array[(row_idx + row_idx + h_pad + 1) // 2, (col_idx + col_idx + w_pad + 1) // 2] += 1
-            col_idx += 1
-            if col_idx >= int(numpy.ceil(datamap.shape[0] / ratio)):
-                col_idx = 0
-        row_idx += 1
-        if row_idx >= int(numpy.ceil(datamap.shape[1] / ratio)):
-            row_idx = 0
-
-    modif_returned_array = modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-    return modif_returned_array
-
-
-def pixels_iterated_on_list_skipping(img_pxsz, data_pxsz, datamap, laser, pixel_list):
-    """
-    Fonction test pour trouver une bonne façon de faire le pixel skipping quand on est dans un cas autre que raster sur
-    tous les pixels :)
-    JUSTE POUR LES TESTS À DELETE
-    """
-    if pixel_list is None:
-        raise Exception("No pixel_list passed bruh, programmer error if we ever get here :)")
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pxsz, data_pxsz)
-    ratio = img_pixelsize_int / data_pixelsize_int
-    # est-ce que je dois aussi m'assurer que le pixelsize fit avec la shape de l'image? i.e. que les 2 shapes soient
-    # divisibles par le pixelsize? ou le ratio? ???
-    h_pad, w_pad = int(laser.shape[0] / 2) * 2, int(laser.shape[1] / 2) * 2
-    modif_returned_array = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
-    iterated_pixels_array = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
-
-    print("Test function running :)")
-    padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant")
-    previous_pixel = None
-    invalid_px_in_sequence = 0
-    valid_px_in_sequence = 0
-    for pixel in pixel_list:
-        row = pixel[0]
-        col = pixel[1]
-        if previous_pixel is not None:
-            # if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:  # absolues?
-            if abs(row - previous_pixel[0]) < ratio and abs(col - previous_pixel[1]) < ratio:  # absolues?
-                invalid_px_in_sequence += 1
-                continue
-        valid_px_in_sequence += 1
-        modif_returned_array[row:row + h_pad + 1, col:col + w_pad + 1] += laser * datamap[row, col]
-        iterated_pixels_array[(row + row + h_pad + 1) // 2, (col + col + w_pad + 1) // 2] += 1
-        previous_pixel = pixel
-
-    print(f"invalid_px_in_sequence = {invalid_px_in_sequence}")
-    print(f"valid_px_in_sequence = {valid_px_in_sequence}")
-    return modif_returned_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)], \
-           iterated_pixels_array[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-
-
-def pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize):
+def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize):
     """
     Function to pre-filter a pixel list. Depending on the ratio between the data_pixelsize and acquisition pixelsize,
     a certain number of pixels must be skipped between laser applications.
@@ -698,16 +439,129 @@ def pixel_list_filter(pixel_list, img_pixelsize, data_pixelsize):
     :returns: A filtered version of the input pixel_list, from which the pixels which can't be iterated over due to the
               pixel sizes have been removed
     """
-    img_pixelsize_int, data_pixelsize_int = pxsize_comp(img_pixelsize, data_pixelsize)
-    ratio = int(img_pixelsize_int / data_pixelsize_int)
+    # figure out valid pixels to iterate on based on ratio between pixel sizes
+    # imagine the laser is fixed on a grid, which is determined by the ratio
+    valid_pixels_grid = pxsize_grid(img_pixelsize, data_pixelsize, datamap)
 
-    previous_pixel = None
-    new_pixel_list = []
-    for (row, col) in pixel_list:
-        if previous_pixel is not None:
-            if abs(row - previous_pixel[0]) < ratio and abs(col - previous_pixel[1]) < ratio:
-                continue
+    # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
+    # if pixel_list is passed, keep only those which are also in valid_pixels_grid
+    if pixel_list is None:
+        pixel_list = valid_pixels_grid
+    else:
+        valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
+        nb_valid_pixels = 0
+        for (row, col) in valid_pixels_grid:
+            valid_pixels_grid_matrix[row, col] = 1
+            nb_valid_pixels += 1
+        pixel_list_matrix = numpy.zeros(datamap.shape)
+        order = 1
+        for (row, col) in pixel_list:
+            pixel_list_matrix[row, col] = order
+            order += 1
+        final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
+        if numpy.array_equal(final_valid_pixels_matrix, numpy.zeros(datamap.shape)):
+            warnings.warn(" \nNo pixels in the list passed is valid given the ratio between pixel sizes, \n"
+                          "Iterating on valid pixels in a raster scan instead.")
+            pixel_list = valid_pixels_grid  # itérer sur les pixels valides seulement
+        else:
+            pixel_list_interim = numpy.argsort(final_valid_pixels_matrix, axis=None)
+            pixel_list_interim = numpy.unravel_index(pixel_list_interim, datamap.shape)
+            pixel_list = [(pixel_list_interim[0][i], pixel_list_interim[1][i])
+                          for i in range(len(pixel_list_interim[0]))]
+            pixel_list = pixel_list[-numpy.count_nonzero(final_valid_pixels_matrix):]
 
-        new_pixel_list.append((row, col))
-        previous_pixel = (row, col)
-    return new_pixel_list
+    return pixel_list
+
+
+def symmetry_verifier(array, direction="vertical", plot=False):
+    """
+    Verifies if the given array is symmetrical along the vertical or horizontal direction
+    :param array: Array to be verified for symmetry
+    :param direction: Direction along which to verify the symmetry. Vertical to see upper vs lower half, Horizontal to
+                      see left vs right half.
+    :param plot: Determines whether or not graphs of array and its symmetry will be displayed.
+    :returns: Array(s) displaying the symmetry
+    """
+
+    direction_lc = direction.lower()
+    valid_directions = ["vertical", "horizontal"]
+    if direction_lc not in valid_directions:
+        raise Exception(f"{direction} is not a valid direction, valid directions are {valid_directions}")
+
+    nb_rows, nb_cols = array.shape
+    if direction_lc == "vertical":
+        if nb_rows % 2 == 0:
+            halfway = nb_rows // 2
+            upper_half = array[0:halfway, :]
+            lower_half = array[halfway:, :]
+        else:
+            halfway = nb_rows // 2 + 1
+            upper_half = array[0:halfway, :]
+            lower_half = array[halfway - 1:, :]
+        symmetry = upper_half - numpy.flip(lower_half, 0)
+    elif direction_lc == "horizontal":
+        if nb_cols % 2 == 0:
+            halfway = nb_cols // 2
+            left_half = array[:, 0:halfway]
+            right_half = array[:, halfway:]
+        else:
+            halfway = nb_cols // 2 + 1
+            left_half = array[:, 0:halfway]
+            right_half = array[:, halfway - 1:]
+        symmetry = left_half - numpy.flip(right_half, 1)
+    else:
+        # forbidden zone, shouldn't go there ever because of previous error handling
+        raise Exception(f"Forbidden zone, call BT if you get here")
+
+    if plot:
+        fig, axes = pyplot.subplots(1, 2)
+
+        base_imshow = axes[0].imshow(array)
+        axes[0].set_title(f"Base input array")
+        fig.colorbar(base_imshow, ax=axes[0], fraction=0.04, pad=0.05)
+
+        symmetry_imshow = axes[1].imshow(symmetry)
+        axes[1].set_title(f"{direction_lc.capitalize()} symmetry verification")
+        fig.colorbar(symmetry_imshow, ax=axes[1], fraction=0.04, pad=0.05)
+
+        pyplot.show()
+
+    return symmetry
+
+
+def array_padder(base, laser, pad_value=0):
+    """
+    Function used to pad an array (base) according to the size of the secondary array being iterated over it (laser).
+    :param base: Base array on which we wish to iterate another array.
+    :param laser: Secondary array which will be iterated over the base array. Axes have to be of odd lengths in order
+                  for it to have a well defined single pixel center.
+    :param pad_value: Value of the padded region.
+    :returns: Padded version of the base array.
+    TODO: maybe returning the values used to pad could be of use?
+    """
+
+    laser_rows, laser_cols = laser.shape
+    if laser_rows % 2 == 0 or laser_cols % 2 == 0:
+        raise Exception(f"Laser shape has to be odd in order to have a well defined single pixel center")
+    rows_pad, cols_pad = laser_rows // 2, laser_cols // 2
+    padded_base = numpy.pad(base, ((rows_pad, rows_pad), (cols_pad, cols_pad)), 'constant', constant_values=pad_value)
+    return padded_base, rows_pad, cols_pad
+
+
+def array_unpadder(padded_base, laser):
+    """
+    Function used to unpad a padded array (padded_base) according to the size of the secondary array being iterated over
+    it (laser).
+    :param padded_base: Padded Base array which we wish to unpad.
+    :param laser: Secondary array which has been iterated over padded_base. Axes have to be of odd lengths in order for
+                  it to have a well defined single pixel center.
+    :returns: An unpadded version of the padded_base.
+    """
+
+    laser_rows, laser_cols = laser.shape
+    if laser_rows % 2 == 0 or laser_cols % 2 == 0:
+        raise Exception(f"Laser shape has to be odd in order to have a well defined single pixel center")
+    rows_pad, cols_pad = laser_rows // 2, laser_cols // 2
+    # laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
+    unpadded_base = padded_base[rows_pad:-rows_pad, cols_pad:-cols_pad]
+    return unpadded_base
