@@ -971,6 +971,7 @@ class Microscope:
         # stack one effective per molecule
         if pixel_list is None:
             pixel_list = utils.pixel_sampling(datamap, mode="all")
+        # faut que je filtre la pixel_list ici :)
         intensity = utils.stack_btmod_definitive(datamap, effective, datamap_pixelsize, pixelsize, pixel_list)
 
         photons = self.fluo.get_photons(intensity)
@@ -1874,7 +1875,6 @@ class Microscope:
         :returns: A 2D array of the new data map.
         '''
         if pixel_list is None:
-            print("No pixel list passed, Running a raster scan :)")
             pixel_list = utils.pixel_sampling(datamap, mode="all")
         __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
 
@@ -2077,12 +2077,14 @@ class Microscope:
 
         laser_received, _, _ = utils.array_padder(numpy.zeros(datamap.shape), i_ex)
         sampled, rows_pad, cols_pad = utils.array_padder(numpy.zeros(datamap.shape), i_ex)
+        if type(pixeldwelltime) != type(laser_received):
+            # tester si cette vérification fonctionne bien :)
+            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
 
         for (row, col) in pixel_list:
-            if type(pixeldwelltime) != type(laser_received):
-                # tester si cette vérification fonctionne bien :)
-                pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
             laser_applied = (i_ex * p_ex + i_sted * p_sted) * pixeldwelltime[row, col]
+            if (row, col) == (0, 0):
+                utils.symmetry_verifier(laser_applied, plot=True)
             sampled[row:row+2*rows_pad+1, col:col+2*cols_pad+1] += 1
             laser_received[row:row+2*rows_pad+1, col:col+2*cols_pad+1] += laser_applied
 
