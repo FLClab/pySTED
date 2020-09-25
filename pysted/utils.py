@@ -565,3 +565,23 @@ def array_unpadder(padded_base, laser):
     # laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
     unpadded_base = padded_base[rows_pad:-rows_pad, cols_pad:-cols_pad]
     return unpadded_base
+
+
+def datamap_generator(shape, sources, molecules):
+    """
+    Function to generate a datamap with randomly located molecules.
+    :param shape: A tuple representing the shape of the datamap. If only 1 number is passed, a square datamap will be
+                  generated.
+    :param sources: Number of molecule sources to be randomly placed on the datamap.
+    :param molecules: Average number of molecules contained on each source. The actual number of molecules will be
+                      determined by poisson sampling.
+    :returns: A datamap containing the randomly placed molecules
+    """
+    if type(shape) == int:
+        shape = (shape, shape)
+    datamap = numpy.zeros(shape)
+    for i in range(sources):
+        row, col = numpy.random.randint(0, shape[0]), numpy.random.randint(0, shape[1])
+        datamap[row, col] = numpy.random.poisson(molecules)
+
+    return datamap
