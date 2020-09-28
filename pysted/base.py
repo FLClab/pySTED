@@ -2097,6 +2097,14 @@ class Microscope:
 
         return laser_received, sampled
 
+    def get_signal_bleach_mod_3(self, datamap, pixelsize, datamap_pixelsize, pixeldwelltime, p_ex, p_sted,
+                                pixel_list=None, bleach=True):
+        """
+        3rd (!) function to bleach the datamap as the signal is acquired. The goal here is to not get the problem I had
+        earlier where I bleached more on the top of the datamap than on the bottom :)
+        """
+        pass
+
 
 class Datamap:
     """This class implements a datamap

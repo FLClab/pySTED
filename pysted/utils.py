@@ -585,3 +585,10 @@ def datamap_generator(shape, sources, molecules):
         datamap[row, col] = numpy.random.poisson(molecules)
 
     return datamap
+
+
+def molecules_symmetry(datamap):
+    total_molecules = numpy.sum(datamap)
+    upper_half_molecules = numpy.sum(datamap[0:datamap.shape[0] // 2, :])
+    lower_half_molecules = numpy.sum(datamap[datamap.shape[0] // 2:, :])
+    return total_molecules, upper_half_molecules, lower_half_molecules
