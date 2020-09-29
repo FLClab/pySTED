@@ -2103,7 +2103,61 @@ class Microscope:
         3rd (!) function to bleach the datamap as the signal is acquired. The goal here is to not get the problem I had
         earlier where I bleached more on the top of the datamap than on the bottom :)
         """
-        pass
+        print("DANS LA NOUVELLE IMPLEM D'ACQUISITION + BLEACHING")
+        pixel_list = utils.pixel_list_filter(datamap, pixel_list, pixelsize, datamap_pixelsize)
+
+        i_ex, i_sted, psf_det = self.cache(pixelsize, datamap_pixelsize)
+
+        effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap.shape[0] / ratio)),
+                                          int(numpy.ceil(datamap.shape[1] / ratio))))
+        padded_datamap, rows_pad, cols_pad = utils.array_padder(datamap, psf_det)
+        padded_datamap = padded_datamap.astype('int32')
+
+        photons_ex = self.fluo.get_photons(i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        # faire mon shit de gestion de pdt :)
+        if type(pixeldwelltime) != type(psf_det):
+            # tester si cette vérification fonctionne bien :)
+            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+
+        prob_ex, _, _ = utils.array_padder(numpy.ones(datamap.shape), psf_det)
+        prob_sted, _, _ = utils.array_padder(numpy.ones(datamap.shape), psf_det)
+
+        for (row, col) in pixel_list:
+            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
+                                                                      padded_datamap[row:row+2*rows_pad+1,
+                                                                      col:col+2*cols_pad+1])
+
+            if bleach is True:
+                prob_ex[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *= numpy.exp(-k_ex * pixeldwelltime[row, col])
+                prob_sted[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *= numpy.exp(-k_sted * pixeldwelltime[row, col])
+                padded_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1] = \
+                    numpy.random.binomial(padded_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1],
+                                          prob_ex[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *
+                                          prob_sted[row:row+2*rows_pad+1, col:col+2*cols_pad+1])
+
+        photons = self.fluo.get_photons(acquired_intensity)
+
+        if photons.shape == pixeldwelltime.shape:
+            returned_intensity = self.detector.get_signal(photons, pixeldwelltime)
+        else:
+            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pixeldwelltime.shape[0] / ratio)),
+                                                   int(numpy.ceil(pixeldwelltime.shape[1] / ratio))))
+            new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
+            for (row, col) in new_pdt_plist:
+                pixeldwelltime_reshaped[row, col] = pixeldwelltime[row * ratio, col * ratio]
+            returned_intensity = self.detector.get_signal(photons, pixeldwelltime_reshaped)
+
+        returned_datamap = utils.array_unpadder(padded_datamap, psf_det)
+        return returned_intensity, returned_datamap
 
 
 class Datamap:
