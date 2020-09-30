@@ -587,8 +587,14 @@ def datamap_generator(shape, sources, molecules):
     return datamap
 
 
-def molecules_symmetry(datamap):
-    total_molecules = numpy.sum(datamap)
-    upper_half_molecules = numpy.sum(datamap[0:datamap.shape[0] // 2, :])
-    lower_half_molecules = numpy.sum(datamap[datamap.shape[0] // 2:, :])
-    return total_molecules, upper_half_molecules, lower_half_molecules
+def molecules_symmetry(pre_bleach, post_bleach):
+    """
+    ya
+    """
+    pre_bleach_uhm = numpy.sum(pre_bleach[0:pre_bleach.shape[0] // 2, :])
+    pre_bleach_lhm = numpy.sum(pre_bleach[pre_bleach.shape[0] // 2:, :])
+    post_bleach_uhm = numpy.sum(post_bleach[0:post_bleach.shape[0] // 2, :])
+    post_bleach_lhm = numpy.sum(post_bleach[post_bleach.shape[0] // 2:, :])
+    uh_ratio = post_bleach_uhm / pre_bleach_uhm
+    lh_ratio = post_bleach_lhm / pre_bleach_lhm
+    return uh_ratio, lh_ratio
