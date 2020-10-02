@@ -1429,13 +1429,12 @@ class Microscope:
 
         return laser_received, sampled
 
-    def get_signal_bleach_mod(self, datamap, pixelsize, datamap_pixelsize, pixeldwelltime, p_ex, p_sted,
+    def get_signal_and_bleach(self, datamap, pixelsize, datamap_pixelsize, pixeldwelltime, p_ex, p_sted,
                               pixel_list=None, bleach=True):
         """
         3rd (!) function to bleach the datamap as the signal is acquired. The goal here is to not get the problem I had
         earlier where I bleached more on the top of the datamap than on the bottom :)
         """
-        print("DANS LA NOUVELLE IMPLEM D'ACQUISITION + BLEACHING")
         pixel_list = utils.pixel_list_filter(datamap, pixel_list, pixelsize, datamap_pixelsize)
 
         i_ex, i_sted, psf_det = self.cache(pixelsize, datamap_pixelsize)
