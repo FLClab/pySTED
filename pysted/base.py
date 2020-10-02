@@ -990,429 +990,8 @@ class Microscope:
 
         return default_returned_array
 
-    def get_signal_bleach_mod(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
-                              bleach=True):
-        '''Compute the detected signal given some molecules disposition.
-
-        :param datamap: A 2D array map of integers indicating how many molecules
-                        are contained in each pixel of the simulated image.
-        :param pixelsize: The size of one pixel of the simulated image (m).
-        :param pdt: The time spent on each pixel of the simulated image (s).
-        :param p_ex: The power of the excitation beam (W).
-        :param p_sted: The power of the STED beam (W).
-        :param bleach: Determines whether or not the laser applies bleach with each iteration. True by default.
-        :returns: A 2D array of the number of detected photons on each pixel.
-        ********** NOTES *************
-        Cette version doit effectuer le pixel skipping comme il faut, en imaginant que la laser peut uniquement se
-        déplacer sur une "grid" déterminée par le ratio entre datamap_pixelsize et pixelsize.
-        Elle doit aussi appliquer le bleaching à chaque itération
-        De plus, elle doit placer le résultat de l'acquisition dans le seul pixel itéré au lieu de la slice
-        Finalement, l'output devrait la forme de la datamap divisé par le ratio entre les pixelsizes
-        Hypothèse : Si je fais une acquisition avec un ratio de 1, cette fonction devrait me retourner le même résultat
-                    que get_signal. Sinon, non, j'pense pas :) (SANS LE BLEACHING POUR CETTE HYPOTHÈSE)
-        '''
-
-        # effective intensity across pixels (W)
-        # acquisition gaussian is computed using data_pixelsize
-        if datamap_pixelsize is None:
-            effective = self.get_effective(pixelsize, p_ex, p_sted)
-        else:
-            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
-
-        # figure out valid pixels to iterate on based on ratio between pixel sizes
-        # imagine the laser is fixed on a grid, which is determined by the ratio
-        valid_pixels_grid = utils.pxsize_grid(pixelsize, datamap_pixelsize, datamap)
-
-        # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
-        # if pixel_list is passed, keep only those which are also in valid_pixels_grid
-        if pixel_list is None:
-            pixel_list = valid_pixels_grid
-        else:
-            valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
-            for (row, col) in valid_pixels_grid:
-                valid_pixels_grid_matrix[row, col] = 1
-            pixel_list_matrix = numpy.zeros(datamap.shape)
-            for (row, col) in pixel_list:
-                pixel_list_matrix[row, col] = 1
-            final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
-            pixel_list = numpy.argwhere(final_valid_pixels_matrix > 0)
-
-        # prepping acquisition matrix
-        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-        datamap_rows, datamap_cols = datamap.shape
-        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_rows / ratio)), int(numpy.ceil(datamap_cols / ratio))))
-        h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
-        padded_datamap = numpy.pad(numpy.copy(datamap), h_pad // 2, mode="constant", constant_values=0).astype(int)
-
-        # computing stuff needed to compute bleach :)
-        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
-
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-
-        pad = photons_ex.shape[0] // 2 * 2
-        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
-
-        # pixeldwelltime array bull shit, À VÉRIFIER SI C'EST BON
-        pixeldwelltime = numpy.asarray(pdt)
-        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
-        if pixeldwelltime.shape == ():
-            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
-        else:
-            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
-            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
-            verif_array = numpy.asarray([1, 2, 3])
-            if type(verif_array) != type(pixeldwelltime):
-                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
-                raise Exception("pixeldwelltime parameter must be array type")
-        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
-
-        prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
-        prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), pad // 2, mode="constant")
-
-        for (row, col) in pixel_list:
-            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
-                                                                      padded_datamap[row:row + h_pad + 1,
-                                                                                     col:col + w_pad + 1])
-            if bleach is True:
-                # bleach stuff
-                # identifier quel calcul est le plus long ici :)
-                pdt_loop = pdtpad[row:row + pad + 1, col:col + pad + 1]
-                prob_ex[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_ex * pdt_loop)
-                prob_sted[row:row + pad + 1, col:col + pad + 1] *= numpy.exp(-k_sted * pdt_loop)
-                prob_ex_interim = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-                prob_sted_interim = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-
-                padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)] = \
-                    numpy.random.binomial(padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)],
-                                          prob_ex_interim * prob_sted_interim)
-
-        photons = self.fluo.get_photons(acquired_intensity)
-
-        if type(pdt) is float or photons.shape == pdt.shape:
-            default_returned_array = self.detector.get_signal(photons, pdt)
-        else:
-            ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-            new_pdt = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)), int(numpy.ceil(pdt.shape[1] / ratio))))
-            for row in range(0, new_pdt.shape[0]):
-                for col in range(0, new_pdt.shape[1]):
-                    new_pdt[row, col] += pdt[row * ratio, col * ratio]
-            default_returned_array = self.detector.get_signal(photons, new_pdt)
-
-        return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-
-    def get_signal_bleach_mod2(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
-                              bleach=True):
-        '''Compute the detected signal given some molecules disposition.
-
-        :param datamap: A 2D array map of integers indicating how many molecules
-                        are contained in each pixel of the simulated image.
-        :param pixelsize: The size of one pixel of the simulated image (m).
-        :param pdt: The time spent on each pixel of the simulated image (s).
-        :param p_ex: The power of the excitation beam (W).
-        :param p_sted: The power of the STED beam (W).
-        :param bleach: Determines whether or not the laser applies bleach with each iteration. True by default.
-        :returns: A 2D array of the number of detected photons on each pixel.
-        ********** NOTES *************
-        Cette version doit effectuer le pixel skipping comme il faut, en imaginant que la laser peut uniquement se
-        déplacer sur une "grid" déterminée par le ratio entre datamap_pixelsize et pixelsize.
-        Elle doit aussi appliquer le bleaching à chaque itération
-        De plus, elle doit placer le résultat de l'acquisition dans le seul pixel itéré au lieu de la slice
-        Finalement, l'output devrait la forme de la datamap divisé par le ratio entre les pixelsizes
-        Hypothèse : Si je fais une acquisition avec un ratio de 1, cette fonction devrait me retourner le même résultat
-                    que get_signal. Sinon, non, j'pense pas :) (SANS LE BLEACHING POUR CETTE HYPOTHÈSE)
-        '''
-        print("Figuring out why bleach bleaches more on top than bottom")
-        # effective intensity across pixels (W)
-        # acquisition gaussian is computed using data_pixelsize
-        if datamap_pixelsize is None:
-            effective = self.get_effective(pixelsize, p_ex, p_sted)
-        else:
-            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
-
-        # figure out valid pixels to iterate on based on ratio between pixel sizes
-        # imagine the laser is fixed on a grid, which is determined by the ratio
-        valid_pixels_grid = utils.pxsize_grid(pixelsize, datamap_pixelsize, datamap)
-
-        # if no pixel_list is passed, use valid_pixels_grid to figure out which pixels to iterate on
-        # if pixel_list is passed, keep only those which are also in valid_pixels_grid
-        if pixel_list is None:
-            pixel_list = valid_pixels_grid
-        else:
-            # problème avec cette méthode : ne conserve pas l'orde original de la liste
-            # fine si la liste originale suit un raster scan, mais convertit tous les ordres en raster scan, ce qui
-            # n'est pas fine
-            # how to fix?
-            # idée : avoir une autre matrice qui tient l'ordre des pixels ?
-            valid_pixels_grid_matrix = numpy.zeros(datamap.shape)
-            for (row, col) in valid_pixels_grid:
-                valid_pixels_grid_matrix[row, col] = 1
-            pixel_list_matrix = numpy.zeros(datamap.shape)
-            for (row, col) in pixel_list:
-                pixel_list_matrix[row, col] = 1
-            final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
-            pixel_list = numpy.argwhere(final_valid_pixels_matrix > 0)
-
-        # prepping acquisition matrix
-        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-        datamap_rows, datamap_cols = datamap.shape
-        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_rows / ratio)), int(numpy.ceil(datamap_cols / ratio))))
-        h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
-        padded_datamap = numpy.pad(numpy.copy(datamap), (int(h_pad / 2), int(w_pad / 2)), mode="constant",
-                                   constant_values=0).astype(int)
-
-        # computing stuff needed to compute bleach :)
-        __i_ex, __i_sted, psf_det = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
-
-        #---------------------------------------------------------------------------------------------------------------
-
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-
-        #--------------------- laser symetry verif ---------------------------------------------------------------------
-        exc_upper = __i_ex[0:int(__i_ex.shape[0] / 2) + 1, :]
-        exc_lower = __i_ex[int(__i_ex.shape[0] / 2):, :]
-        exc_lower_flipped = numpy.flip(exc_lower, 0)
-        exc_diff = exc_upper - exc_lower_flipped
-
-        sted_upper = __i_sted[0:int(__i_sted.shape[0] / 2) + 1, :]
-        sted_lower = __i_sted[int(__i_sted.shape[0] / 2):, :]
-        sted_lower_flipped = numpy.flip(sted_lower, 0)
-        sted_diff = sted_upper - sted_lower_flipped
-
-        psf_upper = psf_det[0:int(psf_det.shape[0] / 2) + 1, :]
-        psf_lower = psf_det[int(psf_det.shape[0] / 2):, :]
-        psf_lower_flipped = numpy.flip(psf_lower, 0)
-        psf_diff = psf_upper - psf_lower_flipped
-
-        fig, axes = pyplot.subplots(2, 3)
-
-        ex_imshow = axes[0, 0].imshow(__i_ex, interpolation="nearest")
-        axes[0, 0].set_title(f"Excitation beam, shape = {__i_ex.shape}")
-        fig.colorbar(ex_imshow, ax=axes[0, 0], fraction=0.04, pad=0.05)
-
-        sted_imshow = axes[0, 1].imshow(__i_sted)
-        axes[0, 1].set_title(f"STED beam, shape = {__i_sted.shape}")
-        fig.colorbar(sted_imshow, ax=axes[0, 1], fraction=0.04, pad=0.05)
-
-        psf_imshow = axes[0, 2].imshow(psf_det)
-        axes[0, 2].set_title(f"PSF, shape = {psf_det.shape}")
-        fig.colorbar(psf_imshow, ax=axes[0, 2], fraction=0.04, pad=0.05)
-
-        ex_diff_imshow = axes[1, 0].imshow(exc_diff)
-        axes[1, 0].set_title(f"Excitation beam symetry verif, shape = {exc_diff.shape}")
-        fig.colorbar(ex_diff_imshow, ax=axes[1, 0], fraction=0.04, pad=0.05)
-
-        sted_diff_imshow = axes[1, 1].imshow(sted_diff)
-        axes[1, 1].set_title(f"STED beam symetry verif, shape = {sted_diff.shape}")
-        fig.colorbar(sted_diff_imshow, ax=axes[1, 1], fraction=0.04, pad=0.05)
-
-        psf_diff_imshow = axes[1, 2].imshow(psf_diff)
-        axes[1, 2].set_title(f"PSF symetry verif, shape = {psf_diff.shape}")
-        fig.colorbar(psf_diff_imshow, ax=axes[1, 2], fraction=0.04, pad=0.05)
-
-        fig.suptitle(f"LASER SYMETRY IN bleach FUNCTION")
-        pyplot.show()
-        #---------------------------------------------------------------------------------------------------------------
-
-        pad = photons_ex.shape[0] // 2 * 2
-        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
-
-        # pixeldwelltime array bull shit, À VÉRIFIER SI C'EST BON
-        pixeldwelltime = numpy.asarray(pdt)
-        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
-        if pixeldwelltime.shape == ():
-            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
-        else:
-            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
-            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
-            verif_array = numpy.asarray([1, 2, 3])
-            if type(verif_array) != type(pixeldwelltime):
-                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
-                raise Exception("pixeldwelltime parameter must be array type")
-        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
-
-        prob_ex = numpy.pad((numpy.ones(datamap.shape)).astype(float), (int(h_pad / 2), int(w_pad / 2)),
-                            mode="constant")
-        prob_sted = numpy.pad((numpy.ones(datamap.shape)).astype(float), (int(h_pad / 2), int(w_pad / 2)),
-                              mode="constant")
-
-        # TESTING WHY IT BLEACHES MORE ON TOP THAN ON THE BOTTOM
-        previous_iter_probs = numpy.pad((numpy.ones(datamap.shape)).astype(float), (int(h_pad / 2), int(w_pad / 2)),
-                                        mode="constant")
-        number_of_iters = numpy.pad((numpy.ones(datamap.shape)).astype(float), (int(h_pad / 2), int(w_pad / 2)),
-                                    mode="constant")
-
-        # video shit :)
-        # video_array = numpy.ones((datamap.shape[0] + 1, datamap.shape[1]))
-        # video_array[-1, :] = 0.35
-        # pyplot.imshow(video_array)
-        # pyplot.imshow(previous_iter_probs[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)])
-        # pyplot.title(f"Survival probabilities, iterating on pixel {('NaN', 'NaN')}")
-        # pyplot.colorbar()
-        # pyplot.savefig(f"C:/Users/benoi/Documents/School/Automne 2020/Research_stuff/bleach_fix/week_of_14_sept/"
-        #                f"flipped_laser/probabilities_evolution/un_scaled/pre_iters")
-        # pyplot.close()
-        # pyplot.show()
-
-        for (row, col) in pixel_list:
-            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
-                                                                      padded_datamap[row:row + h_pad + 1,
-                                                                                     col:col + w_pad + 1])
-            if bleach is True:
-                # bleach stuff
-                # identifier quel calcul est le plus long ici :)
-                pdt_loop = pdtpad[row:row + h_pad + 1, col:col + w_pad + 1]
-                prob_ex[row:row + h_pad + 1, col:col + w_pad + 1] *= numpy.exp(-k_ex * pdt_loop)
-                prob_sted[row:row + h_pad + 1, col:col + w_pad + 1] *= numpy.exp(-k_sted * pdt_loop)
-                prob_ex_interim = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-                prob_sted_interim = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-
-                padded_datamap[row:row + h_pad + 1, col:col + w_pad + 1] = \
-                    numpy.random.binomial(padded_datamap[row:row + h_pad + 1, col:col + w_pad + 1],
-                                          prob_ex[row:row + h_pad + 1, col:col + w_pad + 1] *
-                                          prob_sted[row:row + h_pad + 1, col:col + w_pad + 1])
-
-                # TESTING WHY IT BLEACHES MORE ON TOP THAN ON THE BOTTOM
-                # print cette figure à chaque iter et la sauvegarder, faire un vid avec ça
-
-                # si je fais previous[] = ... au lieu de *=, j'obtiens de quoi de plus symétrique
-                # mais je pense pas que c'est ce je veux
-                previous_iter_probs[row:row + h_pad + 1, col:col + w_pad + 1] *= \
-                    prob_ex[row:row + h_pad + 1, col:col + w_pad + 1] * \
-                    prob_sted[row:row + h_pad + 1, col:col + w_pad + 1]
-
-                # previous_iter_probs[row:row + h_pad + 1, col:col + w_pad + 1] *= \
-                #     numpy.exp(-k_ex * pdt_loop) * numpy.exp(-k_sted * pdt_loop)
-
-                # padded_datamap[row:row + h_pad + 1, col:col + w_pad + 1] = \
-                #     numpy.random.binomial(padded_datamap[row:row + h_pad + 1, col:col + w_pad + 1],
-                #                           previous_iter_probs[row:row + h_pad + 1, col:col + w_pad + 1])
-
-                # video_array[0:-1, :] = previous_iter_probs[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-                # pyplot.imshow(video_array)
-                # pyplot.imshow(previous_iter_probs[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)])
-                # pyplot.colorbar()
-                # pyplot.scatter(col, row, color='r')
-                # pyplot.title(f"Survival probabilities, iterating on pixel {(row, col)}")
-                # pyplot.savefig(
-                #     f"C:/Users/benoi/Documents/School/Automne 2020/Research_stuff/bleach_fix/week_of_14_sept/"
-                #     f"flipped_laser/probabilities_evolution/un_scaled/{row}/{col}")
-                # pyplot.close()
-                # pyplot.show()
-                number_of_iters[row:row + h_pad + 1, col:col + w_pad + 1] += 1
-
-        # TESTING WHY IT BLEACHES MORE ON TOP THAN ON THE BOTTOM
-        prob_ex_display = prob_ex[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-        prob_ex_upper = prob_ex_display[0:int(prob_ex_display.shape[0] / 2), :]
-        prob_ex_lower = prob_ex_display[int(prob_ex_display.shape[0] / 2):, :]
-        prob_ex_lower_flipped = numpy.flip(prob_ex_lower, 0)
-        diff_prob_ex = prob_ex_upper - prob_ex_lower_flipped
-
-        prob_sted_display = prob_sted[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-        prob_sted_upper = prob_sted_display[0:int(prob_sted_display.shape[0] / 2), :]
-        prob_sted_lower = prob_sted_display[int(prob_sted_display.shape[0] / 2):, :]
-        prob_sted_lower_flipped = numpy.flip(prob_sted_lower, 0)
-        diff_prob_sted = prob_sted_upper - prob_sted_lower_flipped
-
-        fig, axes = pyplot.subplots(2, 2)
-
-        prob_ex_imshow = axes[0, 0].imshow(prob_ex_display)
-        axes[0, 0].set_title(f"prob_ex")
-        fig.colorbar(prob_ex_imshow, ax=axes[0, 0], fraction=0.04, pad=0.05)
-
-        prob_sted_imshow = axes[0, 1].imshow(prob_sted_display)
-        axes[0, 1].set_title(f"prob_sted")
-        fig.colorbar(prob_sted_imshow, ax=axes[0, 1], fraction=0.04, pad=0.05)
-
-        diff_ex_imshow = axes[1, 0].imshow(diff_prob_ex)
-        axes[1, 0].set_title(f"prob_ex symetry")
-        fig.colorbar(diff_ex_imshow, ax=axes[1, 0], fraction=0.04, pad=0.05)
-
-        diff_sted_imshow = axes[1, 1].imshow(diff_prob_sted)
-        axes[1, 1].set_title(f"prob_sted symetry")
-        fig.colorbar(diff_sted_imshow, ax=axes[1, 1], fraction=0.04, pad=0.05)
-
-        pyplot.show()
-
-        # regarder les valeurs sur la première ligne de prob_Ex ou prob_sted, jsais pu quoi faire man
-        print(f"{prob_sted_display[0, 0]:.30f}")
-        print(f"{prob_sted_display[-1, 0]:.30f}")
-
-        previous_iter_probs_display = previous_iter_probs[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-        final_probs = prob_ex * prob_sted
-        final_probs_display = final_probs[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-        number_of_iters_display = number_of_iters[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-
-        final_upper = final_probs_display[0:int(final_probs_display.shape[0] / 2), :]
-        final_lower = final_probs_display[int(final_probs_display.shape[0] / 2):, :]
-        final_lower_flipped = numpy.flip(final_lower, 0)
-        diff_final = final_upper - final_lower_flipped
-
-        perceived_upper = previous_iter_probs_display[0:int(previous_iter_probs_display.shape[0] / 2), :]
-        perceived_lower = previous_iter_probs_display[int(previous_iter_probs_display.shape[0] / 2):, :]
-        perceived_lower_flipped = numpy.flip(perceived_lower, 0)
-        diff_perceived = perceived_upper - perceived_lower_flipped
-
-        iters_upper = number_of_iters_display[0:int(number_of_iters_display.shape[0] / 2), :]
-        iters_lower = number_of_iters_display[int(number_of_iters_display.shape[0] / 2):, :]
-        iters_lower_flipped = numpy.flip(iters_lower, 0)
-        diff_iters = iters_upper - iters_lower_flipped
-
-        fig, axes = pyplot.subplots(2, 3)
-
-        final_probs_imshow = axes[0, 0].imshow(final_probs_display, interpolation="nearest")
-        axes[0, 0].set_title(f"Final pixel-wise probabilities, \n"
-                             f"shape = {final_probs_display.shape}")
-        fig.colorbar(final_probs_imshow, ax=axes[0, 0], fraction=0.04, pad=0.05)
-
-        perceived_probs_imshow = axes[0, 1].imshow(previous_iter_probs_display, interpolation="nearest")
-        axes[0, 1].set_title(f"Perceived pixel-wise probabilities, \n"
-                          f"shape = {previous_iter_probs_display.shape}")
-        fig.colorbar(perceived_probs_imshow, ax=axes[0, 1], fraction=0.04, pad=0.05)
-
-        number_imshow = axes[0, 2].imshow(number_of_iters_display, interpolation="nearest")
-        axes[0, 2].set_title(f"Number of times each pixel has been sampled")
-        fig.colorbar(number_imshow, ax=axes[0, 2], fraction=0.04, pad=0.05)
-
-        diff_final_imshow = axes[1, 0].imshow(diff_final)
-        axes[1, 0].set_title(f"Final probabilities symetry")
-        fig.colorbar(diff_final_imshow, ax=axes[1, 0], fraction=0.04, pad=0.05)
-
-        diff_preceived_imshow = axes[1, 1].imshow(diff_perceived, interpolation="nearest")
-        axes[1, 1].set_title(f"Perceived probabilities symetry")
-        fig.colorbar(diff_preceived_imshow, ax=axes[1, 1], fraction=0.04, pad=0.05)
-
-        diff_iters_imshow = axes[1, 2].imshow(diff_iters)
-        axes[1, 2].set_title(f"Number of iterations symetry")
-        fig.colorbar(diff_iters_imshow, ax=axes[1, 2], fraction=0.04, pad=0.05)
-
-        pyplot.show()
-
-        photons = self.fluo.get_photons(acquired_intensity)
-
-        if type(pdt) is float or photons.shape == pdt.shape:
-            default_returned_array = self.detector.get_signal(photons, pdt)
-        else:
-            ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-            new_pdt = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)), int(numpy.ceil(pdt.shape[1] / ratio))))
-            for row in range(0, new_pdt.shape[0]):
-                for col in range(0, new_pdt.shape[1]):
-                    new_pdt[row, col] += pdt[row * ratio, col * ratio]
-            default_returned_array = self.detector.get_signal(photons, new_pdt)
-
-        return default_returned_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
-                              bleach=True, rescue=False):
+                          bleach=True, rescue=False):
         '''Compute the detected signal given some molecules disposition.
 
         :param datamap: A 2D array map of integers indicating how many molecules
@@ -1579,7 +1158,7 @@ class Microscope:
             pixeldwelltime
 
     def get_signal_rescue2(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
-                              bleach=True, rescue=False):
+                           bleach=True, rescue=False):
         '''Compute the detected signal given some molecules disposition.
 
         :param datamap: A 2D array map of integers indicating how many molecules
@@ -1739,109 +1318,6 @@ class Microscope:
         return detected_photons_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)], \
             pixeldwelltime
 
-    def am_i_centered(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
-        """
-        Le but de cette fonction est de vérifier si je me centre bien sur le pixel itéré lorsque je fais mon acquisition
-        / bleaching avec mes matrices de lasers superposées à mes données :)
-        """
-        print("VOUS ÊTES DANS LA FONCTION POUR VÉRIFIER SI VOUS ÊTES BIEN CENTRÉ :)")
-        if pixel_list is None:
-            print("No pixel list passed, Running a raster scan :)")
-            pixel_list = utils.pixel_sampling(datamap, mode="all")
-        __i_ex, __i_sted, _ = self.cache(pixelsize, data_pixelsize=datamap_pixelsize)
-
-        photons_ex = self.fluo.get_photons(__i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(__i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-
-        pad = photons_ex.shape[0] // 2 * 2
-        h_size, w_size = datamap.shape[0] + pad, datamap.shape[1] + pad
-
-        pixeldwelltime = numpy.asarray(pixeldwelltime)
-        # vérifier si pixeldwelltime est un scalaire ou une matrice, si c'est un scalaire, transformer en matrice
-        if pixeldwelltime.shape == ():
-            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
-            # je devrais tu juste mettre les pixels dans pixel_list à une valeur non nulle? ce serait ce qui est ici
-            """pixeldwelltime_arr = numpy.zeros(datamap.shape)
-            for (row, col) in pixel_list:
-                pixeldwelltime_arr[row, col] += pixeldwelltime
-            pixeldwelltime = pixeldwelltime_arr"""
-        else:
-            # live j'assume que si je passe une matrice comme pixeldwelltime, elle est de la même forme que ma datamap,
-            # ajouter des trucs pour vérifier que c'est bien le cas ici :)
-            verif_array = numpy.asarray([1, 2, 3])
-            if type(verif_array) != type(pixeldwelltime):
-                # on va tu ever se rendre ici? qq lignes plus haut je transfo pdt en array... w/e
-                raise Exception("pixeldwelltime parameter must be array type")
-        pdtpad = numpy.pad(pixeldwelltime, pad // 2, mode="constant", constant_values=0)
-
-        # à place de faire ça, je devrais faire comme je fais pour ma modif de pixelsize pour skipper certains pixels :)
-        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp2(pixelsize, datamap_pixelsize)
-        ratio = img_pixelsize_int / data_pixelsize_int
-
-        traversed_array_padded = numpy.pad(datamap, pad // 2, mode="constant")
-        traversed_array_roi = numpy.copy(datamap)
-        acq_matrix = numpy.ones(photons_ex.shape)
-        previous_pixel = None
-        for (row, col) in pixel_list:
-            # fait le pixel skipping comme il faut pour une liste raster scan normale, mais ne fonctionne pas pour un
-            # ordre abitraire / raster inversé, need to figure out why et faire marche ça pour get_signal aussi :)
-            if previous_pixel is not None:
-                if row - previous_pixel[0] < ratio and col - previous_pixel[1] < ratio:   # absolues?
-                    continue
-
-            # setting up mes plots pour trouver le pixel itéré
-            traversed_array_padded[row:row + pad + 1, col:col + pad + 1] += acq_matrix
-            if row + pad // 2 == (row + row + pad + 1) // 2 and col + pad // 2 == (col + col + pad + 1) // 2:
-                traversed_array_roi[row, col] += 1
-                traversed_array_padded[(row + row + pad + 1) // 2, (col + col + pad + 1) // 2] += 1
-
-            list_over = traversed_array_padded[row:(row + row + pad + 1) // 2, col]
-            list_under = traversed_array_padded[(row + row + pad + 1) // 2 + 1:row + pad + 1, col]
-            list_left = traversed_array_padded[row, col:(col + col + pad + 1) // 2]
-            list_right = traversed_array_padded[row, (col + col + pad + 1) // 2 + 1:col + pad + 1]
-
-            # plot mes shit
-            fig, axes = pyplot.subplots(1, 2)
-
-            padded_imshow = axes[0].imshow(traversed_array_padded)
-            axes[0].set_title(f"Padded array, with region covered by acquisition array and original datamap highlighted"
-                              f"\n"
-                              f"Acquisition array shape = "
-                              f"{traversed_array_padded[row:row + pad + 1, col:col + pad + 1].shape} \n"
-                              f"Center of region covered by acquisition array also highlighted \n"
-                              f"{len(list_over)} pixels over iterated pixel inside acquisition array, "
-                              f"{len(list_under)} pixels under iterated pixel inside acquisition array, \n"
-                              f"{len(list_left)} pixels left of iterated pixel inside acquisition array, "
-                              f"{len(list_right)} pixels right of iterated pixel inside acquisition array")
-            fig.colorbar(padded_imshow, ax=axes[0], fraction=0.04, pad=0.05)
-
-            roi_imshow = axes[1].imshow(traversed_array_roi)
-            axes[1].set_title(f"Pixel iterated over in the original datamap frame of reference")
-            fig.colorbar(roi_imshow, ax=axes[1], fraction=0.04, pad=0.05)
-
-            fig.suptitle(f'Iteration on pixel {(row, col)}', fontsize=16)
-
-            figManager = pyplot.get_current_fig_manager()
-            figManager.window.showMaximized()
-
-            pyplot.show()
-
-            # reverte les modifs que j'ai fait plus haut :)
-            traversed_array_padded[row:row + pad + 1, col:col + pad + 1] -= 1
-            if row + pad // 2 == (row + row + pad + 1) // 2 and col + pad // 2 == (col + col + pad + 1) // 2:
-                traversed_array_roi[row, col] -= 1
-                traversed_array_padded[(row + row + pad + 1) // 2, (col + col + pad + 1) // 2] -= 1
-
-            previous_pixel = (row, col)
-
-        traversed_array_padded = traversed_array_padded[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)]
-        # print(f"iterated over {counter} pixels out of {datamap.shape[0] * datamap.shape[1]}")
-        return traversed_array_padded
-
     def bleach(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
         '''
         Compute the bleached data map using the following survival
@@ -1917,147 +1393,7 @@ class Microscope:
 
         return new_datamap
 
-    def laser_dans_face(self, datamap, pixelsize, pixeldwelltime, p_ex, p_sted, datamap_pixelsize, pixel_list=None):
-        """
-        Test function to see how much laser each pixel receives in the face ;)
-        """
-        # variable qui sera retournée, chaque pixel contiendra la quantité de photons reçus par la datamap à cause
-        # des lasers
-        laser_received = numpy.zeros(datamap.shape)
-
-        # effective intensity across pixels (W)
-        # acquisition gaussian is computed using data_pixelsize
-        if datamap_pixelsize is None:
-            print(f"datamap_pixelsize is None")
-            effective = self.get_effective(pixelsize, p_ex, p_sted)
-        else:
-            print(f"datamap_pixelsize = {datamap_pixelsize}")
-            effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
-
-        # variable qui sera retournée, chaque pixel contiendra la quantité de photons reçus par la datamap à cause
-        # des lasers
-        # dans stack, on utilise data pour calculer le pad, qui est effective
-        img_pixelsize_int, data_pixelsize_int = utils.pxsize_comp2(pixelsize, datamap_pixelsize)
-        ratio = int(img_pixelsize_int / data_pixelsize_int)
-        h_pad, w_pad = int(effective.shape[0] / 2) * 2, int(effective.shape[1] / 2) * 2
-        # laser_received = numpy.zeros(
-        #     (int(datamap.shape[0] / ratio) + h_pad, int(datamap.shape[1] / ratio) + w_pad))
-        laser_received_pre_pad = numpy.ones(datamap.shape)
-        print(f"pre pad shape = {laser_received_pre_pad.shape}")
-        laser_received = numpy.pad(laser_received_pre_pad, (int(h_pad / 2), int(w_pad / 2)), 'constant',
-                                   constant_values=0)   # confirmed has good shape
-        laser_received_virgin = numpy.copy(laser_received)
-        __i_ex, __i_sted, psf_det = self.cache_verif(pixelsize, datamap_pixelsize)
-
-        # exc_greater_than = (__i_ex > 500000000000) * 1e13   # 1e13
-        # sted_greater_than = (__i_sted > 200000000000000) * 5e14   # 5e14
-        # psf_greater_than = (psf_det > 0.3) * 5
-        # exc_greater_than = (__i_ex > 0) * 5   # 1e13
-        # sted_greater_than = (__i_sted > 0) * 5   # 5e14
-        # exc_greater_than = (__i_ex > 500000000000) * 5   # 1e13
-        # sted_greater_than = (__i_sted > 200000000000000) * 5   # 5e14
-        exc_greater_than = __i_ex
-        sted_greater_than = __i_sted
-        psf_greater_than = psf_det
-
-        exc_upper = exc_greater_than[0:int(exc_greater_than.shape[0] / 2) + 1, :]
-        exc_lower = exc_greater_than[int(exc_greater_than.shape[0] / 2):, :]
-        exc_lower_flipped = numpy.flip(exc_lower, 0)
-        exc_diff = exc_upper - exc_lower_flipped
-
-        sted_upper = sted_greater_than[0:int(sted_greater_than.shape[0] / 2) + 1, :]
-        sted_lower = sted_greater_than[int(sted_greater_than.shape[0] / 2):, :]
-        sted_lower_flipped = numpy.flip(sted_lower, 0)
-        sted_diff = sted_upper - sted_lower_flipped
-
-        psf_upper = psf_greater_than[0:int(psf_greater_than.shape[0] / 2) + 1, :]
-        psf_lower = psf_greater_than[int(psf_greater_than.shape[0] / 2):, :]
-        psf_lower_flipped = numpy.flip(psf_lower, 0)
-        psf_diff = psf_upper - psf_lower_flipped
-
-        fig, axes = pyplot.subplots(2, 3)
-
-        exc_imshow = axes[0, 0].imshow(exc_greater_than)
-        axes[0, 0].set_title(f"Cte Excitation beam, shape = {exc_greater_than.shape}")
-        fig.colorbar(exc_imshow, ax=axes[0, 0], fraction=0.04, pad=0.05)
-
-        sted_imshow = axes[0, 1].imshow(sted_greater_than)
-        axes[0, 1].set_title(f"Cte STED beam, shape = {sted_greater_than.shape}")
-        fig.colorbar(sted_imshow, ax=axes[0, 1], fraction=0.04, pad=0.05)
-
-        psf_imshow = axes[0, 2].imshow(psf_greater_than)
-        axes[0, 2].set_title(f"Cte PSF beam, shape = {psf_greater_than.shape}")
-        fig.colorbar(psf_imshow, ax=axes[0, 2], fraction=0.04, pad=0.05)
-
-        exc_diff_imshow = axes[1, 0].imshow(exc_diff)
-        axes[1, 0].set_title(f"Excitation beam, shape = {exc_diff.shape}")
-        fig.colorbar(exc_diff_imshow, ax=axes[1, 0], fraction=0.04, pad=0.05)
-
-        sted_diff_imshow = axes[1, 1].imshow(sted_diff)
-        axes[1, 1].set_title(f"STED beam, shape = {sted_diff.shape}")
-        fig.colorbar(sted_diff_imshow, ax=axes[1, 1], fraction=0.04, pad=0.05)
-
-        psf_diff_imshow = axes[1, 2].imshow(psf_diff)
-        axes[1, 2].set_title(f"PSF beam, shape = {psf_diff.shape}")
-        fig.colorbar(psf_diff_imshow, ax=axes[1, 2], fraction=0.04, pad=0.05)
-
-        fig.suptitle(f"DANS LA FONCTION laser_in_the_face")
-        pyplot.show()
-        # exit()
-
-        # verif bullshit, to remove eventually
-        iterated_pixels = numpy.zeros((int(datamap.shape[0] / ratio), int(datamap.shape[1] / ratio)))
-
-        # VERIF SI JE SUIS BIEN CENTRÉ ???
-        # mon centre devrait être 9 :)
-        # COMMENT JE FAIS POUR VÉRIFIER SI JE SUIS BIEN CENTRÉ À CHAQUE ITÉRATION???
-        # J'ESPÈRE QUE CE N'EST PAS ÇA LE PROBLÈME, MAIS JE NE SAIS PAS COMMENT VÉRIFIER ::))
-        # slice = laser_received[0:0+h_pad+1, 0:0+w_pad+1]
-        # center_row, center_col = int(slice.shape[0] / 2), int(slice.shape[1] / 2)
-        # slice[center_row, center_col] = 1
-        # pyplot.imshow(slice)
-        # pyplot.title(f"slice shape = {slice.shape}, center pos = {(center_row, center_col)}")
-        # pyplot.show()
-        # exit()
-
-        # TESTER SI C'EST MON CENTERING QUI ET LE PROBLÈME :
-        # en ce moment, je pad ma datamap et je dois "shifter" mes slices pour itérer sur les bons pixels dans la
-        # datamap paddée. Pour vérifier si c'est ce shifting qui cause mon problème d'asymétrie de laser reçu, je vais
-        # modifier ma façon de procéder :
-        # - refaire ma datamap paddée "de la bonne façon", i.e. en paddant une datamap de 1 avec des 0 sur les pads.
-        # - Itérer sur TOUS les pixels de la datamap paddée. Si le pixel itéré est à 0, c'est que je suis dans le pad,
-        #   donc ne rien faire. Sinon, faire le calcul normal
-        # Avec cela, je m'assure de seulement itérer sur des pixels de la datamap, et sur aucun pixels du pad. Je ne
-        # devrais pas avoir d'assymétrie, right? Si j'en ai, je crois que ça veut dire que mes "slices" ne sont pas
-        # centrées.
-
-        # si aucune pixel_list n'est passée, on fait un raster scan complet :)
-        if pixel_list is None:
-            pixel_list = utils.pixel_sampling(datamap, mode="all")
-        for pixel in pixel_list:
-            row = pixel[0]
-            col = pixel[1]
-            # 1 W = 1 J / s, donc si je multiplie par le pixeldwelltime, mon output va être en J :)
-            laser_received[row:row+h_pad+1, col:col+w_pad+1] += (exc_greater_than * p_ex +
-                                                                 sted_greater_than * p_sted) * pixeldwelltime
-            # laser_received[row:row+h_pad+1, col:col+w_pad+1] += exc_greater_than + sted_greater_than
-            iterated_pixels[row, col] = 1
-
-        # CENTRAGE VERIF --> MON CENTRAGE EST BIEN FAIT :)
-        # pixel_list = utils.pixel_sampling(laser_received, mode="all")
-        # iterated_pixels = numpy.pad(iterated_pixels, (int(h_pad / 2), int(w_pad / 2)), 'constant',
-        # constant_values = 0)
-        # for (row, col) in pixel_list:
-        #     if laser_received_virgin[row, col]:
-        #         # ma slice est pas cnetrée!!!!!
-        #         laser_received[row - int(h_pad / 2):row + int(h_pad / 2) + 1,
-        #                        col - int(w_pad / 2):col + int(w_pad / 2) + 1] += exc_greater_than + sted_greater_than
-        #         iterated_pixels[row, col] = 1
-
-        # return laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)], iterated_pixels[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)]
-        return laser_received[int(h_pad / 2):-int(h_pad / 2), int(w_pad / 2):-int(w_pad / 2)], iterated_pixels
-
-    def laser_dans_face_2(self, datamap, pixelsize, datamap_pixelsize, pixeldwelltime, p_ex, p_sted, pixel_list=None):
+    def laser_dans_face(self, datamap, pixelsize, datamap_pixelsize, pixeldwelltime, p_ex, p_sted, pixel_list=None):
         """
         2nd test function to visualize how much laser each pixel receives
         :param datamap: Datamap (array) on which the lasers will be applied.
@@ -2091,11 +1427,68 @@ class Microscope:
         sampled = utils.array_unpadder(sampled, i_ex)
         laser_received = utils.array_unpadder(laser_received, i_ex)
 
-        # la fonction en tant que telle est finit, mais je serais rendu à ajouter qqchose pour traquer l'évolution
-        # des coins opposés. Je crois que si j'avais de quoi de symmétrique, je m'attendrais à voir 2 listes inverses
-        # l'une de l'autre, pas trop certain de ce que je m'attends dans mon cas actuel, à faire!!
-
         return laser_received, sampled
+
+    def get_signal_and_bleach(self, datamap, pixelsize, datamap_pixelsize, pixeldwelltime, p_ex, p_sted,
+                              pixel_list=None, bleach=True):
+        """
+        3rd (!) function to bleach the datamap as the signal is acquired. The goal here is to not get the problem I had
+        earlier where I bleached more on the top of the datamap than on the bottom :)
+        """
+        pixel_list = utils.pixel_list_filter(datamap, pixel_list, pixelsize, datamap_pixelsize)
+
+        i_ex, i_sted, psf_det = self.cache(pixelsize, datamap_pixelsize)
+
+        effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap.shape[0] / ratio)),
+                                          int(numpy.ceil(datamap.shape[1] / ratio))))
+        padded_datamap, rows_pad, cols_pad = utils.array_padder(datamap, psf_det)
+        padded_datamap = padded_datamap.astype('int32')
+
+        photons_ex = self.fluo.get_photons(i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        # faire mon shit de gestion de pdt :)
+        if type(pixeldwelltime) != type(psf_det):
+            # tester si cette vérification fonctionne bien :)
+            pixeldwelltime = numpy.ones(datamap.shape) * pixeldwelltime
+
+        prob_ex, _, _ = utils.array_padder(numpy.ones(datamap.shape), psf_det)
+        prob_sted, _, _ = utils.array_padder(numpy.ones(datamap.shape), psf_det)
+
+        for (row, col) in pixel_list:
+            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
+                                                                      padded_datamap[row:row+2*rows_pad+1,
+                                                                      col:col+2*cols_pad+1])
+
+            if bleach is True:
+                prob_ex[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *= numpy.exp(-k_ex * pixeldwelltime[row, col])
+                prob_sted[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *= numpy.exp(-k_sted * pixeldwelltime[row, col])
+                padded_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1] = \
+                    numpy.random.binomial(padded_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1],
+                                          prob_ex[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *
+                                          prob_sted[row:row+2*rows_pad+1, col:col+2*cols_pad+1])
+
+        photons = self.fluo.get_photons(acquired_intensity)
+
+        if photons.shape == pixeldwelltime.shape:
+            returned_intensity = self.detector.get_signal(photons, pixeldwelltime)
+        else:
+            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pixeldwelltime.shape[0] / ratio)),
+                                                   int(numpy.ceil(pixeldwelltime.shape[1] / ratio))))
+            new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
+            for (row, col) in new_pdt_plist:
+                pixeldwelltime_reshaped[row, col] = pixeldwelltime[row * ratio, col * ratio]
+            returned_intensity = self.detector.get_signal(photons, pixeldwelltime_reshaped)
+
+        returned_datamap = utils.array_unpadder(padded_datamap, psf_det)
+        return returned_intensity, returned_datamap
 
 
 class Datamap:

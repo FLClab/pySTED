@@ -585,3 +585,31 @@ def datamap_generator(shape, sources, molecules):
         datamap[row, col] = numpy.random.poisson(molecules)
 
     return datamap
+
+
+def molecules_symmetry(pre_bleach, post_bleach):
+    """
+    Function to compare the ratio of surviving molecules in the upper vs lower half of a datamap.
+    :param pre_bleach: The datamap before bleaching it.
+    :param post_bleach: The datamap after bleaching it.
+    :returns: Ratio of molecules surviving bleach, split between upper half and lower half
+    """
+    # We have to compare the same datamap before and after applying lasers on it, so the shape has to be the same
+    if pre_bleach.shape != post_bleach.shape:
+        raise ValueError("Both pre and post bleach datamaps need to be of the same shape")
+
+    # if there is an odd number of rows, the last row of the upper half will be the first row of the lower half
+    if pre_bleach.shape[0] % 2 == 0:
+        pre_bleach_uhm = numpy.sum(pre_bleach[0:pre_bleach.shape[0] // 2, :])
+        pre_bleach_lhm = numpy.sum(pre_bleach[pre_bleach.shape[0] // 2:, :])
+        post_bleach_uhm = numpy.sum(post_bleach[0:post_bleach.shape[0] // 2, :])
+        post_bleach_lhm = numpy.sum(post_bleach[post_bleach.shape[0] // 2:, :])
+    else:
+        pre_bleach_uhm = numpy.sum(pre_bleach[0:pre_bleach.shape[0] // 2 + 1, :])
+        pre_bleach_lhm = numpy.sum(pre_bleach[pre_bleach.shape[0] // 2:, :])
+        post_bleach_uhm = numpy.sum(post_bleach[0:post_bleach.shape[0] // 2 + 1, :])
+        post_bleach_lhm = numpy.sum(post_bleach[post_bleach.shape[0] // 2:, :])
+
+    uh_ratio = post_bleach_uhm / pre_bleach_uhm
+    lh_ratio = post_bleach_lhm / pre_bleach_lhm
+    return uh_ratio, lh_ratio
