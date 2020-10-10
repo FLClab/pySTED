@@ -1,5 +1,9 @@
 
-'''This module contains utilitary functions that used across pySTED.
+'''
+This module contains utilitary functions that used across pySTED.
+
+Code written by Benoit Turcotte, benoit.turcotte.4@ulaval.ca, October 2020
+For use by FLClab (@CERVO) authorized people
 '''
 
 import numpy
@@ -355,8 +359,8 @@ def pxsize_comp2(img_pixelsize, data_pixelsize):
     data_pixelsize_exp = int(str(data_pixelsize)[str(data_pixelsize).find('e') + 1:])
     exp = img_pixelsize_exp - data_pixelsize_exp
     img_pixelsize_int *= 10 ** exp
-    img_pixelsize_int = int(img_pixelsize_int)
-    data_pixelsize_int = int(data_pixelsize_int)
+    # img_pixelsize_int = int(img_pixelsize_int)
+    # data_pixelsize_int = int(data_pixelsize_int)
     test3 = img_pixelsize_int % data_pixelsize_int
     if img_pixelsize < data_pixelsize or not math.isclose(test3, 0):
         raise Exception("img_pixelsize has to be a multiple of data_pixelsize")
@@ -567,7 +571,7 @@ def array_unpadder(padded_base, laser):
     return unpadded_base
 
 
-def datamap_generator(shape, sources, molecules):
+def datamap_generator(shape, sources, molecules, random_state=None):
     """
     Function to generate a datamap with randomly located molecules.
     :param shape: A tuple representing the shape of the datamap. If only 1 number is passed, a square datamap will be
@@ -577,6 +581,7 @@ def datamap_generator(shape, sources, molecules):
                       determined by poisson sampling.
     :returns: A datamap containing the randomly placed molecules
     """
+    numpy.random.seed(random_state)
     if type(shape) == int:
         shape = (shape, shape)
     datamap = numpy.zeros(shape)
@@ -613,3 +618,13 @@ def molecules_symmetry(pre_bleach, post_bleach):
     uh_ratio = post_bleach_uhm / pre_bleach_uhm
     lh_ratio = post_bleach_lhm / pre_bleach_lhm
     return uh_ratio, lh_ratio
+
+
+def molecules_survival(pre_bleach, post_bleach):
+    """
+    Returns the ratio of surviving molecules
+    :param pre_bleach: The datamap before bleaching it.
+    :param post_bleach: The datamap after bleaching it.
+    :return: Ratio of molecules surviving bleach
+    """
+    return numpy.sum(post_bleach) / numpy.sum(pre_bleach)

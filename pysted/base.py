@@ -28,6 +28,9 @@ given some ``data_model``.
     pyplot.colorbar()
     pyplot.show()
 
+Code written by Benoit Turcotte, benoit.turcotte.4@ulaval.ca, October 2020
+For use by FLClab (@CERVO) authorized people
+
 .. rubric:: References
 
 
