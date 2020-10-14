@@ -207,97 +207,6 @@ class GaussianBeam:
         # [RPPhoto2015]
         return intensity * 2 * transmission * power / area_fwhm
 
-    def get_intensity_verif(self, power, f, n, na, transmission, pixelsize, data_pixelsize=None):
-        '''Compute the transmitted excitation intensity field (W/m²). The
-        technique essentially follows the method described in [Xie2013]_,
-        where :math:`z = 0`, along with some equations from [Deng2010]_, and
-        [RPPhoto2015]_.
-
-        :param power: The power of the beam (W).
-        :param f: The focal length of the objective (m).
-        :param n: The refractive index of the objective.
-        :param na: The numerical aperture of the objective.
-        :param transmission: The transmission ratio of the objective (given the
-                             wavelength of the excitation beam).
-        :param pixelsize: The size of an element in the intensity matrix (m).
-        :returns: A 2D array.
-        '''
-        if data_pixelsize is None:
-            data_pixelsize = pixelsize
-        else:
-            pixelsize = data_pixelsize
-
-        def fun1(theta, kr):
-            return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta) * \
-                   scipy.special.jv(0, kr * numpy.sin(theta)) * (1 + numpy.cos(theta))
-
-        def fun2(theta, kr):
-            return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta) ** 2 * \
-                   scipy.special.jv(1, kr * numpy.sin(theta))
-
-        def fun3(theta, kr):
-            return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta) * \
-                   scipy.special.jv(2, kr * numpy.sin(theta)) * (1 - numpy.cos(theta))
-
-        alpha = numpy.arcsin(na / n)
-
-        diameter = 2.233 * self.lambda_ / (na * pixelsize)
-        n_pixels = int(diameter / 2) * 2 + 1  # odd number of pixels
-        center = int(n_pixels / 2)
-
-        # [Deng2010]
-        k = 2 * numpy.pi * n / self.lambda_
-
-        # compute the focal plane integrations i1 to i3 [Xie2013]
-        i1 = numpy.empty((n_pixels, n_pixels))
-        i2 = numpy.empty((n_pixels, n_pixels))
-        i3 = numpy.empty((n_pixels, n_pixels))
-        phi = numpy.empty((n_pixels, n_pixels))
-        for y in range(n_pixels):
-            h_rel = (center - y)
-            for x in range(n_pixels):
-                w_rel = (x - center)
-
-                angle, radius = utils.cart2pol(w_rel, h_rel)
-
-                kr = k * radius * pixelsize
-                i1[y, x] = scipy.integrate.quad(fun1, 0, alpha, (kr,))[0]
-                i2[y, x] = scipy.integrate.quad(fun2, 0, alpha, (kr,))[0]
-                i3[y, x] = scipy.integrate.quad(fun3, 0, alpha, (kr,))[0]
-                phi[y, x] = angle
-
-        ax = numpy.sin(self.beta)
-        ay = numpy.cos(self.beta) * numpy.exp(1j * self.polarization)
-
-        # [Xie2013] eq. 1, where exdx = e_x, eydx = e_y, and ezdx = e_z
-        exdx = -ax * 1j * (i1 + i3 * numpy.cos(2 * phi))
-        eydx = -ax * 1j * i3 * numpy.sin(2 * phi)
-        ezdx = -ax * 2 * i2 * numpy.cos(phi)
-        # [Xie2013] appendix A, where exdy = e'_{1x'}, eydy = e'_{1y'}, and ezdy = e'_{1z'}
-        exdy = -ay * 1j * (i1 - i3 * numpy.cos(2 * phi))
-        eydy = ay * 1j * i3 * numpy.sin(2 * phi)
-        ezdy = -ay * 2 * i2 * numpy.sin(phi)
-        # [Xie2013] eq. 3
-        electromagfieldx = exdx - eydy
-        electromagfieldy = eydx + exdy
-        electromagfieldz = ezdx + ezdy
-
-        # [Xie2013] I = E_x E_x* + E_y E_y* + E_z E_z* (p. 1642)
-        intensity = electromagfieldx * numpy.conj(electromagfieldx) + \
-                    electromagfieldy * numpy.conj(electromagfieldy) + \
-                    electromagfieldz * numpy.conj(electromagfieldz)
-
-        # keep it real
-        intensity = numpy.real_if_close(intensity)
-        # normalize
-        intensity /= numpy.max(intensity)
-
-        idx_mid = int((intensity.shape[0] - 1) / 2)
-        r = utils.fwhm(intensity[idx_mid])
-        area_fwhm = numpy.pi * (r * pixelsize) ** 2 / 2
-        # [RPPhoto2015]
-        return intensity * 2 * transmission * power / area_fwhm
-
 
 class DonutBeam:
     '''This class implements a donut beam (STED).
@@ -846,8 +755,7 @@ class Microscope:
             f, n, na = self.objective.f, self.objective.n, self.objective.na
 
             transmission = self.objective.get_transmission(self.excitation.lambda_)
-            i_ex = self.excitation.get_intensity_verif(1, f, n, na,
-                                                       transmission, pixelsize, data_pixelsize)
+            i_ex = self.excitation.get_intensity(1, f, n, na, transmission, pixelsize, data_pixelsize)
 
             i_ex_flipped = numpy.zeros(i_ex.shape)
             i_ex_tr = i_ex[0:int(i_ex.shape[0] / 2) + 1, int(i_ex.shape[1] / 2):]
