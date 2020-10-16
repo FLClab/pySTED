@@ -118,7 +118,7 @@ class GaussianBeam:
         self.beta = kwargs.get("beta", numpy.pi/4)
     
     # FIXME: pass Objective object instead of f, n, na, transmission
-    def get_intensity(self, power, f, n, na, transmission, pixelsize, data_pixelsize=None):
+    def get_intensity(self, power, f, n, na, transmission, datamap_pixelsize):
         '''Compute the transmitted excitation intensity field (W/m²). The
         technique essentially follows the method described in [Xie2013]_,
         where :math:`z = 0`, along with some equations from [Deng2010]_, and
@@ -130,13 +130,9 @@ class GaussianBeam:
         :param na: The numerical aperture of the objective.
         :param transmission: The transmission ratio of the objective (given the
                              wavelength of the excitation beam).
-        :param pixelsize: The size of an element in the intensity matrix (m).
+        :param datamap_pixelsize: The size of an element in the intensity matrix (m).
         :returns: A 2D array.
         '''
-        if data_pixelsize is None:
-            data_pixelsize = pixelsize
-        else:
-            pixelsize = data_pixelsize
 
         def fun1(theta, kr):
             return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta) *\
@@ -150,7 +146,7 @@ class GaussianBeam:
         
         alpha = numpy.arcsin(na / n)
         
-        diameter = 2.233 * self.lambda_ / (na * pixelsize)
+        diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
         center = int(n_pixels / 2)
         
@@ -169,7 +165,7 @@ class GaussianBeam:
 
                 angle, radius = utils.cart2pol(w_rel, h_rel)
                 
-                kr = k * radius * pixelsize
+                kr = k * radius * datamap_pixelsize
                 i1[y, x] = scipy.integrate.quad(fun1, 0, alpha, (kr,))[0]
                 i2[y, x] = scipy.integrate.quad(fun2, 0, alpha, (kr,))[0]
                 i3[y, x] = scipy.integrate.quad(fun3, 0, alpha, (kr,))[0]
@@ -203,7 +199,7 @@ class GaussianBeam:
         
         idx_mid = int((intensity.shape[0]-1) / 2)
         r = utils.fwhm(intensity[idx_mid])
-        area_fwhm = numpy.pi * (r  * pixelsize)**2 / 2
+        area_fwhm = numpy.pi * (r * datamap_pixelsize) ** 2 / 2
         # [RPPhoto2015]
         return intensity * 2 * transmission * power / area_fwhm
 
@@ -247,7 +243,7 @@ class DonutBeam:
         self.zero_residual = kwargs.get("zero_residual", 0)
     
     # FIXME: pass Objective object instead of f, n, na, transmission
-    def get_intensity(self, power, f, n, na, transmission, pixelsize, data_pixelsize=None):
+    def get_intensity(self, power, f, n, na, transmission, datamap_pixelsize):
         '''Compute the transmitted STED intensity field (W/m²). The technique
         essentially follows the method described in [Xie2013]_, where
         :math:`z = 0`, along with some equations from [Deng2010]_, and
@@ -259,13 +255,8 @@ class DonutBeam:
         :param na: The numerical aperture.
         :param transmission: The transmission ratio of the objective (given the
                              wavelength of the STED beam).
-        :param pixelsize: The size of an element in the intensity matrix (m).
-        :param data_pixelsize: The size of a pixel in the raw data matrix (m).
+        :param datamap_pixelsize: The size of an element in the intensity matrix (m).
         '''
-        if data_pixelsize is None:
-            data_pixelsize = pixelsize
-        else:
-            pixelsize = data_pixelsize
 
         def fun1(theta, kr):
             return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta) *\
@@ -285,7 +276,7 @@ class DonutBeam:
         
         alpha = numpy.arcsin(na / n)
         
-        diameter = 2.233 * self.lambda_ / (na * pixelsize)
+        diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
         center = int(n_pixels / 2)
         
@@ -306,7 +297,7 @@ class DonutBeam:
                 
                 angle, radius = utils.cart2pol(w_rel, h_rel)
                 
-                kr = k * radius * pixelsize
+                kr = k * radius * datamap_pixelsize
                 
                 i1[y, x] = scipy.integrate.quad(fun1, 0, alpha, (kr,))[0]
                 i2[y, x] = scipy.integrate.quad(fun2, 0, alpha, (kr,))[0]
@@ -356,8 +347,8 @@ class DonutBeam:
         
         idx_mid = int((intensity.shape[0]-1) / 2)
         r_out, r_in = utils.fwhm_donut(intensity[idx_mid])
-        big_area = numpy.pi * (r_out * pixelsize)**2 / 2
-        small_area = numpy.pi * (r_in * pixelsize)**2 / 2
+        big_area = numpy.pi * (r_out * datamap_pixelsize) ** 2 / 2
+        small_area = numpy.pi * (r_in * datamap_pixelsize) ** 2 / 2
         area_fwhm = big_area - small_area
         
         # [RPPhoto2015]
@@ -423,7 +414,7 @@ class Detector:
         self.pcef = kwargs.get("pcef", 0.1)
         self.pdef = kwargs.get("pdef", 0.5)
     
-    def get_detection_psf(self, lambda_, psf, na, transmission, pixelsize):
+    def get_detection_psf(self, lambda_, psf, na, transmission, datamap_pixelsize):
         '''Compute the detection PSF as a convolution between the fluorscence
         PSF and a pinhole, as described by the equation from [Willig2006]_. The
         pinhole raidus is determined using the :attr:`n_airy`, the fluorescence
@@ -435,11 +426,11 @@ class Detector:
         :param na: The numerical aperture of the objective.
         :param transmission: The transmission ratio of the objective for the
                              given fluorescence wavelength *lambda_*.
-        :param pixelsize: The size of a pixel in the simulated image (m).
+        :param datamap_pixelsize: The size of a pixel in the simulated image (m).
         :returns: A 2D array.
         '''
         radius = self.n_airy * 0.61 * lambda_ / na
-        pinhole = utils.pinhole(radius, pixelsize, psf.shape[0])
+        pinhole = utils.pinhole(radius, datamap_pixelsize, psf.shape[0])
         # convolution [Willig2006] eq. 3
         psf_det = scipy.signal.convolve2d(psf, pinhole, "same")
         # normalization to 1
@@ -605,27 +596,27 @@ class Fluorescence:
         '''
         return self.phy_react[int(lambda_ * 1e9)]
     
-    def get_psf(self, na, pixelsize):
+    def get_psf(self, na, datamap_pixelsize):
         '''Compute the Gaussian-shaped fluorescence PSF.
         
         :param na: The numerical aperture of the objective.
-        :param pixelsize: The size of an element in the intensity matrix (m).
+        :param datamap_pixelsize: The size of an element in the intensity matrix (m).
         :returns: A 2D array.
         '''
-        diameter = 2.233 * self.lambda_ / (na * pixelsize)
+        diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
         center = int(n_pixels / 2)
         
         fwhm = self.lambda_ / (2 * na)
         
-        half_pixelsize = pixelsize / 2
+        half_pixelsize = datamap_pixelsize / 2
         gauss = numpy.zeros((n_pixels, n_pixels))
         for y in range(n_pixels):
-            h_rel = (center - y) * pixelsize
+            h_rel = (center - y) * datamap_pixelsize
             h_lb = h_rel - half_pixelsize
             h_ub = h_rel + half_pixelsize
             for x in range(n_pixels):
-                w_rel = (x - center) * pixelsize
+                w_rel = (x - center) * datamap_pixelsize
                 w_lb = w_rel - half_pixelsize
                 w_ub = w_rel + half_pixelsize
                 gauss[y, x] = scipy.integrate.nquad(cUtils.calculate_amplitude,
@@ -676,60 +667,51 @@ class Microscope:
     def __str__(self):
         return str(self.__cache.keys())
     
-    def is_cached(self, pixelsize, data_pixelsize=None):
+    def is_cached(self, datamap_pixelsize):
         '''Indicate the presence of a cache entry for the given pixel size.
         
-        :param pixelsize: The size of a pixel in the simulated image (m).
+        :param datamap_pixelsize: The size of a pixel in the simulated image (m).
         :returns: A boolean.
         '''
-        if data_pixelsize is None:
-            data_pixelsize = pixelsize
-        else:
-            pixelsize = data_pixelsize
 
-        pixelsize_nm = int(pixelsize * 1e9)
-        return pixelsize_nm in self.__cache
+        datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
+        return datamap_pixelsize_nm in self.__cache
     
-    def cache(self, pixelsize, data_pixelsize=None):
+    def cache(self, datamap_pixelsize):
         '''Compute and cache the excitation and STED intensities, and the
         fluorescence PSF. These intensities are computed with a power of 1 W
         such that they can serve as a basis to compute intensities with any
         power.
         
-        :param pixelsize: The size of a pixel in the simulated image (m).
-        :param data_pixelsize: The size of a pixel in the raw data (m)
+        :param datamap_pixelsize: The size of a pixel in the simulated image (m).
         :returns: A tuple containing:
         
                   * A 2D array of the excitation intensity for a power of 1 W;
                   * A 2D array of the STED intensity for a a power of 1 W;
                   * A 2D array of the detection PSF.
         '''
-        if data_pixelsize is None:
-            data_pixelsize = pixelsize
-        else:
-            pixelsize = data_pixelsize
 
-        pixelsize_nm = int(pixelsize * 1e9)
-        if pixelsize_nm not in self.__cache:
+        datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
+        if datamap_pixelsize_nm not in self.__cache:
             f, n, na = self.objective.f, self.objective.n, self.objective.na
             
             transmission = self.objective.get_transmission(self.excitation.lambda_)
             i_ex = self.excitation.get_intensity(1, f, n, na,
-                                                 transmission, pixelsize, data_pixelsize)
+                                                 transmission, datamap_pixelsize)
             
             transmission = self.objective.get_transmission(self.sted.lambda_)
             i_sted = self.sted.get_intensity(1, f, n, na,
-                                             transmission, pixelsize, data_pixelsize)
-            
+                                             transmission, datamap_pixelsize)
             
             transmission = self.objective.get_transmission(self.fluo.lambda_)
-            psf = self.fluo.get_psf(na, pixelsize)
+            psf = self.fluo.get_psf(na, datamap_pixelsize)
+            # should take data_pixelsize instead of pixelsize, right? same for psf above?
             psf_det = self.detector.get_detection_psf(self.fluo.lambda_, psf,
                                                       na, transmission,
-                                                      pixelsize)
-            self.__cache[pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
+                                                      datamap_pixelsize)
+            self.__cache[datamap_pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
 
-        return self.__cache[pixelsize_nm]
+        return self.__cache[datamap_pixelsize_nm]
 
     def cache_verif(self, pixelsize, data_pixelsize=None):
         '''Compute and cache the excitation and STED intensities, and the
@@ -744,6 +726,7 @@ class Microscope:
                   * A 2D array of the excitation intensity for a power of 1 W;
                   * A 2D array of the STED intensity for a a power of 1 W;
                   * A 2D array of the detection PSF.
+        *** DELETE THIS FUNCTION ONCE MY LASERS ARE SYMMETRICAL ***
         '''
         if data_pixelsize is None:
             data_pixelsize = pixelsize
@@ -755,7 +738,7 @@ class Microscope:
             f, n, na = self.objective.f, self.objective.n, self.objective.na
 
             transmission = self.objective.get_transmission(self.excitation.lambda_)
-            i_ex = self.excitation.get_intensity(1, f, n, na, transmission, pixelsize, data_pixelsize)
+            i_ex = self.excitation.get_intensity(1, f, n, na, transmission, data_pixelsize)
 
             i_ex_flipped = numpy.zeros(i_ex.shape)
             i_ex_tr = i_ex[0:int(i_ex.shape[0] / 2) + 1, int(i_ex.shape[1] / 2):]
@@ -766,7 +749,7 @@ class Microscope:
 
             transmission = self.objective.get_transmission(self.sted.lambda_)
             i_sted = self.sted.get_intensity(1, f, n, na,
-                                             transmission, pixelsize, data_pixelsize)
+                                             transmission, data_pixelsize)
 
             i_sted_flipped = numpy.zeros(i_sted.shape)
             i_sted_tr = i_sted[0:int(i_sted.shape[0] / 2) + 1, int(i_sted.shape[1] / 2):]
@@ -804,10 +787,10 @@ class Microscope:
         '''
         self.__cache = {}
     
-    def get_effective(self, pixelsize, p_ex, p_sted, data_pixelsize=None):
+    def get_effective(self, datamap_pixelsize, p_ex, p_sted):
         '''Compute the detected signal given some molecules disposition.
         
-        :param pixelsize: The size of one pixel of the simulated image (m).
+        :param datamap_pixelsize: The size of one pixel of the simulated image (m).
         :param p_ex: The power of the depletion beam (W).
         :param p_sted: The power of the STED beam (W).
         :param data_pixelsize: The size of one pixel of the raw data (m).
@@ -816,15 +799,11 @@ class Microscope:
         The technique follows the method and equations described in
         [Willig2006]_, [Leutenegger2010]_ and [Holler2011]_.
         '''
-        if data_pixelsize is None:
-            data_pixelsize = pixelsize
-        else:
-            pixelsize = data_pixelsize
 
         h, c = scipy.constants.h, scipy.constants.c
         f, n, na = self.objective.f, self.objective.n, self.objective.na
         
-        __i_ex, __i_sted, psf_det = self.cache(pixelsize, data_pixelsize)
+        __i_ex, __i_sted, psf_det = self.cache(datamap_pixelsize)
         i_ex = __i_ex * p_ex
         i_sted = __i_sted * p_sted
         
@@ -1413,12 +1392,11 @@ class Datamap:
     :param obejctive: The objective use to image. This is used to generate the laser, needed for its shape. For the
                       acquisition to make sense, use the same obejctive used for the microscope
     """
-    def __init__(self, whole_datamap, datamap_pixelsize, objective, excitation, roi=None):
+    def __init__(self, whole_datamap, datamap_pixelsize, microscope, roi=None):
         self.datamap_pixelsize = datamap_pixelsize
         self.whole_datamap = whole_datamap
         self.shape = whole_datamap.shape
-        self.objective = objective
-        self.excitation = excitation
+        self.microscope = microscope
         if roi is None:
             # faire sélectionner une ROI? how? placer un pt aux 4 coins? juste 1 au centre?
             # Je crois que lui faire choisir 4 coins serait le best, je dis combien de pixels laisser de chaque bord
@@ -1429,9 +1407,9 @@ class Datamap:
         else:
             rows_interval = roi['rows']
             cols_interval = roi['cols']
-            f, n, na = self.objective.f, self.objective.n, self.objective.na
-            transmission = self.objective.get_transmission(self.excitation.lambda_)
-            i_ex = self.excitation.get_intensity(1, f, n, na, transmission, self.datamap_pixelsize)
+
+            i_ex, i_sted, psf_det = self.microscope.cache(self.datamap_pixelsize)
+
             rows_pad, cols_pad = i_ex.shape[0] // 2, i_ex.shape[1] // 2
             rows_min, cols_min = rows_pad, cols_pad
             rows_max, cols_max = self.whole_datamap.shape[0] - rows_pad - 1, self.whole_datamap.shape[1] - cols_pad - 1
@@ -1451,9 +1429,7 @@ class Datamap:
         """
         The goal of this function is just to pass the laser over the whole ROI to make sure it fits right :)
         """
-        f, n, na = self.objective.f, self.objective.n, self.objective.na
-        transmission = self.objective.get_transmission(self.excitation.lambda_)
-        i_ex = self.excitation.get_intensity(1, f, n, na, transmission, self.datamap_pixelsize)
+        i_ex, i_sted, psf_det = self.microscope.cache(self.datamap_pixelsize)
         ones_laser = numpy.ones(i_ex.shape)
         acquisition_pad, rows_pad, cols_pad = utils.array_padder(numpy.zeros(self.whole_datamap[self.roi].shape),
                                                                  ones_laser)
