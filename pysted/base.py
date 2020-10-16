@@ -1405,13 +1405,64 @@ class Microscope:
 class Datamap:
     """This class implements a datamap
 
-    :param molecules: The disposition of the molecules in the sample.
-    :param datamap_pixelsize: The size of a pixel of the datamap
+    :param whole_datamap: The disposition of the molecules in the sample. This represents the whole sample, from which
+                          only a region will be imaged (roi). (numpy array)
+    :param roi: A dict of tuples containing the rows and columns intervals for the ROI to image. The size of the ROI is
+                limited by the size of the lasers (and thus by the datamap_pixelsize).
+    :param datamap_pixelsize: The size of a pixel of the datamap. (m)
+    :param obejctive: The objective use to image. This is used to generate the laser, needed for its shape. For the
+                      acquisition to make sense, use the same obejctive used for the microscope
     """
-    def __init__(self, molecules, datamap_pixelsize):
-        self.molecules = molecules
-        self.shape = molecules.shape
+    def __init__(self, whole_datamap, datamap_pixelsize, objective, excitation, roi=None):
         self.datamap_pixelsize = datamap_pixelsize
+        self.whole_datamap = whole_datamap
+        self.shape = whole_datamap.shape
+        self.objective = objective
+        self.excitation = excitation
+        if roi is None:
+            # faire sélectionner une ROI? how? placer un pt aux 4 coins? juste 1 au centre?
+            # Je crois que lui faire choisir 4 coins serait le best, je dis combien de pixels laisser de chaque bord
+            # minimum pour que les lasers fittent, je fais des "moyennes" des 4 coins pour avoir le carré?
+            # ou jpense que j'vais juste définir la plus grosse ROI que je peux étant donné la taille des lasers
+            print("ROI selection is not yet implemented aha")
+            pass
+        else:
+            rows_interval = roi['rows']
+            cols_interval = roi['cols']
+            f, n, na = self.objective.f, self.objective.n, self.objective.na
+            transmission = self.objective.get_transmission(self.excitation.lambda_)
+            i_ex = self.excitation.get_intensity(1, f, n, na, transmission, self.datamap_pixelsize)
+            rows_pad, cols_pad = i_ex.shape[0] // 2, i_ex.shape[1] // 2
+            rows_min, cols_min = rows_pad, cols_pad
+            rows_max, cols_max = self.whole_datamap.shape[0] - rows_pad - 1, self.whole_datamap.shape[1] - cols_pad - 1
+
+            if rows_interval[0] < rows_min or rows_interval[1] > rows_max or \
+               cols_interval[0] < cols_min or cols_interval[1] > cols_max:
+                raise ValueError(f"ROI missplaced for datamap of shape {self.whole_datamap.shape} with lasers of shape"
+                                 f"{i_ex.shape}. ROI intervals must be within bounds "
+                                 f"rows:[{rows_min}, {rows_max}], "
+                                 f"cols:[{cols_min}, {cols_max}].")
+
+            # call self.whole_datamap[self.roi] to get the cropped to be imaged from the whole datamap
+            # intervals are inclusive, hence the + 1
+            self.roi = (slice(rows_interval[0], rows_interval[1] + 1), slice(cols_interval[0], cols_interval[1] + 1))
+
+    def test_iter_over_roi(self):
+        """
+        The goal of this function is just to pass the laser over the whole ROI to make sure it fits right :)
+        """
+        f, n, na = self.objective.f, self.objective.n, self.objective.na
+        transmission = self.objective.get_transmission(self.excitation.lambda_)
+        i_ex = self.excitation.get_intensity(1, f, n, na, transmission, self.datamap_pixelsize)
+        ones_laser = numpy.ones(i_ex.shape)
+        acquisition_pad, rows_pad, cols_pad = utils.array_padder(numpy.zeros(self.whole_datamap[self.roi].shape),
+                                                                 ones_laser)
+        pixel_list = utils.pixel_sampling(self.whole_datamap[self.roi])
+        for (row, col) in pixel_list:
+            acquisition_pad[row:row+2*rows_pad+1, col:col+2*cols_pad+1] += ones_laser
+
+        return utils.array_unpadder(acquisition_pad, ones_laser)
+
 
     def show(self):
         def pix2m(x):
@@ -1423,7 +1474,7 @@ class Datamap:
         x_size = self.shape[0] * self.datamap_pixelsize
         y_size = self.shape[1] * self.datamap_pixelsize
         fig, ax = pyplot.subplots(constrained_layout=False)
-        display = ax.imshow(self.molecules, extent=[0, x_size, y_size, 0])
+        display = ax.imshow(self.whole_datamap, extent=[0, x_size, y_size, 0])
         ax.set_xlabel(f"Position [m]")
         ax.set_ylabel(f"Position [m]")
         ax.set_title(f"Molecule disposition, \n"
@@ -1452,7 +1503,7 @@ class Datamap:
 
         # padder la datamap pour m'assurer que je puisse ajouter une sphère en périphérie de l'img aussi
         pad = pixels_width
-        padded_molecules = numpy.pad(self.molecules, pad, mode="constant")
+        padded_molecules = numpy.pad(self.whole_datamap, pad, mode="constant")
 
         if distribution == "random":
             for i in range(0, 360):
@@ -1518,4 +1569,4 @@ class Datamap:
                                                         int(y + pad + position[1])])
 
         # ligne pour un-pad
-        self.molecules = padded_molecules[pad:-pad, pad:-pad]
+        self.whole_datamap = padded_molecules[pad:-pad, pad:-pad]

@@ -552,6 +552,16 @@ def array_padder(base, laser, pad_value=0):
     return padded_base, rows_pad, cols_pad
 
 
+def pad_values(laser):
+    """
+    Returns the minimum necessary rows, cols to pad an array with if we want to iterated over all of it with a laser
+    :param laser: Array of the shape of the laser which we want to iterated over a datamap.
+    :returns: rows_pad, cols_pad, the number of rows and columns we need to pad the array with.
+    """
+    rows_pad, cols_pad = laser.shape[0] // 2, laser.shape[1] // 2
+    return rows_pad, cols_pad
+
+
 def array_unpadder(padded_base, laser):
     """
     Function used to unpad a padded array (padded_base) according to the size of the secondary array being iterated over
