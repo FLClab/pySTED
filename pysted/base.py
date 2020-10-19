@@ -173,7 +173,7 @@ class GaussianBeam:
         
         ax = numpy.sin(self.beta)
         ay = numpy.cos(self.beta) * numpy.exp(1j * self.polarization)
-        
+
         # [Xie2013] eq. 1, where exdx = e_x, eydx = e_y, and ezdx = e_z
         exdx = -ax * 1j * (i1 + i3 * numpy.cos(2*phi))
         eydx = -ax * 1j * i3 * numpy.sin(2*phi)
@@ -196,12 +196,23 @@ class GaussianBeam:
         intensity = numpy.real_if_close(intensity)
         # normalize
         intensity /= numpy.max(intensity)
+
+        # Here, the laser should be perfectly symmetrical, however, it is not because of the way python/computers handle
+        # floating point values. In order to make it symmetrical, as it should be, we flip the upper right corner of
+        # the laser over the rest of the laser, in order to "patch" it to be symmetrical. The asymetries are typically
+        # values 10^16 times smaller than the values of the laser.
+        intensity_flipped = numpy.zeros(intensity.shape)
+        intensity_tr = intensity[0: n_pixels // 2 + 1, n_pixels // 2:]
+        intensity_flipped[0: n_pixels // 2 + 1, n_pixels // 2:] = intensity_tr
+        intensity_flipped[0: n_pixels // 2 + 1, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr, 1)
+        intensity_flipped[n_pixels // 2:, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr)
+        intensity_flipped[n_pixels // 2:, n_pixels // 2:] = numpy.flip(intensity_tr, 0)
         
         idx_mid = int((intensity.shape[0]-1) / 2)
         r = utils.fwhm(intensity[idx_mid])
         area_fwhm = numpy.pi * (r * datamap_pixelsize) ** 2 / 2
         # [RPPhoto2015]
-        return intensity * 2 * transmission * power / area_fwhm
+        return intensity_flipped * 2 * transmission * power / area_fwhm
 
 
 class DonutBeam:
@@ -340,6 +351,18 @@ class DonutBeam:
         
         # normalize
         intensity /= numpy.max(intensity)
+
+        # Here, the laser should be perfectly symmetrical, however, it is not because of the way python/computers handle
+        # floating point values. In order to make it symmetrical, as it should be, we flip the upper right corner of
+        # the laser over the rest of the laser, in order to "patch" it to be symmetrical. The asymetries are typically
+        # values 10^16 times smaller than the values of the laser.
+        intensity_flipped = numpy.zeros(intensity.shape)
+        intensity_tr = intensity[0: n_pixels // 2 + 1, n_pixels // 2:]
+        intensity_flipped[0: n_pixels // 2 + 1, n_pixels // 2:] = intensity_tr
+        intensity_flipped[0: n_pixels // 2 + 1, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr, 1)
+        intensity_flipped[n_pixels // 2:, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr)
+        intensity_flipped[n_pixels // 2:, n_pixels // 2:] = numpy.flip(intensity_tr, 0)
+        intensity = intensity_flipped
         
         # for peak intensity
         duty_cycle = self.tau * self.rate
@@ -435,7 +458,21 @@ class Detector:
         psf_det = scipy.signal.convolve2d(psf, pinhole, "same")
         # normalization to 1
         psf_det = psf_det / numpy.max(psf_det)
-        return psf_det * transmission
+
+        # Here, the psf should be perfectly symmetrical, however, it is not because of the way python/computers handle
+        # floating point values. In order to make it symmetrical, as it should be, we flip the upper right corner of
+        # the psf over the rest of the laser, in order to "patch" it to be symmetrical. The asymetries are typically
+        # values 10^16 times smaller than the values of the psf.
+        returned_array = psf_det * transmission
+        ra_flipped = numpy.zeros(returned_array.shape)
+        intensity_tr = returned_array[0: returned_array.shape[0] // 2 + 1, returned_array.shape[1] // 2:]
+        ra_flipped[0: returned_array.shape[0] // 2 + 1, returned_array.shape[1] // 2:] = intensity_tr
+        ra_flipped[0: returned_array.shape[0] // 2 + 1, 0: returned_array.shape[1] // 2 + 1] = numpy.flip(intensity_tr,
+                                                                                                          1)
+        ra_flipped[returned_array.shape[0] // 2:, 0: returned_array.shape[1] // 2 + 1] = numpy.flip(intensity_tr)
+        ra_flipped[returned_array.shape[0] // 2:, returned_array.shape[1] // 2:] = numpy.flip(intensity_tr, 0)
+
+        return ra_flipped
     
     def get_signal(self, photons, dwelltime):
         '''Compute the detected signal (in photons) given the number of emitted
@@ -1416,36 +1453,34 @@ class Datamap:
         self.whole_datamap = whole_datamap.astype('int32')
         self.shape = whole_datamap.shape
         self.microscope = microscope
+        i_ex, i_sted, psf_det = self.microscope.cache(self.datamap_pixelsize)
+        rows_pad, cols_pad = i_ex.shape[0] // 2, i_ex.shape[1] // 2
+        rows_min, cols_min = rows_pad, cols_pad
+        rows_max, cols_max = self.whole_datamap.shape[0] - rows_pad - 1, self.whole_datamap.shape[1] - cols_pad - 1
         if roi is None:
-            # faire sélectionner une ROI? how? placer un pt aux 4 coins? juste 1 au centre?
-            # Je crois que lui faire choisir 4 coins serait le best, je dis combien de pixels laisser de chaque bord
-            # minimum pour que les lasers fittent, je fais des "moyennes" des 4 coins pour avoir le carré?
-            # ou jpense que j'vais juste définir la plus grosse ROI que je peux étant donné la taille des lasers
-            print("ROI selection is not yet implemented aha")
-            pass
-        else:
-            rows_interval = roi['rows']
-            cols_interval = roi['cols']
+            print(f"ROI must be within rows [{rows_min}, {rows_max}] inclusively, "
+                  f"columns must be within [{cols_min}, {cols_max}] inclusively")
+            roi = {'rows': None, 'cols': None}
+            rows_start = int(input(f"Enter a starting row, >= {rows_min} : "))
+            rows_end = int(input(f"Enter an ending row, <= {rows_max} : "))
+            cols_start = int(input(f"Enter a starting column, >= {cols_min} : "))
+            cols_end = int(input(f"Enter an ending column, <= {cols_max} : "))
+            roi['rows'] = [rows_start, rows_end]
+            roi['cols'] = [cols_start, cols_end]
 
-            i_ex, i_sted, psf_det = self.microscope.cache(self.datamap_pixelsize)
+        if roi['rows'][0] < rows_min or roi['rows'][1] > rows_max or \
+           roi['cols'][0] < cols_min or roi['cols'][1] > cols_max:
+            raise ValueError(f"ROI missplaced for datamap of shape {self.whole_datamap.shape} with lasers of shape"
+                             f"{i_ex.shape}. ROI intervals must be within bounds "
+                             f"rows:[{rows_min}, {rows_max}], "
+                             f"cols:[{cols_min}, {cols_max}].")
 
-            rows_pad, cols_pad = i_ex.shape[0] // 2, i_ex.shape[1] // 2
-            rows_min, cols_min = rows_pad, cols_pad
-            rows_max, cols_max = self.whole_datamap.shape[0] - rows_pad - 1, self.whole_datamap.shape[1] - cols_pad - 1
-
-            if rows_interval[0] < rows_min or rows_interval[1] > rows_max or \
-               cols_interval[0] < cols_min or cols_interval[1] > cols_max:
-                raise ValueError(f"ROI missplaced for datamap of shape {self.whole_datamap.shape} with lasers of shape"
-                                 f"{i_ex.shape}. ROI intervals must be within bounds "
-                                 f"rows:[{rows_min}, {rows_max}], "
-                                 f"cols:[{cols_min}, {cols_max}].")
-
-            # call self.whole_datamap[self.roi] to get the cropped to be imaged from the whole datamap
-            # intervals are inclusive, hence the + 1
-            self.roi = (slice(rows_interval[0], rows_interval[1] + 1), slice(cols_interval[0], cols_interval[1] + 1))
-            # Having a slice object is useful, but having the idx values of the 4 corners is also useful
-            self.roi_corners = {'tl': (roi['rows'][0], roi['cols'][0]), 'tr': (roi['rows'][0], roi['cols'][1]),
-                                'bl': (roi['rows'][1], roi['cols'][0]), 'br': (roi['rows'][1], roi['cols'][1])}
+        # call self.whole_datamap[self.roi] to get the crop to be imaged from the whole datamap
+        # intervals are inclusive, hence the + 1
+        self.roi = (slice(roi['rows'][0], roi['rows'][1] + 1), slice(roi['cols'][0], roi['cols'][1] + 1))
+        # Having a slice object is useful, but having the idx values of the 4 corners is also useful
+        self.roi_corners = {'tl': (roi['rows'][0], roi['cols'][0]), 'tr': (roi['rows'][0], roi['cols'][1]),
+                            'bl': (roi['rows'][1], roi['cols'][0]), 'br': (roi['rows'][1], roi['cols'][1])}
 
     def test_iter_over_roi(self):
         """
@@ -1460,7 +1495,6 @@ class Datamap:
             acquisition_pad[row:row+2*rows_pad+1, col:col+2*cols_pad+1] += ones_laser
 
         return utils.array_unpadder(acquisition_pad, ones_laser)
-
 
     def show(self):
         def pix2m(x):

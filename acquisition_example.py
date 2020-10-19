@@ -37,7 +37,7 @@ parser.add_argument("--sted", type=float, default=30e-3, help="STED power (in W)
 parser.add_argument("--zero_residual", type=float, default=0, help="Fraction of the doughnut beam that bleeds into"
                                                                    "the centre (between 0 and 1)")
 parser.add_argument("--background", type=int, default=0, help="Background photons")
-parser.add_argument("--pixelsize", type=float, default=10e-9, help="Displacement of laser between pulses. Must be a "
+parser.add_argument("--pixelsize", type=float, default=20e-9, help="Displacement of laser between pulses. Must be a "
                                                                    "multiple of the datamap_pixelsize, 10 nm. (m)")
 parser.add_argument("--bleach", type=str2bool, default=False, help="Determines wether bleaching is active or not.")
 parser.add_argument("--seed", type=int, default=None, help="Used to seed the acquisitions if wanted")
@@ -63,7 +63,7 @@ detector = base.Detector(noise=True, background=args.background)
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
 microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
-datamap_pixelsize = 10e-9
+datamap_pixelsize = 20e-9
 utils.pxsize_comp2(args.pixelsize, datamap_pixelsize)
 
 # this loads the datamap
@@ -75,18 +75,18 @@ if args.select_datamap:
     datamap = (datamap / numpy.amax(datamap) * 5).astype(int)
 else:
     datamap = utils.datamap_generator(args.shape, args.sources, args.molecules, random_state=args.seed)
+datamap_obj = base.Datamap(datamap, datamap_pixelsize, microscope)
 
 # This function pre-generates the excitation and STED beams, allowing you to visualize them if you wish
-i_ex, i_sted, psf_det = microscope.cache(args.pixelsize, datamap_pixelsize)
+i_ex, i_sted, psf_det = microscope.cache(datamap_pixelsize)
 
 # expliquer ça là :)
-signal_confocal, bleached_datamap_confocal = microscope.get_signal_and_bleach(datamap, args.pixelsize, datamap_pixelsize,
-                                                                              args.pdt, args.exc, 0, pixel_list=None,
+signal_confocal, bleached_datamap_confocal = microscope.get_signal_and_bleach(datamap_obj, args.pixelsize, args.pdt,
+                                                                              args.exc, 0, pixel_list=None,
                                                                               bleach=args.bleach)
 
-signal_sted, bleached_datamap_sted = microscope.get_signal_and_bleach(datamap, args.pixelsize, datamap_pixelsize, args.pdt,
-                                                                      args.exc, args.sted, pixel_list=None,
-                                                                      bleach=args.bleach)
+signal_sted, bleached_datamap_sted = microscope.get_signal_and_bleach(datamap_obj, args.pixelsize, args.pdt, args.exc,
+                                                                      args.sted, pixel_list=None, bleach=args.bleach)
 
 # save stuff as tiff files
 if not os.path.exists("acquisitions"):
