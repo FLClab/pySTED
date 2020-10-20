@@ -62,7 +62,6 @@ laser_sted = base.DonutBeam(575e-9, zero_residual=args.zero_residual)
 detector = base.Detector(noise=True, background=args.background)
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
-microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
 datamap_pixelsize = 20e-9
 utils.pxsize_comp2(args.pixelsize, datamap_pixelsize)
 
@@ -70,42 +69,46 @@ utils.pxsize_comp2(args.pixelsize, datamap_pixelsize)
 if args.select_datamap:
     filename = askopenfilename(initialdir="examples/data/", title="Select a .tif file",
                                filetypes=[("tif files", "*.tif *.tiff")])
-    datamap = tifffile.imread(filename)
+    molecules_disposition = tifffile.imread(filename)
     # normalize the datamap, 5 molecules/pixel at most
-    datamap = (datamap / numpy.amax(datamap) * 5).astype(int)
+    molecules_disposition = (molecules_disposition / numpy.amax(molecules_disposition) * 5).astype(int)
 else:
-    datamap = utils.datamap_generator(args.shape, args.sources, args.molecules, random_state=args.seed)
-datamap_obj = base.Datamap(datamap, datamap_pixelsize, microscope)
+    molecules_disposition = utils.datamap_generator(args.shape, args.sources, args.molecules, random_state=args.seed)
+molecules_disposition = molecules_disposition.astype(numpy.int32)
+datamap = base.Datamap(molecules_disposition, datamap_pixelsize)
+microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, datamap)
 
 # This function pre-generates the excitation and STED beams, allowing you to visualize them if you wish
 i_ex, i_sted, psf_det = microscope.cache(datamap_pixelsize)
 
 # expliquer ça là :)
-signal_confocal, bleached_datamap_confocal = microscope.get_signal_and_bleach(datamap_obj, args.pixelsize, args.pdt,
-                                                                              args.exc, 0, pixel_list=None,
-                                                                              bleach=args.bleach)
+signal_confocal = microscope.get_signal_and_bleach(args.pixelsize, args.pdt, args.exc, 0, pixel_list=None,
+                                                   bleach=args.bleach)
+confocal_bleached = numpy.copy(datamap.whole_datamap)
 
-signal_sted, bleached_datamap_sted = microscope.get_signal_and_bleach(datamap_obj, args.pixelsize, args.pdt, args.exc,
-                                                                      args.sted, pixel_list=None, bleach=args.bleach)
+datamap.whole_datamap = numpy.copy(molecules_disposition)
+signal_sted = microscope.get_signal_and_bleach(args.pixelsize, args.pdt, args.exc, args.sted, pixel_list=None,
+                                               bleach=args.bleach)
+sted_bleached = numpy.copy(datamap.whole_datamap)
 
 # save stuff as tiff files
 if not os.path.exists("acquisitions"):
     os.mkdir("acquisitions")
 new_acq_dir = "acquisitions/" + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 os.mkdir(new_acq_dir)
-image.imsave(new_acq_dir + "/datamap.tiff", datamap)
+image.imsave(new_acq_dir + "/datamap.tiff", molecules_disposition)
 image.imsave(new_acq_dir + "/signal_confocal.tiff", signal_confocal)
 image.imsave(new_acq_dir + "/signal_sted.tiff", signal_sted)
 if args.bleach:
-    image.imsave(new_acq_dir + "/bleached_datamap_confocal.tiff", bleached_datamap_confocal)
-    image.imsave(new_acq_dir + "/bleached_datamap_sted.tiff", bleached_datamap_sted)
+    image.imsave(new_acq_dir + "/bleached_datamap_confocal.tiff", confocal_bleached)
+    image.imsave(new_acq_dir + "/bleached_datamap_sted.tiff", sted_bleached)
 
 # Plot the original datamap, acquired signal and bleached datamap
 
 fig, axes = pyplot.subplots(1, 3)
 
-datamap_imshow = axes[0].imshow(datamap)
-axes[0].set_title(f"Datamap, shape = {datamap.shape}")
+datamap_imshow = axes[0].imshow(molecules_disposition)
+axes[0].set_title(f"Datamap, shape = {molecules_disposition.shape}")
 fig.colorbar(datamap_imshow, ax=axes[0], fraction=0.04, pad=0.05)
 
 confocal_imshow = axes[1].imshow(signal_confocal)
@@ -119,21 +122,21 @@ fig.colorbar(sted_imshow, ax=axes[2], fraction=0.04, pad=0.05)
 pyplot.show()
 
 if args.bleach:
-    confocal_ratio = utils.molecules_survival(datamap, bleached_datamap_confocal)
-    sted_ratio = utils.molecules_survival(datamap, bleached_datamap_sted)
+    confocal_ratio = utils.molecules_survival(molecules_disposition, confocal_bleached)
+    sted_ratio = utils.molecules_survival(molecules_disposition, sted_bleached)
 
     fig, axes = pyplot.subplots(1, 3)
 
-    datamap_imshow = axes[0].imshow(datamap)
-    axes[0].set_title(f"Datamap, shape = {datamap.shape}")
+    datamap_imshow = axes[0].imshow(molecules_disposition)
+    axes[0].set_title(f"Datamap, shape = {molecules_disposition.shape}")
     fig.colorbar(datamap_imshow, ax=axes[0], fraction=0.04, pad=0.05)
 
-    confocal_bleach_imshow = axes[1].imshow(bleached_datamap_confocal)
+    confocal_bleach_imshow = axes[1].imshow(confocal_bleached)
     axes[1].set_title(f"Bleached datamap after confocal acquisition \n"
                       f"{round(100 * confocal_ratio, 3)} % of molecules survived")
     fig.colorbar(confocal_bleach_imshow, ax=axes[1], fraction=0.04, pad=0.05)
 
-    sted_bleach_imshow = axes[2].imshow(bleached_datamap_sted)
+    sted_bleach_imshow = axes[2].imshow(sted_bleached)
     axes[2].set_title(f"Bleached datamap after STED acquisition, \n"
                       f"{round(100 * sted_ratio, 3)} % of molecules survived")
     fig.colorbar(sted_bleach_imshow, ax=axes[2], fraction=0.04, pad=0.05)

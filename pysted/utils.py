@@ -540,8 +540,7 @@ def array_padder(base, laser, pad_value=0):
     :param laser: Secondary array which will be iterated over the base array. Axes have to be of odd lengths in order
                   for it to have a well defined single pixel center.
     :param pad_value: Value of the padded region.
-    :returns: Padded version of the base array.
-    TODO: maybe returning the values used to pad could be of use?
+    :returns: Padded version of the base array, along with the number of added rows and columns
     """
 
     laser_rows, laser_cols = laser.shape

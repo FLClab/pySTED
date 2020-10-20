@@ -691,15 +691,20 @@ class Microscope:
                  fluorescence molecules to be used.
     '''
     
-    def __init__(self, excitation, sted, detector, objective, fluo):
+    def __init__(self, excitation, sted, detector, objective, fluo, datamap):
         self.excitation = excitation
         self.sted = sted
         self.detector = detector
         self.objective = objective
         self.fluo = fluo
+        self.datamap = datamap
                 
         # caching system
         self.__cache = {}
+        i_ex, i_sted, psf_det = self.cache(self.datamap.pixelsize)   # devraient tu être des attributs de mon microscope
+        # Finish initialization of datamap object by finding the biggest ROI which can be iterated over given the laser
+        # array shapes, asking the user to select what ROI they want (?)
+        self.datamap.get_roi(i_ex)
     
     def __str__(self):
         return str(self.__cache.keys())
@@ -749,69 +754,6 @@ class Microscope:
             self.__cache[datamap_pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
 
         return self.__cache[datamap_pixelsize_nm]
-
-    def cache_verif(self, pixelsize, data_pixelsize=None):
-        '''Compute and cache the excitation and STED intensities, and the
-        fluorescence PSF. These intensities are computed with a power of 1 W
-        such that they can serve as a basis to compute intensities with any
-        power.
-
-        :param pixelsize: The size of a pixel in the simulated image (m).
-        :param data_pixelsize: The size of a pixel in the raw data (m)
-        :returns: A tuple containing:
-
-                  * A 2D array of the excitation intensity for a power of 1 W;
-                  * A 2D array of the STED intensity for a a power of 1 W;
-                  * A 2D array of the detection PSF.
-        *** DELETE THIS FUNCTION ONCE MY LASERS ARE SYMMETRICAL ***
-        '''
-        if data_pixelsize is None:
-            data_pixelsize = pixelsize
-        else:
-            pixelsize = data_pixelsize
-
-        pixelsize_nm = int(pixelsize * 1e9)
-        if pixelsize_nm not in self.__cache:
-            f, n, na = self.objective.f, self.objective.n, self.objective.na
-
-            transmission = self.objective.get_transmission(self.excitation.lambda_)
-            i_ex = self.excitation.get_intensity(1, f, n, na, transmission, data_pixelsize)
-
-            i_ex_flipped = numpy.zeros(i_ex.shape)
-            i_ex_tr = i_ex[0:int(i_ex.shape[0] / 2) + 1, int(i_ex.shape[1] / 2):]
-            i_ex_flipped[0:int(i_ex.shape[0] / 2) + 1, int(i_ex.shape[1] / 2):] = i_ex_tr
-            i_ex_flipped[0:int(i_ex.shape[0] / 2) + 1, 0:int(i_ex.shape[1] / 2) + 1] = numpy.flip(i_ex_tr, 1)
-            i_ex_flipped[int(i_ex.shape[0] / 2):, 0:int(i_ex.shape[1] / 2) + 1] = numpy.flip(i_ex_tr)
-            i_ex_flipped[int(i_ex.shape[0] / 2):, int(i_ex.shape[1] / 2):] = numpy.flip(i_ex_tr, 0)
-
-            transmission = self.objective.get_transmission(self.sted.lambda_)
-            i_sted = self.sted.get_intensity(1, f, n, na,
-                                             transmission, data_pixelsize)
-
-            i_sted_flipped = numpy.zeros(i_sted.shape)
-            i_sted_tr = i_sted[0:int(i_sted.shape[0] / 2) + 1, int(i_sted.shape[1] / 2):]
-            i_sted_flipped[0:int(i_sted.shape[0] / 2) + 1, int(i_sted.shape[1] / 2):] = i_sted_tr
-            i_sted_flipped[0:int(i_sted.shape[0] / 2) + 1, 0:int(i_sted.shape[1] / 2) + 1] = numpy.flip(i_sted_tr, 1)
-            i_sted_flipped[int(i_sted.shape[0] / 2):, 0:int(i_sted.shape[1] / 2) + 1] = numpy.flip(i_sted_tr)
-            i_sted_flipped[int(i_sted.shape[0] / 2):, int(i_sted.shape[1] / 2):] = numpy.flip(i_sted_tr, 0)
-
-            transmission = self.objective.get_transmission(self.fluo.lambda_)
-            psf = self.fluo.get_psf(na, pixelsize)
-            psf_det = self.detector.get_detection_psf(self.fluo.lambda_, psf,
-                                                      na, transmission,
-                                                      pixelsize)
-
-            psf_det_flipped = numpy.zeros(psf_det.shape)
-            psf_det_tr = psf_det[0:int(psf_det.shape[0] / 2) + 1, int(psf_det.shape[1] / 2):]
-            psf_det_flipped[0:int(psf_det.shape[0] / 2) + 1, int(psf_det.shape[1] / 2):] = psf_det_tr
-            psf_det_flipped[0:int(psf_det.shape[0] / 2) + 1, 0:int(psf_det.shape[1] / 2) + 1] = numpy.flip(psf_det_tr, 1)
-            psf_det_flipped[int(psf_det.shape[0] / 2):, 0:int(psf_det.shape[1] / 2) + 1] = numpy.flip(psf_det_tr)
-            psf_det_flipped[int(psf_det.shape[0] / 2):, int(psf_det.shape[1] / 2):] = numpy.flip(psf_det_tr, 0)
-
-            # self.__cache[pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
-            self.__cache[pixelsize_nm] = utils.resize(i_ex_flipped, i_sted_flipped, psf_det_flipped)
-
-        return self.__cache[pixelsize_nm]
     
     def clear_cache(self):
         '''Empty the cache.
@@ -855,7 +797,7 @@ class Microscope:
         gamma = (zeta * k_vib) / (zeta * k_s1 + k_vib)
         T = 1 / self.sted.rate
         # probability of fluorescence given the donut
-        eta = (((1 + gamma * numpy.exp(-k_s1 * self.sted.tau * (1 + gamma))) / (1 + gamma)) -\
+        eta = (((1 + gamma * numpy.exp(-k_s1 * self.sted.tau * (1 + gamma))) / (1 + gamma)) -
               numpy.exp(-k_s1 * (gamma * self.sted.tau + T))) / (1 - numpy.exp(-k_s1 * T))
         
         # molecular brigthness [Holler2011]
@@ -1000,7 +942,7 @@ class Microscope:
 
         return new_datamap
 
-    def laser_dans_face(self, datamap_obj, pixelsize, pixeldwelltime, p_ex, p_sted, pixel_list=None):
+    def laser_dans_face(self, pixelsize, pixeldwelltime, p_ex, p_sted, pixel_list=None):
         """
         2nd test function to visualize how much laser each pixel receives
         :param datamap_obj: Datamap object on which the lasers will be applied.
@@ -1015,17 +957,17 @@ class Microscope:
         :returns: laser_received, an array containing the quantity of laser received per pixel,
                   sampled, an array containing the number of times each pixel has been covered by the laser array
         """
-        datamap_roi = datamap_obj.whole_datamap[datamap_obj.roi]
-        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_obj.datamap_pixelsize)
+        datamap_roi = self.datamap.whole_datamap[self.datamap.roi]
+        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, self.datamap.pixelsize)
 
-        i_ex, i_sted, psf_det = self.cache(datamap_obj.datamap_pixelsize)
+        i_ex, i_sted, psf_det = self.cache(self.datamap.pixelsize)
 
-        laser_received = numpy.zeros(datamap_obj.whole_datamap.shape)
-        sampled = numpy.zeros(datamap_obj.whole_datamap.shape)
-        rows_pad, cols_pad = datamap_obj.roi_corners['tl'][0], datamap_obj.roi_corners['tl'][1]
+        laser_received = numpy.zeros(self.datamap.whole_datamap.shape)
+        sampled = numpy.zeros(self.datamap.whole_datamap.shape)
+        rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
         if type(pixeldwelltime) != type(laser_received):
             # tester si cette vérification fonctionne bien :)
-            pixeldwelltime = numpy.ones(datamap_obj.whole_datamap[datamap_obj.roi].shape) * pixeldwelltime
+            pixeldwelltime = numpy.ones(self.datamap.whole_datamap[self.datamap.roi].shape) * pixeldwelltime
 
         for (row, col) in pixel_list:
             laser_applied = (i_ex * p_ex + i_sted * p_sted) * pixeldwelltime[row, col]
@@ -1038,7 +980,7 @@ class Microscope:
 
         return laser_received, sampled
 
-    def get_signal_and_bleach(self, datamap_obj, pixelsize, pixeldwelltime, p_ex, p_sted, pixel_list=None, bleach=True):
+    def get_signal_and_bleach(self, pixelsize, pixeldwelltime, p_ex, p_sted, pixel_list=None, bleach=True):
         """
         Function to bleach the datamap as the signal is acquired.
         :param datamap_obj: Datamap object on which the lasers will be applied.
@@ -1053,8 +995,8 @@ class Microscope:
         :param bleach: A bool which determines whether or not bleaching wil occur
         :returns: An array with the acquired pixelwise intensities, and the updated (bleached) datamap_obj
         """
-        datamap_roi = datamap_obj.whole_datamap[datamap_obj.roi]
-        datamap_pixelsize = datamap_obj.datamap_pixelsize
+        datamap_roi = self.datamap.whole_datamap[self.datamap.roi]
+        datamap_pixelsize = self.datamap.pixelsize
         pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
 
         i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
@@ -1064,7 +1006,7 @@ class Microscope:
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
         acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
                                           int(numpy.ceil(datamap_roi.shape[1] / ratio))))
-        rows_pad, cols_pad = datamap_obj.roi_corners['tl'][0], datamap_obj.roi_corners['tl'][1]
+        rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
 
         photons_ex = self.fluo.get_photons(i_ex * p_ex)
         k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
@@ -1077,20 +1019,20 @@ class Microscope:
         if type(pixeldwelltime) != type(psf_det):
             pixeldwelltime = numpy.ones(datamap_roi.shape) * pixeldwelltime
 
-        prob_ex = numpy.ones(datamap_obj.whole_datamap.shape)
-        prob_sted = numpy.ones(datamap_obj.whole_datamap.shape)
+        prob_ex = numpy.ones(self.datamap.whole_datamap.shape)
+        prob_sted = numpy.ones(self.datamap.whole_datamap.shape)
 
         for (row, col) in pixel_list:
             acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
-                                                                                datamap_obj.whole_datamap
+                                                                                self.datamap.whole_datamap
                                                                                 [row:row+2*rows_pad+1,
                                                                                  col:col+2*cols_pad+1])
 
             if bleach is True:
                 prob_ex[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *= numpy.exp(-k_ex * pixeldwelltime[row, col])
                 prob_sted[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *= numpy.exp(-k_sted * pixeldwelltime[row, col])
-                datamap_obj.whole_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1] = \
-                    numpy.random.binomial(datamap_obj.whole_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1],
+                self.datamap.whole_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1] = \
+                    numpy.random.binomial(self.datamap.whole_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1],
                                           prob_ex[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *
                                           prob_sted[row:row+2*rows_pad+1, col:col+2*cols_pad+1])
 
@@ -1106,7 +1048,7 @@ class Microscope:
                 pixeldwelltime_reshaped[row, col] = pixeldwelltime[row * ratio, col * ratio]
             returned_intensity = self.detector.get_signal(photons, pixeldwelltime_reshaped)
 
-        return returned_intensity, datamap_obj
+        return returned_intensity
 
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, datamap_pixelsize=None, pixel_list=None,
                           bleach=True, rescue=False):
@@ -1445,49 +1387,92 @@ class Datamap:
     :param roi: A dict of tuples containing the rows and columns intervals for the ROI to image. The size of the ROI is
                 limited by the size of the lasers (and thus by the datamap_pixelsize).
     :param datamap_pixelsize: The size of a pixel of the datamap. (m)
-    :param obejctive: The objective use to image. This is used to generate the laser, needed for its shape. For the
-                      acquisition to make sense, use the same obejctive used for the microscope
+    :param roi: The region of interest of the datamap which we will want to image. Can be either None, 'max' or a
+                dictionary like roi = {'rows': [min_row, max_row], 'cols': [min_col, max_col]}. If None, the user will
+                be asked to input the values. If 'max', the whole datamap will be used as roi, and padding will be added
+                to iterate over correctly. In this case, note that the values on the edge of acquisitions might be
+                slightly off, as there is nothing outside the roi that will contribute.
     """
-    def __init__(self, whole_datamap, datamap_pixelsize, microscope, roi=None):
-        self.datamap_pixelsize = datamap_pixelsize
-        self.whole_datamap = whole_datamap.astype('int32')
-        self.shape = whole_datamap.shape
-        self.microscope = microscope
-        i_ex, i_sted, psf_det = self.microscope.cache(self.datamap_pixelsize)
-        rows_pad, cols_pad = i_ex.shape[0] // 2, i_ex.shape[1] // 2
-        rows_min, cols_min = rows_pad, cols_pad
-        rows_max, cols_max = self.whole_datamap.shape[0] - rows_pad - 1, self.whole_datamap.shape[1] - cols_pad - 1
-        if roi is None:
+
+    def __init__(self, whole_datamap, datamap_pixelsize, roi=None):
+        self.whole_datamap = numpy.copy(whole_datamap.astype(numpy.int32))
+        self.whole_shape = self.whole_datamap.shape
+        self.pixelsize = datamap_pixelsize
+        self.roi = roi
+        # je pense que l'objet Datamap devrait aussi contenir les infos sur le p_ex, p_sted, pdt de chaque pixel
+
+    def get_roi(self, laser):
+        """
+        This method will use the lasers generated by the associated Microscope object to define the maximal ROI which
+        can be iterated upon without needing to pad the array. This can be seen as the second part of the object
+        initialisation.
+        """
+        # if the laser is useful for other functions, keep it as an attribute. don't need to do this line if not
+        self.laser = laser
+        rows_min, cols_min = self.laser.shape[0] // 2, self.laser.shape[1] // 2
+        rows_max, cols_max = self.whole_datamap.shape[0] - rows_min - 1, self.whole_datamap.shape[1] - cols_min - 1
+        # il faut que je gère le cas où la datamap est trop petite et que je n'ai pas le choix de padder de 0
+        # assumer qu'il voudra itérer sur tout la datamap alors
+
+        if self.roi is None:
+            # l'utilisateur n'a pas définit de ROI, on lui demande de la définir ici
             print(f"ROI must be within rows [{rows_min}, {rows_max}] inclusively, "
                   f"columns must be within [{cols_min}, {cols_max}] inclusively")
             roi = {'rows': None, 'cols': None}
-            rows_start = int(input(f"Enter a starting row, >= {rows_min} : "))
-            rows_end = int(input(f"Enter an ending row, <= {rows_max} : "))
-            cols_start = int(input(f"Enter a starting column, >= {cols_min} : "))
-            cols_end = int(input(f"Enter an ending column, <= {cols_max} : "))
+            rows_start = int(input(f"Enter a starting row : "))
+            rows_end = int(input(f"Enter an ending row : "))
+            cols_start = int(input(f"Enter a starting column : "))
+            cols_end = int(input(f"Enter an ending column : "))
             roi['rows'] = [rows_start, rows_end]
             roi['cols'] = [cols_start, cols_end]
 
-        if roi['rows'][0] < rows_min or roi['rows'][1] > rows_max or \
-           roi['cols'][0] < cols_min or roi['cols'][1] > cols_max:
-            raise ValueError(f"ROI missplaced for datamap of shape {self.whole_datamap.shape} with lasers of shape"
-                             f"{i_ex.shape}. ROI intervals must be within bounds "
-                             f"rows:[{rows_min}, {rows_max}], "
-                             f"cols:[{cols_min}, {cols_max}].")
+            if roi['rows'][0] < rows_min or roi['rows'][0] > rows_max or \
+               roi['rows'][1] < rows_min or roi['rows'][1] > rows_max or \
+               roi['cols'][0] < cols_min or roi['cols'][0] > cols_max or \
+               roi['cols'][1] < cols_min or roi['cols'][1] > cols_max:
+                raise ValueError(f"ROI missplaced for datamap of shape {self.whole_datamap.shape} with lasers of shape"
+                                 f"{self.laser.shape}. ROI intervals must be within bounds "
+                                 f"rows:[{rows_min}, {rows_max}], cols:[{cols_min}, {cols_max}].")
 
-        # call self.whole_datamap[self.roi] to get the crop to be imaged from the whole datamap
-        # intervals are inclusive, hence the + 1
-        self.roi = (slice(roi['rows'][0], roi['rows'][1] + 1), slice(roi['cols'][0], roi['cols'][1] + 1))
-        # Having a slice object is useful, but having the idx values of the 4 corners is also useful
-        self.roi_corners = {'tl': (roi['rows'][0], roi['cols'][0]), 'tr': (roi['rows'][0], roi['cols'][1]),
-                            'bl': (roi['rows'][1], roi['cols'][0]), 'br': (roi['rows'][1], roi['cols'][1])}
+            self.roi = (slice(roi['rows'][0], roi['rows'][1] + 1), slice(roi['cols'][0], roi['cols'][1] + 1))
+            # Having a slice object is useful, but having the idx values of the 4 corners is also useful
+            self.roi_corners = {'tl': (roi['rows'][0], roi['cols'][0]), 'tr': (roi['rows'][0], roi['cols'][1]),
+                                'bl': (roi['rows'][1], roi['cols'][0]), 'br': (roi['rows'][1], roi['cols'][1])}
+
+        elif self.roi == 'max':
+            # l'utilisateur veut itérer sur la whole_datamap, alors la padder de 0 comme normal
+            self.whole_datamap, rows_pad, cols_pad = utils.array_padder(self.whole_datamap, self.laser)
+            # def mes 4 coins et ma slice
+            self.roi = (slice(rows_pad, self.whole_datamap.shape[0] - rows_pad),
+                        slice(cols_pad, self.whole_datamap.shape[1] - cols_pad))
+            self.roi_corners = {'tl': (rows_pad, cols_pad),
+                                'tr': (rows_pad, self.whole_datamap.shape[1] - cols_pad - 1),
+                                'bl': (self.whole_datamap.shape[0] - rows_pad - 1, cols_pad),
+                                'br': (self.whole_datamap.shape[0] - rows_pad - 1,
+                                       self.whole_datamap.shape[1] - cols_pad - 1)}
+        elif type(self.roi) is dict:
+            # j'assume que l'utilisateur a passé un dictionnaire avec roi['rows'] et roi['cols'] comme intervalles
+            if self.roi['rows'][0] < rows_min or self.roi['rows'][0] > rows_max or \
+               self.roi['rows'][1] < rows_min or self.roi['rows'][1] > rows_max or \
+               self.roi['cols'][0] < cols_min or self.roi['cols'][0] > cols_max or \
+               self.roi['cols'][1] < cols_min or self.roi['cols'][1] > cols_max:
+                raise ValueError(f"ROI missplaced for datamap of shape {self.whole_datamap.shape} with lasers of shape"
+                                 f"{self.laser.shape}. ROI intervals must be within bounds "
+                                 f"rows:[{rows_min}, {rows_max}], cols:[{cols_min}, {cols_max}].")
+            self.roi_corners = {'tl': (self.roi['rows'][0], self.roi['cols'][0]),
+                                'tr': (self.roi['rows'][0], self.roi['cols'][1]),
+                                'bl': (self.roi['rows'][1], self.roi['cols'][0]),
+                                'br': (self.roi['rows'][1], self.roi['cols'][1])}
+            self.roi = (slice(self.roi_corners['tl'][0], self.roi_corners['bl'][1] + 1),
+                        slice(self.roi_corners['tl'][0], self.roi_corners['br'][1] + 1))
+        else:
+            raise ValueError("roi parameter must be either None, 'max' or dict")
 
     def test_iter_over_roi(self):
         """
         The goal of this function is just to pass the laser over the whole ROI to make sure it fits right :)
         """
-        i_ex, i_sted, psf_det = self.microscope.cache(self.datamap_pixelsize)
-        ones_laser = numpy.ones(i_ex.shape)
+        ones_laser = numpy.ones(self.laser.shape)
         acquisition_pad, rows_pad, cols_pad = utils.array_padder(numpy.zeros(self.whole_datamap[self.roi].shape),
                                                                  ones_laser)
         pixel_list = utils.pixel_sampling(self.whole_datamap[self.roi])
@@ -1496,32 +1481,10 @@ class Datamap:
 
         return utils.array_unpadder(acquisition_pad, ones_laser)
 
-    def show(self):
-        def pix2m(x):
-            return x * self.datamap_pixelsize
-
-        def m2pix(x):
-            return x / self.datamap_pixelsize
-
-        x_size = self.shape[0] * self.datamap_pixelsize
-        y_size = self.shape[1] * self.datamap_pixelsize
-        fig, ax = pyplot.subplots(constrained_layout=False)
-        display = ax.imshow(self.whole_datamap, extent=[0, x_size, y_size, 0])
-        ax.set_xlabel(f"Position [m]")
-        ax.set_ylabel(f"Position [m]")
-        ax.set_title(f"Molecule disposition, \n"
-                     f"shape = {self.shape}")
-        ax.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
-        secxax = ax.secondary_xaxis('top', functions=(m2pix, pix2m))
-        secxax.set_xlabel(f"Position [pixel]")
-        secyax = ax.secondary_yaxis('right', functions=(m2pix, pix2m))
-        secyax.set_ylabel(f"Position [pixel]")
-        fig.colorbar(display, ax=ax, fraction=0.04, pad=0.05)
-        pyplot.show()
-
     def add_sphere(self, width, position, max_molecs=3, randomness=1, distribution="random"):
         """
         Function to add a sphere containing molecules at a certain position
+        *** Probably need to revisit this if, if I even want to keep it ***
         """
         valid_distributions = ["random", "gaussian", "periphery"]
         if distribution not in valid_distributions:
@@ -1531,7 +1494,7 @@ class Datamap:
                 print(possibilites)
             raise Exception("Invalid distribution choice")
 
-        pixels_width = utils.pxsize_ratio(width, self.datamap_pixelsize)
+        pixels_width = utils.pxsize_ratio(width, self.pixelsize)
 
         # padder la datamap pour m'assurer que je puisse ajouter une sphère en périphérie de l'img aussi
         pad = pixels_width
