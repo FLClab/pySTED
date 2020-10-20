@@ -944,14 +944,8 @@ class Microscope:
 
     def laser_dans_face(self, pixelsize, pixel_list=None):
         """
-        2nd test function to visualize how much laser each pixel receives
-        :param datamap_obj: Datamap object on which the lasers will be applied.
+        Test function to visualize how much laser each pixel receives
         :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
-        :param pixeldwelltime: Time spent by the lasers on each pixel. If single value, this value will be used for each
-                               pixel iterated on. If array, the according pixeldwelltime will be used for each pixel
-                               iterated on.
-        :param p_ex: Power of the excitation beam. (W)
-        :param p_sted: Power of the STED beam. (W)
         :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
                            pixel will be done.
         :returns: laser_received, an array containing the quantity of laser received per pixel,
@@ -981,6 +975,84 @@ class Microscope:
 
     def get_signal_and_bleach(self, pixelsize, p_ex, p_sted, pixel_list=None, bleach=True):
         """
+        Function to bleach the datamap as the signal is acquired.
+        :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
+        :param p_ex: Power of the excitation beam. (W)
+        :param p_sted: Power of the STED beam. (W)
+        :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
+                           pixel of the ROI will be done.
+        :param bleach: A bool which determines whether or not bleaching wil occur
+        :returns: An array with the acquired pixelwise intensities, and the updated (bleached) datamap_obj
+        """
+        datamap_roi = self.datamap.whole_datamap[self.datamap.roi]
+        datamap_pixelsize = self.datamap.pixelsize
+        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
+
+        i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
+
+        effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
+                                          int(numpy.ceil(datamap_roi.shape[1] / ratio))))
+        rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
+        laser_pad = self.datamap.laser.shape[0] // 2
+        pdt_roi = self.datamap.pdt[self.datamap.roi]
+
+        # TODO: figure out comment faire ça pour un p_ex, p_sted variable par pixel
+        #       un dict qui contient les photons_ex pour chaque (row, col)?? seems dumb, maybe I have no other choice
+        photons_ex = self.fluo.get_photons(i_ex * p_ex)
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        prob_ex = numpy.ones(self.datamap.whole_datamap.shape)
+        prob_sted = numpy.ones(self.datamap.whole_datamap.shape)
+
+        for (row, col) in pixel_list:
+            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
+                                                                                self.datamap.whole_datamap
+                                                                                [row+rows_pad-laser_pad:
+                                                                                 row+rows_pad+laser_pad+1,
+                                                                                 col+cols_pad-laser_pad:
+                                                                                 col+cols_pad+laser_pad+1])
+
+            if bleach is True:
+                prob_ex[row+rows_pad-laser_pad:row+rows_pad+laser_pad+1,
+                        col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *= numpy.exp(-k_ex*pdt_roi[row, col])
+                prob_sted[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                          col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *= \
+                    numpy.exp(-k_sted*pdt_roi[row, col])
+                self.datamap.whole_datamap[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                                           col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] = \
+                    numpy.random.binomial(self.datamap.whole_datamap[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                                                                     col+cols_pad-laser_pad: col+cols_pad+laser_pad+1],
+                                          prob_ex[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                                                  col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *
+                                          prob_sted[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                                                    col+cols_pad-laser_pad: col+cols_pad+laser_pad+1])
+
+        photons = self.fluo.get_photons(acquired_intensity)
+
+        if photons.shape == pdt_roi.shape:
+            returned_intensity = self.detector.get_signal(photons, pdt_roi)
+        else:
+            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt_roi.shape[0] / ratio)),
+                                                   int(numpy.ceil(pdt_roi.shape[1] / ratio))))
+            new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
+            for (row, col) in new_pdt_plist:
+                pixeldwelltime_reshaped[row, col] = pdt_roi[row * ratio, col * ratio]
+            returned_intensity = self.detector.get_signal(photons, pixeldwelltime_reshaped)
+
+        return returned_intensity
+
+    def get_signal_and_bleach_functions(self, pixelsize, p_ex, p_sted, pixel_list=None, bleach=True):
+        """
+        *** BEING IMPLEMENTED / TESTED ***
+        *** THE GOAL HERE IS TO ACCEPT AND USE DIFFERENT BLEACHING FUNCTIONS THAN THE 'NORMAL' ONE ***
         Function to bleach the datamap as the signal is acquired.
         :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
         :param pixeldwelltime: Time spent by the lasers on each pixel. If single value, this value will be used for each
@@ -1433,6 +1505,8 @@ class Datamap:
         This method will use the lasers generated by the associated Microscope object to define the maximal ROI which
         can be iterated upon without needing to pad the array. This can be seen as the second part of the object
         initialisation.
+
+        DOC
         """
         # if the laser is useful for other functions, keep it as an attribute. don't need to do this line if not
         self.laser = laser
@@ -1477,6 +1551,11 @@ class Datamap:
                                 'bl': (self.whole_datamap.shape[0] - rows_pad - 1, cols_pad),
                                 'br': (self.whole_datamap.shape[0] - rows_pad - 1,
                                        self.whole_datamap.shape[1] - cols_pad - 1)}
+            # s'il choisit max, il faut alors aussi que je pad mes array de pdt, p_ex et p_sted
+            self.pdt, _, _ = utils.array_padder(self.pdt, self.laser)
+            self.p_ex, _, _ = utils.array_padder(self.p_ex, self.laser)
+            self.p_sted, _, _ = utils.array_padder(self.p_sted, self.laser)
+
         elif type(self.roi) is dict:
             # j'assume que l'utilisateur a passé un dictionnaire avec roi['rows'] et roi['cols'] comme intervalles
             if self.roi['rows'][0] < rows_min or self.roi['rows'][0] > rows_max or \

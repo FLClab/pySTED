@@ -2,7 +2,7 @@
 Code written by Benoit Turcotte, benoit.turcotte.4@ulaval.ca, October 2020
 For use by FLClab (@CERVO) authorized people
 """
-
+# TODO : fix this
 # Import packages
 import argparse
 
@@ -82,12 +82,12 @@ microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, da
 i_ex, i_sted, psf_det = microscope.cache(datamap_pixelsize)
 
 # expliquer ça là :)
-signal_confocal = microscope.get_signal_and_bleach(args.pixelsize, args.pdt, args.exc, 0, pixel_list=None,
+signal_confocal = microscope.get_signal_and_bleach(args.pixelsize, args.exc, 0, pixel_list=None,
                                                    bleach=args.bleach)
 confocal_bleached = numpy.copy(datamap.whole_datamap)
 
 datamap.whole_datamap = numpy.copy(molecules_disposition)
-signal_sted = microscope.get_signal_and_bleach(args.pixelsize, args.pdt, args.exc, args.sted, pixel_list=None,
+signal_sted = microscope.get_signal_and_bleach(args.pixelsize, args.exc, args.sted, pixel_list=None,
                                                bleach=args.bleach)
 sted_bleached = numpy.copy(datamap.whole_datamap)
 
@@ -109,6 +109,14 @@ fig, axes = pyplot.subplots(1, 3)
 
 datamap_imshow = axes[0].imshow(molecules_disposition)
 axes[0].set_title(f"Datamap, shape = {molecules_disposition.shape}")
+axes[0].plot(numpy.linspace(datamap.roi_corners['tl'][1], datamap.roi_corners['tr'][1]),
+             numpy.linspace(datamap.roi_corners['tl'][0], datamap.roi_corners['tr'][0]), color='r')   # top line
+axes[0].plot(numpy.linspace(datamap.roi_corners['bl'][1], datamap.roi_corners['br'][1]),
+             numpy.linspace(datamap.roi_corners['bl'][0], datamap.roi_corners['br'][0]), color='r')   # bottom line
+axes[0].plot(numpy.linspace(datamap.roi_corners['tl'][1], datamap.roi_corners['bl'][1]),
+             numpy.linspace(datamap.roi_corners['tl'][0], datamap.roi_corners['bl'][0]), color='r')   # left line
+axes[0].plot(numpy.linspace(datamap.roi_corners['tr'][1], datamap.roi_corners['br'][1]),
+             numpy.linspace(datamap.roi_corners['tr'][0], datamap.roi_corners['br'][0]), color='r')   # right line
 fig.colorbar(datamap_imshow, ax=axes[0], fraction=0.04, pad=0.05)
 
 confocal_imshow = axes[1].imshow(signal_confocal)
