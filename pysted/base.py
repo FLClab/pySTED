@@ -80,13 +80,14 @@ import scipy.constants
 import scipy.signal
 
 # from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
-from pysted import utils
+from pysted import utils, bleach_functions
 import cUtils
 
 # import mis par BT pour des tests
 import warnings
 from matplotlib import pyplot
 import time
+from functools import partial
 
 
 class GaussianBeam:
@@ -1013,27 +1014,18 @@ class Microscope:
         prob_sted = numpy.ones(self.datamap.whole_datamap.shape)
 
         for (row, col) in pixel_list:
+            row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
+            col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
             acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
                                                                                 self.datamap.whole_datamap
-                                                                                [row+rows_pad-laser_pad:
-                                                                                 row+rows_pad+laser_pad+1,
-                                                                                 col+cols_pad-laser_pad:
-                                                                                 col+cols_pad+laser_pad+1])
+                                                                                [row_slice, col_slice])
 
             if bleach is True:
-                prob_ex[row+rows_pad-laser_pad:row+rows_pad+laser_pad+1,
-                        col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *= numpy.exp(-k_ex*pdt_roi[row, col])
-                prob_sted[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                          col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *= \
-                    numpy.exp(-k_sted*pdt_roi[row, col])
-                self.datamap.whole_datamap[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                                           col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] = \
-                    numpy.random.binomial(self.datamap.whole_datamap[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                                                                     col+cols_pad-laser_pad: col+cols_pad+laser_pad+1],
-                                          prob_ex[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                                                  col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *
-                                          prob_sted[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                                                    col+cols_pad-laser_pad: col+cols_pad+laser_pad+1])
+                prob_ex[row_slice, col_slice] *= numpy.exp(-k_ex * pdt_roi[row, col])
+                prob_sted[row_slice, col_slice] *= numpy.exp(-k_sted * pdt_roi[row, col])
+                self.datamap.whole_datamap[row_slice, col_slice] = \
+                    numpy.random.binomial(self.datamap.whole_datamap[row_slice, col_slice],
+                                          prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
 
         photons = self.fluo.get_photons(acquired_intensity)
 
@@ -1065,6 +1057,7 @@ class Microscope:
         :param bleach: A bool which determines whether or not bleaching wil occur
         :returns: An array with the acquired pixelwise intensities, and the updated (bleached) datamap_obj
         """
+        print("YOU ARE IN THE FUNCTIONS TESTING ACQUISITION+BLEACH THINGY")
         datamap_roi = self.datamap.whole_datamap[self.datamap.roi]
         datamap_pixelsize = self.datamap.pixelsize
         pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
@@ -1079,43 +1072,38 @@ class Microscope:
         rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
         laser_pad = self.datamap.laser.shape[0] // 2
         pdt_roi = self.datamap.pdt[self.datamap.roi]
+        p_ex_roi = self.datamap.p_ex[self.datamap.roi]
+        p_sted_roi = self.datamap.p_sted[self.datamap.roi]
 
         # TODO: figure out comment faire ça pour un p_ex, p_sted variable par pixel
         #       un dict qui contient les photons_ex pour chaque (row, col)?? seems dumb, maybe I have no other choice
-        photons_ex = self.fluo.get_photons(i_ex * p_ex)
+        """photons_ex = self.fluo.get_photons(i_ex * p_ex)
         k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
 
 
         duty_cycle = self.sted.tau * self.sted.rate
         photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)"""
+        bleach_func = partial(self.datamap.bleach_func, i_ex, i_sted, self.fluo, self.excitation, self.sted)
 
         prob_ex = numpy.ones(self.datamap.whole_datamap.shape)
         prob_sted = numpy.ones(self.datamap.whole_datamap.shape)
 
         for (row, col) in pixel_list:
+            row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
+            col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
             acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
                                                                                 self.datamap.whole_datamap
-                                                                                [row+rows_pad-laser_pad:
-                                                                                 row+rows_pad+laser_pad+1,
-                                                                                 col+cols_pad-laser_pad:
-                                                                                 col+cols_pad+laser_pad+1])
+                                                                                [row_slice, col_slice])
 
             if bleach is True:
-                prob_ex[row+rows_pad-laser_pad:row+rows_pad+laser_pad+1,
-                        col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *= numpy.exp(-k_ex*pdt_roi[row, col])
-                prob_sted[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                          col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *= \
-                    numpy.exp(-k_sted*pdt_roi[row, col])
-                self.datamap.whole_datamap[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                                           col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] = \
-                    numpy.random.binomial(self.datamap.whole_datamap[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                                                                     col+cols_pad-laser_pad: col+cols_pad+laser_pad+1],
-                                          prob_ex[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                                                  col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *
-                                          prob_sted[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
-                                                    col+cols_pad-laser_pad: col+cols_pad+laser_pad+1])
+                prob_ex, prob_sted = bleach_func(p_ex_roi[row, col], p_sted_roi[row, col], pdt_roi[row, col],
+                                                 prob_ex, prob_sted, (row_slice, col_slice))
+                self.datamap.whole_datamap[row_slice, col_slice] = \
+                    numpy.random.binomial(self.datamap.whole_datamap[row_slice, col_slice],
+                                          prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
 
+        # Bleaching is done, the rest is for intensity calculation
         photons = self.fluo.get_photons(acquired_intensity)
 
         if photons.shape == pdt_roi.shape:
@@ -1479,7 +1467,8 @@ class Datamap:
         self.whole_shape = self.whole_datamap.shape
         self.pixelsize = datamap_pixelsize
         self.roi = roi
-        # je pense que l'objet Datamap devrait aussi contenir les infos sur le p_ex, p_sted, pdt de chaque pixel
+
+        # l'objet Datamap contient les infos sur le p_ex, p_sted, pdt de chaque pixel
         if type(pdt) is float:
             self.pdt = numpy.ones(self.whole_shape) * pdt
         elif type(pdt) is numpy.ndarray and self.whole_shape == pdt.shape:
@@ -1499,6 +1488,10 @@ class Datamap:
         else:
             raise TypeError("p_sted has to be either a float or a numpy array of the same shape as whole_datamap")
 
+        # la fct de bleaching normal prend 11 params, mais comment est-ce que je gère si je veux une fonction qui prend
+        # 0 params, genre ma fonction bleach_functions.fuck_tout
+        self.bleach_func = partial(bleach_functions.default_bleach)
+        # self.bleach_func = partial(bleach_functions.fuck_tout)
 
     def get_roi(self, laser):
         """
