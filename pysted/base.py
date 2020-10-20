@@ -942,7 +942,7 @@ class Microscope:
 
         return new_datamap
 
-    def laser_dans_face(self, pixelsize, pixeldwelltime, p_ex, p_sted, pixel_list=None):
+    def laser_dans_face(self, pixelsize, pixel_list=None):
         """
         2nd test function to visualize how much laser each pixel receives
         :param datamap_obj: Datamap object on which the lasers will be applied.
@@ -965,25 +965,23 @@ class Microscope:
         laser_received = numpy.zeros(self.datamap.whole_datamap.shape)
         sampled = numpy.zeros(self.datamap.whole_datamap.shape)
         rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
-        if type(pixeldwelltime) != type(laser_received):
-            # tester si cette vérification fonctionne bien :)
-            pixeldwelltime = numpy.ones(self.datamap.whole_datamap[self.datamap.roi].shape) * pixeldwelltime
+        laser_pad = self.datamap.laser.shape[0] // 2
+        pdt_roi = self.datamap.pdt[self.datamap.roi]
+        p_ex_roi = self.datamap.p_ex[self.datamap.roi]
+        p_sted_roi = self.datamap.p_sted[self.datamap.roi]
 
         for (row, col) in pixel_list:
-            laser_applied = (i_ex * p_ex + i_sted * p_sted) * pixeldwelltime[row, col]
-            sampled[row:row+2*rows_pad+1, col:col+2*cols_pad+1] += 1
-            laser_received[row:row+2*rows_pad+1, col:col+2*cols_pad+1] += laser_applied
-
-        # returning only the ROI information, should I return the whole Datamap info instead?
-        sampled = utils.array_unpadder(sampled, i_ex)
-        laser_received = utils.array_unpadder(laser_received, i_ex)
+            laser_applied = (i_ex * p_ex_roi[row, col] + i_sted * p_sted_roi[row, col]) * pdt_roi[row, col]
+            sampled[row + rows_pad - laser_pad: row + rows_pad + laser_pad + 1,
+                    col + cols_pad - laser_pad: col + cols_pad + laser_pad + 1] += 1
+            laser_received[row + rows_pad - laser_pad: row + rows_pad + laser_pad + 1,
+                           col + cols_pad - laser_pad: col + cols_pad + laser_pad + 1] += laser_applied
 
         return laser_received, sampled
 
-    def get_signal_and_bleach(self, pixelsize, pixeldwelltime, p_ex, p_sted, pixel_list=None, bleach=True):
+    def get_signal_and_bleach(self, pixelsize, p_ex, p_sted, pixel_list=None, bleach=True):
         """
         Function to bleach the datamap as the signal is acquired.
-        :param datamap_obj: Datamap object on which the lasers will be applied.
         :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
         :param pixeldwelltime: Time spent by the lasers on each pixel. If single value, this value will be used for each
                                pixel iterated on. If array, the according pixeldwelltime will be used for each pixel
@@ -1007,17 +1005,18 @@ class Microscope:
         acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
                                           int(numpy.ceil(datamap_roi.shape[1] / ratio))))
         rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
+        laser_pad = self.datamap.laser.shape[0] // 2
+        pdt_roi = self.datamap.pdt[self.datamap.roi]
 
+        # TODO: figure out comment faire ça pour un p_ex, p_sted variable par pixel
+        #       un dict qui contient les photons_ex pour chaque (row, col)?? seems dumb, maybe I have no other choice
         photons_ex = self.fluo.get_photons(i_ex * p_ex)
         k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
 
         duty_cycle = self.sted.tau * self.sted.rate
         photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
         k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
-
-        # Convert pixeldwelltime to array if it isn't one already
-        if type(pixeldwelltime) != type(psf_det):
-            pixeldwelltime = numpy.ones(datamap_roi.shape) * pixeldwelltime
 
         prob_ex = numpy.ones(self.datamap.whole_datamap.shape)
         prob_sted = numpy.ones(self.datamap.whole_datamap.shape)
@@ -1025,27 +1024,36 @@ class Microscope:
         for (row, col) in pixel_list:
             acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
                                                                                 self.datamap.whole_datamap
-                                                                                [row:row+2*rows_pad+1,
-                                                                                 col:col+2*cols_pad+1])
+                                                                                [row+rows_pad-laser_pad:
+                                                                                 row+rows_pad+laser_pad+1,
+                                                                                 col+cols_pad-laser_pad:
+                                                                                 col+cols_pad+laser_pad+1])
 
             if bleach is True:
-                prob_ex[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *= numpy.exp(-k_ex * pixeldwelltime[row, col])
-                prob_sted[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *= numpy.exp(-k_sted * pixeldwelltime[row, col])
-                self.datamap.whole_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1] = \
-                    numpy.random.binomial(self.datamap.whole_datamap[row:row+2*rows_pad+1, col:col+2*cols_pad+1],
-                                          prob_ex[row:row+2*rows_pad+1, col:col+2*cols_pad+1] *
-                                          prob_sted[row:row+2*rows_pad+1, col:col+2*cols_pad+1])
+                prob_ex[row+rows_pad-laser_pad:row+rows_pad+laser_pad+1,
+                        col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *= numpy.exp(-k_ex*pdt_roi[row, col])
+                prob_sted[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                          col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *= \
+                    numpy.exp(-k_sted*pdt_roi[row, col])
+                self.datamap.whole_datamap[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                                           col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] = \
+                    numpy.random.binomial(self.datamap.whole_datamap[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                                                                     col+cols_pad-laser_pad: col+cols_pad+laser_pad+1],
+                                          prob_ex[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                                                  col+cols_pad-laser_pad: col+cols_pad+laser_pad+1] *
+                                          prob_sted[row+rows_pad-laser_pad: row+rows_pad+laser_pad+1,
+                                                    col+cols_pad-laser_pad: col+cols_pad+laser_pad+1])
 
         photons = self.fluo.get_photons(acquired_intensity)
 
-        if photons.shape == pixeldwelltime.shape:
-            returned_intensity = self.detector.get_signal(photons, pixeldwelltime)
+        if photons.shape == pdt_roi.shape:
+            returned_intensity = self.detector.get_signal(photons, pdt_roi)
         else:
-            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pixeldwelltime.shape[0] / ratio)),
-                                                   int(numpy.ceil(pixeldwelltime.shape[1] / ratio))))
+            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt_roi.shape[0] / ratio)),
+                                                   int(numpy.ceil(pdt_roi.shape[1] / ratio))))
             new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
             for (row, col) in new_pdt_plist:
-                pixeldwelltime_reshaped[row, col] = pixeldwelltime[row * ratio, col * ratio]
+                pixeldwelltime_reshaped[row, col] = pdt_roi[row * ratio, col * ratio]
             returned_intensity = self.detector.get_signal(photons, pixeldwelltime_reshaped)
 
         return returned_intensity
@@ -1394,12 +1402,31 @@ class Datamap:
                 slightly off, as there is nothing outside the roi that will contribute.
     """
 
-    def __init__(self, whole_datamap, datamap_pixelsize, roi=None):
+    def __init__(self, whole_datamap, datamap_pixelsize, roi=None, pdt=10e-6, p_ex=1e-6, p_sted=30e-3):
         self.whole_datamap = numpy.copy(whole_datamap.astype(numpy.int32))
         self.whole_shape = self.whole_datamap.shape
         self.pixelsize = datamap_pixelsize
         self.roi = roi
         # je pense que l'objet Datamap devrait aussi contenir les infos sur le p_ex, p_sted, pdt de chaque pixel
+        if type(pdt) is float:
+            self.pdt = numpy.ones(self.whole_shape) * pdt
+        elif type(pdt) is numpy.ndarray and self.whole_shape == pdt.shape:
+            self.pdt = numpy.copy(pdt)
+        else:
+            raise TypeError("pdt has to be either a float or a numpy array of the same shape as whole_datamap")
+        if type(p_ex) is float:
+            self.p_ex = numpy.ones(self.whole_shape) * p_ex
+        elif type(p_ex) is numpy.ndarray and self.whole_shape == p_ex.shape:
+            self.p_ex = numpy.copy(p_ex)
+        else:
+            raise TypeError("p_ex has to be either a float or a numpy array of the same shape as whole_datamap")
+        if type(p_sted) is float:
+            self.p_sted = numpy.ones(self.whole_shape) * p_sted
+        elif type(p_sted) is numpy.ndarray and self.whole_shape == p_sted.shape:
+            self.p_sted = numpy.copy(p_sted)
+        else:
+            raise TypeError("p_sted has to be either a float or a numpy array of the same shape as whole_datamap")
+
 
     def get_roi(self, laser):
         """
@@ -1463,8 +1490,8 @@ class Datamap:
                                 'tr': (self.roi['rows'][0], self.roi['cols'][1]),
                                 'bl': (self.roi['rows'][1], self.roi['cols'][0]),
                                 'br': (self.roi['rows'][1], self.roi['cols'][1])}
-            self.roi = (slice(self.roi_corners['tl'][0], self.roi_corners['bl'][1] + 1),
-                        slice(self.roi_corners['tl'][0], self.roi_corners['br'][1] + 1))
+            self.roi = (slice(self.roi_corners['tl'][0], self.roi_corners['bl'][0] + 1),
+                        slice(self.roi_corners['tl'][1], self.roi_corners['br'][1] + 1))
         else:
             raise ValueError("roi parameter must be either None, 'max' or dict")
 
