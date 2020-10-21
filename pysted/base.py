@@ -702,17 +702,11 @@ class Microscope:
                 
         # caching system
         self.__cache = {}
-        i_ex, i_sted, psf_det = self.cache(self.datamap.pixelsize)   # devraient tu être des attributs de mon microscope
-        # Finish initialization of datamap object by finding the biggest ROI which can be iterated over given the laser
-        # array shapes, asking the user to select what ROI they want (?)
+        i_ex, i_sted, psf_det = self.cache(self.datamap.pixelsize)
+        # Finish initialization of datamap object by finding the biggest ROI which can be iterated over given the lasers
         self.datamap.get_roi(i_ex)
-        """
-        self.bleach_func = partial(bleach_functions.default_bleach)
-        
-        bleach_func = partial(self.datamap.bleach_func, i_ex, i_sted, self.fluo, self.excitation, self.sted)
-        prob_ex, prob_sted = bleach_func(p_ex_roi[row, col], p_sted_roi[row, col], pdt_roi[row, col],
-                                         prob_ex, prob_sted, (row_slice, col_slice))
-        """
+
+
         if bleach_func not in bleach_functions.functions_dict:
             raise ValueError("Not a valid bleaching function")
         if bleach_func == "default_bleach":
