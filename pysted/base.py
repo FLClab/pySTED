@@ -692,7 +692,7 @@ class Microscope:
                  fluorescence molecules to be used.
     '''
     
-    def __init__(self, excitation, sted, detector, objective, fluo, datamap):
+    def __init__(self, excitation, sted, detector, objective, fluo, datamap, bleach_func="default"):
         self.excitation = excitation
         self.sted = sted
         self.detector = detector
@@ -706,6 +706,20 @@ class Microscope:
         # Finish initialization of datamap object by finding the biggest ROI which can be iterated over given the laser
         # array shapes, asking the user to select what ROI they want (?)
         self.datamap.get_roi(i_ex)
+        """
+        self.bleach_func = partial(bleach_functions.default_bleach)
+        
+        bleach_func = partial(self.datamap.bleach_func, i_ex, i_sted, self.fluo, self.excitation, self.sted)
+        prob_ex, prob_sted = bleach_func(p_ex_roi[row, col], p_sted_roi[row, col], pdt_roi[row, col],
+                                         prob_ex, prob_sted, (row_slice, col_slice))
+        """
+        if bleach_func not in bleach_functions.functions_dict:
+            raise ValueError("Not a valid bleaching function")
+        if bleach_func == "default_bleach":
+            self.bleach_func = partial(bleach_functions.default_bleach, i_ex, i_sted, self.fluo, self.excitation,
+                                       self.sted)
+        else:
+            self.bleach_func = bleach_functions.functions_dict[bleach_func]
     
     def __str__(self):
         return str(self.__cache.keys())
@@ -1064,7 +1078,8 @@ class Microscope:
 
         i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
 
-        effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+        # le effective va devoir être recalculé à chaque iter :)
+        # effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
 
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
         acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
@@ -1075,21 +1090,11 @@ class Microscope:
         p_ex_roi = self.datamap.p_ex[self.datamap.roi]
         p_sted_roi = self.datamap.p_sted[self.datamap.roi]
 
-        # TODO: figure out comment faire ça pour un p_ex, p_sted variable par pixel
-        #       un dict qui contient les photons_ex pour chaque (row, col)?? seems dumb, maybe I have no other choice
-        """photons_ex = self.fluo.get_photons(i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-
-
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)"""
-        bleach_func = partial(self.datamap.bleach_func, i_ex, i_sted, self.fluo, self.excitation, self.sted)
-
         prob_ex = numpy.ones(self.datamap.whole_datamap.shape)
         prob_sted = numpy.ones(self.datamap.whole_datamap.shape)
 
         for (row, col) in pixel_list:
+            effective = self.get_effective(datamap_pixelsize, p_ex_roi[row, col], p_sted_roi[row, col])
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
             acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
@@ -1097,8 +1102,8 @@ class Microscope:
                                                                                 [row_slice, col_slice])
 
             if bleach is True:
-                prob_ex, prob_sted = bleach_func(p_ex_roi[row, col], p_sted_roi[row, col], pdt_roi[row, col],
-                                                 prob_ex, prob_sted, (row_slice, col_slice))
+                prob_ex, prob_sted = self.bleach_func(p_ex_roi[row, col], p_sted_roi[row, col], pdt_roi[row, col],
+                                                      prob_ex, prob_sted, (row_slice, col_slice))
                 self.datamap.whole_datamap[row_slice, col_slice] = \
                     numpy.random.binomial(self.datamap.whole_datamap[row_slice, col_slice],
                                           prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
@@ -1488,10 +1493,6 @@ class Datamap:
         else:
             raise TypeError("p_sted has to be either a float or a numpy array of the same shape as whole_datamap")
 
-        # la fct de bleaching normal prend 11 params, mais comment est-ce que je gère si je veux une fonction qui prend
-        # 0 params, genre ma fonction bleach_functions.fuck_tout
-        self.bleach_func = partial(bleach_functions.default_bleach)
-        # self.bleach_func = partial(bleach_functions.fuck_tout)
 
     def get_roi(self, laser):
         """

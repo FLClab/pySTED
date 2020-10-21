@@ -7,7 +7,7 @@ For use by FLClab (@CERVO) authorized people
 """
 
 import numpy
-from matplotlib import pyplot
+from functools import partial
 
 
 def default_bleach(i_ex, i_sted, fluo, excitation, sted, p_ex, p_sted, pdt, prob_ex, prob_sted, region):
@@ -29,7 +29,19 @@ def default_bleach(i_ex, i_sted, fluo, excitation, sted, p_ex, p_sted, pdt, prob
 
     return prob_ex, prob_sted
 
-def fuck_tout():
-    prob_ex = 0
-    prob_sted = 0
+
+def fuck_tout(p_ex, p_sted, pdt, prob_ex, prob_sted, region):
+    prob_ex[region] = 0
+    prob_sted[region] = 0
     return prob_ex, prob_sted
+
+
+def fifty_fifty(p_ex, p_sted, pdt, prob_ex, prob_sted, region):
+    prob_ex[region] = 0.5
+    prob_sted[region] = 0.5
+    return prob_ex, prob_sted
+
+
+# if you add a function, add it to the dict so it gets detected
+functions_dict = {"default_bleach": partial(default_bleach), "fuck_tout": partial(fuck_tout),
+                  "fifty_fifty": partial(fifty_fifty)}
