@@ -17,6 +17,12 @@ def default_bleach(i_ex, i_sted, fluo, excitation, sted, p_ex, p_sted, pdt, prob
     Is there anything else to say for now?
     :return:
     """
+    # i_ex, i_sted, fluo, excitation, sted, p_ex, p_sted, pdt, prob_ex, prob_sted, region = kwargs
+    # i_ex, i_sted = kwargs['i_ex'], kwargs['i_sted']
+    # fluo, excitation, sted = kwargs['fluo'], kwargs['excitation'], kwargs['sted']
+    # p_ex, p_sted, pdt = kwargs['p_ex'], kwargs['p_sted'], kwargs['pdt']
+    # prob_ex, prob_sted, region = kwargs['prob_ex'], kwargs['prob_sted'], kwargs['region']
+
     photons_ex = fluo.get_photons(i_ex * p_ex)
     k_ex = fluo.get_k_bleach(excitation.lambda_, photons_ex)
 
@@ -30,18 +36,41 @@ def default_bleach(i_ex, i_sted, fluo, excitation, sted, p_ex, p_sted, pdt, prob
     return prob_ex, prob_sted
 
 
-def fuck_tout(p_ex, p_sted, pdt, prob_ex, prob_sted, region):
+def fuck_tout(prob_ex, prob_sted, region, **kwargs):
     prob_ex[region] = 0
     prob_sted[region] = 0
     return prob_ex, prob_sted
 
 
-def fifty_fifty(p_ex, p_sted, pdt, prob_ex, prob_sted, region):
+def fifty_fifty(prob_ex, prob_sted, region, **kwargs):
     prob_ex[region] = 0.5
     prob_sted[region] = 0.5
     return prob_ex, prob_sted
 
 
+def sted_exc(p_ex, p_sted, prob_ex, prob_sted, region, **kwargs):
+    """
+    Meant to replicate the 'if only STED, barely bleaches, if only exc, bleaches a bit, if both, bleaches a lot
+    should probably add in the p_ex, p_sted somewhere in the calculation
+    The values I put here work well when generating a laser with dpxsz = 50 nm, but I need to find a way to make
+    it appropriate no matter the dpxsz used... 
+    """
+    if p_ex == 0 and p_sted == 0:
+        # in this case the survival probabilities do not change
+        pass
+    elif p_ex == 0 and p_sted != 0:
+        # barely bleaches
+        prob_sted[region] *= 0.999999
+    elif p_ex != 0 and p_sted == 0:
+        # bleaches a bit
+        prob_ex[region] *= 0.999993
+    else:
+        prob_sted[region] *= 0.999999
+        prob_ex[region] *= 0.99999
+    return prob_ex, prob_sted
+
+
+
 # if you add a function, add it to the dict so it gets detected
 functions_dict = {"default_bleach": partial(default_bleach), "fuck_tout": partial(fuck_tout),
-                  "fifty_fifty": partial(fifty_fifty)}
+                  "fifty_fifty": partial(fifty_fifty), "sted_exc": partial(sted_exc)}

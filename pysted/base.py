@@ -701,17 +701,12 @@ class Microscope:
                 
         # caching system
         self.__cache = {}
-        # enlever ça JE METS JUSTE ÇA POUR TESTER QU MON SHIT IMPLEM DES FUNCTIONS MARCHE ENCORE
-        i_ex, i_sted, _ = self.cache(50e-9)
-
 
         if bleach_func not in bleach_functions.functions_dict:
             raise ValueError("Not a valid bleaching function")
-        if bleach_func == "default_bleach":
-            self.bleach_func = partial(bleach_functions.default_bleach, i_ex, i_sted, self.fluo, self.excitation,
-                                       self.sted)
         else:
             self.bleach_func = bleach_functions.functions_dict[bleach_func]
+            self.bleach_func_txt = bleach_func
     
     def __str__(self):
         return str(self.__cache.keys())
@@ -948,6 +943,7 @@ class Microscope:
         """
         # la gestion de pdt, p_ex et p_sted devra être fait dans cette méthode au lieu de dans l'init de l'objet Datamap
         # pour éviter de potentielles manipulations qui seraient invisibles à l'utilisateur
+        print(f"DANS LA FONCTION BLEACH QUI PREND DES FONCTIONS DE BLEACH LULW")
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
         p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
@@ -983,8 +979,14 @@ class Microscope:
                                                                                 [row_slice, col_slice])
 
             if bleach is True:
-                prob_ex, prob_sted = self.bleach_func(p_ex[row, col], p_sted[row, col], pdt[row, col],
-                                                      prob_ex, prob_sted, (row_slice, col_slice))
+                # i_ex, i_sted, self.fluo, self.excitation, self.sted, p_ex, p_sted, pdt, prob_ex, prob_sted, region
+                # sont les 11 params nécessaires pour la fonction de bleach par défaut
+                # comment je fais pour gérer les fcts plus simples, tout en m'assurant que la fct par défaut run bien?
+                kwargs = {'i_ex': i_ex, 'i_sted': i_sted, 'fluo': self.fluo, 'excitation': self.excitation,
+                          'sted': self.sted, 'p_ex': p_ex[row, col], 'p_sted': p_sted[row, col],
+                          'pdt': pdt[row, col], 'prob_ex': prob_ex, 'prob_sted': prob_sted,
+                          'region': (row_slice, col_slice)}
+                prob_ex, prob_sted = self.bleach_func(**kwargs)
                 bleached_datamap[row_slice, col_slice] = \
                     numpy.random.binomial(bleached_datamap[row_slice, col_slice],
                                           prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
