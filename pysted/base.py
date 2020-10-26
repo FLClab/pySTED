@@ -692,27 +692,24 @@ class Microscope:
                  fluorescence molecules to be used.
     '''
     
-    def __init__(self, excitation, sted, detector, objective, fluo, datamap, bleach_func="default_bleach"):
+    def __init__(self, excitation, sted, detector, objective, fluo, bleach_func="default_bleach"):
         self.excitation = excitation
         self.sted = sted
         self.detector = detector
         self.objective = objective
         self.fluo = fluo
-        self.datamap = datamap
                 
         # caching system
         self.__cache = {}
-        # pre-compute lasers with the datamap_pixelsize. This will make it easier for the user to define a ROI
-        i_ex, i_sted, psf_det = self.cache(self.datamap.pixelsize)
 
 
-        if bleach_func not in bleach_functions.functions_dict:
-            raise ValueError("Not a valid bleaching function")
-        if bleach_func == "default_bleach":
-            self.bleach_func = partial(bleach_functions.default_bleach, i_ex, i_sted, self.fluo, self.excitation,
-                                       self.sted)
-        else:
-            self.bleach_func = bleach_functions.functions_dict[bleach_func]
+        # if bleach_func not in bleach_functions.functions_dict:
+        #     raise ValueError("Not a valid bleaching function")
+        # if bleach_func == "default_bleach":
+        #     self.bleach_func = partial(bleach_functions.default_bleach, i_ex, i_sted, self.fluo, self.excitation,
+        #                                self.sted)
+        # else:
+        #     self.bleach_func = bleach_functions.functions_dict[bleach_func]
     
     def __str__(self):
         return str(self.__cache.keys())
@@ -981,7 +978,7 @@ class Microscope:
 
         return laser_received, sampled
 
-    def get_signal_and_bleach(self, pixelsize, p_ex, p_sted, pixel_list=None, bleach=True):
+    def get_signal_and_bleach(self, datamap, pixelsize, p_ex, p_sted, pixel_list=None, bleach=True):
         """
         Function to bleach the datamap as the signal is acquired.
         :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
@@ -992,13 +989,13 @@ class Microscope:
         :param bleach: A bool which determines whether or not bleaching wil occur
         :returns: An array with the acquired pixelwise intensities, and the updated (bleached) datamap_obj
         """
-        datamap_pixelsize = self.datamap.pixelsize
+        datamap_pixelsize = datamap.pixelsize
         i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
-        if self.datamap.roi is None:
+        if datamap.roi is None:
             # demander au dude de setter une roi
-            self.datamap.set_roi(i_ex)
+            datamap.set_roi(i_ex)
 
-        datamap_roi = self.datamap.whole_datamap[self.datamap.roi]
+        datamap_roi = datamap.whole_datamap[datamap.roi]
         pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
 
         effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
@@ -1006,9 +1003,9 @@ class Microscope:
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
         acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
                                           int(numpy.ceil(datamap_roi.shape[1] / ratio))))
-        rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
+        rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
         laser_pad = i_ex.shape[0] // 2
-        pdt_roi = self.datamap.pdt[self.datamap.roi]
+        pdt_roi = datamap.pdt[datamap.roi]
 
         # TODO: figure out comment faire ça pour un p_ex, p_sted variable par pixel
         #       un dict qui contient les photons_ex pour chaque (row, col)?? seems dumb, maybe I have no other choice
@@ -1020,21 +1017,20 @@ class Microscope:
         photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
         k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
 
-        prob_ex = numpy.ones(self.datamap.whole_datamap.shape)
-        prob_sted = numpy.ones(self.datamap.whole_datamap.shape)
+        prob_ex = numpy.ones(datamap.whole_datamap.shape)
+        prob_sted = numpy.ones(datamap.whole_datamap.shape)
 
         for (row, col) in pixel_list:
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
-            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
-                                                                                self.datamap.whole_datamap
+            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective * datamap.whole_datamap
                                                                                 [row_slice, col_slice])
 
             if bleach is True:
                 prob_ex[row_slice, col_slice] *= numpy.exp(-k_ex * pdt_roi[row, col])
                 prob_sted[row_slice, col_slice] *= numpy.exp(-k_sted * pdt_roi[row, col])
-                self.datamap.whole_datamap[row_slice, col_slice] = \
-                    numpy.random.binomial(self.datamap.whole_datamap[row_slice, col_slice],
+                datamap.whole_datamap[row_slice, col_slice] = \
+                    numpy.random.binomial(datamap.whole_datamap[row_slice, col_slice],
                                           prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
 
         photons = self.fluo.get_photons(acquired_intensity)
@@ -1486,7 +1482,6 @@ class Datamap:
         else:
             raise TypeError("p_sted has to be either a float or a numpy array of the same shape as whole_datamap")
 
-
     def set_roi(self, laser, intervals=None):
         """
         This method will use the lasers generated by the associated Microscope object to define the maximal ROI which
@@ -1495,7 +1490,6 @@ class Datamap:
 
         DOC
         """
-        print(f"type(intervals) = {type(intervals)}")
         rows_min, cols_min = laser.shape[0] // 2, laser.shape[1] // 2
         rows_max, cols_max = self.whole_datamap.shape[0] - rows_min - 1, self.whole_datamap.shape[1] - cols_min - 1
         # il faut que je gère le cas où la datamap est trop petite et que je n'ai pas le choix de padder de 0
