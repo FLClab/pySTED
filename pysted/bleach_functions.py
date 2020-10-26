@@ -53,7 +53,7 @@ def sted_exc(p_ex, p_sted, prob_ex, prob_sted, region, **kwargs):
     Meant to replicate the 'if only STED, barely bleaches, if only exc, bleaches a bit, if both, bleaches a lot
     should probably add in the p_ex, p_sted somewhere in the calculation
     The values I put here work well when generating a laser with dpxsz = 50 nm, but I need to find a way to make
-    it appropriate no matter the dpxsz used... 
+    it appropriate no matter the dpxsz used...
     """
     if p_ex == 0 and p_sted == 0:
         # in this case the survival probabilities do not change
