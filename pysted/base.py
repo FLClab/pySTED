@@ -978,9 +978,10 @@ class Microscope:
 
         return laser_received, sampled
 
-    def get_signal_and_bleach(self, datamap, pixelsize, p_ex, p_sted, pixel_list=None, bleach=True):
+    def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True):
         """
         Function to bleach the datamap as the signal is acquired.
+        :param datamap: A Datamap object containing the molecule disposition
         :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
         :param p_ex: Power of the excitation beam. (W)
         :param p_sted: Power of the STED beam. (W)
@@ -989,6 +990,13 @@ class Microscope:
         :param bleach: A bool which determines whether or not bleaching wil occur
         :returns: An array with the acquired pixelwise intensities, and the updated (bleached) datamap_obj
         """
+        # la gestion de pdt, p_ex et p_sted devra être fait dans cette méthode au lieu de dans l'init de l'objet Datamap
+        # pour éviter de potentielles manipulations qui seraient invisibles à l'utilisateur
+        datamap_roi = datamap.whole_datamap[datamap.roi]
+        pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
+        p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
+        p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
+
         datamap_pixelsize = datamap.pixelsize
         i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
         if datamap.roi is None:
@@ -998,51 +1006,53 @@ class Microscope:
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
 
-        effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
+        # effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
 
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
         acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
                                           int(numpy.ceil(datamap_roi.shape[1] / ratio))))
         rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
         laser_pad = i_ex.shape[0] // 2
-        pdt_roi = datamap.pdt[datamap.roi]
 
         # TODO: figure out comment faire ça pour un p_ex, p_sted variable par pixel
         #       un dict qui contient les photons_ex pour chaque (row, col)?? seems dumb, maybe I have no other choice
-        photons_ex = self.fluo.get_photons(i_ex * p_ex)
+        # va devoir aller dans la boucle ça, je mets [0, 0] pour l'instant
+        photons_ex = self.fluo.get_photons(i_ex * p_ex[0, 0])
         k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
 
 
         duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
+        photons_sted = self.fluo.get_photons(i_sted * p_sted[0, 0] * duty_cycle)
         k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
 
         prob_ex = numpy.ones(datamap.whole_datamap.shape)
         prob_sted = numpy.ones(datamap.whole_datamap.shape)
 
         for (row, col) in pixel_list:
+            # effective va devoir être calculé à chaque iter si je veux pouvoir faire des puissances variables
+            effective = self.get_effective(datamap_pixelsize, p_ex[row, col], p_sted[row, col])
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
             acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective * datamap.whole_datamap
                                                                                 [row_slice, col_slice])
 
             if bleach is True:
-                prob_ex[row_slice, col_slice] *= numpy.exp(-k_ex * pdt_roi[row, col])
-                prob_sted[row_slice, col_slice] *= numpy.exp(-k_sted * pdt_roi[row, col])
+                prob_ex[row_slice, col_slice] *= numpy.exp(-k_ex * pdt[row, col])
+                prob_sted[row_slice, col_slice] *= numpy.exp(-k_sted * pdt[row, col])
                 datamap.whole_datamap[row_slice, col_slice] = \
                     numpy.random.binomial(datamap.whole_datamap[row_slice, col_slice],
                                           prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
 
         photons = self.fluo.get_photons(acquired_intensity)
 
-        if photons.shape == pdt_roi.shape:
-            returned_intensity = self.detector.get_signal(photons, pdt_roi)
+        if photons.shape == pdt.shape:
+            returned_intensity = self.detector.get_signal(photons, pdt)
         else:
-            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt_roi.shape[0] / ratio)),
-                                                   int(numpy.ceil(pdt_roi.shape[1] / ratio))))
+            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
+                                                   int(numpy.ceil(pdt.shape[1] / ratio))))
             new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
             for (row, col) in new_pdt_plist:
-                pixeldwelltime_reshaped[row, col] = pdt_roi[row * ratio, col * ratio]
+                pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
             returned_intensity = self.detector.get_signal(photons, pixeldwelltime_reshaped)
 
         return returned_intensity
@@ -1454,33 +1464,12 @@ class Datamap:
     :param datamap_pixelsize: The size of a pixel of the datamap. (m)
     """
 
-    def __init__(self, whole_datamap, datamap_pixelsize, pdt=10e-6, p_ex=1e-6, p_sted=30e-3):
+    def __init__(self, whole_datamap, datamap_pixelsize):
         self.whole_datamap = numpy.copy(whole_datamap.astype(numpy.int32))
         self.whole_shape = self.whole_datamap.shape
         self.pixelsize = datamap_pixelsize
         self.roi = None
         self.roi_corners = None
-
-        # l'objet Datamap contient les infos sur le p_ex, p_sted, pdt de chaque pixel
-        # DELET THIS, Datamap object will not have these as attributes
-        if type(pdt) is float:
-            self.pdt = numpy.ones(self.whole_shape) * pdt
-        elif type(pdt) is numpy.ndarray and self.whole_shape == pdt.shape:
-            self.pdt = numpy.copy(pdt)
-        else:
-            raise TypeError("pdt has to be either a float or a numpy array of the same shape as whole_datamap")
-        if type(p_ex) is float:
-            self.p_ex = numpy.ones(self.whole_shape) * p_ex
-        elif type(p_ex) is numpy.ndarray and self.whole_shape == p_ex.shape:
-            self.p_ex = numpy.copy(p_ex)
-        else:
-            raise TypeError("p_ex has to be either a float or a numpy array of the same shape as whole_datamap")
-        if type(p_sted) is float:
-            self.p_sted = numpy.ones(self.whole_shape) * p_sted
-        elif type(p_sted) is numpy.ndarray and self.whole_shape == p_sted.shape:
-            self.p_sted = numpy.copy(p_sted)
-        else:
-            raise TypeError("p_sted has to be either a float or a numpy array of the same shape as whole_datamap")
 
     def set_roi(self, laser, intervals=None):
         """
