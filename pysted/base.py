@@ -706,7 +706,6 @@ class Microscope:
             raise ValueError("Not a valid bleaching function")
         else:
             self.bleach_func = bleach_functions.functions_dict[bleach_func]
-            self.bleach_func_txt = bleach_func
     
     def __str__(self):
         return str(self.__cache.keys())
