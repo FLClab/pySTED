@@ -9,13 +9,13 @@ egfp = {"lambda_": 535e-9,
         "tau": 3e-09,
         "tau_vib": 1.0e-12,
         "tau_tri": 5e-6,
-        "phy_react": {488: 1e-4,   # 1e-4
-                      575: 1e-8},   # 1e-8
+        "phy_react": {488: 1e-8,   # 1e-4
+                      575: 1e-12},   # 1e-8
         "k_isc": 0.26e6}
 
-datamap_pixelsize = 50e-9
-pixelsize = 50e-9
-pixeldwelltime = 10e-6
+datamap_pixelsize = 10e-9
+pixelsize = 10e-9
+pdt = 10e-6
 p_ex = 1e-6
 p_sted = 30e-3
 bleach = True
