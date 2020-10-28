@@ -1251,6 +1251,22 @@ class Microscope:
         return detected_photons_array, padded_datamap[int(pad / 2):-int(pad / 2), int(pad / 2):-int(pad / 2)], \
             pixeldwelltime
 
+    def get_signal_rescue_real(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
+                               rescue=False):
+        """
+        *** THIS FUNCTION IS CURRENTLY BEING IMPLEMENTED *** 
+        :param datamap:
+        :param pixelsize:
+        :param pdt:
+        :param p_ex:
+        :param p_sted:
+        :param pixel_list:
+        :param bleach:
+        :param update:
+        :param rescue:
+        :return:
+        """
+
 
 class Datamap:
     """This class implements a datamap
