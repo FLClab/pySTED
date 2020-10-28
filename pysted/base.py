@@ -1252,7 +1252,7 @@ class Microscope:
             pixeldwelltime
 
     def get_signal_rescue_real(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
-                               rescue=False):
+                               lower_th=10, upper_th=25):
         """
         *** THIS FUNCTION IS CURRENTLY BEING IMPLEMENTED ***
         :param datamap:
@@ -1294,14 +1294,25 @@ class Microscope:
         prob_ex = numpy.ones(datamap.whole_datamap.shape)
         prob_sted = numpy.ones(datamap.whole_datamap.shape)
         bleached_datamap = numpy.copy(datamap.whole_datamap)
+        returned_photons = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
 
         for (row, col) in pixel_list:
             effective = self.get_effective(datamap_pixelsize, p_ex[row, col], p_sted[row, col])
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
-            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
-                                                                                datamap.whole_datamap
-                                                                                [row_slice, col_slice])
+
+            # j'ai une intensité pour 1 pixel, que je dois convertir en un nombre de photons
+            # ensuite je dois comparer ce nombre de photons à un upper et lower threshold
+            # je dois assumer que les photons ont étés relâchés uniformément sur mon pdt, et set le pdt de ce pixel
+            # au pdt recquis pour atteindre le lower_th
+            pixel_intensity = numpy.sum(effective * datamap.whole_datamap[row_slice, col_slice])
+            pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col])
+            returned_photons[int(row / ratio), int(col / ratio)] = pixel_photons
+            # live j'ai le nb de photons reçus par le détecteur pour ce pixel
+            # je dois déterminer à chaque combien de temps un photon a été émi
+            # je dois vérifier si ça fit dans les thresholds et set le pdt au pdt requis pour avoir lower_threshold
+            # photons
+            photons_per_sec = pixel_photons / pdt[row, col]
 
             if bleach is True:
                 # i_ex, i_sted, self.fluo, self.excitation, self.sted, p_ex, p_sted, pdt, prob_ex, prob_sted, region
@@ -1317,22 +1328,22 @@ class Microscope:
                                           prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
 
         # Bleaching is done, the rest is for intensity calculation
-        photons = self.fluo.get_photons(acquired_intensity)
+        # photons = self.fluo.get_photons(acquired_intensity)
+        #
+        # if photons.shape == pdt.shape:
+        #     returned_photons = self.detector.get_signal(photons, pdt)
+        # else:
+        #     pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
+        #                                            int(numpy.ceil(pdt.shape[1] / ratio))))
+        #     new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
+        #     for (row, col) in new_pdt_plist:
+        #         pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
+        #     returned_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped)
+        #
+        # if update:
+        #     datamap.whole_datamap = bleached_datamap
 
-        if photons.shape == pdt.shape:
-            returned_intensity = self.detector.get_signal(photons, pdt)
-        else:
-            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
-                                                   int(numpy.ceil(pdt.shape[1] / ratio))))
-            new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
-            for (row, col) in new_pdt_plist:
-                pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
-            returned_intensity = self.detector.get_signal(photons, pixeldwelltime_reshaped)
-
-        if update:
-            datamap.whole_datamap = bleached_datamap
-
-        return returned_intensity, bleached_datamap
+        return returned_photons, bleached_datamap
 
 
 class Datamap:
