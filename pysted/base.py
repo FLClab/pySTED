@@ -1252,7 +1252,7 @@ class Microscope:
             pixeldwelltime
 
     def get_signal_rescue_real(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
-                               lower_th=1, ltr=0.1, upper_th=20, utr=0.9):
+                               lower_th=1, ltr=0.1, upper_th=1, utr=0.9):
         """
         *** THIS FUNCTION IS CURRENTLY BEING IMPLEMENTED ***
         :param datamap:
@@ -1283,11 +1283,7 @@ class Microscope:
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
 
-        # effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
-
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
-                                          int(numpy.ceil(datamap_roi.shape[1] / ratio))))
         rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
         laser_pad = i_ex.shape[0] // 2
 
@@ -1295,7 +1291,8 @@ class Microscope:
         prob_sted = numpy.ones(datamap.whole_datamap.shape)
         bleached_datamap = numpy.copy(datamap.whole_datamap)
         returned_photons = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
-        
+
+        nb_ut = 0
         for (row, col) in pixel_list:
             effective = self.get_effective(datamap_pixelsize, p_ex[row, col], p_sted[row, col])
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
@@ -1309,7 +1306,10 @@ class Microscope:
             if lt_time_photons < lower_th:
                 pdt[row, col] = ltr * pdt[row, col]
             elif ut_time_photons > upper_th:
-                pdt[row, col] = utr * pdt[row, col]
+                # jpense pas que je dois mult par utr, je dois mult par le temps requis pour arriver à upper_th
+                time_to_ut = upper_th / photons_per_sec
+                pdt[row, col] = time_to_ut
+                nb_ut += 1
             else:
                 pass
 
@@ -1328,7 +1328,7 @@ class Microscope:
                 bleached_datamap[row_slice, col_slice] = \
                     numpy.random.binomial(bleached_datamap[row_slice, col_slice],
                                           prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
-
+        print(f"went into upper threshold handling {nb_ut} times")
         if update:
             datamap.whole_datamap = bleached_datamap
 
