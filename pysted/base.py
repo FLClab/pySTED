@@ -855,9 +855,6 @@ class Microscope:
         :param bleach: A bool which determines whether or not bleaching wil occur
         :returns: An array with the acquired pixelwise intensities, and the updated (bleached) datamap_obj
         """
-        # la gestion de pdt, p_ex et p_sted devra être fait dans cette méthode au lieu de dans l'init de l'objet Datamap
-        # pour éviter de potentielles manipulations qui seraient invisibles à l'utilisateur
-        print(f"DANS LA FONCTION BLEACH QUI PREND DES FONCTIONS DE BLEACH LULW")
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
         p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
@@ -893,9 +890,6 @@ class Microscope:
                                                                                 [row_slice, col_slice])
 
             if bleach is True:
-                # i_ex, i_sted, self.fluo, self.excitation, self.sted, p_ex, p_sted, pdt, prob_ex, prob_sted, region
-                # sont les 11 params nécessaires pour la fonction de bleach par défaut
-                # comment je fais pour gérer les fcts plus simples, tout en m'assurant que la fct par défaut run bien?
                 kwargs = {'i_ex': i_ex, 'i_sted': i_sted, 'fluo': self.fluo, 'excitation': self.excitation,
                           'sted': self.sted, 'p_ex': p_ex[row, col], 'p_sted': p_sted[row, col],
                           'pdt': pdt[row, col], 'prob_ex': prob_ex, 'prob_sted': prob_sted,
@@ -923,8 +917,8 @@ class Microscope:
 
         return returned_intensity, bleached_datamap
 
-    def get_signal_rescue_real(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
-                               lower_th=1, ltr=0.1, upper_th=1, utr=0.9):
+    def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
+                          lower_th=1, ltr=0.1, upper_th=1, utr=0.9):
         """
         *** IMPLEM NOT 100% COMPLETE ***
         :param datamap:
