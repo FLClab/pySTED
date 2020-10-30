@@ -841,19 +841,21 @@ class Microscope:
 
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True):
         """
-        *** BEING IMPLEMENTED / TESTED ***
-        *** THE GOAL HERE IS TO ACCEPT AND USE DIFFERENT BLEACHING FUNCTIONS THAN THE 'NORMAL' ONE ***
         Function to bleach the datamap as the signal is acquired.
-        :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
-        :param pixeldwelltime: Time spent by the lasers on each pixel. If single value, this value will be used for each
-                               pixel iterated on. If array, the according pixeldwelltime will be used for each pixel
-                               iterated on.
-        :param p_ex: Power of the excitation beam. (W)
-        :param p_sted: Power of the STED beam. (W)
+        :param datamap: A Datamap object containing the relevant molecule disposition information, pixel size and ROI.
+        :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap.pixelsize. (m)
+        :param pdt: Time spent by the lasers on each pixel. Can be a float or an array of floats of same shape as
+                    as the datamap ROI (datamap.whole_datamap[datamap.roi]) (s)
+        :param p_ex: Power of the excitation beam. Can be a float or an array of floats of same shape as
+                     as the datamap ROI (datamap.whole_datamap[datamap.roi]) (W)
+        :param p_sted: Power of the STED beam. Can be a float or an array of floats of same shape as
+                       as the datamap ROI (datamap.whole_datamap[datamap.roi])(W)
         :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
-                           pixel of the ROI will be done.
-        :param bleach: A bool which determines whether or not bleaching wil occur
-        :returns: An array with the acquired pixelwise intensities, and the updated (bleached) datamap_obj
+                           pixel of the ROI will be done. Set to None by default.
+        :param bleach: A bool which determines whether or not bleaching will occur. Set to True by default.
+        :param update: A bool which determines whether or not the Datamap object will be updated with the bleaching.
+                       Set to True by default.
+        :returns: The acquired detected photons, and the bleached datamap.
         """
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
@@ -920,20 +922,29 @@ class Microscope:
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
                           lower_th=1, ltr=0.1, upper_th=1, utr=0.9):
         """
-        *** IMPLEM NOT 100% COMPLETE ***
-        :param datamap:
-        :param pixelsize:
-        :param pdt:
-        :param p_ex:
-        :param p_sted:
-        :param pixel_list:
-        :param bleach:
-        :param update:
-        :param lower_th:
-        :param ltr:
-        :param upper_th:
-        :param utr:
-        :return:
+        Function to bleach the datamap as the signal is acquired using RESCue method (EN PARLER PLUS ET METTRE UNE
+        CITATION AU PAPIER OU QQCHOSE UNE FOIS QUE J'AURAI RELU L'ARTICLE ET TOUT)
+        :param datamap: A Datamap object containing the relevant molecule disposition information, pixel size and ROI.
+        :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap.pixelsize. (m)
+        :param pdt: Time spent by the lasers on each pixel. Can be a float or an array of floats of same shape as
+                    as the datamap ROI (datamap.whole_datamap[datamap.roi]) (s)
+        :param p_ex: Power of the excitation beam. Can be a float or an array of floats of same shape as
+                     as the datamap ROI (datamap.whole_datamap[datamap.roi]) (W)
+        :param p_sted: Power of the STED beam. Can be a float or an array of floats of same shape as
+                       as the datamap ROI (datamap.whole_datamap[datamap.roi])(W)
+        :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
+                           pixel of the ROI will be done. Set to None by default.
+        :param bleach: A bool which determines whether or not bleaching will occur. Set to True by default.
+        :param update: A bool which determines whether or not the Datamap object will be updated with the bleaching.
+                       Set to True by default.
+        :param lower_th: The minimum number of photons we wish to detect on a pixel in (pdt * ltr) seconds to determine
+                         if we continue illuminating the pixel.
+        :param ltr: The ratio of the pdt time in which we will decide whether or not we continue illuminating the pixel.
+        :param upper_th: The maximum number of photons we wish to detect on a pixel in (pdt * utr) seconds before moving
+                         to the next pixel.
+        :param utr: The ratio of the pdt time in which we will decide wether or not enough photons have already been
+                    detected in order to move on to the next pixel before ellapsing the whole pdt time.
+        :returns: The acquired detected photons, and the bleached datamap.
         """
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
