@@ -935,7 +935,6 @@ class Microscope:
         :param utr:
         :return:
         """
-        print(f"DANS LA FONCTION BLEACH QUI IMPLÉMENTE RESCUE")
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
         p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
@@ -959,7 +958,6 @@ class Microscope:
         bleached_datamap = numpy.copy(datamap.whole_datamap)
         returned_photons = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
 
-        nb_ut = 0
         for (row, col) in pixel_list:
             effective = self.get_effective(datamap_pixelsize, p_ex[row, col], p_sted[row, col])
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
@@ -976,7 +974,6 @@ class Microscope:
                 # jpense pas que je dois mult par utr, je dois mult par le temps requis pour arriver à upper_th
                 time_to_ut = upper_th / photons_per_sec
                 pdt[row, col] = time_to_ut
-                nb_ut += 1
             else:
                 pass
 
@@ -992,7 +989,7 @@ class Microscope:
                 bleached_datamap[row_slice, col_slice] = \
                     numpy.random.binomial(bleached_datamap[row_slice, col_slice],
                                           prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
-        print(f"went into upper threshold handling {nb_ut} times")
+
         if update:
             datamap.whole_datamap = bleached_datamap
 
