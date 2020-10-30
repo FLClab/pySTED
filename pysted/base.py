@@ -1201,3 +1201,20 @@ class Datamap:
 
         # ligne pour un-pad
         self.whole_datamap = padded_molecules[pad:-pad, pad:-pad]
+
+
+def load_experiment_parameters(path):
+    """
+    This function handles the generation of all the objects required for an experiment, which are :
+    GaussianBeam
+    DonutBeam
+    Detector
+    Objective
+    Fluorescence
+    Microscope
+    Datamap
+    It loads the information required to generate these objects from a .txt (?) file.
+    :param path: Path to .txt (?) file used to generate the experiment objects
+    :returns: The generated objects required for an experiment
+    """
+
