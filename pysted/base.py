@@ -84,6 +84,8 @@ from pysted import utils, bleach_functions
 import cUtils
 
 # import mis par BT pour des tests
+import configparser
+import ast
 import warnings
 from matplotlib import pyplot
 import time
@@ -1203,7 +1205,7 @@ class Datamap:
         self.whole_datamap = padded_molecules[pad:-pad, pad:-pad]
 
 
-def load_experiment_parameters(path):
+def load_experiment_parameters(path, molecule_disposition):
     """
     This function handles the generation of all the objects required for an experiment, which are :
     GaussianBeam
@@ -1215,6 +1217,47 @@ def load_experiment_parameters(path):
     Datamap
     It loads the information required to generate these objects from a .txt (?) file.
     :param path: Path to .txt (?) file used to generate the experiment objects
+    :param molecule_disposition: An array representing the disposition of molecules :)
     :returns: The generated objects required for an experiment
     """
+    config = configparser.ConfigParser()
+    config.read(path)
 
+    exc_args = {s: float(config['GaussianBeam'][s]) for s in config['GaussianBeam']}
+
+    sted_args = {s: float(config['DonutBeam'][s]) for s in config['DonutBeam']}
+
+    detector_noise = bool(config['Detector']['noise'])
+    config['Detector']['noise'] = '0'
+    detector_args = {s: float(config['Detector'][s]) for s in config['Detector']}
+    detector_args['noise'] = detector_noise
+
+    objective_transmission = ast.literal_eval(config['Objective']['transmission'])
+    config['Objective']['transmission'] = '0'
+    objective_args = {s: float(config['Objective'][s]) for s in config['Objective']}
+    objective_args['transmission'] = objective_transmission
+
+
+    fluo_dict_args, fluo_dicts = ['sigma_ste', 'sigma_abs', 'phy_react'], {}
+    for dict_arg in fluo_dict_args:
+        fluo_dicts[dict_arg] = config['Fluorescence'][dict_arg]
+        config['Fluorescence'][dict_arg] = '0'
+    fluo_args = {s: float(config['Fluorescence'][s]) for s in config['Fluorescence']}
+    for dict_arg in fluo_dict_args:
+        fluo_args[dict_arg] = fluo_dicts[dict_arg]
+
+    microscope_args = config['Microscope']
+
+    datamap_args = {'pixelsize': float(config['Datamap']['pixelsize']), 'roi': config['Datamap']['roi']}
+
+    laser_ex = GaussianBeam(**exc_args)
+    laser_sted = DonutBeam(**sted_args)
+    detector = Detector(**detector_args)
+    objective = Objective(**objective_args)
+    fluo = Fluorescence(**fluo_args)
+    microscope = Microscope(laser_ex, laser_sted, detector, objective, fluo, microscope_args['bleach_func'])
+    datamap = Datamap(molecule_disposition, datamap_args['pixelsize'])
+    i_ex, _, _ = microscope.cache(datamap.pixelsize)
+    datamap.set_roi(i_ex, datamap_args['roi'])
+
+    return laser_ex, laser_sted, detector, objective, fluo, microscope, datamap
