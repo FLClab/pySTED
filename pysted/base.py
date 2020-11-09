@@ -890,7 +890,7 @@ class Microscope:
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
             acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
-                                                                                datamap.whole_datamap
+                                                                                bleached_datamap
                                                                                 [row_slice, col_slice])
 
             if bleach is True:
