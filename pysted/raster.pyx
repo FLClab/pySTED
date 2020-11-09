@@ -44,12 +44,10 @@ def raster_func_wbleach_c(
     cdef FLOATDTYPE_t value
     cdef numpy.ndarray[INTDTYPE_t, ndim=2] wdmap
     cdef int sampled_value
-    # cdef FLOATDTYPE_t prob
     cdef int prob
     cdef FLOATDTYPE_t pdt
     cdef int rsamp
-    # cdef FLOATDTYPE_t rsamp
-    # print(f"OK NOW IS THE TIME")   # added by BT for tests :)
+
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -79,14 +77,14 @@ def raster_func_wbleach_c(
 
                 # Calculates the binomial sampling
                 sampled_value = 0
-                current = bleached_datamap[s, t]   #whole_datamap[s, t]
+                current = bleached_datamap[s, t]
                 prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
                 # For each count we sample a random variable
                 for o in range(current):
-                    rsamp = rand() #/ RAND_MAX
+                    rsamp = rand()
                     if rsamp < prob:
                         sampled_value += 1
-                bleached_datamap[s, t] = sampled_value   # whole_datamap[s, t] = sampled_value
+                bleached_datamap[s, t] = sampled_value
 
                 tprime += 1
             sprime += 1
