@@ -1025,7 +1025,7 @@ class Microscope:
         return returned_intensity, bleached_datamap
 
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
-                          lower_th=1, ltr=0.1, upper_th=1, utr=0.9):
+                          lower_th=1, ltr=0.1, upper_th=1):
         """
         Function to bleach the datamap as the signal is acquired using RESCue method (EN PARLER PLUS ET METTRE UNE
         CITATION AU PAPIER OU QQCHOSE UNE FOIS QUE J'AURAI RELU L'ARTICLE ET TOUT)
@@ -1051,6 +1051,7 @@ class Microscope:
                     detected in order to move on to the next pixel before ellapsing the whole pdt time.
         :returns: The acquired detected photons, and the bleached datamap.
         """
+        #TODO : Pouvoir mettre None à upper_th
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
         p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
@@ -1083,16 +1084,22 @@ class Microscope:
             pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col])
             photons_per_sec = pixel_photons / pdt[row, col]
             lt_time_photons = photons_per_sec * ltr * pdt[row, col]
-            ut_time_photons = photons_per_sec * utr * pdt[row, col]
-            if lt_time_photons < lower_th:
-                pdt[row, col] = ltr * pdt[row, col]
-            elif ut_time_photons > upper_th:
-                # jpense pas que je dois mult par utr, je dois mult par le temps requis pour arriver à upper_th
-                time_to_ut = upper_th / photons_per_sec
-                pdt[row, col] = time_to_ut
-            else:
+            if lower_th is None:
                 pass
+            elif lt_time_photons < lower_th:
+                pdt[row, col] = ltr * pdt[row, col]
+            else:
+                if upper_th is None:
+                    pass
+                elif pixel_photons > upper_th:
+                    # jpense pas que je dois mult par utr, je dois mult par le temps requis pour arriver à upper_th
+                    time_to_ut = upper_th / photons_per_sec
+                    pdt[row, col] = time_to_ut
+                else:
+                    pass
 
+            # ça serait tu mieux de calculer mon nombre de photons avec le photons_per_sec?
+            # i think so right?
             rescue_pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col])
             returned_photons[int(row / ratio), int(col / ratio)] = rescue_pixel_photons
 
