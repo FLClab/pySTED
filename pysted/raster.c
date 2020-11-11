@@ -2727,7 +2727,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_wbleach_c(CYTHON_UNUSED Py
  *                 # For each count we sample a random variable
  *                 for o in range(current):             # <<<<<<<<<<<<<<
  *                     rsamp = rand()
- *                     if rsamp < prob:
+ *                     if rsamp <= prob:
  */
         __pyx_t_42 = __pyx_v_current;
         __pyx_t_43 = __pyx_t_42;
@@ -2738,7 +2738,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_wbleach_c(CYTHON_UNUSED Py
  *                 # For each count we sample a random variable
  *                 for o in range(current):
  *                     rsamp = rand()             # <<<<<<<<<<<<<<
- *                     if rsamp < prob:
+ *                     if rsamp <= prob:
  *                         sampled_value += 1
  */
           __pyx_v_rsamp = rand();
@@ -2746,16 +2746,16 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_wbleach_c(CYTHON_UNUSED Py
           /* "pysted/raster.pyx":85
  *                 for o in range(current):
  *                     rsamp = rand()
- *                     if rsamp < prob:             # <<<<<<<<<<<<<<
+ *                     if rsamp <= prob:             # <<<<<<<<<<<<<<
  *                         sampled_value += 1
  *                 bleached_datamap[s, t] = sampled_value
  */
-          __pyx_t_2 = ((__pyx_v_rsamp < __pyx_v_prob) != 0);
+          __pyx_t_2 = ((__pyx_v_rsamp <= __pyx_v_prob) != 0);
           if (__pyx_t_2) {
 
             /* "pysted/raster.pyx":86
  *                     rsamp = rand()
- *                     if rsamp < prob:
+ *                     if rsamp <= prob:
  *                         sampled_value += 1             # <<<<<<<<<<<<<<
  *                 bleached_datamap[s, t] = sampled_value
  * 
@@ -2765,7 +2765,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_wbleach_c(CYTHON_UNUSED Py
             /* "pysted/raster.pyx":85
  *                 for o in range(current):
  *                     rsamp = rand()
- *                     if rsamp < prob:             # <<<<<<<<<<<<<<
+ *                     if rsamp <= prob:             # <<<<<<<<<<<<<<
  *                         sampled_value += 1
  *                 bleached_datamap[s, t] = sampled_value
  */
@@ -2773,7 +2773,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_wbleach_c(CYTHON_UNUSED Py
         }
 
         /* "pysted/raster.pyx":87
- *                     if rsamp < prob:
+ *                     if rsamp <= prob:
  *                         sampled_value += 1
  *                 bleached_datamap[s, t] = sampled_value             # <<<<<<<<<<<<<<
  * 

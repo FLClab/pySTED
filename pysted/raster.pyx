@@ -82,7 +82,7 @@ def raster_func_wbleach_c(
                 # For each count we sample a random variable
                 for o in range(current):
                     rsamp = rand()
-                    if rsamp < prob:
+                    if rsamp <= prob:
                         sampled_value += 1
                 bleached_datamap[s, t] = sampled_value
 

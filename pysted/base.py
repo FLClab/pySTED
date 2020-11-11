@@ -933,6 +933,8 @@ class Microscope:
         :param bleach: A bool which determines whether or not bleaching wil occur
         :returns: An array with the acquired pixelwise intensities, and the updated (bleached) datamap_obj
         """
+        if seed is not None:
+            numpy.random.seed(seed)
         datamap_pixelsize = datamap.pixelsize
         i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
         if datamap.roi is None:
