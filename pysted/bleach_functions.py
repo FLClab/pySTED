@@ -17,11 +17,6 @@ def default_bleach(i_ex, i_sted, fluo, excitation, sted, p_ex, p_sted, pdt, prob
     Is there anything else to say for now?
     :return:
     """
-    # i_ex, i_sted, fluo, excitation, sted, p_ex, p_sted, pdt, prob_ex, prob_sted, region = kwargs
-    # i_ex, i_sted = kwargs['i_ex'], kwargs['i_sted']
-    # fluo, excitation, sted = kwargs['fluo'], kwargs['excitation'], kwargs['sted']
-    # p_ex, p_sted, pdt = kwargs['p_ex'], kwargs['p_sted'], kwargs['pdt']
-    # prob_ex, prob_sted, region = kwargs['prob_ex'], kwargs['prob_sted'], kwargs['region']
 
     photons_ex = fluo.get_photons(i_ex * p_ex)
     k_ex = fluo.get_k_bleach(excitation.lambda_, photons_ex)
