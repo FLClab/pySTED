@@ -864,14 +864,12 @@ class Microscope:
         if datamap.roi is None:
             # demander au dude de setter une roi
             datamap.set_roi(i_ex)
-            
+
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
         p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
         p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
 
-
-        datamap_roi = datamap.whole_datamap[datamap.roi]
         pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
 
         # effective = self.get_effective(datamap_pixelsize, p_ex, p_sted)
@@ -948,6 +946,7 @@ class Microscope:
 
         pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
 
+        # TODO: need to find a way to compute this inside the C function on a pixel per pixel basis
         effective = self.get_effective(datamap_pixelsize, p_ex[0, 0], p_sted[0, 0])
 
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
@@ -970,9 +969,7 @@ class Microscope:
         prob_sted = numpy.ones(datamap.whole_datamap.shape)
         bleached_datamap = numpy.copy(datamap.whole_datamap)
 
-        start = time.time()
         if isinstance(raster_func, type(None)):
-            # print("ANTHO FUNC GOES IN THE 'NORMAL' PART'")
             for (row, col) in pixel_list:
                 effective = self.get_effective(datamap_pixelsize, p_ex[row, col], p_sted[row, col])
                 row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
@@ -982,13 +979,6 @@ class Microscope:
                                                                                     [row_slice, col_slice])
 
                 if bleach is True:
-                    # prob_ex[row_slice, col_slice] *= numpy.exp(-k_ex*pdt[row, col])
-                    # prob_sted[row_slice, col_slice] *= \
-                    #     numpy.exp(-k_sted*pdt[row, col])
-                    # bleached_datamap[row_slice, col_slice] = \
-                    #     numpy.random.binomial(bleached_datamap[row_slice, col_slice],
-                    #                           prob_ex[row_slice, col_slice] *
-                    #                           prob_sted[row_slice, col_slice])
                     kwargs = {'i_ex': i_ex, 'i_sted': i_sted, 'fluo': self.fluo, 'excitation': self.excitation,
                               'sted': self.sted, 'p_ex': p_ex[row, col], 'p_sted': p_sted[row, col],
                               'pdt': pdt[row, col], 'prob_ex': prob_ex, 'prob_sted': prob_sted,
@@ -998,7 +988,6 @@ class Microscope:
                         numpy.random.binomial(bleached_datamap[row_slice, col_slice],
                                               prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
         else:
-            # print(f"ANTHO FUNC GOES INTO raster_func()")
             if seed is None:
                 seed = 0
             raster_func(
@@ -1006,7 +995,7 @@ class Microscope:
                 ratio, effective, rows_pad, cols_pad, laser_pad, datamap.whole_datamap,
                 bleach, prob_ex, prob_sted, k_ex, k_sted, pdt, bleached_datamap, seed
             )
-        elapsed = time.time() - start
+
         # Bleaching is done, the rest is for intensity calculation
         photons = self.fluo.get_photons(acquired_intensity)
 
