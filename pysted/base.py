@@ -859,16 +859,17 @@ class Microscope:
                        Set to True by default.
         :returns: The acquired detected photons, and the bleached datamap.
         """
-        datamap_roi = datamap.whole_datamap[datamap.roi]
-        pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
-        p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
-        p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
-
         datamap_pixelsize = datamap.pixelsize
         i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
         if datamap.roi is None:
             # demander au dude de setter une roi
             datamap.set_roi(i_ex)
+            
+        datamap_roi = datamap.whole_datamap[datamap.roi]
+        pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
+        p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
+        p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
+
 
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
