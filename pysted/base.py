@@ -1100,7 +1100,8 @@ class Microscope:
 
             # ça serait tu mieux de calculer mon nombre de photons avec le photons_per_sec?
             # i think so right?
-            rescue_pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col])
+            rescue_pixel_photons = photons_per_sec * pdt[row, col]
+            # rescue_pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col])
             returned_photons[int(row / ratio), int(col / ratio)] = rescue_pixel_photons
 
             if bleach is True:
