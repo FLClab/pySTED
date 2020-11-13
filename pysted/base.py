@@ -1016,6 +1016,60 @@ class Microscope:
 
         return returned_intensity, bleached_datamap
 
+    def get_signal_and_bleach_test(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True,
+                                   raster_func=None, update=True, seed=None):
+        """
+        jveux tester si passer self à la c_func marche comme il faut :)
+        """
+        if seed is not None:
+            numpy.random.seed(seed)
+        datamap_pixelsize = datamap.pixelsize
+        i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
+        if datamap.roi is None:
+            # demander au dude de setter une roi
+            datamap.set_roi(i_ex)
+
+        datamap_roi = datamap.whole_datamap[datamap.roi]
+        pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
+        p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
+        p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
+
+        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
+
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
+                                          int(numpy.ceil(datamap_roi.shape[1] / ratio))))
+        rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
+        laser_pad = i_ex.shape[0] // 2
+
+        prob_ex = numpy.ones(datamap.whole_datamap.shape)
+        prob_sted = numpy.ones(datamap.whole_datamap.shape)
+        bleached_datamap = numpy.copy(datamap.whole_datamap)
+        if seed is None:
+            seed = 0
+        raster_func(
+            self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32),
+            ratio, rows_pad, cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleached_datamap, seed
+        )
+
+        # Bleaching is done, the rest is for intensity calculation
+        photons = self.fluo.get_photons(acquired_intensity)
+
+        if photons.shape == pdt.shape:
+            returned_intensity = self.detector.get_signal(photons, pdt)
+        else:
+            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
+                                                   int(numpy.ceil(pdt.shape[1] / ratio))))
+            new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
+            for (row, col) in new_pdt_plist:
+                pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
+            returned_intensity = self.detector.get_signal(photons, pixeldwelltime_reshaped)
+
+        if update:
+            datamap.whole_datamap = bleached_datamap
+
+        return returned_intensity, bleached_datamap
+
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
                           lower_th=1, ltr=0.1, upper_th=1):
         """
