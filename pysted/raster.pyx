@@ -179,7 +179,6 @@ def raster_func_c_self(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef FLOATDTYPE_t duty_cycle
 
-    print("Everything should be defined now")
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -190,8 +189,7 @@ def raster_func_c_self(
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
 
-    for i in range(max_len):
-        row, col = pixel_list[i]
+    for (row, col) in pixel_list:
         pdt = pdt_roi[row, col]
         p_ex = p_ex_roi[row, col]
         p_sted = p_sted_roi[row, col]
