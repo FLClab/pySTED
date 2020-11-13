@@ -165,16 +165,21 @@ def raster_func_c_self(
 
     cdef int row, col
     cdef int sprime, tprime
-    cdef int h
-    cdef int w
+    cdef int h, w
     cdef int current
     cdef int max_len = len(pixel_list)
     cdef FLOATDTYPE_t value
-    cdef numpy.ndarray[INTDTYPE_t, ndim=2] wdmap
     cdef int sampled_value
     cdef int prob
     cdef int rsamp
+    cdef FLOATDTYPE_t pdt, p_ex, p_sted
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] pre_effective, effective
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex, i_sted
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
+    cdef FLOATDTYPE_t duty_cycle
 
+    print("Everything should be defined now")
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -185,10 +190,14 @@ def raster_func_c_self(
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
 
-    for (row, col) in pixel_list:
-        effective = self.get_effective(datamap.pixelsize, p_ex_roi[row, col], p_sted_roi[row, col])
+    for i in range(max_len):
+        row, col = pixel_list[i]
+        pdt = pdt_roi[row, col]
+        p_ex = p_ex_roi[row, col]
+        p_sted = p_sted_roi[row, col]
+        effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
 
-        value = 0
+        value = 0.0
         sprime = 0
         for s in range(row, row + h):
             tprime = 0
@@ -198,11 +207,10 @@ def raster_func_c_self(
             sprime += 1
         acquired_intensity[int(row / ratio), int(col / ratio)] = value
 
-        pdt = pdt_roi[row, col]
-        photons_ex = self.fluo.get_photons(i_ex * p_ex_roi[row, col])
+        photons_ex = self.fluo.get_photons(i_ex * p_ex)
         k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
         duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(i_sted * p_sted_roi[row, col] * duty_cycle)
+        photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
         k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
 
         sprime = 0
@@ -210,8 +218,8 @@ def raster_func_c_self(
             tprime = 0
             for t in range(col, col + w):
                 # Updates probabilites
-                prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt_roi[row, col])
-                prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt_roi[row, col])
+                prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
+                prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
 
                 # Calculates the binomial sampling
                 sampled_value = 0
