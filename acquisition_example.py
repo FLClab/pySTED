@@ -1,141 +1,138 @@
-"""
-Code written by Benoit Turcotte, benoit.turcotte.4@ulaval.ca, October 2020
-For use by FLClab (@CERVO) authorized people
-"""
-
 # Import packages
-import argparse
-
-from matplotlib import pyplot, image
+from matplotlib import pyplot
 import numpy
-import tifffile
-import os, datetime
-from tkinter.filedialog import askopenfilename
+import time
 
 from pysted import base, utils
-from hidden_vars import *
+import raster
 
+print(f"Starting test to see if I can pass self to raster c func :)")
 
-def str2bool(v):
-    if isinstance(v, bool):
-       return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+egfp = {"lambda_": 535e-9,
+        "qy": 0.6,
+        "sigma_abs": {488: 1.15e-20,
+                      575: 6e-21},
+        "sigma_ste": {560: 1.2e-20,
+                      575: 6.0e-21,
+                      580: 5.0e-21},
+        "sigma_tri": 1e-21,
+        "tau": 3e-09,
+        "tau_vib": 1.0e-12,
+        "tau_tri": 5e-6,
+        "phy_react": {488: 1e-6,
+                      575: 1e-10},
+        "k_isc": 0.26e6}
 
-
-# This allows for a simple way to change parametres when calling the script from the command line
-# To modify the value of the pdt parametre for example, one would type
-# python acquisition_example.py --pdt 20e-6
-parser = argparse.ArgumentParser(description="Exemple de scripte d'acquisition")
-parser.add_argument("--pdt", type=float, default=10e-6, help="pixel dwell time (in s)")
-parser.add_argument("--exc", type=float, default=1e-6,  help="excitation power (in W)")
-parser.add_argument("--sted", type=float, default=30e-3, help="STED power (in W)")
-parser.add_argument("--zero_residual", type=float, default=0, help="Fraction of the doughnut beam that bleeds into"
-                                                                   "the centre (between 0 and 1)")
-parser.add_argument("--background", type=int, default=0, help="Background photons")
-parser.add_argument("--pixelsize", type=float, default=10e-9, help="Displacement of laser between pulses. Must be a "
-                                                                   "multiple of the datamap_pixelsize, 10 nm. (m)")
-parser.add_argument("--bleach", type=str2bool, default=False, help="Determines wether bleaching is active or not.")
-parser.add_argument("--seed", type=int, default=None, help="Used to seed the acquisitions if wanted")
-parser.add_argument("--select_datamap", type=str2bool, default=False, help="If true, will open a file explorer for you"
-                                                                           "to select a .tif file as the datamap. The"
-                                                                           ".tif file will then be normalized to contain"
-                                                                           "between 0 and 5 molecules per pixel.")
-parser.add_argument("--shape", type=int, default=100, help="An int used to generate a square datamap with axes of"
-                                                           "this length.")
-parser.add_argument("--sources", type=int, default=100, help="Number of fluorophore sources to be added in the datamap")
-parser.add_argument("--molecules", type=int, default=5, help="Average number of fluorescent molecules per source in "
-                                                             "the datamap")
-args = parser.parse_args()
-
-print("Starting acquisition...")
+datamap_pixelsize = 20e-9
+p_ex = 1e-6
+p_sted = 30e-3
+pdt = 10e-6
+bleach = True
+seed = False
+random_state = None
+# ROI max is fine for bleach testing, since I'm interested in the bleaching inside the ROI :)
+roi = 'max'
+datamap_size = 200
+colorbar_params = {'fraction': 0.04, 'pad': 0.05}
 
 # Generating objects necessary for acquisition simulation
 laser_ex = base.GaussianBeam(488e-9)
-# zero_residual controls how much of the donut beam "bleeds" into the the donut hole
-laser_sted = base.DonutBeam(575e-9, zero_residual=args.zero_residual)
-# noise allows noise on the detector, background adds an average photon count for the empty pixels
-detector = base.Detector(noise=True, background=args.background)
+laser_sted = base.DonutBeam(575e-9)
+detector = base.Detector(noise=True)
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
-microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
-datamap_pixelsize = 10e-9
-utils.pxsize_comp2(args.pixelsize, datamap_pixelsize)
+microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, bleach_func="default_bleach")
+i_ex, _, _ = microscope.cache(datamap_pixelsize)
 
-# this loads the datamap
-if args.select_datamap:
-    filename = askopenfilename(initialdir="examples/data/", title="Select a .tif file",
-                               filetypes=[("tif files", "*.tif *.tiff")])
-    datamap = tifffile.imread(filename)
-    # normalize the datamap, 5 molecules/pixel at most
-    datamap = (datamap / numpy.amax(datamap) * 5).astype(int)
-else:
-    datamap = utils.datamap_generator(args.shape, args.sources, args.molecules, random_state=args.seed)
+if seed:
+    random_state = 420
+molecule_disposition = utils.datamap_generator(datamap_size, int((datamap_size ** 2 / 2)), 5,
+                                               random_state=random_state)
 
-# This function pre-generates the excitation and STED beams, allowing you to visualize them if you wish
-i_ex, i_sted, psf_det = microscope.cache(args.pixelsize, datamap_pixelsize)
+datamap = base.Datamap(molecule_disposition, datamap_pixelsize)
+datamap.set_roi(i_ex, roi)
 
-# expliquer ça là :)
-signal_confocal, bleached_datamap_confocal = microscope.get_signal_and_bleach(datamap, args.pixelsize, datamap_pixelsize,
-                                                                              args.pdt, args.exc, 0, pixel_list=None,
-                                                                              bleach=args.bleach)
+p_ex_array = numpy.linspace(0, 5*p_ex, num=datamap.whole_datamap[datamap.roi].shape[0] *
+                            datamap.whole_datamap[datamap.roi].shape[1])
+p_ex_array = numpy.reshape(p_ex_array, datamap.whole_datamap[datamap.roi].shape)
 
-signal_sted, bleached_datamap_sted = microscope.get_signal_and_bleach(datamap, args.pixelsize, datamap_pixelsize, args.pdt,
-                                                                      args.exc, args.sted, pixel_list=None,
-                                                                      bleach=args.bleach)
+p_sted_array = numpy.linspace(0, 5 * p_sted, num=datamap.whole_datamap[datamap.roi].shape[0] *
+                              datamap.whole_datamap[datamap.roi].shape[1])
+p_sted_array = numpy.reshape(p_sted_array, datamap.whole_datamap[datamap.roi].shape)
 
-# save stuff as tiff files
-if not os.path.exists("acquisitions"):
-    os.mkdir("acquisitions")
-new_acq_dir = "acquisitions/" + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-os.mkdir(new_acq_dir)
-image.imsave(new_acq_dir + "/datamap.tiff", datamap)
-image.imsave(new_acq_dir + "/signal_confocal.tiff", signal_confocal)
-image.imsave(new_acq_dir + "/signal_sted.tiff", signal_sted)
-if args.bleach:
-    image.imsave(new_acq_dir + "/bleached_datamap_confocal.tiff", bleached_datamap_confocal)
-    image.imsave(new_acq_dir + "/bleached_datamap_sted.tiff", bleached_datamap_sted)
+pdt_array = numpy.linspace(0, 5 * pdt, num=datamap.whole_datamap[datamap.roi].shape[0] *
+                           datamap.whole_datamap[datamap.roi].shape[1])
+pdt_array = numpy.reshape(pdt_array, datamap.whole_datamap[datamap.roi].shape)
 
-# Plot the original datamap, acquired signal and bleached datamap
+print(f"Starting SELF acq...")
+self_start = time.time()
+acq_self, bleached_self = microscope.get_signal_and_bleach_test(datamap, datamap.pixelsize, pdt_array, p_ex_array,
+                                                                p_sted_array, pixel_list=None, bleach=True,
+                                                                raster_func=raster.raster_func_c_self, update=False,
+                                                                seed=420)
+self_acq_time = time.time() - self_start
 
-fig, axes = pyplot.subplots(1, 3)
+print(f"Starting FAST acq...")
+fast_start = time.time()
+acq_fast, bleached_fast = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt_array, p_ex_array,
+                                                                p_sted_array, pixel_list=None, bleach=True,
+                                                                raster_func=raster.raster_func_wbleach_c, update=False,
+                                                                seed=420)
+fast_acq_time = time.time() - fast_start
 
-datamap_imshow = axes[0].imshow(datamap)
-axes[0].set_title(f"Datamap, shape = {datamap.shape}")
-fig.colorbar(datamap_imshow, ax=axes[0], fraction=0.04, pad=0.05)
+print(f"Starting OG acq...")
+og_start = time.time()
+acq_og, bleached_og = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt_array, p_ex_array, p_sted_array,
+                                                       pixel_list=None, bleach=True, update=False)
+og_acq_time = time.time() - og_start
 
-confocal_imshow = axes[1].imshow(signal_confocal)
-axes[1].set_title(f"Confocal signal, shape = {signal_confocal.shape}")
-fig.colorbar(confocal_imshow, ax=axes[1], fraction=0.04, pad=0.05)
+acq_mse = utils.mse_calculator(acq_fast, acq_self)
+bleach_mse = utils.mse_calculator(bleached_fast, bleached_self)
 
-sted_imshow = axes[2].imshow(signal_sted)
-axes[2].set_title(f"STED signal, shape = {signal_sted.shape}")
-fig.colorbar(sted_imshow, ax=axes[2], fraction=0.04, pad=0.05)
+fig, axes = pyplot.subplots(3, 3)
 
+self_datamap_imshow = axes[0, 0].imshow(datamap.whole_datamap)
+axes[0, 0].set_title(f"Datamap, \n"
+                     f"SELF acq took {self_acq_time} s")
+fig.colorbar(self_datamap_imshow, ax=axes[0, 0], **colorbar_params)
+
+self_acq_imshow = axes[0, 1].imshow(acq_self)
+axes[0, 1].set_title(f"Acquisition (self)")
+fig.colorbar(self_acq_imshow, ax=axes[0, 1], **colorbar_params)
+
+self_bleached_imshow = axes[0, 2].imshow(bleached_self)
+axes[0, 2].set_title(f"Bleached datamap (self)")
+fig.colorbar(self_bleached_imshow, ax=axes[0, 2], **colorbar_params)
+
+fast_datamap_imshow = axes[1, 0].imshow(datamap.whole_datamap)
+axes[1, 0].set_title(f"Datamap, \n"
+                     f"FAST acq took {fast_acq_time} s")
+fig.colorbar(fast_datamap_imshow, ax=axes[1, 0], **colorbar_params)
+
+fast_acq_imshow = axes[1, 1].imshow(acq_fast)
+axes[1, 1].set_title(f"Acquisition (fast), \n"
+                     f"MSE = {acq_mse}")
+fig.colorbar(fast_acq_imshow, ax=axes[1, 1], **colorbar_params)
+
+fast_bleached_imshow = axes[1, 2].imshow(bleached_fast)
+axes[1, 2].set_title(f"Bleached datamap (fast), \n"
+                     f"MSE = {bleach_mse}")
+fig.colorbar(fast_bleached_imshow, ax=axes[1, 2], **colorbar_params)
+
+og_datamap_imshow = axes[2, 0].imshow(datamap.whole_datamap)
+axes[2, 0].set_title(f"Datamap, \n"
+                     f"OG acq took {og_acq_time} s")
+fig.colorbar(og_datamap_imshow, ax=axes[2, 0], **colorbar_params)
+
+og_acq_imshow = axes[2, 1].imshow(acq_og)
+axes[2, 1].set_title(f"Acquisition (OG)")
+fig.colorbar(og_acq_imshow, ax=axes[2, 1], **colorbar_params)
+
+og_bleached_imshow = axes[2, 2].imshow(bleached_og)
+axes[2, 2].set_title(f"Bleached datamap (OG)")
+fig.colorbar(og_bleached_imshow, ax=axes[2, 2], **colorbar_params)
+
+pyplot.suptitle(f"SELF acquisition took {self_acq_time} s, \n"
+                f"FAST acquisition took {fast_acq_time} s, \n"
+                f"OG acquisition took {og_acq_time} s")
 pyplot.show()
-
-if args.bleach:
-    confocal_ratio = utils.molecules_survival(datamap, bleached_datamap_confocal)
-    sted_ratio = utils.molecules_survival(datamap, bleached_datamap_sted)
-
-    fig, axes = pyplot.subplots(1, 3)
-
-    datamap_imshow = axes[0].imshow(datamap)
-    axes[0].set_title(f"Datamap, shape = {datamap.shape}")
-    fig.colorbar(datamap_imshow, ax=axes[0], fraction=0.04, pad=0.05)
-
-    confocal_bleach_imshow = axes[1].imshow(bleached_datamap_confocal)
-    axes[1].set_title(f"Bleached datamap after confocal acquisition \n"
-                      f"{round(100 * confocal_ratio, 3)} % of molecules survived")
-    fig.colorbar(confocal_bleach_imshow, ax=axes[1], fraction=0.04, pad=0.05)
-
-    sted_bleach_imshow = axes[2].imshow(bleached_datamap_sted)
-    axes[2].set_title(f"Bleached datamap after STED acquisition, \n"
-                      f"{round(100 * sted_ratio, 3)} % of molecules survived")
-    fig.colorbar(sted_bleach_imshow, ax=axes[2], fraction=0.04, pad=0.05)
-
-    pyplot.show()

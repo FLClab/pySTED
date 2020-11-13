@@ -540,8 +540,7 @@ def array_padder(base, laser, pad_value=0):
     :param laser: Secondary array which will be iterated over the base array. Axes have to be of odd lengths in order
                   for it to have a well defined single pixel center.
     :param pad_value: Value of the padded region.
-    :returns: Padded version of the base array.
-    TODO: maybe returning the values used to pad could be of use?
+    :returns: Padded version of the base array, along with the number of added rows and columns
     """
 
     laser_rows, laser_cols = laser.shape
@@ -638,3 +637,21 @@ def molecules_survival(pre_bleach, post_bleach):
     :return: Ratio of molecules surviving bleach
     """
     return numpy.sum(post_bleach) / numpy.sum(pre_bleach)
+
+
+def float_to_array_verifier(float_or_array, shape):
+    """
+    This function serves to verify if a certain input is a float or an array. If it is a float, it will return an array
+    of shape (shape) filled with the float value. If it is an array, it will verify if it is of the appropriate shape.
+    If it is neither, it will return an error
+    :param float_or_array: Either a float or an array containing floats
+    :param shape: The shape we want for our array (tuple)
+    :returns: An array of the appropriate shape
+    """
+    if type(float_or_array) is float:
+        returned_array = numpy.ones(shape) * float_or_array
+    elif type(float_or_array) is numpy.ndarray and shape == float_or_array.shape:
+        returned_array = numpy.copy(float_or_array)
+    else:
+        raise TypeError("Has to be either a float or an array of same shape as the ROI")
+    return returned_array
