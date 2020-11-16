@@ -145,9 +145,9 @@ def raster_func_c(
 
 @cython.boundscheck(False) # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
-def raster_func_c_self(
-    self,
-    datamap,
+def raster_func_c_self_bleach(
+    object self,
+    object datamap,
     numpy.ndarray[FLOATDTYPE_t, ndim=2] acquired_intensity,
     numpy.ndarray[INTDTYPE_t, ndim=2] pixel_list,
     int ratio,
@@ -185,6 +185,7 @@ def raster_func_c_self(
     else:
         srand(seed)
 
+    print("This is the fastest it will go :)")
     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
@@ -232,3 +233,58 @@ def raster_func_c_self(
 
                 tprime += 1
             sprime += 1
+
+@cython.boundscheck(False) # turn off bounds-checking for entire function
+@cython.wraparound(False)  # turn off negative index wrapping for entire function
+def raster_func_c_self(
+    object self,
+    object datamap,
+    numpy.ndarray[FLOATDTYPE_t, ndim=2] acquired_intensity,
+    numpy.ndarray[INTDTYPE_t, ndim=2] pixel_list,
+    int ratio,
+    int rows_pad,
+    int cols_pad,
+    int laser_pad,
+    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_ex,
+    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted,
+    numpy.ndarray[FLOATDTYPE_t, ndim=2] pdt_roi,
+    numpy.ndarray[FLOATDTYPE_t, ndim=2] p_ex_roi,
+    numpy.ndarray[FLOATDTYPE_t, ndim=2] p_sted_roi,
+    numpy.ndarray[INTDTYPE_t, ndim=2] bleached_datamap,
+    int seed
+    ):
+
+    cdef int row, col
+    cdef int sprime, tprime
+    cdef int h, w
+    cdef int max_len = len(pixel_list)
+    cdef FLOATDTYPE_t value
+    cdef FLOATDTYPE_t pdt, p_ex, p_sted
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] pre_effective, effective
+    cdef FLOATDTYPE_t duty_cycle
+
+    if seed == 0:
+        # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
+        srand(int(str(time.time_ns())[-5:-1]))
+    else:
+        srand(seed)
+
+    print("This is the fastest it will go :)")
+    pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
+    h, w = pre_effective.shape[0], pre_effective.shape[1]
+
+    for (row, col) in pixel_list:
+        pdt = pdt_roi[row, col]
+        p_ex = p_ex_roi[row, col]
+        p_sted = p_sted_roi[row, col]
+        effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
+
+        value = 0.0
+        sprime = 0
+        for s in range(row, row + h):
+            tprime = 0
+            for t in range(col, col + w):
+                value += effective[sprime, tprime] * bleached_datamap[s, t]
+                tprime += 1
+            sprime += 1
+        acquired_intensity[int(row / ratio), int(col / ratio)] = value

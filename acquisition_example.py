@@ -3,8 +3,8 @@ from matplotlib import pyplot
 import numpy
 import time
 
-from pysted import base, utils
-import raster
+from pysted import base, utils, raster
+# import raster
 
 print(f"Starting test to see if I can pass self to raster c func :)")
 
@@ -66,23 +66,23 @@ pdt_array = numpy.reshape(pdt_array, datamap.whole_datamap[datamap.roi].shape)
 
 print(f"Starting SELF acq...")
 self_start = time.time()
-acq_self, bleached_self = microscope.get_signal_and_bleach_test(datamap, datamap.pixelsize, pdt_array, p_ex_array,
-                                                                p_sted_array, pixel_list=None, bleach=True,
+acq_self, bleached_self = microscope.get_signal_and_bleach_test(datamap, datamap.pixelsize, pdt, p_ex,
+                                                                p_sted, pixel_list=None, bleach=True,
                                                                 raster_func=raster.raster_func_c_self, update=False,
                                                                 seed=420)
 self_acq_time = time.time() - self_start
 
 print(f"Starting FAST acq...")
 fast_start = time.time()
-acq_fast, bleached_fast = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt_array, p_ex_array,
-                                                                p_sted_array, pixel_list=None, bleach=True,
+acq_fast, bleached_fast = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
+                                                                p_sted, pixel_list=None, bleach=True,
                                                                 raster_func=raster.raster_func_wbleach_c, update=False,
                                                                 seed=420)
 fast_acq_time = time.time() - fast_start
 
 print(f"Starting OG acq...")
 og_start = time.time()
-acq_og, bleached_og = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt_array, p_ex_array, p_sted_array,
+acq_og, bleached_og = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
                                                        pixel_list=None, bleach=True, update=False)
 og_acq_time = time.time() - og_start
 
