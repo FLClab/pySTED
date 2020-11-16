@@ -185,7 +185,6 @@ def raster_func_c_self_bleach(
     else:
         srand(seed)
 
-    print("This is the fastest it will go :)")
     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
@@ -269,7 +268,6 @@ def raster_func_c_self(
     else:
         srand(seed)
 
-    print("This is the fastest it will go :)")
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
 
