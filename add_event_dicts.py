@@ -1,6 +1,7 @@
 # this little script will only be used to add events to files, so I don't have to do this
 # in the test script file, so I don't write the same event 1000 times in one file
 
+# juste faire une fonction dans utils pour ça?
 from pysted import utils
 
 path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1_events.txt"
