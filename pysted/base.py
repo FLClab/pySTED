@@ -1037,7 +1037,7 @@ class Microscope:
         return returned_intensity, bleached_datamap
 
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
-                          lower_th=1, ltr=0.1, upper_th=1):
+                          lower_th=1, ltr=0.1, upper_th=100):
         """
         Function to bleach the datamap as the signal is acquired using RESCue method (EN PARLER PLUS ET METTRE UNE
         CITATION AU PAPIER OU QQCHOSE UNE FOIS QUE J'AURAI RELU L'ARTICLE ET TOUT)

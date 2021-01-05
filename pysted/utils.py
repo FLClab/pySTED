@@ -655,3 +655,19 @@ def float_to_array_verifier(float_or_array, shape):
     else:
         raise TypeError("Has to be either a float or an array of same shape as the ROI")
     return returned_array
+
+
+def dict_write_func(file, dictio):
+    f = open(file, 'a')
+    f.write(str(dictio))
+    f.write("\n")
+    f.close()
+
+
+def event_reader(file):
+    events_list = []
+    f = open(file, 'r')
+    lines = f.readlines()
+    for line_idx, line in enumerate(lines):
+        events_list.append(eval(line.strip()))
+    return events_list
