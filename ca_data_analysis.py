@@ -67,7 +67,7 @@ frames = np.arange(event_oi["start frame"], event_oi["end frame"])
 # plt.show()
 """
 # -------------------------------------------- ACQUIRE AND SIMULATE A FLASH --------------------------------------------
-"""
+
 # le plan c'est de faire une acq par frame d'un evt (40 pour l'evt 1) sur la datamap de poils classique, et faire
 # augmenter le nombre de molécules dans une région selon la courbe de flash que j'ai extrait
 
@@ -120,22 +120,38 @@ list_of_events = utils.event_reader(path_events)
 event_oi = list_of_events[0]
 light_curve = utils.get_light_curve(path_video, event_oi)
 # normaliser la light curve entre 1 et X? comme ça la région commencerait à la bonne val et monterait aux bonnes vals
+normalized_light_curve = utils.rescale_data(light_curve, to_int=True, divider=3)
 
 
 # faire 40 acquisitions back to back, afficher les 40 après
 # une fois que ce sera fait, il restera à sélectionner une petite région que je flasherai :)
+flash_roi = {"row start": 375,
+             "row end": 382,
+             "col start": 420,
+             "col end": 432}
 nb_frames = event_oi["end frame"] - event_oi["start frame"]
+save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Analysis/Ca2+/fibres_flash/"
+frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
+# jdevrais le refaire et les normaliser
 for i in range(nb_frames):
+    # multiply the region by the normalized light curve
+    print(f"acq on frame {i + 1}")
+    datamap.whole_datamap[datamap.roi][flash_roi["row start"]: flash_roi["row end"],
+                                       flash_roi["col start"]: flash_roi["col end"]] *= normalized_light_curve[i]
     time_start = time.time()
-    acq, bleached = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex, 0.0,
-                                                          pixel_list=None, bleach=bleach, update=False, seed=420)
+    acq, bleached = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
+                                                          pixel_list=None, bleach=bleach, update=False)
     acq_time = time.time() - time_start
-    plt.imshow(acq)
-    plt.title(f"Acquisition took {acq_time} s")
-    plt.show()
-"""
-#------------------------------------------- RANDOM TESTS --------------------------------------------------------------
+    print(f"acq took {acq_time}")
+    plt.imsave(save_path+str(i)+".png", acq)
 
+    # reset the datamap so as not to "stack" the multiplications
+    datamap.whole_datamap[datamap.roi] = frozen_datamap
+    # plt.imshow(datamap.whole_datamap[datamap.roi])
+    # plt.show()
+
+#------------------------------------------- RANDOM TESTS --------------------------------------------------------------
+"""
 path_video = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
 path_events = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1_events.txt"
 list_of_events = utils.event_reader(path_events)
@@ -143,8 +159,10 @@ event_oi = list_of_events[0]
 
 frames = np.arange(event_oi["start frame"], event_oi["end frame"])
 light_curve = utils.get_light_curve(path_video, event_oi)
-normalized_light_curve = utils.rescale_data(light_curve)
+normalized_light_curve = utils.rescale_data(light_curve, divider=5)
+print(normalized_light_curve.astype(int))
 plt.plot(frames, light_curve, label="Light curve")
-plt.plot(frames, normalized_light_curve, label="Normalize")
+plt.plot(frames, normalized_light_curve.astype(int), label="Normalize + inted")
 plt.legend()
 plt.show()
+"""

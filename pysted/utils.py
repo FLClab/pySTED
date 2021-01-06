@@ -723,12 +723,16 @@ def get_light_curve(video_path, event):
     return mean_photons
 
 
-def rescale_data(data):
+def rescale_data(data, to_int=True, divider=1):
     """
     Function to rescale the data (made for light curves, might be of use elsewhere) between 1 and max-min
     :param data: data to rescale.
+    :param to_int: Determines whether the data is truncated to ints after being normalized. Useful for using the
+                   fast acquisition function.
     :return: The data rescaled between 1 and max(data) - min(data)
     """
     b, a = numpy.max(data) - numpy.min(data), 1
-    normalized = (b - a) * ((data - numpy.min(data)) / (numpy.max(data) - numpy.min(data))) + a
+    normalized = ((b - a)/divider) * ((data - numpy.min(data)) / (numpy.max(data) - numpy.min(data))) + a
+    if to_int:
+        normalized = normalized.astype(int)
     return normalized
