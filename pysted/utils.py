@@ -658,6 +658,12 @@ def float_to_array_verifier(float_or_array, shape):
 
 
 def dict_write_func(file, dictio):
+    """
+    aha
+    :param file:
+    :param dictio:
+    :return:
+    """
     f = open(file, 'a')
     f.write(str(dictio))
     f.write("\n")
@@ -665,9 +671,36 @@ def dict_write_func(file, dictio):
 
 
 def event_reader(file):
+    """
+    aha
+    :param file:
+    :return:
+    """
     events_list = []
     f = open(file, 'r')
     lines = f.readlines()
     for line_idx, line in enumerate(lines):
         events_list.append(eval(line.strip()))
     return events_list
+
+
+def add_event(file, start_frame, end_frame, start_row, end_row, start_col, end_col):
+    """
+    Function that allows a user to easily store an event in a file, which can later be read with the event_reader func.
+    :param file: File to write the dict to. The goal is to use 1 text file to which we will write all the vents for
+                 1 video.
+    :param start_frame: Frame number for the start of the event
+    :param start_row: Frame number for the end of the event
+    :param start_col: Starting column for the left of the event
+    :param end_frame: Ending column for the right of the event
+    :param end_row: Starting row for the top of the event
+    :param end_col: Ending row for the bottom of the event
+    """
+    event = {"frame start": start_frame,
+             "frame end": end_frame,
+             "col_start": start_col,
+             "col_end": end_col,
+             "row_start": start_row,
+             "row_end": end_row}
+    dict_write_func(file, event)
+
