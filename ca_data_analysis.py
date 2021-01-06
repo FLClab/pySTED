@@ -2,8 +2,11 @@ from matplotlib import pyplot as plt
 import numpy as np
 import tifffile
 import tqdm
-from pysted import utils
+from pysted import base, utils
+import time
 
+# ------------------------------------------- GET LIGHT CURVE TESTS ----------------------------------------------------
+"""
 path_video = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
 path_events = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1_events.txt"
 theresa_data = tifffile.imread(path_video)
@@ -62,3 +65,86 @@ frames = np.arange(event_oi["start frame"], event_oi["end frame"])
 # plt.xlabel("Time [ms]")
 # plt.ylabel("Photons")
 # plt.show()
+"""
+# -------------------------------------------- ACQUIRE AND SIMULATE A FLASH --------------------------------------------
+"""
+# le plan c'est de faire une acq par frame d'un evt (40 pour l'evt 1) sur la datamap de poils classique, et faire
+# augmenter le nombre de molécules dans une région selon la courbe de flash que j'ai extrait
+
+# get l'image de poils
+poils = tifffile.imread("examples/data/fibres.tif")
+poils = (poils / np.max(poils) * 3).astype(int)
+
+# génère mon microscope et toutes les choses qui vont avec :)
+egfp = {"lambda_": 535e-9,
+        "qy": 0.6,
+        "sigma_abs": {488: 1.15e-20,
+                      575: 6e-21},
+        "sigma_ste": {560: 1.2e-20,
+                      575: 6.0e-21,
+                      580: 5.0e-21},
+        "sigma_tri": 1e-21,
+        "tau": 3e-09,
+        "tau_vib": 1.0e-12,
+        "tau_tri": 5e-6,
+        "phy_react": {488: 1e-4,   # 1e-4
+                      575: 1e-8},   # 1e-8
+        "k_isc": 0.26e6}
+pixelsize = 10e-9
+dpxsz = 10e-9
+bleach = False
+p_ex = 1e-6
+p_sted = 30e-3
+pdt = 10e-6
+size = 64 + (2 * 22 + 1)
+roi = 'max'
+seed = True
+
+# Generating objects necessary for acquisition simulation
+laser_ex = base.GaussianBeam(488e-9)
+# zero_residual controls how much of the donut beam "bleeds" into the the donut hole
+laser_sted = base.DonutBeam(575e-9, zero_residual=0)
+# noise allows noise on the detector, background adds an average photon count for the empty pixels
+detector = base.Detector(noise=True, background=0)
+objective = base.Objective()
+fluo = base.Fluorescence(**egfp)
+datamap = base.Datamap(poils, dpxsz)
+microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, bleach_func="default_bleach")
+i_ex, _, _ = microscope.cache(datamap.pixelsize)
+datamap.set_roi(i_ex, roi)
+
+# obtenir la light curve pour pouvoir l'utiliser pendant l'acquisition
+path_video = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
+path_events = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1_events.txt"
+list_of_events = utils.event_reader(path_events)
+event_oi = list_of_events[0]
+light_curve = utils.get_light_curve(path_video, event_oi)
+# normaliser la light curve entre 1 et X? comme ça la région commencerait à la bonne val et monterait aux bonnes vals
+
+
+# faire 40 acquisitions back to back, afficher les 40 après
+# une fois que ce sera fait, il restera à sélectionner une petite région que je flasherai :)
+nb_frames = event_oi["end frame"] - event_oi["start frame"]
+for i in range(nb_frames):
+    time_start = time.time()
+    acq, bleached = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex, 0.0,
+                                                          pixel_list=None, bleach=bleach, update=False, seed=420)
+    acq_time = time.time() - time_start
+    plt.imshow(acq)
+    plt.title(f"Acquisition took {acq_time} s")
+    plt.show()
+"""
+#------------------------------------------- RANDOM TESTS --------------------------------------------------------------
+
+path_video = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
+path_events = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1_events.txt"
+list_of_events = utils.event_reader(path_events)
+event_oi = list_of_events[0]
+
+frames = np.arange(event_oi["start frame"], event_oi["end frame"])
+light_curve = utils.get_light_curve(path_video, event_oi)
+normalized_light_curve = utils.rescale_data(light_curve)
+plt.plot(frames, light_curve, label="Light curve")
+plt.plot(frames, normalized_light_curve, label="Normalize")
+plt.legend()
+plt.show()

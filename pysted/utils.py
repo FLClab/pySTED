@@ -13,6 +13,7 @@ import scipy, scipy.constants, scipy.integrate
 import math
 import random
 import warnings
+import tifffile
 
 # import mis par BT pour des tests :)
 from matplotlib import pyplot
@@ -672,9 +673,9 @@ def dict_write_func(file, dictio):
 
 def event_reader(file):
     """
-    aha
-    :param file:
-    :return:
+    Read events from a file containing event dictionaries and return the dicts to a listé
+    :param file: Path to the txt file containing the dict for the events
+    :return: A list containing the dicts of every identified event in a video
     """
     events_list = []
     f = open(file, 'r')
@@ -705,3 +706,29 @@ def add_event(file, start_frame, end_frame, start_row, end_row, start_col, end_c
              "end row": end_row}
     dict_write_func(file, event)
 
+
+def get_light_curve(video_path, event):
+    """
+    aha
+    :param video: The path to the video file from which we want to extract an event light curve (str)
+    :param event: A dictionary containing the start and end info for frames, rows, columns of an event (dict)
+    :return: A vector representing the mean intensity accros the frames of the event
+    """
+    data_vid = tifffile.imread(video_path)
+    event_data = data_vid[event["start frame"]: event["end frame"],
+                          event["start row"]: event["end row"],
+                          event["start col"]: event["end col"]]
+    mean_photons = numpy.mean(event_data, axis=(1, 2))
+
+    return mean_photons
+
+
+def rescale_data(data):
+    """
+    Function to rescale the data (made for light curves, might be of use elsewhere) between 1 and max-min
+    :param data: data to rescale.
+    :return: The data rescaled between 1 and max(data) - min(data)
+    """
+    b, a = numpy.max(data) - numpy.min(data), 1
+    normalized = (b - a) * ((data - numpy.min(data)) / (numpy.max(data) - numpy.min(data))) + a
+    return normalized
