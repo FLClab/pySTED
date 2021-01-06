@@ -686,6 +686,7 @@ def event_reader(file):
 
 def add_event(file, start_frame, end_frame, start_row, end_row, start_col, end_col):
     """
+    *** PT QUE JE POURRAIS TRAVAILLER AVEC DES SLICES DANS LE DICT À PLACE? PT PLUS FACILE À MANIP APRÈS IDK ***
     Function that allows a user to easily store an event in a file, which can later be read with the event_reader func.
     :param file: File to write the dict to. The goal is to use 1 text file to which we will write all the vents for
                  1 video.
@@ -696,11 +697,11 @@ def add_event(file, start_frame, end_frame, start_row, end_row, start_col, end_c
     :param end_row: Starting row for the top of the event
     :param end_col: Ending row for the bottom of the event
     """
-    event = {"frame start": start_frame,
-             "frame end": end_frame,
-             "col_start": start_col,
-             "col_end": end_col,
-             "row_start": start_row,
-             "row_end": end_row}
+    event = {"start frame": start_frame,
+             "end frame": end_frame,
+             "start col": start_col,
+             "end col": end_col,
+             "start row": start_row,
+             "end row": end_row}
     dict_write_func(file, event)
 
