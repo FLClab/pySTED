@@ -736,3 +736,36 @@ def rescale_data(data, to_int=True, divider=1):
     if to_int:
         normalized = normalized.astype(int)
     return normalized
+
+
+def shift_data(data, peak_idx=5):
+    """
+    Function to shift the data (made for light curves, might be of use elsewhere) so the peak is on idx 5
+    :param data: data to shift
+    :param peak_idx: idx at which we want the peak to be
+    :return: The shifted data
+    """
+    # probably only works if I shift to the left, haven't tested for shifting to the right
+    peak_arg = numpy.argmax(data)
+    shifted_curve = data[peak_arg - peak_idx:]
+    while len(shifted_curve) != 40:
+        shifted_curve = numpy.append(shifted_curve, shifted_curve[-1])
+    return shifted_curve
+
+
+def get_avg_lightcurve(light_curves):
+    """
+    This function takes as input a list of light curves and processes them so they are rescaled and shifted to align
+    their peaks. It then return the avg light curve as well as its standard deviation, so we can sample a light curve
+    for event simulation.
+    :return:
+    """
+    shifted_curves = []
+    for curve in light_curves:
+        rescaled_curve = rescale_data(curve, to_int=False, divider=1)
+        shifted_curve = shift_data(rescaled_curve, peak_idx=5)
+        shifted_curves.append(shifted_curve)
+
+    avg_shifted_curves = numpy.mean(shifted_curves, axis=0)
+    std_shifted_curves = numpy.std(shifted_curves, axis=0)
+    return avg_shifted_curves, std_shifted_curves

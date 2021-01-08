@@ -71,8 +71,9 @@ frames = np.arange(event_oi["start frame"], event_oi["end frame"])
 # le plan c'est de faire une acq par frame d'un evt (40 pour l'evt 1) sur la datamap de poils classique, et faire
 # augmenter le nombre de molécules dans une région selon la courbe de flash que j'ai extrait
 
-# get l'image de poils
+# get l'image de poils and crop a 100 by 100 region
 poils = tifffile.imread("examples/data/fibres.tif")
+poils = poils[325: 425, 370: 470]
 poils = (poils / np.max(poils) * 3).astype(int)
 
 # génère mon microscope et toutes les choses qui vont avec :)
@@ -125,13 +126,18 @@ normalized_light_curve = utils.rescale_data(light_curve, to_int=True, divider=3)
 
 # faire 40 acquisitions back to back, afficher les 40 après
 # une fois que ce sera fait, il restera à sélectionner une petite région que je flasherai :)
-flash_roi = {"row start": 375,
-             "row end": 382,
-             "col start": 420,
-             "col end": 432}
+# flash_roi = {"row start": 375,   # good for uncropped img, not for cropped
+#              "row end": 382,
+#              "col start": 420,
+#              "col end": 432}
+flash_roi = {"row start": 52,   # good for cropped
+             "row end": 56,
+             "col start": 54,
+             "col end": 60}
 nb_frames = event_oi["end frame"] - event_oi["start frame"]
-save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Analysis/Ca2+/fibres_flash/"
+save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Analysis/Ca2+/fibres_flash/Confocal_norm_v2/"
 frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
+acquisitions = []
 # jdevrais le refaire et les normaliser
 for i in range(nb_frames):
     # multiply the region by the normalized light curve
@@ -139,16 +145,22 @@ for i in range(nb_frames):
     datamap.whole_datamap[datamap.roi][flash_roi["row start"]: flash_roi["row end"],
                                        flash_roi["col start"]: flash_roi["col end"]] *= normalized_light_curve[i]
     time_start = time.time()
-    acq, bleached = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
+    acq, bleached = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex, 0.0,
                                                           pixel_list=None, bleach=bleach, update=False)
     acq_time = time.time() - time_start
     print(f"acq took {acq_time}")
-    plt.imsave(save_path+str(i)+".png", acq)
+    # plt.imsave(save_path+str(i)+".png", acq)
+    acquisitions.append(acq)
 
     # reset the datamap so as not to "stack" the multiplications
     datamap.whole_datamap[datamap.roi] = frozen_datamap
     # plt.imshow(datamap.whole_datamap[datamap.roi])
     # plt.show()
+
+all_max, all_min = np.max(acquisitions), np.min(acquisitions)
+for i, acq_i in enumerate(acquisitions):
+    # acq_i[0, 0] = all_max
+    plt.imsave(save_path+str(i)+".png", acq_i, vmin=all_min, vmax=all_max)
 
 #------------------------------------------- RANDOM TESTS --------------------------------------------------------------
 """
