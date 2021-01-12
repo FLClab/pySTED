@@ -5,6 +5,7 @@ import math
 from matplotlib import pyplot
 from skimage import draw, measure, io
 from scipy import spatial
+from tqdm import trange
 
 from pysted import _draw
 
