@@ -8,6 +8,7 @@ import numpy
 import pysted
 
 ext_modules = [Extension("pysted.cUtils", ["pysted/cUtils.c"]),
+               Extension("pysted._draw", ["pysted/_draw.c"]),
                Extension("pysted.raster", ["pysted/raster.c"])]
 
 setup(name="pysted",
