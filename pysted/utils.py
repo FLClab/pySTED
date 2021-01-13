@@ -858,3 +858,11 @@ def sample_light_curve(light_curves):
     sampled_curve = numpy.where(sampled_curve >= 1, sampled_curve, 1)
     smoothed_sampled = savitzky_golay(sampled_curve, 5, 2)   # These params give nice curves :)
     return smoothed_sampled
+
+
+def generate_fiber_with_synapses():
+    """
+    This func allows a user to generate a fiber object and synapses attached to it
+    :return:
+    """
+    pass
