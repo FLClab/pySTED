@@ -18,6 +18,8 @@ import tifffile
 # import mis par BT pour des tests :)
 from matplotlib import pyplot
 import time
+from pysted import temporal
+from scipy.spatial.distance import cdist
 
 
 def approx_binomial(n, p, size=None):
@@ -860,9 +862,55 @@ def sample_light_curve(light_curves):
     return smoothed_sampled
 
 
-def generate_fiber_with_synapses():
+def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses, min_dist, polygon_scale=(5, 10)):
     """
-    This func allows a user to generate a fiber object and synapses attached to it
+    This func allows a user to generate a fiber object and synapses attached to it.
+    :param datamap_shape: shape of the image to which we will add the fiber and synapses
+    :param fibre_min: min position for the fibre to start at
+    :param fibre_max: max position for the fibre to start at
+    :param n_synapses: number of synapses to put on the fiber
+    :param min_dist: min distance we want to have between the synapses. this is to make sure we don't have overlapping
+                     synapses
+    :param polygon_scale: values from which the polygon size will be sampled
     :return:
     """
-    pass
+    min_array, max_array = numpy.asarray((fibre_min, fibre_min)), numpy.asarray((fibre_max, fibre_max))
+    # jpense jpeux controller l'angle aussi
+    fibre = temporal.Fiber(random_params={"num_points": (fibre_min, fibre_max),
+                                                    "pos": [numpy.zeros((1, 2)) + min_array,
+                                                            datamap_shape - max_array],
+                                                    "scale": (1, 5)})
+    n_added = 0
+    synapse_positions = numpy.empty((0, 2))
+    while n_added != n_synapses:
+        sampled_node = numpy.asarray(random.sample(list(fibre.nodes_position), 1)[0].astype(int))
+        if numpy.less_equal(sampled_node, 0).any() or \
+                numpy.greater_equal(sampled_node, datamap_shape - numpy.ones((1, 1))).any():
+            continue
+        if n_added == 0:
+            synapse_positions = numpy.append(synapse_positions, sampled_node)
+            synapse_positions = numpy.expand_dims(synapse_positions, 0).astype(int)
+            n_added += 1
+            continue
+        # comparer la distance du point samplé à tous les points dans la liste
+        # vérifier qu'elle est plus grande que min_distance pour tous les points déjà présents,
+        # si c'est le cas, l'ajouter à la liste, sinon continuer le while :)
+        else:
+            sample_to_verify = numpy.expand_dims(numpy.copy(sampled_node), axis=0).astype(int)
+            synapse_positions = numpy.append(synapse_positions, sample_to_verify, axis=0).astype(int)
+            distances = cdist(synapse_positions, synapse_positions)
+            distances[n_added, n_added] = min_dist + 1
+            if numpy.less_equal(distances[n_added, :], min_dist).any():
+                # at least 1 elt is closer than 10 pixels to an already present elt so remove it :)
+                synapse_positions = numpy.delete(synapse_positions, n_added, axis=0)
+            else:
+                # good to add to the list
+                n_added += 1
+
+    polygon_list = []
+    for node in synapse_positions:
+        polygon = temporal.Polygon(random_params={"pos": [node, node],
+                                                  "scale": polygon_scale})
+        polygon_list.append(polygon)
+
+    return fibre, polygon_list

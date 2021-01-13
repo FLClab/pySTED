@@ -83,3 +83,23 @@ plt.show()
 #     plt.show()
 #
 # print("bitch?")
+
+func_fiber, func_polygons = utils.generate_fiber_with_synapses(image.shape, 100, 200, 5, 10, polygon_scale=(3, 6))
+
+# polygon_list = []
+# for node in func_polygon_pos:
+#     polygon = temporal.Polygon(random_params={"pos": [node, node],
+#                                               "scale": (5, 10)})
+#     polygon_list.append(polygon)
+
+n_frames = 1
+roi = ((0, 0), image.shape)   # jtrouve que la façon de gérer la shape de l'ensemble est weird
+ensemble_test2 = temporal.Ensemble(roi=roi)
+ensemble_test2.append(func_fiber)
+for polygon in func_polygons:
+    # pass
+    ensemble_test2.append(polygon)
+
+frame2 = ensemble_test2.return_frame()
+plt.imshow(frame2)
+plt.show()
