@@ -252,8 +252,6 @@ class Fiber(Nodes):
         """
         if isinstance(coords, type(None)):
             coords = self.generate_random(**random_params)
-        elif coords == "perpendicular":
-            coords = self.generate_random_perpendicular(**random_params)
 
         super().__init__(coords, parent=parent)
 
@@ -298,50 +296,6 @@ class Fiber(Nodes):
         coords = numpy.array(coords)
         coords = coords + [random.uniform(*yx) for yx in zip(*pos)]
         return coords
-
-    def generate_random_perpendicular(self, num_points=(10, 50), angle=(-math.pi/8, math.pi/8), scale=(1, 5),
-                                      pos=((0, 0), (0, 0))):
-        """
-        Generates a random set of points. To do so, we incrementaly add a point
-        to list of coordinates. It could be seen as building a serpent from the
-        head to the tail.
-        :param num_points: (min, max) values of the uniform sampling to generate
-                           the number of points of the fiber
-        :param angle: (min, max) values of the uniform sampling to generate the
-                      angle from the previous angle
-        :param scale: (min, max) values of the uniform sampling to generate the
-                      displacement
-        :param pos: Uniformly sample a position of the `Fiber` object. Should be
-                    a `tuple` of top-left and bottom-right corner in (y, x) coordinates
-        :returns : A (N,2) `numpy.ndarray` of coordinates
-        """
-        print(f"In the perpendicular fibre test func :)")
-        coords = [(0, 0)]
-        self.angles = []
-        for _ in range(random.randrange(*num_points)):
-            # When we start we sample an angle in 0, 2pi
-            if len(coords) == 1:
-                prev_angle = 0
-                self.angles.append(prev_angle)
-                delta, ang = random.uniform(*scale), random.uniform(0, 2*math.pi)
-            else:
-                # Calcultes the previous angle in range [0,2pi]
-                dy = coords[-1][0] - coords[-2][0]
-                dx = coords[-1][1] - coords[-2][1]
-                prev_angle = (math.atan2(dy, dx) + 2*math.pi) % (2*math.pi)
-                delta, ang = random.uniform(*scale), random.uniform(*angle)
-            # The angle is relative to the previous angle
-            self.angles.append(ang)
-            ang = ang + prev_angle
-            # Calculates the next position
-            prev_y, prev_x = coords[-1]
-            dy, dx = delta * math.sin(ang), delta * math.cos(ang)
-            coords.append((prev_y + dy, prev_x + dx))
-        # Random position of the coords
-        coords = numpy.array(coords)
-        coords = coords + [random.uniform(*yx) for yx in zip(*pos)]
-        return coords
-
 
     def grow(self, prob=0.5, angle=(-math.pi/8, math.pi/8), scale=(2, 3)):
         """

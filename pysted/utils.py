@@ -916,7 +916,7 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
     return fibre, polygon_list
 
 
-def generate_secondary_fibers(datamap_shape, main_fiber, n_secondary, min_dist=10, sec_len=(10, 20)):
+def generate_secondary_fibers(datamap_shape, main_fiber, n_secondary, min_dist=10, sec_len=(2, 6)):
     """
     Similar to the synapse function, but with fibers instead. The goal would be to pass
     an already existing fiber to this func and simply spawn the secondary fibers
@@ -954,11 +954,10 @@ def generate_secondary_fibers(datamap_shape, main_fiber, n_secondary, min_dist=1
     print(f"angles = {angle_at_position}")
     sec_fibers_list = []
     for node in sec_fiber_positions:
-        sec_fiber = temporal.Fiber(coords="perpendicular", random_params={"num_points": sec_len,
-                                                                          "pos": [node, node],
-                                                                          "scale": (1, 5),
-                                                                          "angle": (- math.pi / 2,
-                                                                                    math.pi / 2)})
+        sec_fiber = temporal.Fiber(random_params={"num_points": sec_len,
+                                                  "pos": [node, node],
+                                                  "scale": (1, 3),
+                                                  "angle": (- 0.25, 0.25)})
         sec_fibers_list.append(sec_fiber)
 
     return sec_fibers_list

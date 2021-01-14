@@ -80,7 +80,7 @@ fibre_rand = temporal.Fiber(random_params={"num_points": (min_nodes, max_nodes),
                                                         image.shape - max_array],
                                                 "scale": (1, 5)})
 
-sec_fibers = utils.generate_secondary_fibers(image.shape, fibre_rand, 5, 3, sec_len=(10, 20))
+sec_fibers = utils.generate_secondary_fibers(image.shape, fibre_rand, 5, 3, sec_len=(3, 8))
 
 print(f"min angle = {np.min(fibre_rand.angles)}")
 print(f"max angle = {np.max(fibre_rand.angles)}")
