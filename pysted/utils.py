@@ -914,3 +914,51 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
         polygon_list.append(polygon)
 
     return fibre, polygon_list
+
+
+def generate_secondary_fibers(datamap_shape, main_fiber, n_secondary, min_dist=10, sec_len=(10, 20)):
+    """
+    Similar to the synapse function, but with fibers instead. The goal would be to pass
+    an already existing fiber to this func and simply spawn the secondary fibers
+    :return:
+    """
+    n_added = 0
+    sec_fiber_positions = numpy.empty((0, 2))
+    angle_at_position = []
+    while n_added != n_secondary:
+        # sampled_node = numpy.asarray(random.sample(list(main_fiber.nodes_position), 1)[0].astype(int))
+        sample_idx = numpy.random.randint(len(main_fiber.nodes_position))
+        sampled_node = main_fiber.nodes_position[sample_idx, :].astype(int)
+        if numpy.less_equal(sampled_node, 0).any() or \
+                numpy.greater_equal(sampled_node, datamap_shape - numpy.ones((1, 1))).any():
+            continue
+        if n_added == 0:
+            sec_fiber_positions = numpy.append(sec_fiber_positions, sampled_node)
+            sec_fiber_positions = numpy.expand_dims(sec_fiber_positions, 0).astype(int)
+            angle_at_position.append(main_fiber.angles[sample_idx])
+            n_added += 1
+            continue
+        else:
+            sample_to_verify = numpy.expand_dims(numpy.copy(sampled_node), axis=0).astype(int)
+            sec_fiber_positions = numpy.append(sec_fiber_positions, sample_to_verify, axis=0).astype(int)
+            distances = cdist(sec_fiber_positions, sec_fiber_positions)
+            distances[n_added, n_added] = min_dist + 1
+            if numpy.less_equal(distances[n_added, :], min_dist).any():
+                # at least 1 elt is closer than 10 pixels to an already present elt so remove it :)
+                sec_fiber_positions = numpy.delete(sec_fiber_positions, n_added, axis=0)
+            else:
+                # good to add to the list
+                angle_at_position.append(main_fiber.angles[sample_idx])
+                n_added += 1
+
+    print(f"angles = {angle_at_position}")
+    sec_fibers_list = []
+    for node in sec_fiber_positions:
+        sec_fiber = temporal.Fiber(coords="perpendicular", random_params={"num_points": sec_len,
+                                                                          "pos": [node, node],
+                                                                          "scale": (1, 5),
+                                                                          "angle": (- math.pi / 2,
+                                                                                    math.pi / 2)})
+        sec_fibers_list.append(sec_fiber)
+
+    return sec_fibers_list
