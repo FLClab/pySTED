@@ -926,7 +926,11 @@ def generate_secondary_fibers(datamap_shape, main_fiber, n_sec, min_dist=10, sec
     sec_fiber_positions = numpy.empty((0, 2))
     angle_at_position = []
     n_secondary = int(random.uniform(*n_sec))
+    n_loops = 0
     while n_added != n_secondary:
+        n_loops += 1
+        if n_loops >= 100 * n_secondary:
+            break
         # sampled_node = numpy.asarray(random.sample(list(main_fiber.nodes_position), 1)[0].astype(int))
         sample_idx = numpy.random.randint(len(main_fiber.nodes_position))
         sampled_node = main_fiber.nodes_position[sample_idx, :].astype(int)
@@ -971,7 +975,11 @@ def generate_synapses_on_fiber(datamap_shape, main_fiber, n_syn, min_dist, synap
     n_added = 0
     synapse_positions = numpy.empty((0, 2))
     n_synapses = int(random.uniform(*n_syn))
+    n_loops = 0
     while n_added != n_synapses:
+        n_loops += 1
+        if n_loops >= 100 * n_synapses:
+            break
         sampled_node = numpy.asarray(random.sample(list(main_fiber.nodes_position), 1)[0].astype(int))
         if numpy.less_equal(sampled_node, 0).any() or \
                 numpy.greater_equal(sampled_node, datamap_shape - numpy.ones((1, 1))).any():
