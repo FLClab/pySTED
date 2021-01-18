@@ -862,6 +862,26 @@ def sample_light_curve(light_curves):
     return smoothed_sampled
 
 
+def flash_generator(events_path, video_path):
+    """
+    C'EST BAD COMME NOM
+    The goal of this function is to generate the light curves (?) needed to generate flashes.
+    Basically this just wraps up the work of the previous light curve functions for ease of use
+    when designing an experiment or something
+    :return:
+    """
+    events = event_reader(events_path)
+
+    curves = []
+    for event in events:
+        light_curve = get_light_curve(video_path, event)
+        curves.append(light_curve)
+
+    sampled_light_curve = sample_light_curve(curves)
+
+    return sampled_light_curve
+
+
 def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses, min_dist, polygon_scale=(5, 10)):
     """
     This func allows a user to generate a fiber object and synapses attached to it.

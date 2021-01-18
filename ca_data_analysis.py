@@ -67,7 +67,7 @@ frames = np.arange(event_oi["start frame"], event_oi["end frame"])
 # plt.show()
 """
 # -------------------------------------------- ACQUIRE AND SIMULATE A FLASH --------------------------------------------
-"""
+
 # le plan c'est de faire une acq par frame d'un evt (40 pour l'evt 1) sur la datamap de poils classique, et faire
 # augmenter le nombre de molécules dans une région selon la courbe de flash que j'ai extrait
 
@@ -148,7 +148,7 @@ for i in range(nb_frames):
     acq, bleached = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex, 0.0,
                                                           pixel_list=None, bleach=bleach, update=False)
     acq_time = time.time() - time_start
-    print(f"acq took {acq_time}")
+    print(f"acq took {acq_time} s")
     # plt.imsave(save_path+str(i)+".png", acq)
     acquisitions.append(acq)
 
@@ -161,9 +161,9 @@ all_max, all_min = np.max(acquisitions), np.min(acquisitions)
 for i, acq_i in enumerate(acquisitions):
     # acq_i[0, 0] = all_max
     plt.imsave(save_path+str(i)+".png", acq_i, vmin=all_min, vmax=all_max)
-"""
-#------------------------------------------- GENERATE RANDOM FLASHES ---------------------------------------------------
 
+#------------------------------------------- GENERATE RANDOM FLASHES ---------------------------------------------------
+"""
 # step 1 is to see if simply sampling each of the 40 pts from a normal with mean and std given by my func returns good
 # looking light curves. My fear is that it might look too jaggedy? maybe I can smooth it out after?
 
@@ -184,48 +184,6 @@ curves.pop(6)
 curves.pop(4)
 avg_curve, std_curve = utils.get_avg_lightcurve(curves)
 
-# Comparing Avg ± std to sampled to sampled+smoothed
-# sampled_curve = np.random.normal(avg_curve, std_curve)
-# smoothed_sampled = utils.savitzky_golay(sampled_curve, 5, 2)
-#
-# x_axis = np.arange(0, 40)
-# plt.plot(x_axis, avg_curve, label="Average light curve")
-# plt.plot(x_axis, sampled_curve, label="Sampled light curve")
-# plt.plot(x_axis, smoothed_sampled, label="Smoothed sampled curved")
-# plt.fill_between(x_axis, avg_curve + std_curve, avg_curve - std_curve, alpha=0.4)
-# plt.xlabel(f"Frame")
-# plt.ylabel(f"Average photon count")
-# plt.legend()
-# plt.show()
-
-# Comparing multiple sampled+smoothed curve on 1 graph
-# n_tries = 5
-# x_axis = np.arange(0, 40)
-# for i in range(n_tries):
-#     sampled_curve = np.random.normal(avg_curve, std_curve)
-#     sampled_curve = np.where(sampled_curve >= 1, sampled_curve, 1)
-#     smoothed_sampled = utils.savitzky_golay(sampled_curve, 5, 2)
-#     plt.plot(x_axis, smoothed_sampled)
-#
-# plt.xlabel(f"Frame")
-# plt.ylabel(f"Average photon count")
-# plt.legend()
-# plt.show()
-
-# Trying to add flashes together with delays
-# I will test this using the average curve and my utils.shift_data.
-# I will first need to verify if my shift function works when I wish to shift to the right
-
-# shifted_curve = utils.shift_data(avg_curve, peak_idx=15)
-# multi_pulse = 0.7 * avg_curve + 0.3 * shifted_curve
-#
-# x_axis = np.arange(0, 40)
-# plt.plot(x_axis, multi_pulse, label="Avg curve")
-# plt.xlabel(f"Frame")
-# plt.ylabel(f"Average photon count")
-# plt.legend()
-# plt.show()
-
 sampled_curve = np.random.normal(avg_curve, std_curve)
 sampled_curve = np.where(sampled_curve >= 1, sampled_curve, 1)
 smoothed_sampled = utils.savitzky_golay(sampled_curve, 5, 2)
@@ -239,7 +197,7 @@ plt.xlabel(f"Frame")
 plt.ylabel(f"Average photon count")
 plt.legend()
 plt.show()
-
+"""
 #------------------------------------------- RANDOM TESTS --------------------------------------------------------------
 """
 path_video = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
