@@ -571,6 +571,34 @@ class Ensemble:
 
         return image
 
+    def generate_objects_dict(self, obj_type="all"):
+        """
+        Creates a dictionnary containing the pixels corresponding to the objects in the frame.
+        This could be useful if we want to do something other than plot the ojbects, such as
+        tagging them for flashing or something.
+        :return:
+        """
+        obj_dict = {}
+        if obj_type == "all":
+            # add tous les obj au dict
+            for i, obj in enumerate(self.objects):
+                obj_dict[i] = obj
+        elif obj_type == "fibers":
+            # add juste les fibres au dict
+            for i, obj in enumerate(self.objects):
+                if type(obj) == Fiber:
+                    obj_dict[i] = obj
+        elif obj_type == "synapses":
+            # add juste les synapses au dict
+            for i, obj in enumerate(self.objects):
+                if type(obj) == Polygon:
+                    obj_dict[i] = obj
+        else:
+            # mauvaise option, lancer une erreur
+            pass
+
+        return obj_dict
+
     def show(self, ax=None):
         """
         Implements a `show` function of the ensemble

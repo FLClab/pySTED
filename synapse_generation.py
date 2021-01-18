@@ -114,8 +114,35 @@ plt.show()
 # qu'il essait de placer des trucs out of bounds et il reste pris dans une loop infinie
 # je pourrais pt ajouter de quoi que genre s'il fait + que X iter de la loop pour placer une
 # fibre / synapse et qu'il ne parvient pas il fait juste give up ou qqchose
-func_frame = utils.generate_synaptic_fibers((256, 256), (100, 255), (3, 10), (2, 5))
-# func_frame = utils.generate_synaptic_fibers((256, 256), (200, 255), 5, 2)
+ensemble_func, synapses_list = utils.generate_synaptic_fibers((256, 256), (100, 255), (3, 10), (2, 5))
 
-plt.imshow(func_frame)
+func_frame = ensemble_func.return_frame()
+
+synapses_ensemble = temporal.Ensemble(roi=((0, 0), (256, 256)))
+for sub_list in synapses_list:
+    for synapse in sub_list:
+        synapses_ensemble.append(synapse)
+
+synapses_frame = synapses_ensemble.return_frame()
+
+third_frame_test = np.zeros(func_frame.shape)
+synapses_dict = ensemble_func.generate_objects_dict(obj_type="synapses")
+for i, key in enumerate(synapses_dict):
+    rr, cc = synapses_dict[key].return_shape(shape=third_frame_test.shape)
+    third_frame_test[rr.astype(int), cc.astype(int)] = i
+
+fig, axes = plt.subplots(1, 3)
+
+all_frame = axes[0].imshow(func_frame)
+axes[0].set_title(f"Fibers + Synapses")
+fig.colorbar(all_frame, ax=axes[0], fraction=0.04, pad=0.05)
+
+synapses_frame = axes[1].imshow(synapses_frame)
+axes[1].set_title(f"Synapses")
+fig.colorbar(synapses_frame, ax=axes[1], fraction=0.04, pad=0.05)
+
+third_frame = axes[2].imshow(third_frame_test)
+axes[2].set_title(f"Adding synapses manually")
+fig.colorbar(third_frame, ax=axes[2], fraction=0.04, pad=0.05)
+
 plt.show()

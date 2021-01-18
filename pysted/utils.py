@@ -1053,6 +1053,6 @@ def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, 
         for synapse in synapses_lists[idx]:
             ensemble_test.append(synapse)
 
-    frame = ensemble_test.return_frame()
+    # frame = ensemble_test.return_frame()
 
-    return frame
+    return ensemble_test, synapses_lists
