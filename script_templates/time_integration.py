@@ -12,8 +12,8 @@ event_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1_events.t
 video_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
 
 # Generate a datamap
-frame_shape = (100, 100)
-ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (25, 74), (3, 10), (2, 5))
+frame_shape = (64, 64)
+ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (9, 55), (3, 10), (2, 5))
 
 poils_frame = ensemble_func.return_frame().astype(int)
 
@@ -72,9 +72,36 @@ flash_prob = 0.05   # every iteration, all synapses will have a 5% to start flas
 
 # start acquisition loop
 frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
-len_sequence = 100
-save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/multiple_random_flashes/test1/"
+save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/test1/"
+len_sequence = 100   # need to modify this from time steps to time in seconds
 list_datamaps, list_confocals, list_steds = [], [], []
+"""
+Here is my thought process :
+I define the len_sequence in seconds
+Now I want every time step in the loop
+    for i in tqdm.trange(len_sequence)
+to be 1 step in the flash light curve
+Flavie said the FWHM is 1-2 seconds, so I will use
+1.5 s as the FWHM of the mean light curve from which
+I sample. 
+managing the pixel_list : 
+I think the best way to manage for how long the microscope 
+acquires during 1 time step of the light flash is to pass
+a pixel list containing only the pixels it will manage to image 
+during a step given its pdt. This works if pdt <= time_step,
+but I dont think it will work if pdt > time_step.
+My idea to manage that would be to have a time bank in the
+microscope maybe? I think it will also be needed if the number
+of pixels that can be imaged during a step is not integer value.
+I shall manage this later once the simpler case is correctly 
+implemented.
+"""
+fwhm_time_steps, fwhm_time_secs = 10, 1.5   # the FWHM of the flash is approx 1.5s, which corresponds to 10 time steps
+sec_per_time_step = fwhm_time_secs / fwhm_time_steps
+total_acquisition_time_seconds = 20
+n_time_steps = int(total_acquisition_time_seconds / sec_per_time_step)   # il faut couper un peu de temps, problem??
+# n_pixels_per_tstep =
+print(f"n_time_steps = {n_time_steps}")
 for i in tqdm.trange(len_sequence):
     print(f"acq {i + 1} of {len_sequence}")
     datamap.whole_datamap[datamap.roi] = np.copy(frozen_datamap)  # essayer np.copy?
