@@ -100,8 +100,10 @@ fwhm_time_steps, fwhm_time_secs = 10, 1.5   # the FWHM of the flash is approx 1.
 sec_per_time_step = fwhm_time_secs / fwhm_time_steps
 total_acquisition_time_seconds = 20
 n_time_steps = int(total_acquisition_time_seconds / sec_per_time_step)   # il faut couper un peu de temps, problem??
-# n_pixels_per_tstep =
+n_pixels_per_tstep = sec_per_time_step / pdt
 print(f"n_time_steps = {n_time_steps}")
+print(f"n_pixels_per_step = {n_pixels_per_tstep}")
+exit()
 for i in tqdm.trange(len_sequence):
     print(f"acq {i + 1} of {len_sequence}")
     datamap.whole_datamap[datamap.roi] = np.copy(frozen_datamap)  # essayer np.copy?
