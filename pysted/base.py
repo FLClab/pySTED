@@ -708,6 +708,10 @@ class Microscope:
             raise ValueError("Not a valid bleaching function")
         else:
             self.bleach_func = bleach_functions.functions_dict[bleach_func]
+
+        # This will be used during the acquisition routine to make a better correspondance
+        # between the microscope acquisition time steps and the Ca2+ flash time steps
+        self.pixel_bank = 0
     
     def __str__(self):
         return str(self.__cache.keys())
@@ -1131,6 +1135,22 @@ class Microscope:
             datamap.whole_datamap = bleached_datamap
 
         return returned_photons, bleached_datamap
+
+    def add_to_pixel_bank(self, n_pixels_per_tstep):
+        """
+        Adds the residual pixels to the pixel bank
+        :param n_pixels_per_tstep: The number of pixels which the microscope has the time to acquire during 1
+                                   time step of the Ca2+ flash event
+        """
+        integer_n_pixels_per_tstep = int(n_pixels_per_tstep)
+        self.pixel_bank += n_pixels_per_tstep - integer_n_pixels_per_tstep
+
+    def take_from_pixel_bank(self):
+        """
+
+        :return:
+        """
+        pass
 
 
 class Datamap:
