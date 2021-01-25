@@ -1076,3 +1076,33 @@ def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, 
     # frame = ensemble_test.return_frame()
 
     return ensemble_test, synapses_lists
+
+
+def generate_raster_pixel_list(n_pixels_to_add, starting_pixel, img):
+    """
+    The goal is to generate a raster scan pixel list from starting_pixel, containing a maximum of n_pixels_to_add
+    pixels and a minimum of img.shape[0] * img.shape[1] pixels.
+    :param n_pixels_to_add:
+    :param starting_pixel:
+    :param img:
+    :return:
+    """
+    # makes sure we don't pass twice over the same pixel, might be removed later
+    # n_pixels_img = img.shape[0] * img.shape[1]
+    # if n_pixels_to_add <= n_pixels_img:
+    #     n_iters = n_pixels_to_add
+    # else:
+    #     n_iters = n_pixels_img
+
+    return_list = []
+    current_idx = starting_pixel
+    for i in range(n_pixels_to_add):
+        return_list.append(tuple(current_idx))
+        current_idx[1] += 1
+        if current_idx[1] >= img.shape[1]:
+            current_idx[1] = 0
+            current_idx[0] += 1
+        if current_idx[0] >= img.shape[0]:
+            current_idx[0] = 0
+
+    return return_list

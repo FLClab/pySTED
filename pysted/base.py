@@ -888,7 +888,7 @@ class Microscope:
             effective = self.get_effective(datamap_pixelsize, p_ex[row, col], p_sted[row, col])
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
-            acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
+            acquired_intensity[int(row / ratio), int(col / ratio)] = numpy.sum(effective *
                                                                                 bleached_datamap
                                                                                 [row_slice, col_slice])
 
@@ -921,7 +921,7 @@ class Microscope:
         return returned_intensity, bleached_datamap
 
     def get_signal_and_bleach_fast(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True,
-                                   update=True, seed=None):
+                                   update=True, seed=None, filter_bypass=False):
         """
         MODIFY ANTHO'S VERSION TO WORK WITH THE GOOD DATAMAP / MICROSCOPE IMPLEMENTATION
         Function to bleach the datamap as the signal is acquired.
@@ -959,7 +959,8 @@ class Microscope:
         p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
         p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
 
-        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
+        if not filter_bypass:
+            pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
 
         # TODO: need to find a way to compute this inside the C function on a pixel per pixel basis
         effective = self.get_effective(datamap_pixelsize, p_ex[0, 0], p_sted[0, 0])
@@ -989,7 +990,7 @@ class Microscope:
                 effective = self.get_effective(datamap_pixelsize, p_ex[row, col], p_sted[row, col])
                 row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
                 col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
-                acquired_intensity[int(row / ratio), int(col / ratio)] += numpy.sum(effective *
+                acquired_intensity[int(row / ratio), int(col / ratio)] = numpy.sum(effective *
                                                                                     bleached_datamap
                                                                                     [row_slice, col_slice])
 
