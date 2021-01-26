@@ -97,67 +97,6 @@ for i in tqdm.trange(n_time_steps):
                 synapse_flash_idx_dict[idx_syn] = 0
                 synpase_flashing_dict[idx_syn] = False
 
-    """if n_pixels_per_tstep >= 1:
-        n_pixels_this_iter = int(n_pixels_per_tstep) + microscope.take_from_pixel_bank()
-        roi_save_copy = np.copy(datamap.whole_datamap[datamap.roi])
-        # generate the list of pixels we will image during this time step
-        pixel_list = utils.generate_raster_pixel_list(n_pixels_this_iter, starting_pixel, roi_save_copy)
-
-        # pass the acq matrix?
-        confoc_acq, _, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
-                                                                                0.0,
-                                                                                acquired_intensity=confoc_intensity,
-                                                                                pixel_list=pixel_list, bleach=bleach,
-                                                                                update=False, filter_bypass=True)
-
-        sted_acq, _, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
-                                                                            p_sted,
-                                                                            acquired_intensity=sted_intensity,
-                                                                            pixel_list=pixel_list, bleach=bleach,
-                                                                            update=False, filter_bypass=True)
-
-        microscope.add_to_pixel_bank(n_pixels_per_tstep)
-        # when do I want to save the images, what is my refresh rate?
-        list_datamaps.append(roi_save_copy)
-        list_confocals.append(confoc_acq)
-        list_steds.append(sted_acq)
-
-        # make sure the next iter starts at the right pixel
-        starting_pixel = utils.set_starting_pixel(list(pixel_list[-1]), roi_save_copy.shape)
-
-    else:
-        # print("aha not yet implemented :)")
-        n_pixels_this_iter = int(n_pixels_per_tstep) + microscope.take_from_pixel_bank()
-        if n_pixels_this_iter >= 1:
-            roi_save_copy = np.copy(datamap.whole_datamap[datamap.roi])
-            # generate the list of pixels we will image during this time step
-            pixel_list = utils.generate_raster_pixel_list(n_pixels_this_iter, starting_pixel, roi_save_copy)
-
-            confoc_acq, _, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt,
-                                                                                    p_ex, 0.0,
-                                                                                    acquired_intensity=confoc_intensity,
-                                                                                    pixel_list=pixel_list,
-                                                                                    bleach=bleach, update=False,
-                                                                                    filter_bypass=True)
-
-            sted_acq, _, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
-                                                                                p_sted,
-                                                                                acquired_intensity=sted_intensity,
-                                                                                pixel_list=pixel_list, bleach=bleach,
-                                                                                update=False, filter_bypass=True)
-
-
-            microscope.add_to_pixel_bank(n_pixels_per_tstep)
-            # when do I want to save the images, what is my refresh rate?
-            list_datamaps.append(roi_save_copy)
-            list_confocals.append(confoc_acq)
-            list_steds.append(sted_acq)
-
-            # make sure the next iter starts at the right pixel
-            starting_pixel = utils.set_starting_pixel(list(pixel_list[-1]), roi_save_copy.shape)
-
-        else:
-            microscope.add_to_pixel_bank(n_pixels_per_tstep)"""
     n_pixels_this_iter = int(n_pixels_per_tstep) + microscope.take_from_pixel_bank()
     if n_pixels_this_iter >= 1:
         roi_save_copy = np.copy(datamap.whole_datamap[datamap.roi])
