@@ -1142,15 +1142,20 @@ class Microscope:
         :param n_pixels_per_tstep: The number of pixels which the microscope has the time to acquire during 1
                                    time step of the Ca2+ flash event
         """
-        integer_n_pixels_per_tstep = int(n_pixels_per_tstep)
+        integer_n_pixels_per_tstep = numpy.floor(n_pixels_per_tstep)   # np.floor() fonctionne comme int()
         self.pixel_bank += n_pixels_per_tstep - integer_n_pixels_per_tstep
 
     def take_from_pixel_bank(self):
         """
-
-        :return:
+        Verifies the amount stored in the pixel_bank, returns the integer part if greater or equal to 1
+        :return: The integer part of the pixel_bank of the microscope
         """
-        pass
+        integer_pixel_bank = numpy.floor(self.pixel_bank)
+        if integer_pixel_bank >= 1:
+            self.pixel_bank -= integer_pixel_bank
+            return integer_pixel_bank
+        else:
+            return 0
 
 
 class Datamap:
