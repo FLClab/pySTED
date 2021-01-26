@@ -924,8 +924,8 @@ class Microscope:
 
         return returned_intensity, bleached_datamap
 
-    def get_signal_and_bleach_fast(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True,
-                                   update=True, seed=None, filter_bypass=False):
+    def get_signal_and_bleach_fast(self, datamap, pixelsize, pdt, p_ex, p_sted, acquired_intensity=None,
+                                   pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False):
         """
         MODIFY ANTHO'S VERSION TO WORK WITH THE GOOD DATAMAP / MICROSCOPE IMPLEMENTATION
         Function to bleach the datamap as the signal is acquired.
@@ -969,9 +969,14 @@ class Microscope:
         # TODO: need to find a way to compute this inside the C function on a pixel per pixel basis
         effective = self.get_effective(datamap_pixelsize, p_ex[0, 0], p_sted[0, 0])
 
+        # TODO: make sure I handle passing an acq matrix correctly / verifying its shape and shit
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-        acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
-                                          int(numpy.ceil(datamap_roi.shape[1] / ratio))))
+        if acquired_intensity is None:
+            acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
+                                              int(numpy.ceil(datamap_roi.shape[1] / ratio))))
+        else:
+            # verify the shape and shit
+            pass
         rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
         laser_pad = i_ex.shape[0] // 2
 
@@ -1017,6 +1022,7 @@ class Microscope:
                 )
                 pass
             else:
+                # print("WHY DO I GO HERE ?")
                 raster_func(
                     acquired_intensity, numpy.array(pixel_list).astype(numpy.int32),
                     ratio, effective, rows_pad, cols_pad, laser_pad, datamap.whole_datamap,
@@ -1027,19 +1033,19 @@ class Microscope:
         photons = self.fluo.get_photons(acquired_intensity)
 
         if photons.shape == pdt.shape:
-            returned_intensity = self.detector.get_signal(photons, pdt)
+            returned_acquired_photons = self.detector.get_signal(photons, pdt)
         else:
             pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
                                                    int(numpy.ceil(pdt.shape[1] / ratio))))
             new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
             for (row, col) in new_pdt_plist:
                 pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
-            returned_intensity = self.detector.get_signal(photons, pixeldwelltime_reshaped)
+            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped)
 
         if update:
             datamap.whole_datamap = bleached_datamap
 
-        return returned_intensity, bleached_datamap
+        return returned_acquired_photons, bleached_datamap, acquired_intensity
 
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
                           lower_th=1, ltr=0.1, upper_th=100):
@@ -1142,7 +1148,7 @@ class Microscope:
         :param n_pixels_per_tstep: The number of pixels which the microscope has the time to acquire during 1
                                    time step of the Ca2+ flash event
         """
-        integer_n_pixels_per_tstep = numpy.floor(n_pixels_per_tstep)   # np.floor() fonctionne comme int()
+        integer_n_pixels_per_tstep = int(n_pixels_per_tstep)   # np.floor() fonctionne comme int()
         self.pixel_bank += n_pixels_per_tstep - integer_n_pixels_per_tstep
 
     def take_from_pixel_bank(self):
@@ -1150,7 +1156,7 @@ class Microscope:
         Verifies the amount stored in the pixel_bank, returns the integer part if greater or equal to 1
         :return: The integer part of the pixel_bank of the microscope
         """
-        integer_pixel_bank = numpy.floor(self.pixel_bank)
+        integer_pixel_bank = int(self.pixel_bank)   # np.floor() fonctionne comme int()
         if integer_pixel_bank >= 1:
             self.pixel_bank -= integer_pixel_bank
             return integer_pixel_bank
