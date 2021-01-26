@@ -70,6 +70,9 @@ flash_prob = 0.05   # every iteration, all synapses will have a 5% to start flas
 frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
 list_datamaps, list_confocals, list_steds = [], [], []
 n_pixels_per_tstep, n_time_steps = utils.compute_time_correspondances((10, 1.5), 20, pdt)
+print(f"pixels = {n_pixels_per_tstep}")
+print(f"time steps = {n_time_steps}")
+exit()
 starting_pixel = [0, 0]   # set starting pixel
 confoc_intensity = np.zeros(frozen_datamap.shape).astype(float)
 sted_intensity = np.zeros(frozen_datamap.shape).astype(float)

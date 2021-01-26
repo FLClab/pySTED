@@ -1078,6 +1078,27 @@ def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, 
     return ensemble_test, synapses_lists
 
 
+def generate_synapse_flash_dicts(synapses_list, roi_shape):
+    """
+    This function is used to generate the dictionnaries needed to keep track of which synapses are flashing and where
+    they are situatied in the flash and such
+    :param synapses_list: The list of all the synapses in the frame (flattenened)
+    :param roi_shape: The shape of the frame
+    :return:
+    """
+    synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = {}, {}, {}, {}
+
+    for idx_syn in range(len(synapses_list)):
+        synpase_flashing_dict[idx_syn] = False
+        synapse_flash_idx_dict[idx_syn] = 0
+        rr, cc = synapses_list[idx_syn].return_shape(shape=roi_shape)
+        isolated_synapses_frames[idx_syn] = numpy.zeros(roi_shape).astype(int)
+        isolated_synapses_frames[idx_syn][rr.astype(int), cc.astype(int)] += 5
+
+    return synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames
+
+
+
 def generate_raster_pixel_list(n_pixels_to_add, starting_pixel, img):
     """
     The goal is to generate a raster scan pixel list from starting_pixel, containing a maximum of n_pixels_to_add
@@ -1106,3 +1127,43 @@ def generate_raster_pixel_list(n_pixels_to_add, starting_pixel, img):
             current_idx[0] = 0
 
     return return_list
+
+
+def set_starting_pixel(previous_pixel, image_shape):
+    """
+    Returns a value 1 pixel further from the last pixel of an acquisition list in an normal raster scan fashion.
+    :param previous_pixel: The pixel on which the previous raster scan stopped
+    :param image_shape: the shape of the ROI on which the raster scan is occuring
+    :return: The pixel on which the next raster scan should start
+    """
+    starting_pixel = list(previous_pixel)
+    starting_pixel[1] += 1
+    if starting_pixel[1] >= image_shape[1]:
+        starting_pixel[1] = 0
+        starting_pixel[0] += 1
+    if starting_pixel[0] >= image_shape[0]:
+        starting_pixel[0] = 0
+
+    return starting_pixel
+
+
+def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_sec, pixel_dwelltime):
+    """
+    This function computes how many loop steps will occur and how many pixels can be imaged for each loop step.
+    So far this only works for static pixel_dwelltime, need to figure out how to make it work for varying dwell times
+    per pixel or varying dwell times as in RESCue.
+    :param fwhm_step_sec_correspondance: a tuple containing how large in time steps the FWHM of the mean flash is at
+                                         index 0 and how large in seconds we want the FWHM to be at index 1
+    :param acquisition_time_sec: How long we want to acquire on the same datamap, in seconds. This will be used to
+                                 determine how many loops we need to do (float? int?)
+    :param pixel_dwelltime: The pixel dwell time used by the microscope (float)
+    :return: The number of pixels that can be imaged per loop and the number of loop iterations
+    """
+    # aha
+    fwhm_time_steps, fwhm_time_secs = fwhm_step_sec_correspondance[0], fwhm_step_sec_correspondance[1]
+    sec_per_time_step = fwhm_time_secs / fwhm_time_steps
+    n_time_steps = int(acquisition_time_sec / sec_per_time_step)
+    n_pixels_per_tstep = sec_per_time_step / pixel_dwelltime
+
+    return n_pixels_per_tstep, n_time_steps
+
