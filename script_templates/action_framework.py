@@ -144,7 +144,10 @@ for i in tqdm.trange(n_time_steps):
         # vérifier combien de pixels je peux faire encore, idk
         if low_res_confoc_plist[-1] == confoc_valid_pixels_list[-1]:
             # mettre confoc_taken à True, faire commencer l'action
-            pass
+            confoc_taken = True
+
+            # calculer combien de pixels il me reste à imager dans cette iter de la loop for
+
         else:
             # set le confoc starting pixel comme il faut? not sure what to do here
             pass
