@@ -436,13 +436,14 @@ def mse_calculator(array1, array2):
     return mean_squared_error
 
 
-def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize):
+def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize, output_empty=False):
     """
     Function to pre-filter a pixel list. Depending on the ratio between the data_pixelsize and acquisition pixelsize,
     a certain number of pixels must be skipped between laser applications.
     :param pixel_list: The list of pixels passed to the acquisition function, which needs to be filtered
     :param img_pixelsize: The acquisition pixelsize (m)
     :param data_pixelsize: The data pixelsize (m)
+    :param output_empty: Bool to allow (or not) this function to return an empty pixel list
     :returns: A filtered version of the input pixel_list, from which the pixels which can't be iterated over due to the
               pixel sizes have been removed
     """
@@ -461,15 +462,18 @@ def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize):
             valid_pixels_grid_matrix[row, col] = 1
             nb_valid_pixels += 1
         pixel_list_matrix = numpy.zeros(datamap.shape)
-        order = 1
-        for (row, col) in pixel_list:
-            pixel_list_matrix[row, col] = order
-            order += 1
+        for idx, (row, col) in enumerate(pixel_list):
+            pixel_list_matrix[row, col] += idx + 1
+            if row == datamap.shape[0] - 1 and col == datamap.shape[1] - 1:
+                break
         final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
         if numpy.array_equal(final_valid_pixels_matrix, numpy.zeros(datamap.shape)):
-            warnings.warn(" \nNo pixels in the list passed is valid given the ratio between pixel sizes, \n"
-                          "Iterating on valid pixels in a raster scan instead.")
-            pixel_list = valid_pixels_grid  # itérer sur les pixels valides seulement
+            if output_empty:
+                return pixel_list
+            else:
+                warnings.warn(" \nNo pixels in the list passed is valid given the ratio between pixel sizes, \n"
+                              "Iterating on valid pixels in a raster scan instead.")
+                pixel_list = valid_pixels_grid  # itérer sur les pixels valides seulement
         else:
             pixel_list_interim = numpy.argsort(final_valid_pixels_matrix, axis=None)
             pixel_list_interim = numpy.unravel_index(pixel_list_interim, datamap.shape)
