@@ -80,10 +80,166 @@ synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolate
     utils.generate_synapse_flash_dicts(flat_synapses_list, frame_shape)
 
 # start acquisition loop
-save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/test_refactoring/"
+
+save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/action_selection/"
 flash_prob = 0.05   # every iteration, all synapses will have a 5% to start flashing
 frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
 list_datamaps, list_confocals, list_steds = [], [], []
-n_pixels_per_tstep, n_time_steps = utils.compute_time_correspondances((10, 1.5), 20, pdt)
-print(f"pixels = {n_pixels_per_tstep}")
-print(f"time steps = {n_time_steps}")
+n_time_steps, n_pixel_per_flash_step = utils.compute_time_correspondances((10, 1.5), 20, pdt, mode="pdt")
+"""
+(int(numpy.ceil(datamap_roi.shape[0] / ratio)),
+int(numpy.ceil(datamap_roi.shape[1] / ratio))
+"""
+ratio = utils.pxsize_ratio(confoc_pxsize, datamap.pixelsize)
+confoc_n_rows, confoc_n_cols = int(np.ceil(frame_shape[0] / ratio)), int(np.ceil(frame_shape[1] / ratio))
+actions_required_pixels = {"confocal": confoc_n_rows * confoc_n_cols, "sted": frame_shape[0] * frame_shape[1]}
+imaged_pixels = 0   # can cap at either n_pixels_confoc or n_pixels_sted
+action_selected = "confocal"
+action_completed = False
+pixels_for_current_action = actions_required_pixels[action_selected]
+confoc_intensity = np.zeros((confoc_n_rows, confoc_n_cols)).astype(float)
+sted_intensity = np.zeros(frozen_datamap.shape).astype(float)
+confocal_starting_pixel, sted_starting_pixel = [0, 0], [0, 0]
+for pixel_idx in tqdm.trange(n_time_steps):
+    microscope.pixel_bank += 1
+    if pixel_idx % n_pixel_per_flash_step == 0:
+        # Start the acquisition if I have more than 1 pixel in the bank
+        # This means that I will ALWAYS start this routine with a 1 pixel confocal
+        pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, confocal_starting_pixel if
+                                                      action_selected == "confocal" else sted_starting_pixel,
+                                                      frozen_datamap)
+        pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, confoc_pxsize if
+                                             action_selected == "confocal" else datamap.pixelsize,
+                                             datamap.pixelsize, output_empty=True)
+
+        # faire le scan confocal sur la pixel_list
+        # faire un if pour confocal ou sted
+        if action_selected == "confocal":
+            confoc_acq, _, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
+                                                                                    0.0,
+                                                                                    acquired_intensity=confoc_intensity,
+                                                                                    pixel_list=pixel_list,
+                                                                                    bleach=bleach, update=False,
+                                                                                    filter_bypass=True)
+        elif action_selected == "sted":
+            sted_acq, _, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
+                                                                                p_sted,
+                                                                                acquired_intensity=sted_intensity,
+                                                                                pixel_list=pixel_list,
+                                                                                bleach=bleach, update=False,
+                                                                                filter_bypass=True)
+
+        # shift the starting pixel
+        if action_selected == "confocal":
+            confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
+        elif action_selected == "sted":
+            sted_starting_pixel = utils.set_starting_pixel(sted_starting_pixel, frame_shape)
+
+        # empty the pixel bank after the acquisition
+        imaged_pixels += microscope.pixel_bank
+        microscope.empty_pixel_bank()
+
+        if imaged_pixels == actions_required_pixels[action_selected]:
+            action_completed = True
+
+        # loop through all synapses, make some start to flash, randomly, maybe
+        for idx_syn in range(len(flat_synapses_list)):
+            if np.random.binomial(1, flash_prob) and synpase_flashing_dict[idx_syn] is False:
+                # can start the flash
+                synpase_flashing_dict[idx_syn] = True
+                synapse_flash_idx_dict[idx_syn] = 1
+                sampled_curve = utils.flash_generator(event_file_path, video_file_path)
+                synapse_flash_curve_dict[idx_syn] = utils.rescale_data(sampled_curve, to_int=True, divider=3)
+
+            if synpase_flashing_dict[idx_syn]:
+                datamap.whole_datamap[datamap.roi] -= isolated_synapses_frames[idx_syn]
+                datamap.whole_datamap[datamap.roi] += isolated_synapses_frames[idx_syn] * \
+                                                      synapse_flash_curve_dict[idx_syn][synapse_flash_idx_dict[idx_syn]]
+                synapse_flash_idx_dict[idx_syn] += 1
+                if synapse_flash_idx_dict[idx_syn] >= 40:
+                    synapse_flash_idx_dict[idx_syn] = 0
+                    synpase_flashing_dict[idx_syn] = False
+
+        # get a copy of the datamap to add to a list to save later
+        roi_save_copy = np.copy(datamap.whole_datamap[datamap.roi])
+        list_datamaps.append(roi_save_copy)
+
+    # Regarder il me manque combien de pixels
+    # pixels_for_current_acq?
+    if action_selected == "confocal":
+        pixels_needed_to_complete_acq = confoc_n_rows * confoc_n_cols - imaged_pixels
+    elif action_selected == "sted":
+        pixels_needed_to_complete_acq = frame_shape[0] * frame_shape[1] - imaged_pixels
+    else:
+        # should never go there yet
+        pixels_needed_to_complete_acq = 0
+
+    if microscope.pixel_bank == pixels_needed_to_complete_acq:
+        # Complete the acquisition and add it to the list of acquisitions to save
+        pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, confocal_starting_pixel if
+                                                      action_selected == "confocal" else sted_starting_pixel,
+                                                      frozen_datamap)
+        pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, confoc_pxsize if
+                                             action_selected == "confocal" else datamap.pixelsize,
+                                             datamap.pixelsize, output_empty=True)
+
+        # faire le scan confocal sur la pixel_list
+        # faire un if pour confocal ou sted
+        if action_selected == "confocal":
+            confoc_acq, _, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
+                                                                                    0.0,
+                                                                                    acquired_intensity=confoc_intensity,
+                                                                                    pixel_list=pixel_list,
+                                                                                    bleach=bleach, update=False,
+                                                                                    filter_bypass=True)
+        elif action_selected == "sted":
+            sted_acq, _, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
+                                                                                p_sted,
+                                                                                acquired_intensity=sted_intensity,
+                                                                                pixel_list=pixel_list,
+                                                                                bleach=bleach, update=False,
+                                                                                filter_bypass=True)
+
+        # shift the starting pixel
+        if action_selected == "confocal":
+            confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
+        elif action_selected == "sted":
+            sted_starting_pixel = utils.set_starting_pixel(sted_starting_pixel, frame_shape)
+
+        # empty the pixel bank after the acquisition
+        imaged_pixels += microscope.pixel_bank
+        microscope.empty_pixel_bank()
+
+        # l'acquisition est finit, ce qui veut dire que que je dois faire des choses là :)
+        action_completed = True
+
+    if action_completed:
+        # add acquisition to be saved
+        if action_selected == "confocal":
+            list_confocals.append(confoc_acq)
+        elif action_selected == "sted":
+            list_steds.append(sted_acq)
+
+        # select the new action based off the previous
+        # (so for now this is confocal -> sted -> confocal)
+        action_completed = False
+        if action_selected == "confocal":
+            action_selected = "sted"
+        elif action_selected == "sted":
+            action_selected = "confocal"
+
+        imaged_pixels = 0
+        pixels_for_current_action = actions_required_pixels[action_selected]
+        confoc_intensity = np.zeros((confoc_n_rows, confoc_n_cols)).astype(float)
+        sted_intensity = np.zeros(frozen_datamap.shape).astype(float)
+
+min_datamap, max_datamap = np.min(list_datamaps), np.max(list_datamaps)
+min_confocal, max_confocal = np.min(list_confocals), np.max(list_confocals)
+min_sted, max_sted = np.min(list_steds), np.max(list_steds)
+for idx in range(len(list_datamaps)):
+    plt.imsave(save_path + f"datamaps/{idx}.png", list_datamaps[idx], vmin=min_datamap, vmax=max_datamap)
+for idx in range(len(list_confocals)):
+    plt.imsave(save_path + f"confocals/{idx}.png", list_confocals[idx], vmin=min_confocal, vmax=max_confocal)
+for idx in range(len(list_steds)):
+    plt.imsave(save_path + f"steds/{idx}.png", list_steds[idx], vmin=min_sted, vmax=max_sted)
+plt.imsave(save_path + "flat_datamap.png", poils_frame)

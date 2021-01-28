@@ -1151,7 +1151,7 @@ def set_starting_pixel(previous_pixel, image_shape):
     return starting_pixel
 
 
-def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_sec, pixel_dwelltime):
+def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_sec, pixel_dwelltime, mode="flash"):
     """
     This function computes how many loop steps will occur and how many pixels can be imaged for each loop step.
     So far this only works for static pixel_dwelltime, need to figure out how to make it work for varying dwell times
@@ -1163,11 +1163,19 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
     :param pixel_dwelltime: The pixel dwell time used by the microscope (float)
     :return: The number of pixels that can be imaged per loop and the number of loop iterations
     """
-    # aha
+
+    legal_modes = ["flash", "pdt"]
+    if mode.lower() not in legal_modes:
+        raise ValueError(f"Mode '{mode}' is not valid")
+
     fwhm_time_steps, fwhm_time_secs = fwhm_step_sec_correspondance[0], fwhm_step_sec_correspondance[1]
     sec_per_time_step = fwhm_time_secs / fwhm_time_steps
-    n_time_steps = int(acquisition_time_sec / sec_per_time_step)
-    n_pixels_per_tstep = sec_per_time_step / pixel_dwelltime
-
-    return n_pixels_per_tstep, n_time_steps
+    if mode == "flash":
+        n_time_steps = int(acquisition_time_sec / sec_per_time_step)
+        n_pixels_per_tstep = sec_per_time_step / pixel_dwelltime
+        return n_time_steps, n_pixels_per_tstep
+    elif mode == "pdt":
+        n_time_steps = int(acquisition_time_sec / pixel_dwelltime)   # fait chier que les ordis savent pas comment math
+        x_pixels_for_flash_ts = round(sec_per_time_step / pixel_dwelltime)
+        return n_time_steps, x_pixels_for_flash_ts
 

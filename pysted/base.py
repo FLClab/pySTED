@@ -1163,6 +1163,12 @@ class Microscope:
         else:
             return 0
 
+    def empty_pixel_bank(self):
+        """
+        Empties the pixel bank
+        """
+        self.pixel_bank = 0
+
 
 class Datamap:
     """This class implements a datamap
