@@ -1133,7 +1133,7 @@ def generate_raster_pixel_list(n_pixels_to_add, starting_pixel, img):
     return return_list
 
 
-def set_starting_pixel(previous_pixel, image_shape):
+def set_starting_pixel(previous_pixel, image_shape, ratio=1):
     """
     Returns a value 1 pixel further from the last pixel of an acquisition list in an normal raster scan fashion.
     :param previous_pixel: The pixel on which the previous raster scan stopped
@@ -1141,10 +1141,10 @@ def set_starting_pixel(previous_pixel, image_shape):
     :return: The pixel on which the next raster scan should start
     """
     starting_pixel = list(previous_pixel)
-    starting_pixel[1] += 1
+    starting_pixel[1] += ratio
     if starting_pixel[1] >= image_shape[1]:
         starting_pixel[1] = 0
-        starting_pixel[0] += 1
+        starting_pixel[0] += ratio
     if starting_pixel[0] >= image_shape[0]:
         starting_pixel[0] = 0
 

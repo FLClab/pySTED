@@ -103,14 +103,24 @@ confocal_starting_pixel, sted_starting_pixel = [0, 0], [0, 0]
 for pixel_idx in tqdm.trange(n_time_steps):
     microscope.pixel_bank += 1
     if pixel_idx % n_pixel_per_flash_step == 0:
-        # Start the acquisition if I have more than 1 pixel in the bank
-        # This means that I will ALWAYS start this routine with a 1 pixel confocal
-        pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, confocal_starting_pixel if
-                                                      action_selected == "confocal" else sted_starting_pixel,
-                                                      frozen_datamap)
-        pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, confoc_pxsize if
-                                             action_selected == "confocal" else datamap.pixelsize,
-                                             datamap.pixelsize, output_empty=True)
+
+        if action_selected == "confocal":
+            pixel_list = utils.generate_raster_pixel_list(frame_shape[0] * frame_shape[1], sted_starting_pixel,
+                                                          frozen_datamap)
+            pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, confoc_pxsize, datamap.pixelsize,
+                                                 output_empty=True)
+
+            # Cut elements before the starting pixel from the list
+            start_idx = pixel_list.index(tuple(confocal_starting_pixel))
+            pixel_list = pixel_list[start_idx:]
+            pixel_list = pixel_list[:microscope.pixel_bank]
+
+        elif action_selected == "sted":
+            # faire la sélection que je fais déjà plus haut
+            pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, sted_starting_pixel, frozen_datamap)
+            pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
+                                                 output_empty=True)
+
 
         # faire le scan confocal sur la pixel_list
         # faire un if pour confocal ou sted
@@ -121,6 +131,7 @@ for pixel_idx in tqdm.trange(n_time_steps):
                                                                                     pixel_list=pixel_list,
                                                                                     bleach=bleach, update=False,
                                                                                     filter_bypass=True)
+
         elif action_selected == "sted":
             sted_acq, _, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
                                                                                 p_sted,
@@ -131,7 +142,8 @@ for pixel_idx in tqdm.trange(n_time_steps):
 
         # shift the starting pixel
         if action_selected == "confocal":
-            confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
+            # confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
+            confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, frame_shape, ratio=ratio)
         elif action_selected == "sted":
             sted_starting_pixel = utils.set_starting_pixel(sted_starting_pixel, frame_shape)
 
@@ -142,6 +154,7 @@ for pixel_idx in tqdm.trange(n_time_steps):
         if imaged_pixels == actions_required_pixels[action_selected]:
             action_completed = True
 
+        datamap.whole_datamap[datamap.roi] = np.copy(frozen_datamap)
         # loop through all synapses, make some start to flash, randomly, maybe
         for idx_syn in range(len(flat_synapses_list)):
             if np.random.binomial(1, flash_prob) and synpase_flashing_dict[idx_syn] is False:
@@ -162,26 +175,32 @@ for pixel_idx in tqdm.trange(n_time_steps):
 
         # get a copy of the datamap to add to a list to save later
         roi_save_copy = np.copy(datamap.whole_datamap[datamap.roi])
+        # plt.imshow(roi_save_copy)
+        # plt.show()
         list_datamaps.append(roi_save_copy)
 
     # Regarder il me manque combien de pixels
-    # pixels_for_current_acq?
-    if action_selected == "confocal":
-        pixels_needed_to_complete_acq = confoc_n_rows * confoc_n_cols - imaged_pixels
-    elif action_selected == "sted":
-        pixels_needed_to_complete_acq = frame_shape[0] * frame_shape[1] - imaged_pixels
-    else:
-        # should never go there yet
-        pixels_needed_to_complete_acq = 0
+    pixels_needed_to_complete_acq = pixels_for_current_action - imaged_pixels
 
     if microscope.pixel_bank == pixels_needed_to_complete_acq:
-        # Complete the acquisition and add it to the list of acquisitions to save
-        pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, confocal_starting_pixel if
-                                                      action_selected == "confocal" else sted_starting_pixel,
-                                                      frozen_datamap)
-        pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, confoc_pxsize if
-                                             action_selected == "confocal" else datamap.pixelsize,
-                                             datamap.pixelsize, output_empty=True)
+
+        if action_selected == "confocal":
+
+            pixel_list = utils.generate_raster_pixel_list(frame_shape[0] * frame_shape[1], sted_starting_pixel,
+                                                          frozen_datamap)
+            pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, confoc_pxsize, datamap.pixelsize,
+                                                 output_empty=True)
+
+            # Cut elements before the starting pixel from the list
+            start_idx = pixel_list.index(tuple(confocal_starting_pixel))
+            pixel_list = pixel_list[start_idx:]
+            pixel_list = pixel_list[:microscope.pixel_bank]
+
+        elif action_selected == "sted":
+            # faire la sélection que je fais déjà plus haut
+            pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, sted_starting_pixel, frozen_datamap)
+            pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
+                                                 output_empty=True)
 
         # faire le scan confocal sur la pixel_list
         # faire un if pour confocal ou sted
@@ -192,6 +211,7 @@ for pixel_idx in tqdm.trange(n_time_steps):
                                                                                     pixel_list=pixel_list,
                                                                                     bleach=bleach, update=False,
                                                                                     filter_bypass=True)
+
         elif action_selected == "sted":
             sted_acq, _, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
                                                                                 p_sted,
@@ -202,7 +222,8 @@ for pixel_idx in tqdm.trange(n_time_steps):
 
         # shift the starting pixel
         if action_selected == "confocal":
-            confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
+            # confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
+            confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, frame_shape, ratio=ratio)
         elif action_selected == "sted":
             sted_starting_pixel = utils.set_starting_pixel(sted_starting_pixel, frame_shape)
 
@@ -217,6 +238,9 @@ for pixel_idx in tqdm.trange(n_time_steps):
         # add acquisition to be saved
         if action_selected == "confocal":
             list_confocals.append(confoc_acq)
+            plt.imshow(confoc_acq)
+            plt.title(f"confoc acq added to list")
+            plt.show()
         elif action_selected == "sted":
             list_steds.append(sted_acq)
 
