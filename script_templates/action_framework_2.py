@@ -81,7 +81,7 @@ synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolate
 
 # start acquisition loop
 
-save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/action_selection/"
+save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/action_selection_2/"
 flash_prob = 0.05   # every iteration, all synapses will have a 5% to start flashing
 frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
 list_datamaps, list_confocals, list_steds = [], [], []
@@ -238,9 +238,9 @@ for pixel_idx in tqdm.trange(n_time_steps):
         # add acquisition to be saved
         if action_selected == "confocal":
             list_confocals.append(confoc_acq)
-            plt.imshow(confoc_acq)
-            plt.title(f"confoc acq added to list")
-            plt.show()
+            # plt.imshow(confoc_acq)
+            # plt.title(f"confoc acq added to list")
+            # plt.show()
         elif action_selected == "sted":
             list_steds.append(sted_acq)
 
