@@ -2,6 +2,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 import tqdm
 from pysted import base, utils, temporal
+import os
+import shutil
 
 
 """
@@ -81,15 +83,11 @@ synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolate
 
 # start acquisition loop
 
-save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/action_selection_2/"
+save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/ffmpeg_raster_video/test1/"
+acquisition_time = 5   ## in seconds
 flash_prob = 0.05   # every iteration, all synapses will have a 5% to start flashing
 frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
-list_datamaps, list_confocals, list_steds = [], [], []
-n_time_steps, n_pixel_per_flash_step = utils.compute_time_correspondances((10, 1.5), 20, pdt, mode="pdt")
-"""
-(int(numpy.ceil(datamap_roi.shape[0] / ratio)),
-int(numpy.ceil(datamap_roi.shape[1] / ratio))
-"""
+n_time_steps, n_pixel_per_flash_step = utils.compute_time_correspondances((10, 1.5), acquisition_time, pdt, mode="pdt")
 ratio = utils.pxsize_ratio(confoc_pxsize, datamap.pixelsize)
 confoc_n_rows, confoc_n_cols = int(np.ceil(frame_shape[0] / ratio)), int(np.ceil(frame_shape[1] / ratio))
 actions_required_pixels = {"confocal": confoc_n_rows * confoc_n_cols, "sted": frame_shape[0] * frame_shape[1]}
@@ -99,6 +97,10 @@ action_completed = False
 pixels_for_current_action = actions_required_pixels[action_selected]
 confoc_intensity = np.zeros((confoc_n_rows, confoc_n_cols)).astype(float)
 sted_intensity = np.zeros(frozen_datamap.shape).astype(float)
+list_datamaps = [np.copy(frozen_datamap)]
+list_confocals = [np.zeros(confoc_intensity.shape)]
+list_steds = [np.zeros(sted_intensity.shape)]
+idx_type = {}
 confocal_starting_pixel, sted_starting_pixel = [0, 0], [0, 0]
 for pixel_idx in tqdm.trange(n_time_steps):
     microscope.pixel_bank += 1
@@ -178,6 +180,7 @@ for pixel_idx in tqdm.trange(n_time_steps):
         # plt.imshow(roi_save_copy)
         # plt.show()
         list_datamaps.append(roi_save_copy)
+        idx_type[pixel_idx] = "datamap"
 
     # Regarder il me manque combien de pixels
     pixels_needed_to_complete_acq = pixels_for_current_action - imaged_pixels
@@ -195,6 +198,7 @@ for pixel_idx in tqdm.trange(n_time_steps):
             start_idx = pixel_list.index(tuple(confocal_starting_pixel))
             pixel_list = pixel_list[start_idx:]
             pixel_list = pixel_list[:microscope.pixel_bank]
+            # print(pixel_list[0])
 
         elif action_selected == "sted":
             # faire la sélection que je fais déjà plus haut
@@ -205,6 +209,9 @@ for pixel_idx in tqdm.trange(n_time_steps):
         # faire le scan confocal sur la pixel_list
         # faire un if pour confocal ou sted
         if action_selected == "confocal":
+            # plt.imshow(confoc_intensity)
+            # plt.title(f"confocal intensity b4 completing acq")
+            # plt.show()
             confoc_acq, _, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
                                                                                     0.0,
                                                                                     acquired_intensity=confoc_intensity,
@@ -237,33 +244,156 @@ for pixel_idx in tqdm.trange(n_time_steps):
     if action_completed:
         # add acquisition to be saved
         if action_selected == "confocal":
-            list_confocals.append(confoc_acq)
+            list_confocals.append(np.copy(confoc_acq))
+            idx_type[pixel_idx] = "confocal"
             # plt.imshow(confoc_acq)
             # plt.title(f"confoc acq added to list")
             # plt.show()
         elif action_selected == "sted":
-            list_steds.append(sted_acq)
+            list_steds.append(np.copy(sted_acq))
+            idx_type[pixel_idx] = "sted"
 
         # select the new action based off the previous
         # (so for now this is confocal -> sted -> confocal)
         action_completed = False
         if action_selected == "confocal":
             action_selected = "sted"
+            # confoc_intensity = np.zeros((confoc_n_rows, confoc_n_cols)).astype(float)
         elif action_selected == "sted":
             action_selected = "confocal"
+            # sted_intensity = np.zeros(frozen_datamap.shape).astype(float)
 
         imaged_pixels = 0
         pixels_for_current_action = actions_required_pixels[action_selected]
-        confoc_intensity = np.zeros((confoc_n_rows, confoc_n_cols)).astype(float)
-        sted_intensity = np.zeros(frozen_datamap.shape).astype(float)
+        # confoc_intensity = np.zeros((confoc_n_rows, confoc_n_cols)).astype(float)
+        # sted_intensity = np.zeros(frozen_datamap.shape).astype(float)
+
+
+save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/ffmpeg_raster_video/test1/"
+ffmpeg_file_path = save_path + "in.ffconcat"
 
 min_datamap, max_datamap = np.min(list_datamaps), np.max(list_datamaps)
 min_confocal, max_confocal = np.min(list_confocals), np.max(list_confocals)
 min_sted, max_sted = np.min(list_steds), np.max(list_steds)
-for idx in range(len(list_datamaps)):
-    plt.imsave(save_path + f"datamaps/{idx}.png", list_datamaps[idx], vmin=min_datamap, vmax=max_datamap)
-for idx in range(len(list_confocals)):
-    plt.imsave(save_path + f"confocals/{idx}.png", list_confocals[idx], vmin=min_confocal, vmax=max_confocal)
-for idx in range(len(list_steds)):
-    plt.imsave(save_path + f"steds/{idx}.png", list_steds[idx], vmin=min_sted, vmax=max_sted)
-plt.imsave(save_path + "flat_datamap.png", poils_frame)
+
+# for idx in range(len(list_datamaps)):
+#     plt.imsave(save_path + f"datamaps/{idx}.png", list_datamaps[idx], vmin=min_datamap, vmax=max_datamap)
+# for idx in range(len(list_confocals)):
+#     plt.imsave(save_path + f"confocals/{idx}.png", list_confocals[idx], vmin=min_confocal, vmax=max_confocal)
+# for idx in range(len(list_steds)):
+#     plt.imsave(save_path + f"steds/{idx}.png", list_steds[idx], vmin=min_sted, vmax=max_sted)
+# plt.imsave(save_path + "flat_datamap.png", poils_frame)
+
+# Generate the first figure
+fig, axes = plt.subplots(1, 3, figsize=(15, 5), tight_layout=True)
+
+dmap_imshow = axes[0].imshow(list_datamaps[0], vmin=min_datamap, vmax=max_datamap)
+axes[0].set_title(f"Datamap")
+fig.colorbar(dmap_imshow, ax=axes[0], fraction=0.04, pad=0.05)
+
+confocal_imshow = axes[1].imshow(list_confocals[0], vmin=min_confocal, vmax=max_confocal)
+axes[1].set_title(f"Confocal (Ground truth) \n "
+                  f"1/3 the resolution of STED")
+fig.colorbar(confocal_imshow, ax=axes[1], fraction=0.04, pad=0.05)
+
+sted_imshow = axes[2].imshow(list_steds[0], vmin=min_sted, vmax=max_sted)
+axes[2].set_title(f"STED acquisition")
+fig.colorbar(sted_imshow, ax=axes[2], fraction=0.04, pad=0.05)
+
+fig.suptitle(f"Acquisition will start in 5 seconds")
+plt.savefig(save_path+f"0.png")
+plt.close()
+
+# write the lines in the script file for video generation
+file = open(ffmpeg_file_path, "a")
+file.write("ffconcat version 1.0\n")
+file.write("file 0.png\n")
+file.write(f"duration 5\n")
+file.close()
+
+# loop through the keys in the dict to correctly order the picture updates
+# faire un tqdm range serait pas pire :)
+keys_list = sorted(idx_type.keys())
+for idx, key in enumerate(keys_list):
+    if idx_type[key] == "datamap":
+        list_datamaps.pop(0)
+    elif idx_type[key] == "confocal":
+        list_confocals.pop(0)
+    elif idx_type[key] == "sted":
+        list_steds.pop(0)
+    else:
+        print(f"FORBIDDEN UNKNOWN")
+
+    if key != keys_list[-1]:
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5), tight_layout=True)
+
+        dmap_imshow = axes[0].imshow(list_datamaps[0], vmin=min_datamap, vmax=max_datamap)
+        axes[0].set_title(f"Datamap")
+        fig.colorbar(dmap_imshow, ax=axes[0], fraction=0.04, pad=0.05)
+
+        confocal_imshow = axes[1].imshow(list_confocals[0], vmin=min_confocal, vmax=max_confocal)
+        axes[1].set_title(f"Confocal (Ground truth) \n "
+                          f"1/3 the resolution of STED")
+        fig.colorbar(confocal_imshow, ax=axes[1], fraction=0.04, pad=0.05)
+
+        sted_imshow = axes[2].imshow(list_steds[0], vmin=min_sted, vmax=max_sted)
+        axes[2].set_title(f"STED acquisition")
+        fig.colorbar(sted_imshow, ax=axes[2], fraction=0.04, pad=0.05)
+
+        fig.suptitle(f"Acquisition has started")
+        plt.savefig(save_path + f"{key + 1}.png")
+        plt.close()
+
+        # make the calculations for times to write in script file
+        duration = (keys_list[idx + 1] - key) * pdt * 10  # right?
+
+        # write the lines to script file
+        file = open(ffmpeg_file_path, "a")
+        file.write(f"file {key + 1}.png\n")
+        file.write(f"duration {duration}\n")   # need to modify this so it computes the right time
+        file.close()
+
+    else:
+        for i in range(2):
+            fig, axes = plt.subplots(1, 3, figsize=(15, 5), tight_layout=True)
+
+            dmap_imshow = axes[0].imshow(list_datamaps[0], vmin=min_datamap, vmax=max_datamap)
+            axes[0].set_title(f"Datamap")
+            fig.colorbar(dmap_imshow, ax=axes[0], fraction=0.04, pad=0.05)
+
+            confocal_imshow = axes[1].imshow(list_confocals[0], vmin=min_confocal, vmax=max_confocal)
+            axes[1].set_title(f"Confocal (Ground truth) \n "
+                              f"1/3 the resolution of STED")
+            fig.colorbar(confocal_imshow, ax=axes[1], fraction=0.04, pad=0.05)
+
+            sted_imshow = axes[2].imshow(list_steds[0], vmin=min_sted, vmax=max_sted)
+            axes[2].set_title(f"STED acquisition")
+            fig.colorbar(sted_imshow, ax=axes[2], fraction=0.04, pad=0.05)
+
+            fig.suptitle(f"Acquisition has ended")
+            plt.savefig(save_path + f"{key + 1}.png")
+            plt.close()
+
+            # make the calculations for times to write in script file
+            duration = 10   # right?
+
+            # write the lines to script file
+            file = open(ffmpeg_file_path, "a")
+            file.write(f"file {key + 1}.png\n")
+            file.write(f"duration {duration}\n")   # need to modify this so it computes the right time
+            file.close()
+
+# calculer le temps total du video en secondes et l'enregistrer qqpart pour
+total_duration = 5 + (keys_list[-1] * pdt * 10) + 10
+
+# copy the audio file over, :)
+mp3_file = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/ffmpeg_video_tests/Trance_009_Sound_System_Dreamscape_HD.mp3"
+shutil.copy(mp3_file, save_path)
+
+# call cmd lines to make the video
+# EVERYTHING IS WORKING WELL EXCEPT THAT THE LAST FRAME WONT DISPLAY? I COULD HACK MY WAY BY APPENDING THE LAST FRAME
+# ONE MORE TIME I GUESS IDK
+os.chdir(save_path)
+os.system(fr'cmd /c "ffmpeg -i in.ffconcat -i Trance_009_Sound_System_Dreamscape_HD.mp3 -c:v libx264 -preset ultrafast -crf 0 -c:a copy -vf fps=25 out.avi"')
+os.chdir(save_path)
+os.system(fr'cmd /c "ffmpeg -ss 0 -i out.avi -t {total_duration} -c copy cut_out.avi"')
