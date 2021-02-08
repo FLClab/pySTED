@@ -30,13 +30,9 @@ video_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
 
 # Generate a datamap
 frame_shape = (64, 64)
-ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (9, 55), (3, 10), (2, 5), seed=42)
+ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (9, 55), (3, 10), (2, 5), seed=27)
 
 poils_frame = ensemble_func.return_frame().astype(int)
-
-plt.imshow(poils_frame)
-plt.show()
-exit()
 
 # Microscope stuff
 egfp = {"lambda_": 535e-9,
@@ -59,6 +55,8 @@ dpxsz = 10e-9
 bleach = False
 p_ex = 1e-6
 p_sted = 30e-3
+p_sted_array = np.reshape(np.linspace(0, p_sted * 5, 64 * 64), poils_frame.shape)
+p_ex_array = np.reshape(np.linspace(0, p_ex * 3, 64 * 64), poils_frame.shape)
 pdt = 10e-6   # pour (10, 1.5) ça me donne 15k pixels par iter
 # pdt = 0.3   # pour (10, 1.5) ça me donne 0.5 pixels par iter
 size = 64 + (2 * 22 + 1)
@@ -87,11 +85,12 @@ synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolate
 
 # start acquisition loop
 
-save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/video_tests_varying_params/testing_seed/"
+save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/video_tests_varying_params/p_ex_array/"
 acquisition_time = 5   ## in seconds
 flash_prob = 0.05   # every iteration, all synapses will have a 5% to start flashing
 frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
 n_time_steps, n_pixel_per_flash_step = utils.compute_time_correspondances((10, 1.5), acquisition_time, pdt, mode="pdt")
+print(f"n_pixel_per_flash_step = {n_pixel_per_flash_step}")
 ratio = utils.pxsize_ratio(confoc_pxsize, datamap.pixelsize)
 confoc_n_rows, confoc_n_cols = int(np.ceil(frame_shape[0] / ratio)), int(np.ceil(frame_shape[1] / ratio))
 actions_required_pixels = {"confocal": confoc_n_rows * confoc_n_cols, "sted": frame_shape[0] * frame_shape[1]}
@@ -111,7 +110,7 @@ for pixel_idx in tqdm.trange(n_time_steps):
     if pixel_idx % n_pixel_per_flash_step == 0:
 
         if action_selected == "confocal":
-            pixel_list = utils.generate_raster_pixel_list(frame_shape[0] * frame_shape[1], sted_starting_pixel,
+            pixel_list = utils.generate_raster_pixel_list(frame_shape[0] * frame_shape[1], confocal_starting_pixel,
                                                           frozen_datamap)
             pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, confoc_pxsize, datamap.pixelsize,
                                                  output_empty=True)
@@ -148,9 +147,11 @@ for pixel_idx in tqdm.trange(n_time_steps):
 
         # shift the starting pixel
         if action_selected == "confocal":
+            confocal_starting_pixel = pixel_list[-1]
             # confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
             confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, frame_shape, ratio=ratio)
         elif action_selected == "sted":
+            sted_starting_pixel = pixel_list[-1]
             sted_starting_pixel = utils.set_starting_pixel(sted_starting_pixel, frame_shape)
 
         # empty the pixel bank after the acquisition
@@ -213,9 +214,6 @@ for pixel_idx in tqdm.trange(n_time_steps):
         # faire le scan confocal sur la pixel_list
         # faire un if pour confocal ou sted
         if action_selected == "confocal":
-            # plt.imshow(confoc_intensity)
-            # plt.title(f"confocal intensity b4 completing acq")
-            # plt.show()
             confoc_acq, _, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
                                                                                     0.0,
                                                                                     acquired_intensity=confoc_intensity,
@@ -233,9 +231,11 @@ for pixel_idx in tqdm.trange(n_time_steps):
 
         # shift the starting pixel
         if action_selected == "confocal":
+            confocal_starting_pixel = pixel_list[-1]
             # confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
             confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, frame_shape, ratio=ratio)
         elif action_selected == "sted":
+            sted_starting_pixel = pixel_list[-1]
             sted_starting_pixel = utils.set_starting_pixel(sted_starting_pixel, frame_shape)
 
         # empty the pixel bank after the acquisition
@@ -250,9 +250,6 @@ for pixel_idx in tqdm.trange(n_time_steps):
         if action_selected == "confocal":
             list_confocals.append(np.copy(confoc_acq))
             idx_type[pixel_idx] = "confocal"
-            # plt.imshow(confoc_acq)
-            # plt.title(f"confoc acq added to list")
-            # plt.show()
         elif action_selected == "sted":
             list_steds.append(np.copy(sted_acq))
             idx_type[pixel_idx] = "sted"
