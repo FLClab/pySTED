@@ -30,9 +30,13 @@ video_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
 
 # Generate a datamap
 frame_shape = (64, 64)
-ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (9, 55), (3, 10), (2, 5))
+ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (9, 55), (3, 10), (2, 5), seed=42)
 
 poils_frame = ensemble_func.return_frame().astype(int)
+
+plt.imshow(poils_frame)
+plt.show()
+exit()
 
 # Microscope stuff
 egfp = {"lambda_": 535e-9,
@@ -83,7 +87,7 @@ synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolate
 
 # start acquisition loop
 
-save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/ffmpeg_raster_video/test1/"
+save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/video_tests_varying_params/testing_seed/"
 acquisition_time = 5   ## in seconds
 flash_prob = 0.05   # every iteration, all synapses will have a 5% to start flashing
 frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
@@ -269,7 +273,7 @@ for pixel_idx in tqdm.trange(n_time_steps):
         # sted_intensity = np.zeros(frozen_datamap.shape).astype(float)
 
 
-save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/ffmpeg_raster_video/test1/"
+# save_path = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/ffmpeg_raster_video/test1/"
 ffmpeg_file_path = save_path + "in.ffconcat"
 
 min_datamap, max_datamap = np.min(list_datamaps), np.max(list_datamaps)

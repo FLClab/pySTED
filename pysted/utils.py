@@ -940,7 +940,7 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
     return fibre, polygon_list
 
 
-def generate_secondary_fibers(datamap_shape, main_fiber, n_sec, min_dist=10, sec_len=(2, 6)):
+def generate_secondary_fibers(datamap_shape, main_fiber, n_sec, min_dist=10, sec_len=(2, 6), seed=None):
     """
     Similar to the synapse function, but with fibers instead. The goal would be to pass
     an already existing fiber to this func and simply spawn the secondary fibers
@@ -985,7 +985,7 @@ def generate_secondary_fibers(datamap_shape, main_fiber, n_sec, min_dist=10, sec
         sec_fiber = temporal.Fiber(random_params={"num_points": sec_len,
                                                   "pos": [node, node],
                                                   "scale": (1, 3),
-                                                  "angle": (- 0.25, 0.25)})
+                                                  "angle": (- 0.25, 0.25)}, seed=seed)
         sec_fibers_list.append(sec_fiber)
 
     return sec_fibers_list
@@ -1038,7 +1038,7 @@ def generate_synapses_on_fiber(datamap_shape, main_fiber, n_syn, min_dist, synap
 
 
 def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, min_fiber_dist=3, min_synapse_dist=1,
-                             sec_fiber_len=(10, 20), synapse_scale=(5, 5)):
+                             sec_fiber_len=(10, 20), synapse_scale=(5, 5), seed=None):
     """
     This function wraps up the generation of fibers with secondary branches and synapses in a neat little package :)
     - Add variable number of synapses, distances, ?
@@ -1046,6 +1046,11 @@ def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, 
     - ??
     :return:
     """
+    if seed is not None:
+        print(f"should have set seed")
+        numpy.random.RandomState(seed)
+        random.seed(seed)
+
 
     # generate an empty image
     image = numpy.zeros(image_shape)
@@ -1080,6 +1085,49 @@ def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, 
     # frame = ensemble_test.return_frame()
 
     return ensemble_test, synapses_lists
+
+
+def test_generate(image_shape, main_nodes, n_sec_fibers, n_synapses, min_fiber_dist=3, min_synapse_dist=1,
+                             sec_fiber_len=(10, 20), synapse_scale=(5, 5), seed=None):
+    """
+    I just want to figure out why I can't set a seed to the generation function
+    """
+    # if seed is not None:
+    #     # print(f"should have set seed")
+    #     numpy.random.RandomState(seed)
+    #     random.seed(seed)
+
+    # generate an empty image
+    image = numpy.zeros(image_shape)
+
+    # generate the main fiber
+    min_nodes, max_nodes = main_nodes[0], main_nodes[1]
+    min_array, max_array = numpy.asarray((min_nodes, min_nodes)), numpy.asarray((max_nodes, max_nodes))
+    fibre_rand = temporal.Fiber(random_params={"num_points": (min_nodes, max_nodes),
+                                               "pos": [numpy.zeros((1, 2)) + min_array,
+                                                       image.shape - max_array],
+                                               "scale": (1, 5)}, seed=seed)
+
+    # setting seed works up to here
+    sec_fibers = generate_secondary_fibers(image_shape, fibre_rand, n_sec_fibers, min_fiber_dist,
+                                           sec_len=sec_fiber_len, seed=seed)
+
+    # generate synapses attached to the secondary fibers
+    synapses_lists = []
+    for secondary_fiber in sec_fibers:
+        ith_fiber_synapses = generate_synapses_on_fiber(image_shape, secondary_fiber, n_synapses, min_synapse_dist,
+                                                        synapse_scale=synapse_scale)
+        synapses_lists.append(ith_fiber_synapses)
+
+    roi = ((0, 0), image_shape)  # jtrouve que la façon de gérer la shape de l'ensemble est weird
+    ensemble_test = temporal.Ensemble(roi=roi)
+    ensemble_test.append(fibre_rand)
+    for idx, sec_fiber in enumerate(sec_fibers):
+        ensemble_test.append(sec_fiber)
+        for synapse in synapses_lists[idx]:
+            ensemble_test.append(synapse)
+
+    return ensemble_test
 
 
 def generate_synapse_flash_dicts(synapses_list, roi_shape):

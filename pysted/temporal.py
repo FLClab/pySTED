@@ -243,7 +243,7 @@ class Fiber(Nodes):
     """
     A `Fiber` is a set of nodes that are connected but not closed
     """
-    def __init__(self, coords=None, random_params={}, parent=None):
+    def __init__(self, coords=None, random_params={}, parent=None, seed=None):
         """
         Instantiates the `Fiber` class
         :param coords: A `numpy.ndarray` of the `Fiber` coordinates
@@ -251,12 +251,12 @@ class Fiber(Nodes):
                        We assume the parent to be the head of the `Fiber`
         """
         if isinstance(coords, type(None)):
-            coords = self.generate_random(**random_params)
+            coords = self.generate_random(**random_params, seed=seed)
 
         super().__init__(coords, parent=parent)
 
     def generate_random(self, num_points=(10, 50), angle=(-math.pi/8, math.pi/8),
-                              scale=(1, 5), pos=((0, 0), (0, 0))):
+                              scale=(1, 5), pos=((0, 0), (0, 0)), seed=None):
         """
         Generates a random set of points. To do so, we incrementaly add a point
         to list of coordinates. It could be seen as building a serpent from the
@@ -271,6 +271,10 @@ class Fiber(Nodes):
                     a `tuple` of top-left and bottom-right corner in (y, x) coordinates
         :returns : A (N,2) `numpy.ndarray` of coordinates
         """
+        if seed is not None:
+            numpy.random.RandomState(seed)
+            numpy.random.seed(seed)
+            random.seed(seed)
         coords = [(0, 0)]
         self.angles = []
         for _ in range(random.randrange(*num_points)):
