@@ -3,13 +3,22 @@ from matplotlib import pyplot as plt
 import os
 import shutil
 from tqdm import tqdm
+import argparse
+import time
 
+
+parser = argparse.ArgumentParser(description="Exemple de scripte d'acquisition")
+parser.add_argument("--pdt", type=float, default=10e-6, help="Pixel dwell time used for the experiment (in s)")
+parser.add_argument("--files_path", type=str, default="", help="Path to the saved npy and ffconcant files")
+parser.add_argument("--delete_after", type=bool, default=True, help="Wether or not the figures are deleted after")
+args = parser.parse_args()
 
 # jpourrais mettre une option pour delete le folder avec les images après
-delete_figures_after = True
+delete_figures_after = args.delete_after
 # These lines are the only ones that should be changed when we want to make new videos
-files_path = r"D:\SCHOOL\Maitrise\H2021\Recherche\data_generation\split\test_1"
-pdt = 10e-6   # is there a way to get this value directly from the exp script?
+# files_path = r"D:\SCHOOL\Maitrise\H2021\Recherche\data_generation\split\test_1"
+files_path = args.files_path
+pdt = args.pdt   # is there a way to get this value directly from the exp script?
 
 # for ffmpeg, I think I don't have a choice but to save the figures on my computer
 # make a directory for the figures
@@ -125,4 +134,4 @@ os.remove(files_path + "/figures/Trance_009_Sound_System_Dreamscape_HD.mp3")
 if delete_figures_after:
     for f in os.listdir(files_path + "/figures/"):
         os.remove(os.path.join(files_path + "/figures/", f))
-    os.rmdir(files_path + "/figures")
+    # os.rmdir(files_path + "/figures")   # can't delete the folder for some reasone
