@@ -115,7 +115,8 @@ total_duration = 5 + (keys_list[-1] * pdt * 10) + 10
 
 # copy the audio file over, :)
 # regarder si la file est là avant
-mp3_file = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/ffmpeg_video_tests/Trance_009_Sound_System_Dreamscape_HD.mp3"
+mp3_file = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/ffmpeg_video_tests/" \
+           "Trance_009_Sound_System_Dreamscape_HD.mp3"
 shutil.copy(mp3_file, files_path + "/figures/")
 shutil.copy(files_path + "/in.ffconcat", files_path + "/figures")
 

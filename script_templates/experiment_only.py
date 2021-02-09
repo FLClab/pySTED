@@ -120,20 +120,22 @@ for pixel_idx in tqdm.trange(n_time_steps):
                                                  output_empty=True)
 
         if action_selected == "confocal":
-            confoc_acq, bleached, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
-                                                                                    0.0,
-                                                                                    acquired_intensity=confoc_intensity,
-                                                                                    pixel_list=pixel_list,
-                                                                                    bleach=bleach, update=False,
-                                                                                    filter_bypass=True)
+            confoc_acq, bleached, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt,
+                                                                                           p_ex, 0.0,
+                                                                                           acquired_intensity=
+                                                                                           confoc_intensity,
+                                                                                           pixel_list=pixel_list,
+                                                                                           bleach=bleach, update=False,
+                                                                                           filter_bypass=True)
 
         elif action_selected == "sted":
-            sted_acq, bleached, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
-                                                                                p_sted,
-                                                                                acquired_intensity=sted_intensity,
-                                                                                pixel_list=pixel_list,
-                                                                                bleach=bleach, update=False,
-                                                                                filter_bypass=True)
+            sted_acq, bleached, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt,
+                                                                                       p_ex, p_sted,
+                                                                                       acquired_intensity=
+                                                                                       sted_intensity,
+                                                                                       pixel_list=pixel_list,
+                                                                                       bleach=bleach, update=False,
+                                                                                       filter_bypass=True)
 
         if bleach:
             datamap.whole_datamap = np.copy(bleached)
@@ -201,20 +203,22 @@ for pixel_idx in tqdm.trange(n_time_steps):
                                                  output_empty=True)
 
         if action_selected == "confocal":
-            confoc_acq, bleached, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
-                                                                                    0.0,
-                                                                                    acquired_intensity=confoc_intensity,
-                                                                                    pixel_list=pixel_list,
-                                                                                    bleach=bleach, update=False,
-                                                                                    filter_bypass=True)
+            confoc_acq, bleached, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt,
+                                                                                           p_ex, 0.0,
+                                                                                           acquired_intensity=
+                                                                                           confoc_intensity,
+                                                                                           pixel_list=pixel_list,
+                                                                                           bleach=bleach, update=False,
+                                                                                           filter_bypass=True)
 
         elif action_selected == "sted":
-            sted_acq, bleached, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
-                                                                                p_sted,
-                                                                                acquired_intensity=sted_intensity,
-                                                                                pixel_list=pixel_list,
-                                                                                bleach=bleach, update=False,
-                                                                                filter_bypass=True)
+            sted_acq, bleached, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt,
+                                                                                       p_ex, p_sted,
+                                                                                       acquired_intensity=
+                                                                                       sted_intensity,
+                                                                                       pixel_list=pixel_list,
+                                                                                       bleach=bleach, update=False,
+                                                                                       filter_bypass=True)
 
         if bleach:
             datamap.whole_datamap = np.copy(bleached)
