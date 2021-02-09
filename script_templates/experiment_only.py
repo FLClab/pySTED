@@ -75,7 +75,7 @@ datamap.set_roi(i_ex, roi)
 # They all start not flashing
 flat_synapses_list = [item for sublist in synapses_list for item in sublist]
 
-synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = \
+synapse_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = \
     utils.generate_synapse_flash_dicts(flat_synapses_list, frame_shape)
 
 # set up variables for acquisition loop
@@ -158,22 +158,14 @@ for pixel_idx in tqdm.trange(n_time_steps):
         if not bleach:
             datamap.whole_datamap[datamap.roi] = np.copy(frozen_datamap)
         # loop through all synapses, make some start to flash, randomly, maybe
-        for idx_syn in range(len(flat_synapses_list)):
-            if np.random.binomial(1, flash_prob) and synpase_flashing_dict[idx_syn] is False:
-                # can start the flash
-                synpase_flashing_dict[idx_syn] = True
-                synapse_flash_idx_dict[idx_syn] = 1
-                sampled_curve = utils.flash_generator(event_file_path, video_file_path)
-                synapse_flash_curve_dict[idx_syn] = utils.rescale_data(sampled_curve, to_int=True, divider=3)
-
-            if synpase_flashing_dict[idx_syn]:
-                datamap.whole_datamap[datamap.roi] -= isolated_synapses_frames[idx_syn]
-                datamap.whole_datamap[datamap.roi] += isolated_synapses_frames[idx_syn] * \
-                                                      synapse_flash_curve_dict[idx_syn][synapse_flash_idx_dict[idx_syn]]
-                synapse_flash_idx_dict[idx_syn] += 1
-                if synapse_flash_idx_dict[idx_syn] >= 40:
-                    synapse_flash_idx_dict[idx_syn] = 0
-                    synpase_flashing_dict[idx_syn] = False
+        synapse_flashing_dict, synapse_flash_idx_dict, \
+        synapse_flash_curve_dict, datamap.whole_datamap = utils.flash_routine(flat_synapses_list, flash_prob,
+                                                                              synapse_flashing_dict,
+                                                                              synapse_flash_idx_dict,
+                                                                              {"event": event_file_path,
+                                                                               "video": video_file_path},
+                                                                              synapse_flash_curve_dict,
+                                                                              isolated_synapses_frames, datamap)
 
         # get a copy of the datamap to add to a list to save later
         roi_save_copy = np.copy(datamap.whole_datamap[datamap.roi])

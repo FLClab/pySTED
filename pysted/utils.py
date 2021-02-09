@@ -1179,3 +1179,28 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
         x_pixels_for_flash_ts = round(sec_per_time_step / pixel_dwelltime)
         return n_time_steps, x_pixels_for_flash_ts
 
+
+def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_idx_dict, paths,
+                  synapse_flash_curve_dict, isolated_synapses_frames, datamap):
+    """
+    This function is used to iterate through the synapses and make them flash, update the dicts and all that
+    :return:
+    """
+    for idx_syn in range(len(synapses)):
+        if numpy.random.binomial(1, probability) and synapse_flashing_dict[idx_syn] is False:
+            # can start the flash
+            synapse_flashing_dict[idx_syn] = True
+            synapse_flash_idx_dict[idx_syn] = 1
+            sampled_curve = flash_generator(paths["event"], paths["video"])
+            synapse_flash_curve_dict[idx_syn] = rescale_data(sampled_curve, to_int=True, divider=3)
+
+        if synapse_flashing_dict[idx_syn]:
+            datamap.whole_datamap[datamap.roi] -= isolated_synapses_frames[idx_syn]
+            datamap.whole_datamap[datamap.roi] += isolated_synapses_frames[idx_syn] * \
+                                                  synapse_flash_curve_dict[idx_syn][synapse_flash_idx_dict[idx_syn]]
+            synapse_flash_idx_dict[idx_syn] += 1
+            if synapse_flash_idx_dict[idx_syn] >= 40:
+                synapse_flash_idx_dict[idx_syn] = 0
+                synapse_flashing_dict[idx_syn] = False
+
+    return synapse_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, datamap.whole_datamap
