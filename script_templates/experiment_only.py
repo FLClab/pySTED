@@ -282,15 +282,18 @@ for idx, key in enumerate(keys_list):
         # write the lines to script file
         file = open(ffmpeg_file_path, "a")
         file.write(f"file {key + 1}.png\n")
-        file.write(f"duration {duration}\n")   # need to modify this so it computes the right time
+        file.write(f"duration {duration}\n")
         file.close()
     else:
-        # make the calculations for times to write in script file
-        duration = 10  # right?
-        # write the lines to script file
-        file = open(ffmpeg_file_path, "a")
-        file.write(f"file {key + 1}.png\n")
-        file.write(f"duration {duration}\n")  # need to modify this so it computes the right time
-        file.close()
+        for i in range(2):   # do it twice or else it skips the last frame
+            # make the calculations for times to write in script file
+            duration = 10  # right?
+            # write the lines to script file
+            file = open(ffmpeg_file_path, "a")
+            file.write(f"file {key + 1}.png\n")
+            file.write(f"duration {duration}\n")
+            file.close()
 
+# faudrait que je save le dict aussi pour m'aider à build la figure
+np.save(save_path + "/idx_type_dict", idx_type)
 # so this should be everything for the experiment part of the script
