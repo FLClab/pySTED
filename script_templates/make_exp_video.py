@@ -2,10 +2,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 import shutil
+from tqdm import tqdm
 
 
 # jpourrais mettre une option pour delete le folder avec les images après
-
+delete_figures_after = True
 # These lines are the only ones that should be changed when we want to make new videos
 files_path = r"D:\SCHOOL\Maitrise\H2021\Recherche\data_generation\split\test_1"
 pdt = 10e-6   # is there a way to get this value directly from the exp script?
@@ -48,7 +49,7 @@ plt.close()
 
 # mettre un tqdm range or something maybe? :)
 keys_list = sorted(idx_type.keys())
-for idx, key in enumerate(keys_list):
+for idx, key in enumerate(tqdm(keys_list)):
     if idx_type[key] == "datamap":
         d_idx += 1
     elif idx_type[key] == "confocal":
@@ -113,10 +114,15 @@ shutil.copy(files_path + "/in.ffconcat", files_path + "/figures")
 os.chdir(files_path + "/figures/")
 os.system(fr'cmd /c "ffmpeg -i in.ffconcat -i Trance_009_Sound_System_Dreamscape_HD.mp3 -c:v libx264 -preset ultrafast -crf 0 -c:a copy -vf fps=25 out.avi"')
 os.chdir(files_path + "/figures/")
-os.system(fr'cmd /c "ffmpeg -ss 0 -i out.avi -t {total_duration} -c copy cut_out.avi"')
-shutil.move(files_path + "/figures/cut_out.avi", files_path + "/cut_out.avi")
+os.system(fr'cmd /c "ffmpeg -ss 0 -i out.avi -t {total_duration} -c copy experiment_video.avi"')
+shutil.move(files_path + "/figures/experiment_video.avi", files_path + "/experiment_video.avi")
 
 # delete le .mp3, .avi et .ffconcat du fichier de figures
 os.remove(files_path + "/figures/in.ffconcat")
 os.remove(files_path + "/figures/out.avi")
 os.remove(files_path + "/figures/Trance_009_Sound_System_Dreamscape_HD.mp3")
+
+if delete_figures_after:
+    for f in os.listdir(files_path + "/figures/"):
+        os.remove(os.path.join(files_path + "/figures/", f))
+    os.rmdir(files_path + "/figures")
