@@ -104,41 +104,15 @@ for pixel_idx in tqdm.trange(n_time_steps):
     if pixel_idx % n_pixel_per_flash_step == 0:
 
         if action_selected == "confocal":
-            pixel_list = utils.generate_raster_pixel_list(frame_shape[0] * frame_shape[1], confocal_starting_pixel,
-                                                          frozen_datamap)
-            pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, confoc_pxsize, datamap.pixelsize,
-                                                 output_empty=True)
-
-            # Cut elements before the starting pixel from the list
-            start_idx = pixel_list.index(tuple(confocal_starting_pixel))
-            pixel_list = pixel_list[start_idx:]
-            pixel_list = pixel_list[:microscope.pixel_bank]
-
+            confoc_acq, confoc_intensity, datamap, pixel_list = utils.action_execution(action_selected, frame_shape,
+                                                                           confocal_starting_pixel, confoc_pxsize,
+                                                                           datamap, frozen_datamap, microscope, pdt,
+                                                                           p_ex, 0.0, confoc_intensity, bleach)
         elif action_selected == "sted":
-            pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, sted_starting_pixel, frozen_datamap)
-            pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
-                                                 output_empty=True)
-
-        if action_selected == "confocal":
-            confoc_acq, bleached, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt,
-                                                                                           p_ex, 0.0,
-                                                                                           acquired_intensity=
-                                                                                           confoc_intensity,
-                                                                                           pixel_list=pixel_list,
-                                                                                           bleach=bleach, update=False,
-                                                                                           filter_bypass=True)
-
-        elif action_selected == "sted":
-            sted_acq, bleached, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt,
-                                                                                       p_ex, p_sted,
-                                                                                       acquired_intensity=
-                                                                                       sted_intensity,
-                                                                                       pixel_list=pixel_list,
-                                                                                       bleach=bleach, update=False,
-                                                                                       filter_bypass=True)
-
-        if bleach:
-            datamap.whole_datamap = np.copy(bleached)
+            sted_acq, sted_intensity, datamap, pixel_list = utils.action_execution(action_selected, frame_shape,
+                                                                       sted_starting_pixel, datamap.pixelsize, datamap,
+                                                                       frozen_datamap, microscope, pdt, p_ex, p_sted,
+                                                                       sted_intensity, bleach)
 
         # shift the starting pixel
         if action_selected == "confocal":
@@ -178,42 +152,20 @@ for pixel_idx in tqdm.trange(n_time_steps):
     if microscope.pixel_bank == pixels_needed_to_complete_acq:
 
         if action_selected == "confocal":
-
-            pixel_list = utils.generate_raster_pixel_list(frame_shape[0] * frame_shape[1], sted_starting_pixel,
-                                                          frozen_datamap)
-            pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, confoc_pxsize, datamap.pixelsize,
-                                                 output_empty=True)
-
-            # Cut elements before the starting pixel from the list
-            start_idx = pixel_list.index(tuple(confocal_starting_pixel))
-            pixel_list = pixel_list[start_idx:]
-            pixel_list = pixel_list[:microscope.pixel_bank]
-
+            confoc_acq, confoc_intensity, datamap, pixel_list = utils.action_execution(action_selected, frame_shape,
+                                                                                       confocal_starting_pixel,
+                                                                                       confoc_pxsize,
+                                                                                       datamap, frozen_datamap,
+                                                                                       microscope, pdt,
+                                                                                       p_ex, 0.0, confoc_intensity,
+                                                                                       bleach)
         elif action_selected == "sted":
-            pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, sted_starting_pixel, frozen_datamap)
-            pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
-                                                 output_empty=True)
-
-        if action_selected == "confocal":
-            confoc_acq, bleached, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt,
-                                                                                           p_ex, 0.0,
-                                                                                           acquired_intensity=
-                                                                                           confoc_intensity,
-                                                                                           pixel_list=pixel_list,
-                                                                                           bleach=bleach, update=False,
-                                                                                           filter_bypass=True)
-
-        elif action_selected == "sted":
-            sted_acq, bleached, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt,
-                                                                                       p_ex, p_sted,
-                                                                                       acquired_intensity=
-                                                                                       sted_intensity,
-                                                                                       pixel_list=pixel_list,
-                                                                                       bleach=bleach, update=False,
-                                                                                       filter_bypass=True)
-
-        if bleach:
-            datamap.whole_datamap = np.copy(bleached)
+            sted_acq, sted_intensity, datamap, pixel_list = utils.action_execution(action_selected, frame_shape,
+                                                                                   sted_starting_pixel,
+                                                                                   datamap.pixelsize, datamap,
+                                                                                   frozen_datamap, microscope, pdt,
+                                                                                   p_ex, p_sted,
+                                                                                   sted_intensity, bleach)
 
         # shift the starting pixel
         if action_selected == "confocal":
