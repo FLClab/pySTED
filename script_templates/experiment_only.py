@@ -1,10 +1,23 @@
 import numpy as np
-from matplotlib import pyplot as plt
 import tqdm
 from pysted import base, utils
 import os
-import shutil
+import argparse
 
+# add arg parser handling
+parser = argparse.ArgumentParser(description="Example of experiment script")
+parser.add_argument("--save_path", type=str, default="", help="Where to save the files")
+parser.add_argument("--bleach", type=bool, default=False, help="Whether or not bleaching is on or not")
+parser.add_argument("--dmap_seed", type=int, default=None, help="Whether or not the dmap is created using a seed")
+parser.add_argument("--flash_seed", type=int, default=None, help="Whether or not the flashes are controlled by a seed")
+parser.add_argument("--acq_time", type=int, default=5, help="Acquisition time (in seconds)")
+args = parser.parse_args()
+
+
+save_path = r"D:\SCHOOL\Maitrise\H2021\Recherche\data_generation\split\test"
+if not os.path.exists(save_path):
+    os.mkdir(save_path)
+# add way to create the dir if not already created
 
 # Get light curves stuff to generate the flashes later
 event_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1_events.txt"
@@ -12,8 +25,8 @@ video_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
 
 # Generate a datamap
 frame_shape = (64, 64)
-dmap_seed = 27
-ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (9, 55), (3, 10), (2, 5), seed=dmap_seed)
+ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (9, 55), (3, 10), (2, 5),
+                                                              seed=args.dmap_seed)
 
 poils_frame = ensemble_func.return_frame().astype(int)
 
@@ -29,8 +42,8 @@ egfp = {"lambda_": 535e-9,
         "tau": 3e-09,
         "tau_vib": 1.0e-12,
         "tau_tri": 5e-6,
-        "phy_react": {488: 1e-4,   # 1e-4
-                      575: 1e-8},   # 1e-8
+        "phy_react": {488: 1e-8,   # 1e-4
+                      575: 1e-12},   # 1e-8
         "k_isc": 0.26e6}
 pixelsize = 10e-9
 confoc_pxsize = 30e-9   # confoc ground truths will be taken at a resolution 3 times lower than sted scans
@@ -38,13 +51,12 @@ dpxsz = 10e-9
 bleach = False
 p_ex = 1e-6
 p_sted = 30e-3
-p_sted_array = np.reshape(np.linspace(0, p_sted * 5, 64 * 64), poils_frame.shape)
-p_ex_array = np.reshape(np.linspace(0, p_ex * 3, 64 * 64), poils_frame.shape)
 pdt = 10e-6   # pour (10, 1.5) ça me donne 15k pixels par iter
 # pdt = 0.3   # pour (10, 1.5) ça me donne 0.5 pixels par iter
-size = 64 + (2 * 22 + 1)
 roi = 'max'
-seed = True
+acquisition_time = args.acq_time
+flash_prob = 0.05   # every iteration, all synapses will have a 5% to start flashing
+flash_seed = args.flash_seed
 
 # Generating objects necessary for acquisition simulation
 laser_ex = base.GaussianBeam(488e-9)
@@ -66,13 +78,9 @@ flat_synapses_list = [item for sublist in synapses_list for item in sublist]
 synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = \
     utils.generate_synapse_flash_dicts(flat_synapses_list, frame_shape)
 
-# start acquisition loop
-save_path = r"D:\SCHOOL\Maitrise\H2021\Recherche\data_generation\split\test_1"
-acquisition_time = 5   ## in seconds
-flash_prob = 0.05   # every iteration, all synapses will have a 5% to start flashing
+# set up variables for acquisition loop
 frozen_datamap = np.copy(datamap.whole_datamap[datamap.roi])
 n_time_steps, n_pixel_per_flash_step = utils.compute_time_correspondances((10, 1.5), acquisition_time, pdt, mode="pdt")
-print(f"n_pixel_per_flash_step = {n_pixel_per_flash_step}")
 ratio = utils.pxsize_ratio(confoc_pxsize, datamap.pixelsize)
 confoc_n_rows, confoc_n_cols = int(np.ceil(frame_shape[0] / ratio)), int(np.ceil(frame_shape[1] / ratio))
 actions_required_pixels = {"confocal": confoc_n_rows * confoc_n_cols, "sted": frame_shape[0] * frame_shape[1]}
@@ -87,6 +95,10 @@ list_confocals = [np.zeros(confoc_intensity.shape)]
 list_steds = [np.zeros(sted_intensity.shape)]
 idx_type = {}
 confocal_starting_pixel, sted_starting_pixel = [0, 0], [0, 0]
+
+# start acquisition loop
+np.random.seed(flash_seed)
+np.random.RandomState(flash_seed)
 for pixel_idx in tqdm.trange(n_time_steps):
     microscope.pixel_bank += 1
     if pixel_idx % n_pixel_per_flash_step == 0:
@@ -103,16 +115,12 @@ for pixel_idx in tqdm.trange(n_time_steps):
             pixel_list = pixel_list[:microscope.pixel_bank]
 
         elif action_selected == "sted":
-            # faire la sélection que je fais déjà plus haut
             pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, sted_starting_pixel, frozen_datamap)
             pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
                                                  output_empty=True)
 
-
-        # faire le scan confocal sur la pixel_list
-        # faire un if pour confocal ou sted
         if action_selected == "confocal":
-            confoc_acq, _, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
+            confoc_acq, bleached, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
                                                                                     0.0,
                                                                                     acquired_intensity=confoc_intensity,
                                                                                     pixel_list=pixel_list,
@@ -120,17 +128,19 @@ for pixel_idx in tqdm.trange(n_time_steps):
                                                                                     filter_bypass=True)
 
         elif action_selected == "sted":
-            sted_acq, _, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
+            sted_acq, bleached, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
                                                                                 p_sted,
                                                                                 acquired_intensity=sted_intensity,
                                                                                 pixel_list=pixel_list,
                                                                                 bleach=bleach, update=False,
                                                                                 filter_bypass=True)
 
+        if bleach:
+            datamap.whole_datamap = np.copy(bleached)
+
         # shift the starting pixel
         if action_selected == "confocal":
             confocal_starting_pixel = pixel_list[-1]
-            # confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
             confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, frame_shape, ratio=ratio)
         elif action_selected == "sted":
             sted_starting_pixel = pixel_list[-1]
@@ -143,7 +153,8 @@ for pixel_idx in tqdm.trange(n_time_steps):
         if imaged_pixels == actions_required_pixels[action_selected]:
             action_completed = True
 
-        datamap.whole_datamap[datamap.roi] = np.copy(frozen_datamap)
+        if not bleach:
+            datamap.whole_datamap[datamap.roi] = np.copy(frozen_datamap)
         # loop through all synapses, make some start to flash, randomly, maybe
         for idx_syn in range(len(flat_synapses_list)):
             if np.random.binomial(1, flash_prob) and synpase_flashing_dict[idx_syn] is False:
@@ -164,8 +175,6 @@ for pixel_idx in tqdm.trange(n_time_steps):
 
         # get a copy of the datamap to add to a list to save later
         roi_save_copy = np.copy(datamap.whole_datamap[datamap.roi])
-        # plt.imshow(roi_save_copy)
-        # plt.show()
         list_datamaps.append(roi_save_copy)
         idx_type[pixel_idx] = "datamap"
 
@@ -185,18 +194,14 @@ for pixel_idx in tqdm.trange(n_time_steps):
             start_idx = pixel_list.index(tuple(confocal_starting_pixel))
             pixel_list = pixel_list[start_idx:]
             pixel_list = pixel_list[:microscope.pixel_bank]
-            # print(pixel_list[0])
 
         elif action_selected == "sted":
-            # faire la sélection que je fais déjà plus haut
             pixel_list = utils.generate_raster_pixel_list(microscope.pixel_bank, sted_starting_pixel, frozen_datamap)
             pixel_list = utils.pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
                                                  output_empty=True)
 
-        # faire le scan confocal sur la pixel_list
-        # faire un if pour confocal ou sted
         if action_selected == "confocal":
-            confoc_acq, _, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
+            confoc_acq, bleached, confoc_intensity = microscope.get_signal_and_bleach_fast(datamap, confoc_pxsize, pdt, p_ex,
                                                                                     0.0,
                                                                                     acquired_intensity=confoc_intensity,
                                                                                     pixel_list=pixel_list,
@@ -204,17 +209,19 @@ for pixel_idx in tqdm.trange(n_time_steps):
                                                                                     filter_bypass=True)
 
         elif action_selected == "sted":
-            sted_acq, _, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
+            sted_acq, bleached, sted_intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex,
                                                                                 p_sted,
                                                                                 acquired_intensity=sted_intensity,
                                                                                 pixel_list=pixel_list,
                                                                                 bleach=bleach, update=False,
                                                                                 filter_bypass=True)
 
+        if bleach:
+            datamap.whole_datamap = np.copy(bleached)
+
         # shift the starting pixel
         if action_selected == "confocal":
             confocal_starting_pixel = pixel_list[-1]
-            # confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, (confoc_n_rows, confoc_n_cols))
             confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, frame_shape, ratio=ratio)
         elif action_selected == "sted":
             sted_starting_pixel = pixel_list[-1]
@@ -224,7 +231,6 @@ for pixel_idx in tqdm.trange(n_time_steps):
         imaged_pixels += microscope.pixel_bank
         microscope.empty_pixel_bank()
 
-        # l'acquisition est finit, ce qui veut dire que que je dois faire des choses là :)
         action_completed = True
 
     if action_completed:
@@ -241,16 +247,13 @@ for pixel_idx in tqdm.trange(n_time_steps):
         action_completed = False
         if action_selected == "confocal":
             action_selected = "sted"
-            # confoc_intensity = np.zeros((confoc_n_rows, confoc_n_cols)).astype(float)
         elif action_selected == "sted":
             action_selected = "confocal"
-            # sted_intensity = np.zeros(frozen_datamap.shape).astype(float)
 
         imaged_pixels = 0
         pixels_for_current_action = actions_required_pixels[action_selected]
 
 # make stacks for datamaps, confocals and steds, and save them
-# I can build the ffconcat file the same way as previously, is there a way to build it directly into the prev loop?
 datamaps_stack = np.stack(list_datamaps)
 confocals_stack = np.stack(list_confocals)
 steds_stack = np.stack(list_steds)
@@ -286,14 +289,12 @@ for idx, key in enumerate(keys_list):
         file.close()
     else:
         for i in range(2):   # do it twice or else it skips the last frame
-            # make the calculations for times to write in script file
-            duration = 10  # right?
+            duration = 10
             # write the lines to script file
             file = open(ffmpeg_file_path, "a")
             file.write(f"file {key + 1}.png\n")
             file.write(f"duration {duration}\n")
             file.close()
 
-# faudrait que je save le dict aussi pour m'aider à build la figure
 np.save(save_path + "/idx_type_dict", idx_type)
 # so this should be everything for the experiment part of the script
