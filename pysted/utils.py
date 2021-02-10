@@ -1239,3 +1239,38 @@ def action_execution(action_selected, frame_shape, starting_pixel, pxsize, datam
         datamap.whole_datamap = numpy.copy(bleached)
 
     return acq, intensity_map, datamap, pixel_list
+
+
+def action_execution_tstack(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope,
+                            pdt, p_ex, p_sted, intensity_map, bleach, t_stack_idx):
+    """
+    This function will handle what happens based on the action selected
+    I feel like this will take way too many params to make work...
+    :return:
+    """
+    valid_actions = ["confocal", "sted"]
+    # vérifier si action_selected est dans valid_actions, sinon lancer une erreur
+
+    if action_selected == "confocal":
+        pixel_list = generate_raster_pixel_list(frame_shape[0] * frame_shape[1], starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, pxsize, datamap.pixelsize, output_empty=True)
+
+        # Cut elements before the starting pixel from the list
+        start_idx = pixel_list.index(tuple(starting_pixel))
+        pixel_list = pixel_list[start_idx:]
+        pixel_list = pixel_list[:microscope.pixel_bank]
+
+    elif action_selected == "sted":
+        pixel_list = generate_raster_pixel_list(microscope.pixel_bank, starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
+                                       output_empty=True)
+
+    acq, bleached, intensity_map = microscope.get_signal_and_bleach_fast(datamap, pxsize, pdt, p_ex, p_sted,
+                                                                         acquired_intensity=intensity_map,
+                                                                         pixel_list=pixel_list,  bleach=bleach,
+                                                                         update=False, filter_bypass=True)
+
+    if bleach:
+        datamap.whole_datamap = numpy.copy(bleached)
+
+    return acq, intensity_map, datamap, pixel_list

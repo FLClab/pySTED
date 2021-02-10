@@ -84,6 +84,7 @@ from pysted import utils, bleach_functions, cUtils, raster
 # import cUtils
 
 # import mis par BT pour des tests
+import copy
 import configparser
 import ast
 import warnings
@@ -1366,10 +1367,44 @@ class Datamap:
         self.whole_datamap = padded_molecules[pad:-pad, pad:-pad]
 
 
-class TemporalDatamap:
+class TemporalDatamap(Datamap):
     """
     This class inherits from Datamap, adding the t dimension to it for managing Ca2+ flashes
     """
+
+    def __init__(self, whole_datamap, datamap_pixelsize, synapses):
+        super().__init__(whole_datamap, datamap_pixelsize)
+        # add flat synapses list as attribute
+        self.synapses = synapses
+        self.static_t_stack = None
+        self.t_stack = None
+
+    def create_t_stack(self, acq_time, pixel_dwelltime, fwhm_step_sec_correspondance, event_path, video_path,
+                       probability):
+        synapse_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = \
+            utils.generate_synapse_flash_dicts(self.synapses, self.whole_datamap[self.roi].shape)
+        n_flash_updates, _ = utils.compute_time_correspondances((fwhm_step_sec_correspondance[0],
+                                                                fwhm_step_sec_correspondance[1]), acq_time,
+                                                                pixel_dwelltime, mode="flash")
+        # temp_dmap = copy.deepcopy(self)
+        list_frames = [numpy.copy(self.whole_datamap)]   # init state
+        for i in range(n_flash_updates):
+            # caller la func flash_routine et ajouter une copie de la datamap à la liste à chaque iter
+            synapse_flashing_dict, synapse_flash_idx_dict, \
+            synapse_flash_curve_dict, temp_dmap = utils.flash_routine(self.synapses, probability, synapse_flashing_dict,
+                                                                      synapse_flash_idx_dict, {"event": event_path,
+                                                                                               "video": video_path},
+                                                                      synapse_flash_curve_dict,
+                                                                      isolated_synapses_frames, self)
+            evolution_copy = numpy.copy(temp_dmap)
+            list_frames.append(evolution_copy)
+        list_frames.append(evolution_copy)   # append it one last time for the final iterations
+        t_stack = numpy.stack(list_frames)
+
+        self.static_t_stack = numpy.copy(t_stack)   # This version should never be modified, will maybe be useful idk
+        self.t_stack = numpy.copy(t_stack)   # This version will be the one acquired on / bleached
+
+
 
 
 def load_experiment_parameters(path, molecule_disposition):
