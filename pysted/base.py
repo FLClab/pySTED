@@ -1366,6 +1366,12 @@ class Datamap:
         self.whole_datamap = padded_molecules[pad:-pad, pad:-pad]
 
 
+class TemporalDatamap:
+    """
+    This class inherits from Datamap, adding the t dimension to it for managing Ca2+ flashes
+    """
+
+
 def load_experiment_parameters(path, molecule_disposition):
     """
     This function handles the generation of all the objects required for an experiment, which are :
