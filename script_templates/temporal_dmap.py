@@ -46,13 +46,13 @@ egfp = {"lambda_": 535e-9,
         "tau": 3e-09,
         "tau_vib": 1.0e-12,
         "tau_tri": 5e-6,
-        "phy_react": {488: 1e-8,   # 1e-4
-                      575: 1e-12},   # 1e-8
+        "phy_react": {488: 1e-12,   # 1e-4
+                      575: 1e-16},   # 1e-8
         "k_isc": 0.26e6}
 pixelsize = 10e-9
 confoc_pxsize = 30e-9   # confoc ground truths will be taken at a resolution 3 times lower than sted scans
 dpxsz = 10e-9
-bleach = False
+bleach = args.bleach
 p_ex = 1e-6
 p_sted = 30e-3
 pdt = 10e-6   # pour (10, 1.5) ça me donne 15k pixels par iter
@@ -73,14 +73,31 @@ fluo = base.Fluorescence(**egfp)
 temporal_datamap = base.TemporalDatamap(poils_frame, dpxsz, flat_synapses_list)
 microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, bleach_func="default_bleach")
 i_ex, _, _ = microscope.cache(temporal_datamap.pixelsize)
+
+temporal_datamap = base.TemporalDatamap(poils_frame, dpxsz, flat_synapses_list)
 temporal_datamap.set_roi(i_ex, roi)
-temporal_datamap.create_t_stack(acquisition_time, pdt, (10, 1.5), event_file_path, video_file_path, flash_prob)
+temporal_datamap.create_t_stack_dmap(acquisition_time, pdt, (10, 1.5), event_file_path, video_file_path, flash_prob,
+                                     i_ex, roi)
+
+# WHY NO RESET AFTER FLASH OVER?
+# dmap_rois = []
+# for dmap in temporal_datamap.list_dmaps:
+#     dmap_rois.append(dmap.whole_datamap[dmap.roi])
+# ## fug
+# dmap_min, dmap_max = np.min(np.asarray(dmap_rois)), np.max(np.asarray(dmap_rois))
+# for idx, dmap in enumerate(dmap_rois):
+#     plt.imshow(dmap, vmin=dmap_min, vmax=dmap_max)
+#     plt.colorbar()
+#     plt.title(f"dmap {idx}, shape = {dmap.shape}")
+#     plt.show()
+# exit()
 
 # synapse_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = \
 #     utils.generate_synapse_flash_dicts(flat_synapses_list, frame_shape)
 
 # set up variables for acquisition loop
-frozen_datamap = np.copy(temporal_datamap.t_stack[0][temporal_datamap.roi])
+t_stack_idx = 0
+frozen_datamap = np.copy(temporal_datamap.list_dmaps[t_stack_idx].whole_datamap[temporal_datamap.roi])
 n_time_steps, n_pixel_per_flash_step = utils.compute_time_correspondances((10, 1.5), acquisition_time, pdt, mode="pdt")
 ratio = utils.pxsize_ratio(confoc_pxsize, temporal_datamap.pixelsize)
 confoc_n_rows, confoc_n_cols = int(np.ceil(frame_shape[0] / ratio)), int(np.ceil(frame_shape[1] / ratio))
@@ -100,9 +117,6 @@ confocal_starting_pixel, sted_starting_pixel = [0, 0], [0, 0]
 # handling the useage of TemporalDatamp object
 # c'est un fix broche à foin, je pense que ça serait mieux si mes fonctions qui utilisent des Datamps pouvaient
 # aussi directement fonctionner sur des TemporalDatamaps
-t_stack_idx = 0
-temporary_dmap = base.Datamap(temporal_datamap.t_stack[t_stack_idx][temporal_datamap.roi], dpxsz)
-temporary_dmap.set_roi(i_ex, roi)
 
 # start acquisition loop
 np.random.seed(flash_seed)
@@ -112,13 +126,13 @@ for pixel_idx in tqdm.trange(n_time_steps):
     if pixel_idx % n_pixel_per_flash_step == 0:
 
         if action_selected == "confocal":
-            confoc_acq, confoc_intensity, temporary_dmap, pixel_list = utils.action_execution(action_selected, frame_shape,
+            confoc_acq, confoc_intensity, temporal_datamap.list_dmaps[t_stack_idx], pixel_list = utils.action_execution(action_selected, frame_shape,
                                                                                                 confocal_starting_pixel, confoc_pxsize,
-                                                                                                temporary_dmap, frozen_datamap, microscope, pdt,
+                                                                                                temporal_datamap.list_dmaps[t_stack_idx], frozen_datamap, microscope, pdt,
                                                                                                 p_ex, 0.0, confoc_intensity, bleach)
         elif action_selected == "sted":
-            sted_acq, sted_intensity, temporary_dmap, pixel_list = utils.action_execution(action_selected, frame_shape,
-                                                                                            sted_starting_pixel, temporary_dmap.pixelsize, temporary_dmap,
+            sted_acq, sted_intensity, temporal_datamap.list_dmaps[t_stack_idx], pixel_list = utils.action_execution(action_selected, frame_shape,
+                                                                                            sted_starting_pixel, temporal_datamap.list_dmaps[t_stack_idx].pixelsize, temporal_datamap.list_dmaps[t_stack_idx],
                                                                                             frozen_datamap, microscope, pdt, p_ex, p_sted,
                                                                                             sted_intensity, bleach)
 
@@ -138,26 +152,18 @@ for pixel_idx in tqdm.trange(n_time_steps):
             action_completed = True
 
         if not bleach:
-            temporary_dmap.whole_datamap[temporary_dmap.roi] = np.copy(frozen_datamap)
-
-        # loop through all synapses, make some start to flash, randomly, maybe
-        # synapse_flashing_dict, synapse_flash_idx_dict, \
-        # synapse_flash_curve_dict, temporal_datamap.whole_datamap = utils.flash_routine(flat_synapses_list, flash_prob,
-        #                                                                                synapse_flashing_dict,
-        #                                                                                synapse_flash_idx_dict,
-        #                                                                                {"event": event_file_path,
-        #                                                                        "video": video_file_path},
-        #                                                                                synapse_flash_curve_dict,
-        #                                                                                isolated_synapses_frames, temporal_datamap)
-        # instead, just increase the tstack idx and create a new temporary dmap
-        t_stack_idx += 1
-        temporary_dmap = base.Datamap(temporal_datamap.t_stack[t_stack_idx][temporal_datamap.roi], dpxsz)
-        temporary_dmap.set_roi(i_ex, roi)
-
+            temporal_datamap.list_dmaps[t_stack_idx] = np.copy(frozen_datamap)
+        else:
+            if t_stack_idx < len(temporal_datamap.list_dmaps) - 1:
+                temporal_datamap.bleach_future(t_stack_idx)
         # get a copy of the datamap to add to a list to save later
-        roi_save_copy = np.copy(temporary_dmap.whole_datamap[temporary_dmap.roi])
+        # IL FAUDRAIT QUE JE SET LES PROCHAINS FRAME DANS LA temporal_datamap.list_dmaps À LA VERSION BLEACHÉE QUE J'AI
+        # EU LÀ, MAIS GENRE C'EST COMPLIQUÉ FUCK
+        t_stack_idx += 1
+        roi_save_copy = np.copy(temporal_datamap.list_dmaps[t_stack_idx].whole_datamap[temporal_datamap.list_dmaps[t_stack_idx].roi])
         list_datamaps.append(roi_save_copy)
         idx_type[pixel_idx] = "datamap"
+        # print(f"flash updated, now at idx {t_stack_idx}")
 
     # Regarder il me manque combien de pixels
     pixels_needed_to_complete_acq = pixels_for_current_action - imaged_pixels
@@ -165,20 +171,25 @@ for pixel_idx in tqdm.trange(n_time_steps):
     if microscope.pixel_bank == pixels_needed_to_complete_acq:
 
         if action_selected == "confocal":
-            confoc_acq, confoc_intensity, temporary_dmap, pixel_list = utils.action_execution(action_selected, frame_shape,
+            confoc_acq, confoc_intensity, temporal_datamap.list_dmaps[t_stack_idx], pixel_list = utils.action_execution(action_selected, frame_shape,
                                                                                                 confocal_starting_pixel,
                                                                                                 confoc_pxsize,
-                                                                                                temporary_dmap, frozen_datamap,
+                                                                                                temporal_datamap.list_dmaps[t_stack_idx], frozen_datamap,
                                                                                                 microscope, pdt,
                                                                                                 p_ex, 0.0, confoc_intensity,
                                                                                                 bleach)
         elif action_selected == "sted":
-            sted_acq, sted_intensity, temporary_dmap, pixel_list = utils.action_execution(action_selected, frame_shape,
+            sted_acq, sted_intensity, temporal_datamap.list_dmaps[t_stack_idx], pixel_list = utils.action_execution(action_selected, frame_shape,
                                                                                             sted_starting_pixel,
-                                                                                            temporary_dmap.pixelsize, temporary_dmap,
+                                                                                            temporal_datamap.list_dmaps[t_stack_idx].pixelsize, temporal_datamap.list_dmaps[t_stack_idx],
                                                                                             frozen_datamap, microscope, pdt,
                                                                                             p_ex, p_sted,
                                                                                             sted_intensity, bleach)
+            # plt.imshow(temporal_datamap.list_dmaps[t_stack_idx].whole_datamap[temporal_datamap.list_dmaps[t_stack_idx].roi])
+            # plt.colorbar()
+            # plt.show()
+        if bleach and t_stack_idx < len(temporal_datamap.list_dmaps) - 1:
+            temporal_datamap.bleach_future(t_stack_idx)
 
         # shift the starting pixel
         if action_selected == "confocal":
