@@ -301,7 +301,7 @@ def pixel_sampling(datamap, mode="all"):
         # TODO: ajouter checker_size comme param au lieu de hard codé ici
         # TODO: regarder s'il y a une manière plus efficace de faire ça
         checkers = numpy.zeros((datamap.shape[0], datamap.shape[1]))
-        cell_size = 100
+        cell_size = 8
 
         even_row = True
         cell_white = False

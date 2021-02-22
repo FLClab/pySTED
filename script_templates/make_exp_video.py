@@ -8,7 +8,7 @@ import time
 
 
 parser = argparse.ArgumentParser(description="Video making script")
-parser.add_argument("--pdt", type=float, default=10e-6, help="Pixel dwell time used for the experiment (in s)")
+parser.add_argument("--pdt", type=float, default=1e-6, help="Pixel dwell time used for the experiment (in s)")
 parser.add_argument("--files_path", type=str, default="", help="Path to the saved npy and ffconcant files")
 parser.add_argument("--delete_after", type=bool, default=True, help="Wether or not the figures are deleted after")
 args = parser.parse_args()
