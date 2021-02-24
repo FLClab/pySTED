@@ -713,6 +713,7 @@ class Microscope:
         # This will be used during the acquisition routine to make a better correspondance
         # between the microscope acquisition time steps and the Ca2+ flash time steps
         self.pixel_bank = 0
+        self.time_bank = 0
     
     def __str__(self):
         return str(self.__cache.keys())
