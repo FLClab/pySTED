@@ -31,8 +31,8 @@ if not os.path.exists(save_path):
     os.mkdir(save_path)
 
 # Get light curves stuff to generate the flashes later
-event_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1_events.txt"
-video_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
+event_file_path = "D:/SCHOOL/Maitrise/A2020/pySTED/my_version/audurand_pysted/flash_files/stream1_events.txt"
+video_file_path = "D:/SCHOOL/Maitrise/A2020/pySTED/my_version/audurand_pysted/flash_files/stream1.tif"
 
 # Generate a datamap
 frame_shape = (64, 64)

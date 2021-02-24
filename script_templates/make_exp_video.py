@@ -7,10 +7,20 @@ import argparse
 import time
 
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 parser = argparse.ArgumentParser(description="Video making script")
 parser.add_argument("--pdt", type=float, default=1e-6, help="Pixel dwell time used for the experiment (in s)")
 parser.add_argument("--files_path", type=str, default="", help="Path to the saved npy and ffconcant files")
-parser.add_argument("--delete_after", type=bool, default=True, help="Wether or not the figures are deleted after")
+parser.add_argument("--delete_after", type=str2bool, default=True, help="Wether or not the figures are deleted after")
 args = parser.parse_args()
 
 # jpourrais mettre une option pour delete le folder avec les images après
