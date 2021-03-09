@@ -123,26 +123,21 @@ for idx, key in enumerate(tqdm(keys_list)):
 # calculer le temps total du video en secondes et l'enregistrer qqpart pour
 total_duration = 5 + (keys_list[-1] * pdt * 10) + 10
 
-# copy the audio file over, :)
-# regarder si la file est là avant
-mp3_file = "D:/SCHOOL/Maitrise/H2021/Recherche/data_generation/time_integration/ffmpeg_video_tests/" \
-           "Trance_009_Sound_System_Dreamscape_HD.mp3"
-shutil.copy(mp3_file, files_path + "/figures/")
+# copy the files to the right folder
 shutil.copy(files_path + "/in.ffconcat", files_path + "/figures")
 
 # call cmd lines to make the video
 os.chdir(files_path + "/figures/")
-os.system(fr'cmd /c "ffmpeg -i in.ffconcat -i Trance_009_Sound_System_Dreamscape_HD.mp3 -c:v libx264 -preset ultrafast -crf 0 -c:a copy -vf fps=25 out.avi"')
+os.system(fr'cmd /c "ffmpeg -i in.ffconcat -c:v libx264 -preset ultrafast -crf 0 -c:a copy -vf fps=25 out.avi"')
 os.chdir(files_path + "/figures/")
 os.system(fr'cmd /c "ffmpeg -ss 0 -i out.avi -t {total_duration} -c copy experiment_video.avi"')
 shutil.move(files_path + "/figures/experiment_video.avi", files_path + "/experiment_video.avi")
 
-# delete le .mp3, .avi et .ffconcat du fichier de figures
+# delete le .avi et .ffconcat du fichier de figures
 os.remove(files_path + "/figures/in.ffconcat")
 os.remove(files_path + "/figures/out.avi")
-os.remove(files_path + "/figures/Trance_009_Sound_System_Dreamscape_HD.mp3")
 
 if delete_figures_after:
     for f in os.listdir(files_path + "/figures/"):
         os.remove(os.path.join(files_path + "/figures/", f))
-    # os.rmdir(files_path + "/figures")   # can't delete the folder for some reasone
+    # os.rmdir(files_path + "/figures")   # can't delete the folder for some reason

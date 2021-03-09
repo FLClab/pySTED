@@ -32,8 +32,8 @@ if not os.path.exists(save_path):
 
 print("Setting up the datamap and its flashes ...")
 # Get light curves stuff to generate the flashes later
-event_file_path = "D:/SCHOOL/Maitrise/A2020/pySTED/my_version/audurand_pysted/flash_files/stream1_events.txt"
-video_file_path = "D:/SCHOOL/Maitrise/A2020/pySTED/my_version/audurand_pysted/flash_files/stream1.tif"
+event_file_path = "flash_files/stream1_events.txt"
+video_file_path = "flash_files/stream1.tif"
 
 # Generate a datamap
 frame_shape = (64, 64)
