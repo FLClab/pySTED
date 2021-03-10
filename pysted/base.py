@@ -1388,7 +1388,8 @@ class TemporalDatamap(Datamap):
                                                                 fwhm_step_sec_correspondance[1]), acq_time,
                                                                 pixel_dwelltime, mode="flash")
 
-        self.datamaps_tstack = numpy.zeros((n_flash_updates, *self.whole_datamap.shape))
+        self.base_datamap = numpy.copy(self.whole_datamap)
+        self.flash_tstack = numpy.zeros((n_flash_updates + 1, *self.whole_datamap.shape))
         for i in range(n_flash_updates):
             synapse_flashing_dict, synapse_flash_idx_dict, \
             synapse_flash_curve_dict, temp_dmap = utils.flash_routine(self.synapses, probability, synapse_flashing_dict,
@@ -1396,54 +1397,10 @@ class TemporalDatamap(Datamap):
                                                                                                "video": video_path},
                                                                       synapse_flash_curve_dict,
                                                                       isolated_synapses_frames,
-                                                                      self)
-            print(synapse_flash_curve_dict)
-            input("?")
-            self.datamaps_tstack[i] = numpy.copy(temp_dmap)
+                                                                      copy.deepcopy(self))   # si je copie pas ça chie
 
-        # # temp_dmap = copy.deepcopy(self)
-        # list_frames = [numpy.copy(self.whole_datamap)]   # init state
-        #
-        # # créer un objet Datamap de l'état initial
-        # init_datamap = Datamap(self.whole_datamap[self.roi], self.pixelsize)
-        # init_datamap.set_roi(i_ex, roi)
-        # list_datamaps = [init_datamap]
-        #
-        # for i in range(n_flash_updates):
-        #     # caller la func flash_routine et ajouter une copie de la datamap à la liste à chaque iter
-        #     synapse_flashing_dict, synapse_flash_idx_dict, \
-        #     synapse_flash_curve_dict, temp_dmap = utils.flash_routine(self.synapses, probability, synapse_flashing_dict,
-        #                                                               synapse_flash_idx_dict, {"event": event_path,
-        #                                                                                        "video": video_path},
-        #                                                               synapse_flash_curve_dict,
-        #                                                               isolated_synapses_frames,
-        #                                                               # copy.deepcopy(list_datamaps[i]))
-        #                                                               copy.deepcopy(init_datamap))
-        #     evolution_copy = numpy.copy(temp_dmap)
-        #     list_frames.append(evolution_copy)
-        #     dmap_obj = Datamap(temp_dmap[self.roi], self.pixelsize)
-        #     dmap_obj.set_roi(i_ex, roi)
-        #     list_datamaps.append(copy.deepcopy(dmap_obj))
-        #
-        # list_frames.append(evolution_copy)   # append it one last time for the final iterations
-        # list_datamaps.append(copy.deepcopy(dmap_obj))
-        # t_stack = numpy.stack(list_frames)
-        #
-        # self.static_t_stack = numpy.copy(t_stack)   # This version should never be modified, will maybe be useful idk
-        # self.t_stack = numpy.copy(t_stack)   # This version will be the one acquired on / bleached
-        # self.list_dmaps = copy.deepcopy(list_datamaps)
-        # self.list_dmaps_static = copy.deepcopy(list_datamaps)
-
-    def create_t_stack_flashes(self):
-        """
-        This method creates a list of arrays showing only the flashes (so the difference between every t_stack_dmap and
-        the base dmap)
-        """
-        self.list_flashes = []
-        for evolution in self.list_dmaps_static:
-            flash = evolution - self.whole_datamap
-            self.list_flashes.append(flash)
-
+            self.flash_tstack[i] = temp_dmap - self.base_datamap
+        self.flash_tstack[-1] = temp_dmap - self.base_datamap   # le petit dernier pour la route
 
     def bleach_future(self, dmap_idx):
         """
