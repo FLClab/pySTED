@@ -1382,6 +1382,9 @@ class TemporalDatamap(Datamap):
 
     def create_t_stack(self, acq_time, pixel_dwelltime, fwhm_step_sec_correspondance, event_path, video_path,
                        probability):
+        """
+        PRETTY SURE THIS METHOD IS DEPRECATED / UNUSED / CRINGE
+        """
         synapse_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = \
             utils.generate_synapse_flash_dicts(self.synapses, self.whole_datamap[self.roi].shape)
         n_flash_updates, _ = utils.compute_time_correspondances((fwhm_step_sec_correspondance[0],
