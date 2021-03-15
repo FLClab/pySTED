@@ -1265,12 +1265,15 @@ def action_execution_tstack(action_selected, frame_shape, starting_pixel, pxsize
         pixel_list = pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
                                        output_empty=True)
 
-    acq, bleached, intensity_map = microscope.get_signal_and_bleach_fast(datamap, pxsize, pdt, p_ex, p_sted,
-                                                                         acquired_intensity=intensity_map,
-                                                                         pixel_list=pixel_list,  bleach=bleach,
-                                                                         update=False, filter_bypass=True)
+    acq, bleached, intensity_map = microscope.get_signal_and_bleach_split(datamap, pxsize, pdt, p_ex, p_sted,
+                                                                          acquired_intensity=intensity_map,
+                                                                          pixel_list=pixel_list, bleach=bleach,
+                                                                          update=False, filter_bypass=True,
+                                                                          indices=t_stack_idx)
 
     if bleach:
-        datamap.whole_datamap = numpy.copy(bleached)
+        datamap.whole_datamap = numpy.copy(bleached[1] + bleached[2])
+        datamap.base_datamap = numpy.copy(bleached[1])
+        datamap.flash_tstack[t_stack_idx["flashes"]] = numpy.copy(bleached[2])
 
     return acq, intensity_map, datamap, pixel_list
