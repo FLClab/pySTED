@@ -59,6 +59,9 @@ temporal_datamap.set_roi(i_ex, roi)
 temporal_datamap.create_t_stack_dmap(acquisition_time, pdt, (10, 1.5), event_file_path, video_file_path, flash_prob,
                                      i_ex, roi)
 
+# using p_ex as array to work on complicated func version
+p_ex = np.ones(temporal_datamap.whole_datamap[temporal_datamap.roi].shape) * p_ex
+
 # for flash in temporal_datamap.flash_tstack:
 #     wdm = temporal_datamap.base_datamap + flash
 #     with np.errstate(divide='ignore', invalid='ignore'):
@@ -90,8 +93,9 @@ for flash_tstep_idx in range(temporal_datamap.flash_tstack.shape[0]):
     # je m'attends à ce que t_d.whole_datamap bleach, mais que t_d.base et t_d.flash restent intactes
 
     signal, bleached, intensity = microscope.get_signal_and_bleach_fast(temporal_datamap, dpxsz, pdt, p_ex, p_sted,
-                                                                        bleach=True, update=False)
-
+                                                                        idx_flash=flash_tstep_idx, bleach=True,
+                                                                        update=False)
+    """
     # calculer le ratio de molécules appartenant à la base et au flash pour ce t step
     with np.errstate(divide='ignore', invalid='ignore'):
         base_ratio = temporal_datamap.base_datamap / temporal_datamap.whole_datamap
@@ -115,9 +119,18 @@ for flash_tstep_idx in range(temporal_datamap.flash_tstack.shape[0]):
         temporal_datamap.flash_tstack[flash_tstep_idx:] = np.multiply(temporal_datamap.flash_tstack[flash_tstep_idx:],
                                                                       flash_survival)
         temporal_datamap.flash_tstack[flash_tstep_idx:] = np.rint(temporal_datamap.flash_tstack[flash_tstep_idx:])
-
+    
     plt.imshow(temporal_datamap.whole_datamap[temporal_datamap.roi])
     plt.show()
+    """
+    fig, axes = plt.subplots(1, 3)
+    axes[0].imshow(bleached[temporal_datamap.roi])
+    axes[1].imshow(temporal_datamap.base_datamap[temporal_datamap.roi])
+    axes[2].imshow(temporal_datamap.flash_tstack[flash_tstep_idx][temporal_datamap.roi])
+    plt.show()
+    # for flash_idx in range(temporal_datamap.flash_tstack.shape[0]):
+    #     plt.imshow(temporal_datamap.flash_tstack[flash_idx])
+    #     plt.show()
 
     # for i in range(temporal_datamap.flash_tstack[flash_tstep_idx:].shape[0]):
     #     fig, axes = plt.subplots(1, 2)
