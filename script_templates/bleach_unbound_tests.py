@@ -110,24 +110,64 @@ np.random.seed(flash_seed)
 np.random.RandomState(flash_seed)
 for t_step_idx in tqdm.trange(n_time_steps):
     microscope.time_bank += min_pdt
-    # next_pixel_to_img = pixel_list[pixel_list_time_idx]
-    # if action_selected == "confocal":
-    #     if microscope.time_bank - confoc_pdt_array[tuple(next_pixel_to_img)] >= 0:
-    #         microscope.time_bank -= confoc_pdt_array[tuple(next_pixel_to_img)]
-    #         pixel_list_time_idx += 1
-    #         microscope.pixel_bank += 1
-    # elif action_selected == "sted":
-    #     if microscope.time_bank - sted_pdt_array[tuple(next_pixel_to_img)] >= 0:
-    #         microscope.time_bank -= sted_pdt_array[tuple(next_pixel_to_img)]
-    #         pixel_list_time_idx += 1
-    #         microscope.pixel_bank += 1
+    next_pixel_to_img = pixel_list[pixel_list_time_idx]
+    if action_selected == "confocal":
+        if microscope.time_bank - confoc_pdt_array[tuple(next_pixel_to_img)] >= 0:
+            microscope.time_bank -= confoc_pdt_array[tuple(next_pixel_to_img)]
+            pixel_list_time_idx += 1
+            microscope.pixel_bank += 1
+    elif action_selected == "sted":
+        if microscope.time_bank - sted_pdt_array[tuple(next_pixel_to_img)] >= 0:
+            microscope.time_bank -= sted_pdt_array[tuple(next_pixel_to_img)]
+            pixel_list_time_idx += 1
+            microscope.pixel_bank += 1
     # ici il va y avoir un elif pour XbyX sted
 
     # verify if the current action is interrupted by a flash step
     if t_step_idx % n_tsteps_per_flash_step == 0:
 
-        # une étape à la fois benoit
-        # le plan ici ça serait de faire temporal_datamap.whole_datamp = base + flash[t_stack_idx]
+        # il faut que je fasse l'acquisition avant de maj la datamap
+        if microscope.pixel_bank >= 1:
+            if action_selected == "confocal":
+                confoc_acq, confoc_intensity, temporal_datamap, imaged_pixel_list = \
+                    utils.action_execution(action_selected, frame_shape, confocal_starting_pixel, confoc_pxsize,
+                                           temporal_datamap, frozen_datamap, microscope,
+                                           confoc_pdt_array, p_ex, 0.0, confoc_intensity, bleach)
+
+            elif action_selected == "sted":
+                sted_acq, sted_intensity, temporal_datamap, imaged_pixel_list = \
+                    utils.action_execution(action_selected, frame_shape, sted_starting_pixel,
+                                           temporal_datamap.pixelsize, temporal_datamap,
+                                           frozen_datamap, microscope, sted_pdt_array, p_ex, p_sted, sted_intensity,
+                                           bleach)
+
+            # shift the starting pixel
+            if action_selected == "confocal":
+                confocal_starting_pixel = imaged_pixel_list[-1]
+                confocal_starting_pixel = utils.set_starting_pixel(confocal_starting_pixel, frame_shape, ratio=ratio)
+            elif action_selected == "sted":
+                sted_starting_pixel = imaged_pixel_list[-1]
+                sted_starting_pixel = utils.set_starting_pixel(sted_starting_pixel, frame_shape)
+
+            # empty the pixel bank after the acquisition
+            imaged_pixels += microscope.pixel_bank
+            microscope.empty_pixel_bank()
+            pixel_list_time_idx = 0
+
+            if imaged_pixels == actions_required_pixels[action_selected]:
+                action_completed = True
+
+            # là c'est ici que je doit gérer le bleaching
+            # si je comprends bien ce que j'ai fait ( :) ), si le bleach est à OFF je fais juste pass ?
+            # et si le bleach est à ON, il faut que j'update la base_datamap et les flash_tstack:
+            # whole_datamap devrait s'est fait bleaché, et whole_datamap = base + flash
+            if not bleach:
+                temporal_datamap.list_dmaps[t_stack_idx] = np.copy(frozen_datamap)
+            else:
+                if t_stack_idx < len(temporal_datamap.list_dmaps) - 1:
+                    temporal_datamap.bleach_future(t_stack_idx)
+
+        # update la datamap selon le flash
         temporal_datamap.whole_datamap = temporal_datamap.base_datamap + temporal_datamap.flash_tstack[t_stack_idx]
         t_stack_idx += 1
 

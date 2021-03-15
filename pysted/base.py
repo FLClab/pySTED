@@ -1389,7 +1389,7 @@ class TemporalDatamap(Datamap):
                                                                 pixel_dwelltime, mode="flash")
 
         self.base_datamap = numpy.copy(self.whole_datamap)
-        self.flash_tstack = numpy.zeros((n_flash_updates + 1, *self.whole_datamap.shape))
+        self.flash_tstack = numpy.zeros((n_flash_updates + 1, *self.whole_datamap.shape), dtype=numpy.int32)
         for i in range(n_flash_updates):
             synapse_flashing_dict, synapse_flash_idx_dict, \
             synapse_flash_curve_dict, temp_dmap = utils.flash_routine(self.synapses, probability, synapse_flashing_dict,
