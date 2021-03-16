@@ -132,11 +132,6 @@ pixel_list_time_idx = 0
 
 indices = {"flashes": t_stack_idx}
 
-# for i in range(temporal_datamap.flash_tstack.shape[0]):
-#     plt.imshow(temporal_datamap.flash_tstack[i])
-#     plt.show()
-# exit()
-
 # start acquisition loop
 print("Starting the experiment loop")
 np.random.seed(flash_seed)

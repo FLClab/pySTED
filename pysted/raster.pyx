@@ -235,7 +235,7 @@ def raster_func_c_self_bleach(
 
 @cython.boundscheck(False) # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
-def raster_func_c_self_bleach_2(
+def raster_func_c_self_bleach_split(
     object self,
     object datamap,
     numpy.ndarray[FLOATDTYPE_t, ndim=2] acquired_intensity,
@@ -249,9 +249,8 @@ def raster_func_c_self_bleach_2(
     numpy.ndarray[FLOATDTYPE_t, ndim=2] pdt_roi,
     numpy.ndarray[FLOATDTYPE_t, ndim=2] p_ex_roi,
     numpy.ndarray[FLOATDTYPE_t, ndim=2] p_sted_roi,
-    numpy.ndarray[INTDTYPE_t, ndim=2] bleached_datamap,
-    int seed,
-    int idx_flash
+    dict bleached_sub_datamaps_dict,
+    int seed
     ):
 
     cdef int row, col
@@ -268,11 +267,11 @@ def raster_func_c_self_bleach_2(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex, i_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
+    cdef numpy.ndarray[INTDTYPE_t, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
-    cdef numpy.ndarray[int, ndim=2] base_datamap, flash_datamap
 
-    print("working on the 2nd version :)")
-    print("modifs registered 0")
+    print("WOOOOOOOOOOOOOOOOOOOOOOOO")
+    print("oh mais là putain")
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -284,17 +283,16 @@ def raster_func_c_self_bleach_2(
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
 
-    print(f"flash idx = {idx_flash}")
-    # c'est pas tout le temps que je vais utiliser une temporal datamap, donc ça planterait ici
-    # si j'utilise pas une temporal datamap... how do I manage this
-    base_datamap = datamap.base_datamap
-    flash_datamap = datamap.flash_tstack[idx_flash]
+    # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape)
 
     for (row, col) in pixel_list:
         pdt = pdt_roi[row, col]
         p_ex = p_ex_roi[row, col]
         p_sted = p_sted_roi[row, col]
         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
+        bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
+        for key in bleached_sub_datamaps_dict:
+            bleached_datamap += bleached_sub_datamaps_dict[key]
 
         value = 0.0
         sprime = 0
@@ -312,42 +310,28 @@ def raster_func_c_self_bleach_2(
         photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
         k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
 
-        # TODO: modify this section so I can bleach separately the different subdatamaps
-        sprime = 0
-        for s in range(row, row + h):
-            tprime = 0
-            for t in range(col, col + w):
-                # Updates probabilites
-                prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
-                prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
+        for key in bleached_sub_datamaps_dict:
+            sprime = 0
+            for s in range(row, row + h):
+                tprime = 0
+                for t in range(col, col + w):
+                    # Updates probabilites
+                    prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
+                    prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
 
-                # Calculates the binomial sampling
-                # sampled_value = 0
-                sampled_base = 0
-                sampled_flash = 0
-                # current = bleached_datamap[s, t]
-                current_base = base_datamap[s, t]
-                current_flash = flash_datamap[s, t]
-                prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
-                # For each count we sample a random variable
-                for o in range(current_base):
-                    rsamp = rand()
-                    if rsamp <= prob:
-                        # sampled_value += 1
-                        sampled_base += 1
-                base_datamap[s, t] = sampled_base
-                for o in range(current_flash):
-                    rsamp = rand()
-                    if rsamp <= prob:
-                        # sampled_value += 1
-                        sampled_flash += 1
-                flash_datamap[s, t] = sampled_flash
-                # datamap.whole_datamap[s, t] = sampled_value
+                    # Calculates the binomial sampling
+                    sampled_value = 0
+                    current = bleached_sub_datamaps_dict[key][s, t]
+                    prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
+                    # For each count we sample a random variable
+                    for o in range(current):
+                        rsamp = rand()
+                        if rsamp <= prob:
+                            sampled_value += 1
+                    bleached_sub_datamaps_dict[key][s, t] = sampled_value
 
-                tprime += 1
-            sprime += 1
-    # datamap.whole_datamap = base_datamap + flash_datamap
-    bleached_datamap = base_datamap + flash_datamap
+                    tprime += 1
+                sprime += 1
 
 @cython.boundscheck(False) # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function

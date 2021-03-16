@@ -1088,8 +1088,7 @@ class Microscope:
         powers_array_verifier = False
         if type(p_ex) is numpy.ndarray or type(p_sted) is numpy.ndarray:
             if bleach:
-                print("working on new version to bleach sub datamap separately")
-                raster_func = raster.raster_func_c_self_bleach_2
+                raster_func = raster.raster_func_c_self_bleach
             else:
                 raster_func = raster.raster_func_c_self
             powers_array_verifier = True
@@ -1156,7 +1155,7 @@ class Microscope:
             if powers_array_verifier:
                 raster_func(
                     self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32), ratio, rows_pad,
-                    cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleached_datamap, seed, idx_flash
+                    cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleached_datamap, seed
                 )
                 pass
             else:
@@ -1184,6 +1183,142 @@ class Microscope:
             datamap.whole_datamap = bleached_datamap
 
         return returned_acquired_photons, bleached_datamap, acquired_intensity
+
+    def get_signal_and_bleach_fast_2(self, datamap, pixelsize, pdt, p_ex, p_sted, idx_flash=0, raster_func=None,
+                                     acquired_intensity=None, pixel_list=None, bleach=True, update=True, seed=None,
+                                     filter_bypass=False):
+        """
+        MODIFY ANTHO'S VERSION TO WORK WITH THE GOOD DATAMAP / MICROSCOPE IMPLEMENTATION
+        Function to bleach the datamap as the signal is acquired.
+        :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
+        :param p_ex: Power of the excitation beam. (W)
+        :param p_sted: Power of the STED beam. (W)
+        :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
+                           pixel of the ROI will be done.
+        :param bleach: A bool which determines whether or not bleaching wil occur
+        :returns: An array with the acquired pixelwise intensities, and the updated (bleached) datamap_obj
+        """
+        if seed is not None:
+            numpy.random.seed(seed)
+        datamap_pixelsize = datamap.pixelsize
+        i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
+        if datamap.roi is None:
+            # demander au dude de setter une roi
+            datamap.set_roi(i_ex)
+
+        datamap_roi = datamap.whole_datamap[datamap.roi]
+        pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
+
+        # VERIFYING IF I CAN PASS A RASTER_FUNC AS AN ARGUMENT
+        if raster_func is None:
+            print("Nothing passed :)")
+        else:
+            print(f"raster_func = {raster_func}")
+        # exit()
+
+        powers_array_verifier = False
+        if type(p_ex) is numpy.ndarray or type(p_sted) is numpy.ndarray:
+            if bleach:
+                print("raster_func_c_self_bleach")
+                # raster_func = raster.raster_func_c_self_bleach
+            else:
+                print("raster_func_c_self")
+                # raster_func = raster.raster_func_c_self
+            powers_array_verifier = True
+        else:
+            if bleach:
+                print("raster_func_wbleach_c")
+                # raster_func = raster.raster_func_wbleach_c
+            else:
+                print("raster_func_c")
+                # raster_func = raster.raster_func_c
+        p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
+        p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
+
+        if not filter_bypass:
+            pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
+
+        # TODO: need to find a way to compute this inside the C function on a pixel per pixel basis
+        effective = self.get_effective(datamap_pixelsize, p_ex[0, 0], p_sted[0, 0])
+
+        # TODO: make sure I handle passing an acq matrix correctly / verifying its shape and shit
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        if acquired_intensity is None:
+            acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
+                                              int(numpy.ceil(datamap_roi.shape[1] / ratio))))
+        else:
+            # verify the shape and shit
+            pass
+        rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
+        laser_pad = i_ex.shape[0] // 2
+
+        # TODO: figure out comment faire ça pour un p_ex, p_sted variable par pixel
+        #       un dict qui contient les photons_ex pour chaque (row, col)?? seems dumb, maybe I have no other choice
+        photons_ex = self.fluo.get_photons(i_ex * p_ex[0, 0])
+        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+
+
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(i_sted * p_sted[0, 0] * duty_cycle)
+        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+        prob_ex = numpy.ones(datamap.whole_datamap.shape)
+        prob_sted = numpy.ones(datamap.whole_datamap.shape)
+        bleached_datamap = numpy.copy(datamap.whole_datamap)
+        bleached_sub_datamaps_dict = copy.copy(datamap.sub_datamaps_dict)
+
+        if isinstance(raster_func, type(None)):
+            for (row, col) in pixel_list:
+                effective = self.get_effective(datamap_pixelsize, p_ex[row, col], p_sted[row, col])
+                row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
+                col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
+                acquired_intensity[int(row / ratio), int(col / ratio)] = numpy.sum(effective *
+                                                                                    bleached_datamap
+                                                                                    [row_slice, col_slice])
+
+                if bleach is True:
+                    kwargs = {'i_ex': i_ex, 'i_sted': i_sted, 'fluo': self.fluo, 'excitation': self.excitation,
+                              'sted': self.sted, 'p_ex': p_ex[row, col], 'p_sted': p_sted[row, col],
+                              'pdt': pdt[row, col], 'prob_ex': prob_ex, 'prob_sted': prob_sted,
+                              'region': (row_slice, col_slice)}
+                    prob_ex, prob_sted = self.bleach_func(**kwargs)
+                    bleached_datamap[row_slice, col_slice] = \
+                        numpy.random.binomial(bleached_datamap[row_slice, col_slice],
+                                              prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
+        else:
+            if seed is None:
+                seed = 0
+            if powers_array_verifier:
+                raster_func(
+                    self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32), ratio, rows_pad,
+                    cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleached_sub_datamaps_dict, seed
+                )
+                pass
+            else:
+                # print("WHY DO I GO HERE ?")
+                raster_func(
+                    acquired_intensity, numpy.array(pixel_list).astype(numpy.int32),
+                    ratio, effective, rows_pad, cols_pad, laser_pad, datamap.whole_datamap,
+                    bleach, prob_ex, prob_sted, k_ex, k_sted, pdt, bleached_datamap, seed
+                )
+
+        # Bleaching is done, the rest is for intensity calculation
+        photons = self.fluo.get_photons(acquired_intensity)
+
+        if photons.shape == pdt.shape:
+            returned_acquired_photons = self.detector.get_signal(photons, pdt)
+        else:
+            pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
+                                                   int(numpy.ceil(pdt.shape[1] / ratio))))
+            new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
+            for (row, col) in new_pdt_plist:
+                pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
+            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped)
+
+        if update:
+            datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
+
+        return returned_acquired_photons, bleached_sub_datamaps_dict, acquired_intensity
 
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
                           lower_th=1, ltr=0.1, upper_th=100):
@@ -1518,6 +1653,8 @@ class TemporalDatamap(Datamap):
         self.synapses = synapses
         self.contains_sub_datamaps = {"base": True,
                                       "flashes": False}
+        self.sub_datamaps_dict = {}
+        self.sub_datamaps_idx_dict = {}
 
     def create_t_stack_dmap(self, acq_time, pixel_dwelltime, fwhm_step_sec_correspondance, event_path, video_path,
                             probability, i_ex, roi):
@@ -1526,7 +1663,8 @@ class TemporalDatamap(Datamap):
         n_flash_updates, _ = utils.compute_time_correspondances((fwhm_step_sec_correspondance[0],
                                                                 fwhm_step_sec_correspondance[1]), acq_time,
                                                                 pixel_dwelltime, mode="flash")
-
+        # la base_datamap n'est pas créée tant que set_roi n'a pas été call
+        self.sub_datamaps_dict["base"] = self.base_datamap
         self.flash_tstack = numpy.zeros((n_flash_updates + 1, *self.whole_datamap.shape), dtype=numpy.int32)
         for i in range(n_flash_updates):
             synapse_flashing_dict, synapse_flash_idx_dict, \
@@ -1540,6 +1678,8 @@ class TemporalDatamap(Datamap):
             self.flash_tstack[i] = temp_dmap - self.base_datamap
         self.flash_tstack[-1] = temp_dmap - self.base_datamap   # le petit dernier pour la route
         self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
 
     def bleach_future(self, dmap_idx):
         """
