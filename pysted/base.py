@@ -1219,19 +1219,23 @@ class Microscope:
         powers_array_verifier = False
         if type(p_ex) is numpy.ndarray or type(p_sted) is numpy.ndarray:
             if bleach:
-                print("raster_func_c_self_bleach")
+                # print("raster_func_c_self_bleach")
                 # raster_func = raster.raster_func_c_self_bleach
+                pass
             else:
-                print("raster_func_c_self")
+                # print("raster_func_c_self")
                 # raster_func = raster.raster_func_c_self
+                pass
             powers_array_verifier = True
         else:
             if bleach:
-                print("raster_func_wbleach_c")
+                # print("raster_func_wbleach_c")
                 # raster_func = raster.raster_func_wbleach_c
+                pass
             else:
-                print("raster_func_c")
+                # print("raster_func_c")
                 # raster_func = raster.raster_func_c
+                pass
         p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
         p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
 
@@ -1292,14 +1296,12 @@ class Microscope:
             if seed is None:
                 seed = 0
             if powers_array_verifier:
-                print("goes in if")
                 raster_func(
                     self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32), ratio, rows_pad,
                     cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleached_sub_datamaps_dict, seed
                 )
                 pass
             else:
-                print("goes in else")
                 raster_func(
                     acquired_intensity, numpy.array(pixel_list).astype(numpy.int32),
                     ratio, effective, rows_pad, cols_pad, laser_pad, datamap.whole_datamap,

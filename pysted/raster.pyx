@@ -48,6 +48,12 @@ def raster_func_wbleach_c(
     cdef FLOATDTYPE_t pdt
     cdef int rsamp
 
+    """
+    raster_func_wbleach_c executes the simultaneous acquisition and bleaching routine for the case where the excitation
+    power (p_ex) AND sted power (p_sted) are kept constant through the sample. This function thus requires these
+    parameters to be passed as scalar values (float)
+    """
+
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -124,6 +130,12 @@ def raster_func_c(
     cdef int prob
     cdef FLOATDTYPE_t pdt
 
+    """
+    raster_func_c executes the acquisition WITH NO BLEACHING routine for the case where the excitation
+    power (p_ex) AND sted power (p_sted) are kept constant through the sample. This function thus requires these
+    parameters to be passed as scalar values (float)
+    """
+
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -178,6 +190,12 @@ def raster_func_c_self_bleach(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex, i_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef FLOATDTYPE_t duty_cycle
+
+    """
+    raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the 
+    excitation power (p_ex) AND/OR sted power (p_sted) vary through the sample. This function thus requires these
+    parameters to be passed as arrays of floats the same size as the ROI being imaged
+    """
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -270,8 +288,14 @@ def raster_func_c_self_bleach_split(
     cdef numpy.ndarray[INTDTYPE_t, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
 
-    print("WOOOOOOOOOOOOOOOOOOOOOOOO")
-    print("oh mais là putain")
+    """
+    raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the 
+    excitation power (p_ex) AND/OR sted power (p_sted) vary through the sample. This function thus requires these
+    parameters to be passed as arrays of floats the same size as the ROI being imaged.
+    
+    Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
+    components of the datamap are bleached separately).
+    """
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -361,6 +385,12 @@ def raster_func_c_self(
     cdef FLOATDTYPE_t pdt, p_ex, p_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] pre_effective, effective
     cdef FLOATDTYPE_t duty_cycle
+
+    """
+    raster_func_c_self_bleach executes the acquisition WITH NO BLEACHING bleaching routine for the case where the 
+    excitation power (p_ex) AND/OR sted power (p_sted) vary through the sample. This function thus requires these
+    parameters to be passed as arrays of floats the same size as the ROI being imaged.
+    """
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
