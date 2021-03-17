@@ -42,6 +42,7 @@ confoc_pxsize = 30e-9   # confoc ground truths will be taken at a resolution 3 t
 dpxsz = 10e-9
 bleach = True
 p_ex = np.ones(frame_shape) * 1e-6
+# p_ex = 1e-6
 p_sted = 30e-3
 min_pdt = 1e-6   # le min pdt est 1 us
 pdt = 10e-6
@@ -67,18 +68,44 @@ i_ex, _, _ = microscope.cache(temporal_datamap.pixelsize)
 temporal_datamap.set_roi(i_ex, roi)
 temporal_datamap.create_t_stack_dmap(acquisition_time, pdt, (10, 1.5), event_file_path, video_file_path, flash_prob,
                                      i_ex, roi)
+idx_dict = {"flashes": 3}
+# for i in range(temporal_datamap.flash_tstack.shape[0]):
+#     plt.imshow(temporal_datamap.flash_tstack[i][temporal_datamap.roi])
+#     plt.title(f"i = {i}")
+#     plt.show()
+# exit()
+
+# va falloir que je fasse cette gestion là dans la loop d'acq
+temporal_datamap.whole_datamap = temporal_datamap.base_datamap + temporal_datamap.flash_tstack[idx_dict["flashes"]]
+temporal_datamap.sub_datamaps_idx_dict["flashes"] = idx_dict["flashes"]
+temporal_datamap.sub_datamaps_dict["flashes"] = temporal_datamap.flash_tstack[temporal_datamap.sub_datamaps_idx_dict["flashes"]]
 
 start_time = time.time()
 photons, bleached, intensity = microscope.get_signal_and_bleach_fast_2(temporal_datamap, temporal_datamap.pixelsize,
                                                                        pdt, p_ex, p_sted, bleach=bleach,
+                                                                       update=True, indices=idx_dict,
                                                                        raster_func=raster.raster_func_c_self_bleach_split)
 run_time = time.time() - start_time
 
 print(f"run time = {run_time}")
+bleached_total = np.zeros(temporal_datamap.whole_datamap.shape)
+for key in bleached:
+    bleached_total += bleached[key]
 
 fig, axes = plt.subplots(1, 3)
 axes[0].imshow(temporal_datamap.whole_datamap[temporal_datamap.roi])
-axes[1].imshow(bleached[temporal_datamap.roi])
+axes[1].imshow(bleached_total[temporal_datamap.roi])
 axes[2].imshow(photons)
 fig.suptitle(f"run time = {run_time}")
 plt.show()
+
+fig, axes = plt.subplots(1, 2)
+axes[0].imshow(temporal_datamap.base_datamap[temporal_datamap.roi])
+axes[1].imshow(temporal_datamap.flash_tstack[idx_dict["flashes"]][temporal_datamap.roi])
+plt.show()
+
+for i in range(temporal_datamap.flash_tstack.shape[0]):
+    plt.imshow(temporal_datamap.flash_tstack[i][temporal_datamap.roi])
+    plt.title(f"i = {i}")
+    plt.show()
+exit()

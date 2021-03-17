@@ -1184,7 +1184,7 @@ class Microscope:
 
         return returned_acquired_photons, bleached_datamap, acquired_intensity
 
-    def get_signal_and_bleach_fast_2(self, datamap, pixelsize, pdt, p_ex, p_sted, idx_flash=0, raster_func=None,
+    def get_signal_and_bleach_fast_2(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, raster_func=None,
                                      acquired_intensity=None, pixel_list=None, bleach=True, update=True, seed=None,
                                      filter_bypass=False):
         """
@@ -1265,7 +1265,10 @@ class Microscope:
         prob_ex = numpy.ones(datamap.whole_datamap.shape)
         prob_sted = numpy.ones(datamap.whole_datamap.shape)
         bleached_datamap = numpy.copy(datamap.whole_datamap)
-        bleached_sub_datamaps_dict = copy.copy(datamap.sub_datamaps_dict)
+        # bleached_sub_datamaps_dict = copy.copy(datamap.sub_datamaps_dict)
+        bleached_sub_datamaps_dict = {}
+        for key in datamap.sub_datamaps_dict:
+            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key])
 
         if isinstance(raster_func, type(None)):
             for (row, col) in pixel_list:
@@ -1289,13 +1292,14 @@ class Microscope:
             if seed is None:
                 seed = 0
             if powers_array_verifier:
+                print("goes in if")
                 raster_func(
                     self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32), ratio, rows_pad,
                     cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleached_sub_datamaps_dict, seed
                 )
                 pass
             else:
-                # print("WHY DO I GO HERE ?")
+                print("goes in else")
                 raster_func(
                     acquired_intensity, numpy.array(pixel_list).astype(numpy.int32),
                     ratio, effective, rows_pad, cols_pad, laser_pad, datamap.whole_datamap,
@@ -1316,7 +1320,23 @@ class Microscope:
             returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped)
 
         if update:
+            print("goes in update")
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
+            datamap.base_datamap = datamap.sub_datamaps_dict["base"]
+            # BLEACHER LES FLASHS FUTURS
+            if datamap.contains_sub_datamaps["flashes"]:
+                what_bleached = datamap.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
+                datamap.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
+                # UPDATE THE FUTURE
+                with numpy.errstate(divide='ignore', invalid='ignore'):
+                    flash_survival = bleached_sub_datamaps_dict["flashes"] / datamap.flash_tstack[indices["flashes"]]
+                flash_survival[numpy.isnan(flash_survival)] = 1
+                datamap.flash_tstack[indices["flashes"]:] -= what_bleached
+                datamap.flash_tstack[indices["flashes"]:] = numpy.multiply(datamap.flash_tstack[indices["flashes"]:],
+                                                                           flash_survival)
+                datamap.flash_tstack[indices["flashes"]:] = numpy.rint(datamap.flash_tstack[indices["flashes"]:])
+                datamap.flash_tstack[indices["flashes"]:] = numpy.where(datamap.flash_tstack[indices["flashes"]:] < 0,
+                                                                        0, datamap.flash_tstack[indices["flashes"]:])
 
         return returned_acquired_photons, bleached_sub_datamaps_dict, acquired_intensity
 
@@ -1459,6 +1479,7 @@ class Datamap:
         self.pixelsize = datamap_pixelsize
         self.roi = None
         self.roi_corners = None
+        self.sub_datamaps_dict = {}
 
     def set_roi(self, laser, intervals=None):
         """
@@ -1530,6 +1551,7 @@ class Datamap:
             raise ValueError("intervals parameter must be either None, 'max' or dict")
 
         self.base_datamap = numpy.copy(self.whole_datamap)
+        self.sub_datamaps_dict["base"] = self.base_datamap
 
     def set_bleached_datamap(self, bleached_datamap):
         """
@@ -1653,7 +1675,7 @@ class TemporalDatamap(Datamap):
         self.synapses = synapses
         self.contains_sub_datamaps = {"base": True,
                                       "flashes": False}
-        self.sub_datamaps_dict = {}
+        # self.sub_datamaps_dict = {}
         self.sub_datamaps_idx_dict = {}
 
     def create_t_stack_dmap(self, acq_time, pixel_dwelltime, fwhm_step_sec_correspondance, event_path, video_path,
