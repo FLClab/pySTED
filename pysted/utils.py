@@ -666,10 +666,9 @@ def float_to_array_verifier(float_or_array, shape):
 
 def dict_write_func(file, dictio):
     """
-    aha
-    :param file:
-    :param dictio:
-    :return:
+    Write a dict to a text file in a good way :)
+    :param file: path of the file to write to
+    :param dictio: the dictionnary we wish to write to a txt file
     """
     f = open(file, 'a')
     f.write(str(dictio))
@@ -693,7 +692,6 @@ def event_reader(file):
 
 def add_event(file, start_frame, end_frame, start_row, end_row, start_col, end_col):
     """
-    *** PT QUE JE POURRAIS TRAVAILLER AVEC DES SLICES DANS LE DICT À PLACE? PT PLUS FACILE À MANIP APRÈS IDK ***
     Function that allows a user to easily store an event in a file, which can later be read with the event_reader func.
     :param file: File to write the dict to. The goal is to use 1 text file to which we will write all the vents for
                  1 video.
@@ -716,7 +714,7 @@ def add_event(file, start_frame, end_frame, start_row, end_row, start_col, end_c
 def get_light_curve(video_path, event):
     """
     aha
-    :param video: The path to the video file from which we want to extract an event light curve (str)
+    :param video_path: The path to the video file from which we want to extract an event light curve (str)
     :param event: A dictionary containing the start and end info for frames, rows, columns of an event (dict)
     :return: A vector representing the mean intensity accros the frames of the event
     """
@@ -769,7 +767,8 @@ def get_avg_lightcurve(light_curves):
     This function takes as input a list of light curves and processes them so they are rescaled and shifted to align
     their peaks. It then return the avg light curve as well as its standard deviation, so we can sample a light curve
     for event simulation.
-    :return:
+    :param light_curves: list of light curves of Ca2+ flash events
+    :return: the avg light curve and std of the light curve
     """
     shifted_curves = []
     for curve in light_curves:
@@ -829,6 +828,8 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     .. [2] Numerical Recipes 3rd Edition: The Art of Scientific Computing
        W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
        Cambridge University Press ISBN-13: 9780521880688
+    ----------
+    ça parait tu que j'ai copy pasta cette fonction de stack overflow ou non
     """
 
     # try:
@@ -868,10 +869,10 @@ def sample_light_curve(light_curves):
 
 def flash_generator(events_path, video_path):
     """
-    C'EST BAD COMME NOM
-    The goal of this function is to generate the light curves (?) needed to generate flashes.
-    Basically this just wraps up the work of the previous light curve functions for ease of use
-    when designing an experiment or something
+    This function uses information from some identified flash events in a video in order to generate a random
+    flash event
+    :param events_path: path to the txt file containing the dict of flash event ROIs
+    :param video_path: path to the video file from which we extract flash event information
     :return:
     """
     events = event_reader(events_path)
@@ -896,7 +897,7 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
     :param min_dist: min distance we want to have between the synapses. this is to make sure we don't have overlapping
                      synapses
     :param polygon_scale: values from which the polygon size will be sampled
-    :return:
+    :return: the fiber object and the polygon objects representing the synapses
     """
     min_array, max_array = numpy.asarray((fibre_min, fibre_min)), numpy.asarray((fibre_max, fibre_max))
     # jpense jpeux controller l'angle aussi
@@ -942,9 +943,14 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
 
 def generate_secondary_fibers(datamap_shape, main_fiber, n_sec, min_dist=10, sec_len=(2, 6), seed=None):
     """
-    Similar to the synapse function, but with fibers instead. The goal would be to pass
-    an already existing fiber to this func and simply spawn the secondary fibers
-    :return:
+    This function allows to spawn secondary fibers branching from a main fiber
+    :param datamap_shape: The shape of the datamap in which the main fiber resides
+    :param main_fiber: The main fiber object to which we will add secondary fiber branches
+    :param n_sec: The interval for the number of secondary branches we wish to spawn (tuple)
+    :param min_dist: The min distance between spawned secondary fiber, to ensure they are not all clumped
+    :param sec_len: The interval for the length of the secondary fibers (tuple)
+    :param seed: Random number generator seed
+    :return: a list containing the secondary fiber objects
     """
     n_added = 0
     sec_fiber_positions = numpy.empty((0, 2))
@@ -993,8 +999,14 @@ def generate_secondary_fibers(datamap_shape, main_fiber, n_sec, min_dist=10, sec
 
 def generate_synapses_on_fiber(datamap_shape, main_fiber, n_syn, min_dist, synapse_scale=(5, 10)):
     """
-    Instead of generating a fiber with synapses on it, I will simply generate synapses on a fiber
-    :return:
+    Generates polygon objects (representing synapses) on the main fiber
+    *** add a seed? ***
+    :param datamap_shape: The shape of the datamap on which the main_fiber lies
+    :param main_fiber: Fiber object representing the main branch
+    :param n_syn: The interval from which we will sample the number of synapses to spawn (tuple)
+    :param min_dist: The minimal distance between 2 synapses, to prevent clumping
+    :param synapse_scale: The interval form which we will sample each synapses' size
+    :return: A list containing all the synapses on the main fiber
     """
     n_added = 0
     synapse_positions = numpy.empty((0, 2))
@@ -1044,7 +1056,17 @@ def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, 
     - Add variable number of synapses, distances, ?
     - Add "position identifiers" to the synapses so I can easily make them flash after
     - ??
-    :return:
+    :param image_shape: The shape of the ROI in which we want to spawn stuff
+    :param main_nodes: ???
+    :param n_sec_fibers: The interval for the number of secondary fibers branching from the main fiber (tuple)
+    :param n_synapses: The interval for the number of synapses (tuple)
+    :param min_fiber_dist: The minimum distance separating the secondary fibers
+    :param min_synapse_dist: The minimum distance separating the synapses
+    :param sec_fiber_len: The interval for the lengths of the secondary fibers
+    :param synapse_scale: The interval for the size of the synapses
+    :param seed: Random number generator seed
+    :return: An array containing the disposition of molecules corresponding to the generated shape and a list
+             containing all the synapses (Polygon objects)
     """
     # generate an empty image
     image = numpy.zeros(image_shape)
@@ -1088,7 +1110,11 @@ def generate_synapse_flash_dicts(synapses_list, roi_shape):
     they are situatied in the flash and such
     :param synapses_list: The list of all the synapses in the frame (flattenened)
     :param roi_shape: The shape of the frame
-    :return:
+    :return: synapse_flashing_dict, a dict corresponding the synapses to whether they are currently flashing or not,
+             synapse_flash_idx_dict, a dict corresponding each flash to where in the light curve they are at,
+             synapse_flash_curve_dict, a dict containing the light curve sampled for the flash of this synapse,
+             isolated_synapses_frames, a dict containing a frame for each synapse in which only it appears and the rest
+                                       is 0
     """
     synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = {}, {}, {}, {}
 
@@ -1102,23 +1128,16 @@ def generate_synapse_flash_dicts(synapses_list, roi_shape):
     return synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames
 
 
-
 def generate_raster_pixel_list(n_pixels_to_add, starting_pixel, img):
     """
-    The goal is to generate a raster scan pixel list from starting_pixel, containing a maximum of n_pixels_to_add
-    pixels and a minimum of img.shape[0] * img.shape[1] pixels.
-    :param n_pixels_to_add:
-    :param starting_pixel:
-    :param img:
-    :return:
+    Generates a pixel list of a raster scan of n_pixels_to_add pixels starting from starting_pixel
+    :param n_pixels_to_add: The number of pixels for which we want to image
+    :param starting_pixel: The starting point of our raster scan
+    :param img: the img in which the raster scan occurs
+    :return: A pixel list for the raster scan starting at starting_pixel
     """
-    # makes sure we don't pass twice over the same pixel, might be removed later
-    # n_pixels_img = img.shape[0] * img.shape[1]
-    # if n_pixels_to_add <= n_pixels_img:
-    #     n_iters = n_pixels_to_add
-    # else:
-    #     n_iters = n_pixels_img
-
+    if starting_pixel[0] >= img.shape[0] or starting_pixel[1] >= img.shape[1]:
+        raise ValueError(f"starting pixel {starting_pixel} must be within img bounds (of shape {img.shape})")
     return_list = []
     current_idx = starting_pixel
     for i in range(n_pixels_to_add):
@@ -1183,8 +1202,18 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
 def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_idx_dict, paths,
                   synapse_flash_curve_dict, isolated_synapses_frames, datamap):
     """
-    This function is used to iterate through the synapses and make them flash, update the dicts and all that
-    :return:
+    This function makes 1 step in a flash routine. It loops through all the synapses in a frame to determine whether
+    they will start flashing (if they aren't already), or move the flash forward 1 time step if they are flashing, or
+    reset the synapse if its flash is over.
+    :param synapses: A list of all the synapses in the datamap
+    :param probability: The probability with which a synapse will start flashing
+    :param synapse_flashing_dict: The dict listing whether each synapse is flashing or not
+    :param synapse_flash_idx_dict: The dict listing where in their flash each synapse is
+    :param paths: paths to the events txt file and corresponding video for random light curve samlping
+    :param synapse_flash_curve_dict: The dict listing the sampled flash curve for every synapse
+    :param isolated_synapses_frames: The dict listing the isolated synapse frames
+    :param datamap: The datamap on which the synapses lie
+    :return: The updated dicts and datamap
     """
     for idx_syn in range(len(synapses)):
         if numpy.random.binomial(1, probability) and synapse_flashing_dict[idx_syn] is False:
@@ -1209,9 +1238,27 @@ def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_id
 def action_execution(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope, pdt,
                      p_ex, p_sted, intensity_map, bleach):
     """
-    This function will handle what happens based on the action selected
-    I feel like this will take way too many params to make work...
-    :return:
+    Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
+    Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
+    by a flash, for example.
+    :param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full
+                            sted scan).
+    :param frame_shape: The shape of the ROI
+    :param starting_pixel: The pixel at which the scan starts
+    :param pxsize: The acquisition pixel size
+    :param datamap: The datamap being imaged
+    :param frozen_datamap: A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS
+    :param microscope: The microscope imageing the datamap
+    :param pdt: The pixel dwelltime (either scalar or array of size frame_shape)
+    :param p_ex: The excitation power (either scalar or array of size frame_shape)
+    :param p_sted: The STED power (either scalar or array of size frame_shape)
+    :param intensity_map: The intensity map for the previous acquisition, in case it was interrupted
+    :param bleach: Bool determining whether bleaching occurs or not
+    :return: acq, the acquisition (photons),
+             bleached, the bleached datamap,
+             datamap, the updated datamap,
+             pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next
+             acquisition should start
     """
     valid_actions = ["confocal", "sted"]
     # vérifier si action_selected est dans valid_actions, sinon lancer une erreur
@@ -1244,9 +1291,29 @@ def action_execution(action_selected, frame_shape, starting_pixel, pxsize, datam
 def action_execution_2(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope,
                        pdt, p_ex, p_sted, intensity_map, bleach, t_stack_idx):
     """
-    This function will handle what happens based on the action selected
-    I feel like this will take way too many params to make work...
-    :return:
+    *** This version exists because I am dumb ***
+    *** This version is here to manage the sub_datamaps because the other doesn't. I need to resolve this :) ***
+    Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
+    Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
+    by a flash, for example.
+    :param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full
+                            sted scan).
+    :param frame_shape: The shape of the ROI
+    :param starting_pixel: The pixel at which the scan starts
+    :param pxsize: The acquisition pixel size
+    :param datamap: The datamap being imaged
+    :param frozen_datamap: A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS
+    :param microscope: The microscope imageing the datamap
+    :param pdt: The pixel dwelltime (either scalar or array of size frame_shape)
+    :param p_ex: The excitation power (either scalar or array of size frame_shape)
+    :param p_sted: The STED power (either scalar or array of size frame_shape)
+    :param intensity_map: The intensity map for the previous acquisition, in case it was interrupted
+    :param bleach: Bool determining whether bleaching occurs or not
+    :return: acq, the acquisition (photons),
+             bleached, the bleached datamap,
+             datamap, the updated datamap,
+             pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next
+             acquisition should start
     """
     valid_actions = ["confocal", "sted"]
     # vérifier si action_selected est dans valid_actions, sinon lancer une erreur
