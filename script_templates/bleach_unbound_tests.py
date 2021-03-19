@@ -194,13 +194,14 @@ for t_step_idx in tqdm.trange(n_time_steps):
 
 
         # get a copy of the datamap to add to a list to save later
+        # j'ai l'impression que y'a gros des choses ici que je devrais faire dans la fonction get_signal_and...
         t_stack_idx += 1
         if t_stack_idx >= temporal_datamap.flash_tstack.shape[0]:
             t_stack_idx = temporal_datamap.flash_tstack.shape[0] - 1
         indices = {"flashes": t_stack_idx}
         temporal_datamap.sub_datamaps_idx_dict = indices
-        temporal_datamap.whole_datamap = temporal_datamap.base_datamap + temporal_datamap.flash_tstack[
-            indices["flashes"]]
+        # temporal_datamap.whole_datamap = temporal_datamap.base_datamap + temporal_datamap.flash_tstack[
+        #     indices["flashes"]]
         temporal_datamap.sub_datamaps_dict["flashes"] = temporal_datamap.flash_tstack[
             temporal_datamap.sub_datamaps_idx_dict["flashes"]]
         roi_save_copy = np.copy(temporal_datamap.whole_datamap[temporal_datamap.roi])

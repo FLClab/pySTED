@@ -1203,24 +1203,27 @@ class Microscope:
                 pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
             returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped)
 
-        if update:
+        if update and bleach:
             print("goes in update")
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
             datamap.base_datamap = datamap.sub_datamaps_dict["base"]
+            datamap.whole_datamap = numpy.copy(datamap.base_datamap)
             # BLEACHER LES FLASHS FUTURS
-            if datamap.contains_sub_datamaps["flashes"]:
+            # pt que je dois ajouter un if indices < flash_tstack.shape[0] aussi
+            if datamap.contains_sub_datamaps["flashes"] and indices["flashes"] < datamap.flash_tstack.shape[0]:
                 what_bleached = datamap.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
                 datamap.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
                 # UPDATE THE FUTURE
                 with numpy.errstate(divide='ignore', invalid='ignore'):
                     flash_survival = bleached_sub_datamaps_dict["flashes"] / datamap.flash_tstack[indices["flashes"]]
                 flash_survival[numpy.isnan(flash_survival)] = 1
-                datamap.flash_tstack[indices["flashes"]:] -= what_bleached
-                datamap.flash_tstack[indices["flashes"]:] = numpy.multiply(datamap.flash_tstack[indices["flashes"]:],
+                datamap.flash_tstack[indices["flashes"]+1:] -= what_bleached
+                datamap.flash_tstack[indices["flashes"]+1:] = numpy.multiply(datamap.flash_tstack[indices["flashes"]+1:],
                                                                            flash_survival)
-                datamap.flash_tstack[indices["flashes"]:] = numpy.rint(datamap.flash_tstack[indices["flashes"]:])
-                datamap.flash_tstack[indices["flashes"]:] = numpy.where(datamap.flash_tstack[indices["flashes"]:] < 0,
-                                                                        0, datamap.flash_tstack[indices["flashes"]:])
+                datamap.flash_tstack[indices["flashes"]+1:] = numpy.rint(datamap.flash_tstack[indices["flashes"]+1:])
+                datamap.flash_tstack[indices["flashes"]+1:] = numpy.where(datamap.flash_tstack[indices["flashes"]+1:] < 0,
+                                                                        0, datamap.flash_tstack[indices["flashes"]+1:])
+                datamap.whole_datamap += datamap.flash_tstack[indices["flashes"]]
 
         return returned_acquired_photons, bleached_sub_datamaps_dict, acquired_intensity
 
