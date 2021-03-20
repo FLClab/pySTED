@@ -1,8 +1,5 @@
 import numpy as np
-import tqdm
 from pysted import base, utils
-import os
-import argparse
 from matplotlib import pyplot as plt
 
 
@@ -26,7 +23,6 @@ egfp = {"lambda_": 535e-9,
                       575: 1e-16},   # 1e-8
         "k_isc": 0.26e6}
 pixelsize = 10e-9
-dpxsz = 10e-9
 bleach = True
 p_ex = 1e-6
 p_ex_array = np.ones(molecules_disposition.shape) * p_ex
@@ -43,13 +39,13 @@ laser_sted = base.DonutBeam(575e-9, zero_residual=0)
 detector = base.Detector(noise=True, background=0)
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
-datamap = base.Datamap(molecules_disposition, dpxsz)
+datamap = base.Datamap(molecules_disposition, pixelsize)
 microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, bleach_func="default_bleach")
 i_ex, _, _ = microscope.cache(datamap.pixelsize)
 datamap.set_roi(i_ex, roi)
 
-acquisition, bleached, _ = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
-                                                                 bleach=bleach, update=False)
+acquisition, bleached, intensity = microscope.get_signal_and_bleach_fast(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
+                                                                         bleach=bleach, update=False)
 
 fig, axes = plt.subplots(1, 3)
 
