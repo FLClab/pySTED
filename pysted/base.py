@@ -1394,10 +1394,7 @@ class Microscope:
         if not filter_bypass:
             pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
 
-        # VÉRIFIER SI MES TODOS SONT ENCORE TODO OU SILS SONT FAIT PI JE LES AIS JUSTE PAS CLEAR
-        # TODO: need to find a way to compute this inside the C function on a pixel per pixel basis
-        effective = self.get_effective(datamap_pixelsize, p_ex[0, 0], p_sted[0, 0])
-
+        # *** VÉRIFIER SI CE TO DO LÀ EST FAIT ***
         # TODO: make sure I handle passing an acq matrix correctly / verifying its shape and shit
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
         if acquired_intensity is None:
@@ -1409,18 +1406,9 @@ class Microscope:
         rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
         laser_pad = i_ex.shape[0] // 2
 
-        # TODO: figure out comment faire ça pour un p_ex, p_sted variable par pixel
-        #       un dict qui contient les photons_ex pour chaque (row, col)?? seems dumb, maybe I have no other choice
-        photons_ex = self.fluo.get_photons(i_ex * p_ex[0, 0])
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(i_sted * p_sted[0, 0] * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
 
         prob_ex = numpy.ones(datamap.whole_datamap.shape)
         prob_sted = numpy.ones(datamap.whole_datamap.shape)
-        bleached_datamap = numpy.copy(datamap.whole_datamap)
         # bleached_sub_datamaps_dict = copy.copy(datamap.sub_datamaps_dict)
         bleached_sub_datamaps_dict = {}
         if isinstance(indices, type(None)):
