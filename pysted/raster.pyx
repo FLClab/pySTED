@@ -373,6 +373,7 @@ def raster_func_c_self_bleach_split_g(
         numpy.ndarray[FLOATDTYPE_t, ndim=2] pdt_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_ex_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_sted_roi,
+        bint bleach,   # bint is a bool
         dict bleached_sub_datamaps_dict,
         int seed
 ):
@@ -402,7 +403,7 @@ def raster_func_c_self_bleach_split_g(
     components of the datamap are bleached separately).
     """
 
-    print("DANS LA NOUVELLE FONCTION :))))))))))))))))))")
+    print("DANS LA NOUVELLE FONCTION **asdf**")
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -435,34 +436,38 @@ def raster_func_c_self_bleach_split_g(
             sprime += 1
         acquired_intensity[int(row / ratio), int(col / ratio)] = value
 
-        photons_ex = self.fluo.get_photons(i_ex * p_ex)
-        k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-        duty_cycle = self.sted.tau * self.sted.rate
-        photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
-        k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+        if bleach:
+            photons_ex = self.fluo.get_photons(i_ex * p_ex)
+            k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+            duty_cycle = self.sted.tau * self.sted.rate
+            photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
+            k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
 
-        for key in bleached_sub_datamaps_dict:
-            sprime = 0
-            for s in range(row, row + h):
-                tprime = 0
-                for t in range(col, col + w):
-                    # Updates probabilites
-                    prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
-                    prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
+            for key in bleached_sub_datamaps_dict:
+                sprime = 0
+                for s in range(row, row + h):
+                    tprime = 0
+                    for t in range(col, col + w):
+                        # Updates probabilites
+                        # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
+                        prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
+                        prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
 
-                    # Calculates the binomial sampling
-                    sampled_value = 0
-                    current = bleached_sub_datamaps_dict[key][s, t]
-                    prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
-                    # For each count we sample a random variable
-                    for o in range(current):
-                        rsamp = rand()
-                        if rsamp <= prob:
-                            sampled_value += 1
-                    bleached_sub_datamaps_dict[key][s, t] = sampled_value
+                        # only need to compute bleaching (resampling) if the pixel is not empty
+                        current = bleached_sub_datamaps_dict[key][s, t]
+                        if current > 0:
+                            # Calculates the binomial sampling
+                            sampled_value = 0
+                            prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
+                            # For each count we sample a random variable
+                            for o in range(current):
+                                rsamp = rand()
+                                if rsamp <= prob:
+                                    sampled_value += 1
+                            bleached_sub_datamaps_dict[key][s, t] = sampled_value
 
-                    tprime += 1
-                sprime += 1
+                        tprime += 1
+                    sprime += 1
 
 @cython.boundscheck(False) # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function

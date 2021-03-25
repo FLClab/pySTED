@@ -1433,7 +1433,8 @@ class Microscope:
 
         raster_func = raster.raster_func_c_self_bleach_split_g
         raster_func(self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32), ratio, rows_pad,
-                    cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleached_sub_datamaps_dict, seed)
+                    cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleach, bleached_sub_datamaps_dict,
+                    seed)
 
         # Bleaching is done, the rest is for intensity calculation
         photons = self.fluo.get_photons(acquired_intensity)
