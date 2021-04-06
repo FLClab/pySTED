@@ -1588,12 +1588,11 @@ class Microscope:
 
 
 class Datamap:
-    """This class implements a datamap
+    """
+    This class implements a datamap, containing a disposition of molecules and a ROI to image.
 
     :param whole_datamap: The disposition of the molecules in the sample. This represents the whole sample, from which
                           only a region will be imaged (roi). (numpy array)
-    :param roi: A dict of tuples containing the rows and columns intervals for the ROI to image. The size of the ROI is
-                limited by the size of the lasers (and thus by the datamap_pixelsize).
     :param datamap_pixelsize: The size of a pixel of the datamap. (m)
     """
 
@@ -1791,6 +1790,19 @@ class Datamap:
 class TemporalDatamap(Datamap):
     """
     This class inherits from Datamap, adding the t dimension to it for managing Ca2+ flashes
+    The TemporalDatamap object is split into subdatamaps. In the simplest case, the only subdatamap is the base, which
+    does not change with time (unless being acquired on with bleaching). In the case of Ca2+ flashes, we can add a
+    subdatamap containing the flashes separately from the base datamap. Thus, for a certain time step t, the
+    whole_datamap is the sum of the base and the flash at idx t.
+
+    Currently, as there is only the Ca2+ flash dynamics implemented, the TemporalDatamap is initialized bt passing
+    the whole molecule disposition and the pixelsize, as for Datamap, with the addition of a list containing all of
+    the synapse objects in the Datamap. This implemention is prone to change in the future as more stuff will be added.
+
+    :param whole_datamap: The disposition of the molecules in the sample. This represents the whole sample, from which
+                          only a region will be imaged (roi). (numpy array)
+    :param datamap_pixelsize: The size of a pixel of the datamap. (m)
+    :param synapses: The list of synapses present in the whole_datamap
     """
 
     def __init__(self, whole_datamap, datamap_pixelsize, synapses):
@@ -1803,7 +1815,24 @@ class TemporalDatamap(Datamap):
         self.sub_datamaps_idx_dict = {}
 
     def create_t_stack_dmap(self, acq_time, pixel_dwelltime, fwhm_step_sec_correspondance, event_path, video_path,
-                            probability, i_ex, roi):
+                            probability):
+        """
+        Generates the flashes for the TemporalDatamap. Updates the dictionnaries to confirm that flash subdatamaps exist
+        and to initialize the flash time step at 0. Generates a flash_tstack, a 3D array containing the evolution
+        of the flashes for every time step. For time step t, the whole_datamap is thus base + flash_tstack[t]
+        :param acq_time: The time for which the acquisition will last, determines how many flash steps will occur. (s)
+        :param pixel_dwelltime: VERIFY IF I SHOULD BE USING THE MIN_PDT OR THE ACQ PDT. PROB THE MIN PDT RIGHT?
+        :param fwhm_step_sec_correspondance: Tuple containing the correspondance between the width of the FWHM of a
+                                             a flash in arbitrary time step units, and how long we want that FWHM to
+                                             last. Usually (10, 1.5) is used. MODIFY THIS SO THIS IS A DEFAULT VALUE.
+        :param event_path: Path to the file containing the dicts describing the flahses in order to generate random
+                           flashes.
+        :param video_path: Path to the video file from which the flashes were extracted. MODIFY THIS SO I HAVE SOME
+                           NUMPY ARRAYS I CAN USE DIRECTLY AND CARRY IN THE PYSTED MODULE INSTEAD OF CARRYING A
+                           HUGE .tif FILE WHICH I WILL ONLY USE FOR EXTRACTING SMALL ROIs.
+        :param probability: The probability of a flash starting on a synapse.
+        :return:
+        """
         synapse_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = \
             utils.generate_synapse_flash_dicts(self.synapses, self.whole_datamap[self.roi].shape)
         n_flash_updates, _ = utils.compute_time_correspondances((fwhm_step_sec_correspondance[0],
@@ -1827,92 +1856,19 @@ class TemporalDatamap(Datamap):
         self.sub_datamaps_idx_dict["flashes"] = 0
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
 
-    def bleach_future(self, dmap_idx):
+    def bleach_future(self, flash_idx):
         """
         Takes a bleached datamp and its unbleached counterpart to apply the bleaching to future datamaps
-        :return:
+        :param flash_idx: The index of the most recent acquisition, to determine from which point forward we bleach.
         """
-        what_bleached = self.list_dmaps_static[dmap_idx].whole_datamap - self.list_dmaps[dmap_idx].whole_datamap
-        self.list_dmaps[dmap_idx + 1].whole_datamap = self.list_dmaps_static[dmap_idx + 1].whole_datamap - what_bleached
-        self.list_dmaps[dmap_idx + 1].whole_datamap[self.list_dmaps[dmap_idx + 1].whole_datamap < 0] = 0
-        # for idx, (dmap, static_dmap) in enumerate(zip(self.list_dmaps, self.list_dmaps_static)):
-        #     fig, axes = pyplot.subplots(1, 2)
-        #     dmap_imshow = axes[0].imshow(dmap.whole_datamap[dmap.roi])
-        #     axes[0].set_title(f"non static dmap")
-        #     fig.colorbar(dmap_imshow, ax=axes[0], fraction=0.04, pad=0.05)
-        #     static_imshow = axes[1].imshow(static_dmap.whole_datamap[static_dmap.roi])
-        #     axes[1].set_title(f"static dmap")
-        #     fig.colorbar(static_imshow, ax=axes[1], fraction=0.04, pad=0.05)
-        #     fig.suptitle(f"idx = {idx}, \n"
-        #                  f"mse = {utils.mse_calculator(dmap.whole_datamap[dmap.roi], static_dmap.whole_datamap[static_dmap.roi])}")
-        #     pyplot.show()
-        # exit()
+        what_bleached = self.list_dmaps_static[flash_idx].whole_datamap - self.list_dmaps[flash_idx].whole_datamap
+        self.list_dmaps[flash_idx + 1].whole_datamap = self.list_dmaps_static[flash_idx + 1].whole_datamap - what_bleached
+        self.list_dmaps[flash_idx + 1].whole_datamap[self.list_dmaps[flash_idx + 1].whole_datamap < 0] = 0
 
     def update_whole_datamap(self, flash_idx):
         """
         This method will be used to update de whole datamap using the indices of the sub datamaps.
         Whole datamap is the base datamap + all the sub datamaps (for flashes, diffusion, etc).
-        :return:
+        :param flash_idx: The index of the most recent acquisition.
         """
         self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
-        #TODO : code the function :)
-        pass
-
-
-
-def load_experiment_parameters(path, molecule_disposition):
-    """
-    This function handles the generation of all the objects required for an experiment, which are :
-    GaussianBeam
-    DonutBeam
-    Detector
-    Objective
-    Fluorescence
-    Microscope
-    Datamap
-    It loads the information required to generate these objects from a .txt (?) file.
-    :param path: Path to .txt (?) file used to generate the experiment objects
-    :param molecule_disposition: An array representing the disposition of molecules :)
-    :returns: The generated objects required for an experiment
-    """
-    config = configparser.ConfigParser()
-    config.read(path)
-
-    exc_args = {s: float(config['GaussianBeam'][s]) for s in config['GaussianBeam']}
-
-    sted_args = {s: float(config['DonutBeam'][s]) for s in config['DonutBeam']}
-
-    detector_noise = bool(config['Detector']['noise'])
-    config['Detector']['noise'] = '0'
-    detector_args = {s: float(config['Detector'][s]) for s in config['Detector']}
-    detector_args['noise'] = detector_noise
-
-    objective_transmission = ast.literal_eval(config['Objective']['transmission'])
-    config['Objective']['transmission'] = '0'
-    objective_args = {s: float(config['Objective'][s]) for s in config['Objective']}
-    objective_args['transmission'] = objective_transmission
-
-
-    fluo_dict_args, fluo_dicts = ['sigma_ste', 'sigma_abs', 'phy_react'], {}
-    for dict_arg in fluo_dict_args:
-        fluo_dicts[dict_arg] = config['Fluorescence'][dict_arg]
-        config['Fluorescence'][dict_arg] = '0'
-    fluo_args = {s: float(config['Fluorescence'][s]) for s in config['Fluorescence']}
-    for dict_arg in fluo_dict_args:
-        fluo_args[dict_arg] = fluo_dicts[dict_arg]
-
-    microscope_args = config['Microscope']
-
-    datamap_args = {'pixelsize': float(config['Datamap']['pixelsize']), 'roi': config['Datamap']['roi']}
-
-    laser_ex = GaussianBeam(**exc_args)
-    laser_sted = DonutBeam(**sted_args)
-    detector = Detector(**detector_args)
-    objective = Objective(**objective_args)
-    fluo = Fluorescence(**fluo_args)
-    microscope = Microscope(laser_ex, laser_sted, detector, objective, fluo, microscope_args['bleach_func'])
-    datamap = Datamap(molecule_disposition, datamap_args['pixelsize'])
-    i_ex, _, _ = microscope.cache(datamap.pixelsize)
-    datamap.set_roi(i_ex, datamap_args['roi'])
-
-    return laser_ex, laser_sted, detector, objective, fluo, microscope, datamap
