@@ -595,6 +595,7 @@ def datamap_generator(shape, sources, molecules, random_state=None):
     :param sources: Number of molecule sources to be randomly placed on the datamap.
     :param molecules: Average number of molecules contained on each source. The actual number of molecules will be
                       determined by poisson sampling.
+    :param random_state: Sets the seed of the random number generator.
     :returns: A datamap containing the randomly placed molecules
     """
     numpy.random.seed(random_state)
@@ -713,7 +714,8 @@ def add_event(file, start_frame, end_frame, start_row, end_row, start_col, end_c
 
 def get_light_curve(video_path, event):
     """
-    aha
+    Use a tif video of Ca2+ flashes along with a ROI (spatial and temporal) to convert the data to an intensity/photon
+    count curve.
     :param video_path: The path to the video file from which we want to extract an event light curve (str)
     :param event: A dictionary containing the start and end info for frames, rows, columns of an event (dict)
     :return: A vector representing the mean intensity accros the frames of the event
@@ -1309,6 +1311,7 @@ def action_execution_2(action_selected, frame_shape, starting_pixel, pxsize, dat
     :param p_sted: The STED power (either scalar or array of size frame_shape)
     :param intensity_map: The intensity map for the previous acquisition, in case it was interrupted
     :param bleach: Bool determining whether bleaching occurs or not
+    :param t_stack_idx: The time step at which we are in our experiment
     :return: acq, the acquisition (photons),
              bleached, the bleached datamap,
              datamap, the updated datamap,
@@ -1341,43 +1344,3 @@ def action_execution_2(action_selected, frame_shape, starting_pixel, pxsize, dat
 
     return acq, intensity_map, datamap, pixel_list
 
-
-def determine_c_func(datamap, bleach, p_ex, p_sted):
-    """
-    Determines the signal acquisition (+ bleaching) C function to use based on whether there is bleaching or not,
-    whether p_ex and/or p_sted are scalars or arrays, and if the datamap has sub_datamaps other than its base
-    :param datamap: The datamap object being image
-    :param bleach: Bool determining whether or not bleaching is on
-    :param p_ex: The excitation beam power (either scalar or array of the ROI shape)
-    :param p_sted: The STED beam power (either scalar or array of the ROI shape)
-    :return: the raster_func, p_ex and p_sted (in case they had to be converted to arrays)
-    """
-    raster_func = None
-    only_base = True
-    for key in datamap.sub_datamaps_dict:
-        if key == "flashes":
-            only_base = False
-    # si only_base est false, j'ai pas le choix d'utiliser raster_func_c_self_bleach_split
-    # et de convertir les puissances en array s'ils ne le sont pas déjà
-    # Le bleach est forcé activé dans cette c_func, mais l'update ne se fait pas in place, est-ce grave?
-    # je devrais tester une run avec bleach = False
-    if not only_base:
-        p_ex = float_to_array_verifier(p_ex, datamap.whole_datamap[datamap.roi].shape)
-        p_sted = float_to_array_verifier(p_sted, datamap.whole_datamap[datamap.roi].shape)
-        raster_func = raster.raster_func_c_self_bleach_split
-        return raster_func, p_ex, p_sted
-
-    if type(p_ex) == float and type(p_sted) == float:
-        if bleach:
-            raster_func = raster.raster_func_wbleach_c
-        else:
-            raster_func = raster.raster_func_c
-        return raster_func, p_ex, p_sted
-    else:
-        p_ex = float_to_array_verifier(p_ex, datamap.whole_datamap[datamap.roi].shape)
-        p_sted = float_to_array_verifier(p_sted, datamap.whole_datamap[datamap.roi].shape)
-        if bleach:
-            raster_func = raster.raster_func_c_self_bleach
-        else:
-            raster_func = raster.raster_func_c_self
-        return raster_func, p_ex, p_sted
