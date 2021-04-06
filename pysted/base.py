@@ -868,7 +868,8 @@ class Microscope:
         :param update: Determines whether the datamap is updated in place. If set to false, the datamap can still be
                        updated later with the returned bleached datamap. (Bool)
         :param seed: Sets a seed for the random number generator.
-        :param filter_bypass: Whether or not to filter the pixel list. Honestly uncertain about this param??
+        :param filter_bypass: Whether or not to filter the pixel list. Honestly uncertain about this param?? If
+                              pixel_list is none, this must be True then.
         :return: returned_acquired_photons, the acquired photon for the acquisition.
                  bleached_sub_datamaps_dict, a dict containing the results of bleaching on the subdatamaps
                  acquired_intensity, the intensity of the acquisition, used for interrupted acquisitions
@@ -945,22 +946,7 @@ class Microscope:
             # BLEACHER LES FLASHS FUTURS
             # pt que je dois ajouter un if indices < flash_tstack.shape[0] aussi
             if datamap.contains_sub_datamaps["flashes"] and indices["flashes"] < datamap.flash_tstack.shape[0]:
-                what_bleached = datamap.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
-                datamap.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
-                # UPDATE THE FUTURE
-                with numpy.errstate(divide='ignore', invalid='ignore'):
-                    flash_survival = bleached_sub_datamaps_dict["flashes"] / datamap.flash_tstack[indices["flashes"]]
-                flash_survival[numpy.isnan(flash_survival)] = 1
-                datamap.flash_tstack[indices["flashes"] + 1:] -= what_bleached
-                datamap.flash_tstack[indices["flashes"] + 1:] = numpy.multiply(
-                    datamap.flash_tstack[indices["flashes"] + 1:],
-                    flash_survival)
-                datamap.flash_tstack[indices["flashes"] + 1:] = numpy.rint(
-                    datamap.flash_tstack[indices["flashes"] + 1:])
-                datamap.flash_tstack[indices["flashes"] + 1:] = numpy.where(
-                    datamap.flash_tstack[indices["flashes"] + 1:] < 0,
-                    0, datamap.flash_tstack[indices["flashes"] + 1:])
-                datamap.whole_datamap += datamap.flash_tstack[indices["flashes"]]
+                datamap.bleach_future(indices, bleached_sub_datamaps_dict)
 
         return returned_acquired_photons, bleached_sub_datamaps_dict, acquired_intensity
 
@@ -1102,6 +1088,8 @@ class Datamap:
         self.pixelsize = datamap_pixelsize
         self.roi = None
         self.roi_corners = None
+        self.contains_sub_datamaps = {"base": True,
+                                      "flashes": False}
         self.sub_datamaps_dict = {}
 
     def set_roi(self, laser, intervals=None):
@@ -1188,104 +1176,6 @@ class Datamap:
                              "bleaching.")
         self.whole_datamap = bleached_datamap
 
-    def test_iter_over_roi(self, laser):
-        """
-        The goal of this function is just to pass the laser over the whole ROI to make sure it fits right :)
-        """
-        ones_laser = numpy.ones(laser.shape)
-        acquisition_pad, rows_pad, cols_pad = utils.array_padder(numpy.zeros(self.whole_datamap[self.roi].shape),
-                                                                 ones_laser)
-        pixel_list = utils.pixel_sampling(self.whole_datamap[self.roi])
-        for (row, col) in pixel_list:
-            acquisition_pad[row:row+2*rows_pad+1, col:col+2*cols_pad+1] += ones_laser
-
-        return utils.array_unpadder(acquisition_pad, ones_laser)
-
-    def add_sphere(self, width, position, max_molecs=3, randomness=1, distribution="random"):
-        """
-        Function to add a sphere containing molecules at a certain position
-        *** Probably need to revisit this if, if I even want to keep it ***
-        """
-        valid_distributions = ["random", "gaussian", "periphery"]
-        if distribution not in valid_distributions:
-            print(f"Wrong distribution choice, retard")
-            print(f"Valid distributions are : ")
-            for possibilites in valid_distributions:
-                print(possibilites)
-            raise Exception("Invalid distribution choice")
-
-        pixels_width = utils.pxsize_ratio(width, self.pixelsize)
-
-        # padder la datamap pour m'assurer que je puisse ajouter une sphère en périphérie de l'img aussi
-        pad = pixels_width
-        padded_molecules = numpy.pad(self.whole_datamap, pad, mode="constant")
-
-        if distribution == "random":
-            for i in range(0, 360):
-                x = pixels_width / 2 * numpy.cos(i * numpy.pi / 180)
-                y = pixels_width / 2 * numpy.sin(i * numpy.pi / 180)
-
-                area_covered_shape = padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]),
-                                                      int(y + pad + position[1])].shape
-                molecs_to_place = numpy.ones(area_covered_shape[0]).astype(numpy.int) * max_molecs
-
-                probability = randomness
-
-                padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]), int(y + pad + position[1])] = \
-                    numpy.random.binomial(molecs_to_place, probability)
-
-        elif distribution == "gaussian":
-            x, y = numpy.meshgrid(numpy.linspace(-1, 1, pixels_width),
-                                  numpy.linspace(-1, 1, pixels_width))
-            d = numpy.sqrt(x*x+y*y)
-            sigma, mu = randomness, 0.0
-            g = numpy.exp(-((d-mu)**2 / (2.0 * sigma**2)))
-
-            probabilities = numpy.zeros(padded_molecules.shape)
-            probabilities[position[0] + pad // 2: position[0] + pad + pad // 2,
-                          position[1] + pad // 2: position[1] + pad + pad // 2] = g
-
-            for i in range(0, 360):
-                x = pixels_width / 2 * numpy.cos(i * numpy.pi / 180)
-                y = pixels_width / 2 * numpy.sin(i * numpy.pi / 180)
-
-                area_covered_shape = padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]),
-                                                      int(y + pad + position[1])].shape
-                molecs_to_place = numpy.ones(area_covered_shape[0]).astype(numpy.int) * max_molecs
-
-                padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]), int(y + pad + position[1])] = \
-                    numpy.random.binomial(molecs_to_place,
-                                          probabilities[int(pad + position[0] - x): int(x + pad + position[0]),
-                                                        int(y + pad + position[1])])
-
-        elif distribution == "periphery":
-            x, y = numpy.meshgrid(numpy.linspace(-1, 1, pixels_width),
-                                  numpy.linspace(-1, 1, pixels_width))
-            d = numpy.sqrt(x*x+y*y)
-            sigma, mu = randomness, 0.0
-            g = numpy.exp(-((d-mu)**2 / (2.0 * sigma**2)))
-
-            probabilities = numpy.zeros(padded_molecules.shape)
-            probabilities[position[0] + pad // 2: position[0] + pad + pad // 2,
-                          position[1] + pad // 2: position[1] + pad + pad // 2] = g
-            probabilities = 1 - probabilities
-
-            for i in range(0, 360):
-                x = pixels_width / 2 * numpy.cos(i * numpy.pi / 180)
-                y = pixels_width / 2 * numpy.sin(i * numpy.pi / 180)
-
-                area_covered_shape = padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]),
-                                                      int(y + pad + position[1])].shape
-                molecs_to_place = numpy.ones(area_covered_shape[0]).astype(numpy.int) * max_molecs
-
-                padded_molecules[int(pad + position[0] - x): int(x + pad + position[0]), int(y + pad + position[1])] = \
-                    numpy.random.binomial(molecs_to_place,
-                                          probabilities[int(pad + position[0] - x): int(x + pad + position[0]),
-                                                        int(y + pad + position[1])])
-
-        # ligne pour un-pad
-        self.whole_datamap = padded_molecules[pad:-pad, pad:-pad]
-
 
 class TemporalDatamap(Datamap):
     """
@@ -1331,7 +1221,6 @@ class TemporalDatamap(Datamap):
                            NUMPY ARRAYS I CAN USE DIRECTLY AND CARRY IN THE PYSTED MODULE INSTEAD OF CARRYING A
                            HUGE .tif FILE WHICH I WILL ONLY USE FOR EXTRACTING SMALL ROIs.
         :param probability: The probability of a flash starting on a synapse.
-        :return:
         """
         synapse_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = \
             utils.generate_synapse_flash_dicts(self.synapses, self.whole_datamap[self.roi].shape)
@@ -1356,14 +1245,27 @@ class TemporalDatamap(Datamap):
         self.sub_datamaps_idx_dict["flashes"] = 0
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
 
-    def bleach_future(self, flash_idx):
+    def bleach_future(self, indices, bleached_sub_datamaps_dict):
         """
         Takes a bleached datamp and its unbleached counterpart to apply the bleaching to future datamaps
         :param flash_idx: The index of the most recent acquisition, to determine from which point forward we bleach.
         """
-        what_bleached = self.list_dmaps_static[flash_idx].whole_datamap - self.list_dmaps[flash_idx].whole_datamap
-        self.list_dmaps[flash_idx + 1].whole_datamap = self.list_dmaps_static[flash_idx + 1].whole_datamap - what_bleached
-        self.list_dmaps[flash_idx + 1].whole_datamap[self.list_dmaps[flash_idx + 1].whole_datamap < 0] = 0
+        what_bleached = self.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
+        self.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
+        # UPDATE THE FUTURE
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            flash_survival = bleached_sub_datamaps_dict["flashes"] / self.flash_tstack[indices["flashes"]]
+        flash_survival[numpy.isnan(flash_survival)] = 1
+        self.flash_tstack[indices["flashes"] + 1:] -= what_bleached
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.multiply(
+            self.flash_tstack[indices["flashes"] + 1:],
+            flash_survival)
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.rint(
+            self.flash_tstack[indices["flashes"] + 1:])
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.where(
+            self.flash_tstack[indices["flashes"] + 1:] < 0,
+            0, self.flash_tstack[indices["flashes"] + 1:])
+        self.whole_datamap += self.flash_tstack[indices["flashes"]]
 
     def update_whole_datamap(self, flash_idx):
         """
