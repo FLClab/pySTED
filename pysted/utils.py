@@ -1344,3 +1344,57 @@ def action_execution_2(action_selected, frame_shape, starting_pixel, pxsize, dat
 
     return acq, intensity_map, datamap, pixel_list
 
+
+def action_execution_g(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope,
+                       pdt, p_ex, p_sted, intensity_map, bleach, t_stack_idx):
+    """
+    *** This version exists because I am dumb ***
+    *** This version is here to manage the sub_datamaps because the other doesn't. I need to resolve this :) ***
+    Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
+    Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
+    by a flash, for example.
+    :param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full
+                            sted scan).
+    :param frame_shape: The shape of the ROI
+    :param starting_pixel: The pixel at which the scan starts
+    :param pxsize: The acquisition pixel size
+    :param datamap: The datamap being imaged
+    :param frozen_datamap: A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS
+    :param microscope: The microscope imageing the datamap
+    :param pdt: The pixel dwelltime (either scalar or array of size frame_shape)
+    :param p_ex: The excitation power (either scalar or array of size frame_shape)
+    :param p_sted: The STED power (either scalar or array of size frame_shape)
+    :param intensity_map: The intensity map for the previous acquisition, in case it was interrupted
+    :param bleach: Bool determining whether bleaching occurs or not
+    :param t_stack_idx: The time step at which we are in our experiment
+    :return: acq, the acquisition (photons),
+             bleached, the bleached datamap,
+             datamap, the updated datamap,
+             pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next
+             acquisition should start
+    """
+    valid_actions = ["confocal", "sted"]
+    # vérifier si action_selected est dans valid_actions, sinon lancer une erreur
+
+    if action_selected == "confocal":
+        pixel_list = generate_raster_pixel_list(frame_shape[0] * frame_shape[1], starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, pxsize, datamap.pixelsize, output_empty=True)
+
+        # Cut elements before the starting pixel from the list
+        start_idx = pixel_list.index(tuple(starting_pixel))
+        pixel_list = pixel_list[start_idx:]
+        pixel_list = pixel_list[:microscope.pixel_bank]
+
+    elif action_selected == "sted":
+        pixel_list = generate_raster_pixel_list(microscope.pixel_bank, starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
+                                       output_empty=True)
+
+    acq, bleached_dict, intensity_map = microscope.get_signal_and_bleach(datamap, pxsize, pdt, p_ex, p_sted,
+                                                                         acquired_intensity=intensity_map,
+                                                                         pixel_list=pixel_list, bleach=bleach,
+                                                                         update=True, filter_bypass=True,
+                                                                         indices=t_stack_idx)
+
+    return acq, intensity_map, datamap, pixel_list
+

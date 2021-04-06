@@ -403,8 +403,6 @@ def raster_func_c_self_bleach_split_g(
     components of the datamap are bleached separately).
     """
 
-    print("DANS LA NOUVELLE FONCTION **asdf**")
-
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
