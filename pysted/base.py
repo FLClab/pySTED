@@ -921,7 +921,8 @@ class Microscope:
         if seed is None:
             seed = 0
 
-        raster_func = raster.raster_func_c_self_bleach_split_g
+        # raster_func = raster.raster_func_c_self_bleach_split_g
+        raster_func = raster.test_var_bleach
         raster_func(self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32), ratio, rows_pad,
                     cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleach, bleached_sub_datamaps_dict,
                     seed)

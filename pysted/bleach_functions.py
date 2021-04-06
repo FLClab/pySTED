@@ -65,6 +65,39 @@ def sted_exc(p_ex, p_sted, prob_ex, prob_sted, region, **kwargs):
     return prob_ex, prob_sted
 
 
+# C'EST DUMB ÇA!!! IL FAUT QUE MES BLEACHING FUNCTIONS SOIENT DES C FUNC, SINON ÇA DEFEAT LE PURPOUSE DE FAIRE DU CYTHON
+def test(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted, ):
+    photons_ex = self.fluo.get_photons(i_ex * p_ex)
+    k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+    duty_cycle = self.sted.tau * self.sted.rate
+    photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
+    k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+
+    for key in bleached_sub_datamaps_dict:
+        sprime = 0
+        for s in range(row, row + h):
+            tprime = 0
+            for t in range(col, col + w):
+                # Updates probabilites
+                # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
+                prob_ex[s, t] = prob_ex[s, t] * numpy.exp(-1. * k_ex[sprime, tprime] * pdt)
+                prob_sted[s, t] = prob_sted[s, t] * numpy.exp(-1. * k_sted[sprime, tprime] * pdt)
+
+                # only need to compute bleaching (resampling) if the pixel is not empty
+                current = bleached_sub_datamaps_dict[key][s, t]
+                if current > 0:
+                    # Calculates the binomial sampling
+                    sampled_value = 0
+                    prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
+                    # For each count we sample a random variable
+                    for o in range(current):
+                        rsamp = rand()
+                        if rsamp <= prob:
+                            sampled_value += 1
+                    bleached_sub_datamaps_dict[key][s, t] = sampled_value
+
+                tprime += 1
+            sprime += 1
 
 # if you add a function, add it to the dict so it gets detected
 functions_dict = {"default_bleach": partial(default_bleach), "fuck_tout": partial(fuck_tout),

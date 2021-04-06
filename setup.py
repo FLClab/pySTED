@@ -9,7 +9,8 @@ import pysted
 
 ext_modules = [Extension("pysted.cUtils", ["pysted/cUtils.c"]),
                Extension("pysted._draw", ["pysted/_draw.c"]),
-               Extension("pysted.raster", ["pysted/raster.c"])]
+               Extension("pysted.raster", ["pysted/raster.c"]),
+               Extension("pysted.bleach_funcs", ["pysted/bleach_funcs.c"])]
 
 setup(name="pysted",
       version=pysted.__revision__,

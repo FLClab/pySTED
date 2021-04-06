@@ -602,8 +602,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__pysted__raster
-#define __PYX_HAVE_API__pysted__raster
+#define __PYX_HAVE__pysted__bleach_funcs
+#define __PYX_HAVE_API__pysted__bleach_funcs
 /* Early includes */
 #include <string.h>
 #include <stdio.h>
@@ -844,7 +844,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "audurand_pysted\\pysted\\raster.pyx",
+  "audurand_pysted\\pysted\\bleach_funcs.pyx",
   "__init__.pxd",
   "type.pxd",
 };
@@ -1074,23 +1074,23 @@ typedef npy_double __pyx_t_5numpy_double_t;
  */
 typedef npy_longdouble __pyx_t_5numpy_longdouble_t;
 
-/* "pysted/raster.pyx":14
+/* "pysted/bleach_funcs.pyx":14
  * FLOATDTYPE = numpy.float64
  * 
  * ctypedef numpy.int32_t INTDTYPE_t             # <<<<<<<<<<<<<<
  * ctypedef numpy.float64_t FLOATDTYPE_t
  * 
  */
-typedef __pyx_t_5numpy_int32_t __pyx_t_6pysted_6raster_INTDTYPE_t;
+typedef __pyx_t_5numpy_int32_t __pyx_t_6pysted_12bleach_funcs_INTDTYPE_t;
 
-/* "pysted/raster.pyx":15
+/* "pysted/bleach_funcs.pyx":15
  * 
  * ctypedef numpy.int32_t INTDTYPE_t
  * ctypedef numpy.float64_t FLOATDTYPE_t             # <<<<<<<<<<<<<<
  * 
  * @cython.boundscheck(False)  # turn off bounds-checking for entire function
  */
-typedef __pyx_t_5numpy_float64_t __pyx_t_6pysted_6raster_FLOATDTYPE_t;
+typedef __pyx_t_5numpy_float64_t __pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t;
 /* Declarations.proto */
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
@@ -1267,51 +1267,11 @@ static CYTHON_INLINE void __Pyx_SafeReleaseBuffer(Py_buffer* info);
 static Py_ssize_t __Pyx_minusones[] = { -1, -1, -1, -1, -1, -1, -1, -1 };
 static Py_ssize_t __Pyx_zeros[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-/* PyDictVersioning.proto */
-#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
-#define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
-#define __PYX_GET_DICT_VERSION(dict)  (((PyDictObject*)(dict))->ma_version_tag)
-#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)\
-    (version_var) = __PYX_GET_DICT_VERSION(dict);\
-    (cache_var) = (value);
-#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP) {\
-    static PY_UINT64_T __pyx_dict_version = 0;\
-    static PyObject *__pyx_dict_cached_value = NULL;\
-    if (likely(__PYX_GET_DICT_VERSION(DICT) == __pyx_dict_version)) {\
-        (VAR) = __pyx_dict_cached_value;\
-    } else {\
-        (VAR) = __pyx_dict_cached_value = (LOOKUP);\
-        __pyx_dict_version = __PYX_GET_DICT_VERSION(DICT);\
-    }\
-}
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj);
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj);
-static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version);
+/* PyCFunctionFastCall.proto */
+#if CYTHON_FAST_PYCCALL
+static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObject **args, Py_ssize_t nargs);
 #else
-#define __PYX_GET_DICT_VERSION(dict)  (0)
-#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)
-#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP)  (VAR) = (LOOKUP);
-#endif
-
-/* GetModuleGlobalName.proto */
-#if CYTHON_USE_DICT_VERSIONS
-#define __Pyx_GetModuleGlobalName(var, name)  {\
-    static PY_UINT64_T __pyx_dict_version = 0;\
-    static PyObject *__pyx_dict_cached_value = NULL;\
-    (var) = (likely(__pyx_dict_version == __PYX_GET_DICT_VERSION(__pyx_d))) ?\
-        (likely(__pyx_dict_cached_value) ? __Pyx_NewRef(__pyx_dict_cached_value) : __Pyx_GetBuiltinName(name)) :\
-        __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
-}
-#define __Pyx_GetModuleGlobalNameUncached(var, name)  {\
-    PY_UINT64_T __pyx_dict_version;\
-    PyObject *__pyx_dict_cached_value;\
-    (var) = __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
-}
-static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value);
-#else
-#define __Pyx_GetModuleGlobalName(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
-#define __Pyx_GetModuleGlobalNameUncached(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
-static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
+#define __Pyx_PyCFunction_FastCall(func, args, nargs)  (assert(0), NULL)
 #endif
 
 /* PyFunctionFastCall.proto */
@@ -1344,10 +1304,25 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 #define __Pyx_PyObject_Call(func, arg, kw) PyObject_Call(func, arg, kw)
 #endif
 
+/* PyObjectCall2Args.proto */
+static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
+
 /* PyObjectCallMethO.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg);
 #endif
+
+/* PyObjectCallOneArg.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
+
+/* ExtTypeTest.proto */
+static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type);
+
+/* BufferFallbackError.proto */
+static void __Pyx_RaiseBufferFallbackError(void);
+
+/* IterFinish.proto */
+static CYTHON_INLINE int __Pyx_IterFinish(void);
 
 /* PyObjectCallNoArg.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
@@ -1356,60 +1331,20 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
 #define __Pyx_PyObject_CallNoArg(func) __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL)
 #endif
 
-/* PyCFunctionFastCall.proto */
-#if CYTHON_FAST_PYCCALL
-static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObject **args, Py_ssize_t nargs);
-#else
-#define __Pyx_PyCFunction_FastCall(func, args, nargs)  (assert(0), NULL)
-#endif
-
-/* PyObjectCallOneArg.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
-
-/* SliceObject.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(
-        PyObject* obj, Py_ssize_t cstart, Py_ssize_t cstop,
-        PyObject** py_start, PyObject** py_stop, PyObject** py_slice,
-        int has_cstart, int has_cstop, int wraparound);
-
-/* PyObjectCall2Args.proto */
-static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2);
-
-/* RaiseTooManyValuesToUnpack.proto */
-static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
-
-/* RaiseNeedMoreValuesToUnpack.proto */
-static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
-
-/* IterFinish.proto */
-static CYTHON_INLINE int __Pyx_IterFinish(void);
-
-/* UnpackItemEndCheck.proto */
-static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected);
-
-/* ExtTypeTest.proto */
-static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type);
-
-/* BufferFallbackError.proto */
-static void __Pyx_RaiseBufferFallbackError(void);
-
-#define __Pyx_BufPtrStrided2d(type, buf, i0, s0, i1, s1) (type)((char*)buf + i0 * s0 + i1 * s1)
-/* DictGetItem.proto */
-#if PY_MAJOR_VERSION >= 3 && !CYTHON_COMPILING_IN_PYPY
-static PyObject *__Pyx_PyDict_GetItem(PyObject *d, PyObject* key);
-#define __Pyx_PyObject_Dict_GetItem(obj, name)\
-    (likely(PyDict_CheckExact(obj)) ?\
-     __Pyx_PyDict_GetItem(obj, name) : PyObject_GetItem(obj, name))
-#else
-#define __Pyx_PyDict_GetItem(d, key) PyObject_GetItem(d, key)
-#define __Pyx_PyObject_Dict_GetItem(obj, name)  PyObject_GetItem(obj, name)
-#endif
-
 /* PyObjectGetMethod.proto */
 static int __Pyx_PyObject_GetMethod(PyObject *obj, PyObject *name, PyObject **method);
 
 /* PyObjectCallMethod0.proto */
 static PyObject* __Pyx_PyObject_CallMethod0(PyObject* obj, PyObject* method_name);
+
+/* RaiseNeedMoreValuesToUnpack.proto */
+static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
+
+/* RaiseTooManyValuesToUnpack.proto */
+static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
+
+/* UnpackItemEndCheck.proto */
+static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected);
 
 /* RaiseNoneIterError.proto */
 static CYTHON_INLINE void __Pyx_RaiseNoneNotIterableError(void);
@@ -1435,12 +1370,17 @@ static CYTHON_INLINE PyObject* __Pyx_dict_iterator(PyObject* dict, int is_dict, 
 static CYTHON_INLINE int __Pyx_dict_iter_next(PyObject* dict_or_iter, Py_ssize_t orig_length, Py_ssize_t* ppos,
                                               PyObject** pkey, PyObject** pvalue, PyObject** pitem, int is_dict);
 
-/* None.proto */
-static CYTHON_INLINE int __Pyx_div_int(int, int);
-
-/* UnaryNegOverflows.proto */
-#define UNARY_NEG_WOULD_OVERFLOW(x)\
-        (((x) < 0) & ((unsigned long)(x) == 0-(unsigned long)(x)))
+#define __Pyx_BufPtrStrided2d(type, buf, i0, s0, i1, s1) (type)((char*)buf + i0 * s0 + i1 * s1)
+/* DictGetItem.proto */
+#if PY_MAJOR_VERSION >= 3 && !CYTHON_COMPILING_IN_PYPY
+static PyObject *__Pyx_PyDict_GetItem(PyObject *d, PyObject* key);
+#define __Pyx_PyObject_Dict_GetItem(obj, name)\
+    (likely(PyDict_CheckExact(obj)) ?\
+     __Pyx_PyDict_GetItem(obj, name) : PyObject_GetItem(obj, name))
+#else
+#define __Pyx_PyDict_GetItem(d, key) PyObject_GetItem(d, key)
+#define __Pyx_PyObject_Dict_GetItem(obj, name)  PyObject_GetItem(obj, name)
+#endif
 
 /* GetItemInt.proto */
 #define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
@@ -1556,6 +1496,53 @@ static PyTypeObject *__Pyx_ImportType(PyObject* module, const char *module_name,
 /* Import.proto */
 static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
 
+/* PyDictVersioning.proto */
+#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
+#define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
+#define __PYX_GET_DICT_VERSION(dict)  (((PyDictObject*)(dict))->ma_version_tag)
+#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)\
+    (version_var) = __PYX_GET_DICT_VERSION(dict);\
+    (cache_var) = (value);
+#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP) {\
+    static PY_UINT64_T __pyx_dict_version = 0;\
+    static PyObject *__pyx_dict_cached_value = NULL;\
+    if (likely(__PYX_GET_DICT_VERSION(DICT) == __pyx_dict_version)) {\
+        (VAR) = __pyx_dict_cached_value;\
+    } else {\
+        (VAR) = __pyx_dict_cached_value = (LOOKUP);\
+        __pyx_dict_version = __PYX_GET_DICT_VERSION(DICT);\
+    }\
+}
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj);
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj);
+static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version);
+#else
+#define __PYX_GET_DICT_VERSION(dict)  (0)
+#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)
+#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP)  (VAR) = (LOOKUP);
+#endif
+
+/* GetModuleGlobalName.proto */
+#if CYTHON_USE_DICT_VERSIONS
+#define __Pyx_GetModuleGlobalName(var, name)  {\
+    static PY_UINT64_T __pyx_dict_version = 0;\
+    static PyObject *__pyx_dict_cached_value = NULL;\
+    (var) = (likely(__pyx_dict_version == __PYX_GET_DICT_VERSION(__pyx_d))) ?\
+        (likely(__pyx_dict_cached_value) ? __Pyx_NewRef(__pyx_dict_cached_value) : __Pyx_GetBuiltinName(name)) :\
+        __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
+}
+#define __Pyx_GetModuleGlobalNameUncached(var, name)  {\
+    PY_UINT64_T __pyx_dict_version;\
+    PyObject *__pyx_dict_cached_value;\
+    (var) = __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
+}
+static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value);
+#else
+#define __Pyx_GetModuleGlobalName(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
+#define __Pyx_GetModuleGlobalNameUncached(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
+static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
+#endif
+
 /* CLineInTraceback.proto */
 #ifdef CYTHON_CLINE_IN_TRACEBACK
 #define __Pyx_CLineForTraceback(tstate, c_line)  (((CYTHON_CLINE_IN_TRACEBACK)) ? c_line : 0)
@@ -1607,13 +1594,6 @@ typedef struct {
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
-
-/* Print.proto */
-static int __Pyx_Print(PyObject*, PyObject *, int);
-#if CYTHON_COMPILING_IN_PYPY || PY_MAJOR_VERSION >= 3
-static PyObject* __pyx_print = 0;
-static PyObject* __pyx_print_kwargs = 0;
-#endif
 
 /* RealImag.proto */
 #if CYTHON_CCOMPLEX
@@ -1716,12 +1696,6 @@ static PyObject* __pyx_print_kwargs = 0;
 /* CIntFromPy.proto */
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
-/* CIntFromPy.proto */
-static CYTHON_INLINE unsigned int __Pyx_PyInt_As_unsigned_int(PyObject *);
-
-/* PrintOne.proto */
-static int __Pyx_PrintOne(PyObject* stream, PyObject *o);
-
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
@@ -1782,14 +1756,13 @@ static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 
 /* Module declarations from 'libc.stdlib' */
 
-/* Module declarations from 'pysted.raster' */
-static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t = { "FLOATDTYPE_t", NULL, sizeof(__pyx_t_6pysted_6raster_FLOATDTYPE_t), { 0 }, 0, 'R', 0, 0 };
-static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t = { "INTDTYPE_t", NULL, sizeof(__pyx_t_6pysted_6raster_INTDTYPE_t), { 0 }, 0, IS_UNSIGNED(__pyx_t_6pysted_6raster_INTDTYPE_t) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_6pysted_6raster_INTDTYPE_t), 0 };
-#define __Pyx_MODULE_NAME "pysted.raster"
-extern int __pyx_module_is_main_pysted__raster;
-int __pyx_module_is_main_pysted__raster = 0;
+/* Module declarations from 'pysted.bleach_funcs' */
+static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t = { "FLOATDTYPE_t", NULL, sizeof(__pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t), { 0 }, 0, 'R', 0, 0 };
+#define __Pyx_MODULE_NAME "pysted.bleach_funcs"
+extern int __pyx_module_is_main_pysted__bleach_funcs;
+int __pyx_module_is_main_pysted__bleach_funcs = 0;
 
-/* Implementation of 'pysted.raster' */
+/* Implementation of 'pysted.bleach_funcs' */
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ImportError;
 static const char __pyx_k_h[] = "h";
@@ -1797,15 +1770,11 @@ static const char __pyx_k_o[] = "o";
 static const char __pyx_k_s[] = "s";
 static const char __pyx_k_t[] = "t";
 static const char __pyx_k_w[] = "w";
-static const char __pyx_k__4[] = "_";
 static const char __pyx_k_col[] = "col";
-static const char __pyx_k_end[] = "end";
 static const char __pyx_k_key[] = "key";
 static const char __pyx_k_pdt[] = "pdt";
 static const char __pyx_k_row[] = "row";
 static const char __pyx_k_tau[] = "tau";
-static const char __pyx_k_base[] = "base";
-static const char __pyx_k_file[] = "file";
 static const char __pyx_k_fluo[] = "fluo";
 static const char __pyx_k_i_ex[] = "i_ex";
 static const char __pyx_k_k_ex[] = "k_ex";
@@ -1814,23 +1783,15 @@ static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_p_ex[] = "p_ex";
 static const char __pyx_k_prob[] = "prob";
 static const char __pyx_k_rate[] = "rate";
-static const char __pyx_k_seed[] = "seed";
 static const char __pyx_k_self[] = "self";
 static const char __pyx_k_sted[] = "sted";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_time[] = "time";
-static const char __pyx_k_cache[] = "cache";
-static const char __pyx_k_dtype[] = "dtype";
 static const char __pyx_k_int32[] = "int32";
 static const char __pyx_k_numpy[] = "numpy";
-static const char __pyx_k_print[] = "print";
 static const char __pyx_k_range[] = "range";
-static const char __pyx_k_ratio[] = "ratio";
 static const char __pyx_k_rsamp[] = "rsamp";
-static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_value[] = "value";
-static const char __pyx_k_zeros[] = "zeros";
-static const char __pyx_k_bleach[] = "bleach";
 static const char __pyx_k_i_sted[] = "i_sted";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_k_sted[] = "k_sted";
@@ -1839,73 +1800,41 @@ static const char __pyx_k_p_sted[] = "p_sted";
 static const char __pyx_k_sprime[] = "sprime";
 static const char __pyx_k_tprime[] = "tprime";
 static const char __pyx_k_current[] = "current";
-static const char __pyx_k_datamap[] = "datamap";
 static const char __pyx_k_float64[] = "float64";
-static const char __pyx_k_max_len[] = "max_len";
-static const char __pyx_k_pdt_roi[] = "pdt_roi";
 static const char __pyx_k_prob_ex[] = "prob_ex";
-static const char __pyx_k_time_ns[] = "time_ns";
 static const char __pyx_k_INTDTYPE[] = "INTDTYPE";
-static const char __pyx_k_cols_pad[] = "cols_pad";
-static const char __pyx_k_p_ex_roi[] = "p_ex_roi";
-static const char __pyx_k_rows_pad[] = "rows_pad";
-static const char __pyx_k_effective[] = "effective";
-static const char __pyx_k_laser_pad[] = "laser_pad";
-static const char __pyx_k_pixelsize[] = "pixelsize";
 static const char __pyx_k_prob_sted[] = "prob_sted";
 static const char __pyx_k_FLOATDTYPE[] = "FLOATDTYPE";
 static const char __pyx_k_duty_cycle[] = "duty_cycle";
 static const char __pyx_k_excitation[] = "excitation";
-static const char __pyx_k_p_sted_roi[] = "p_sted_roi";
 static const char __pyx_k_photons_ex[] = "photons_ex";
-static const char __pyx_k_pixel_list[] = "pixel_list";
 static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_get_photons[] = "get_photons";
 static const char __pyx_k_bleach_funcs[] = "bleach_funcs";
 static const char __pyx_k_get_k_bleach[] = "get_k_bleach";
 static const char __pyx_k_photons_sted[] = "photons_sted";
-static const char __pyx_k_test_func_xD[] = "test func xD";
-static const char __pyx_k_get_effective[] = "get_effective";
-static const char __pyx_k_pre_effective[] = "pre_effective";
-static const char __pyx_k_pysted_raster[] = "pysted.raster";
 static const char __pyx_k_sampled_value[] = "sampled_value";
 static const char __pyx_k_default_bleach[] = "default_bleach";
-static const char __pyx_k_test_var_bleach[] = "test_var_bleach";
-static const char __pyx_k_bleached_datamap[] = "bleached_datamap";
-static const char __pyx_k_acquired_intensity[] = "acquired_intensity";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
+static const char __pyx_k_pysted_bleach_funcs[] = "pysted.bleach_funcs";
 static const char __pyx_k_bleached_sub_datamaps_dict[] = "bleached_sub_datamaps_dict";
 static const char __pyx_k_numpy_core_multiarray_failed_to[] = "numpy.core.multiarray failed to import";
-static const char __pyx_k_raster_func_c_self_bleach_split[] = "raster_func_c_self_bleach_split_g";
-static const char __pyx_k_audurand_pysted_pysted_raster_py[] = "audurand_pysted\\pysted\\raster.pyx";
+static const char __pyx_k_audurand_pysted_pysted_bleach_fu[] = "audurand_pysted\\pysted\\bleach_funcs.pyx";
 static const char __pyx_k_numpy_core_umath_failed_to_impor[] = "numpy.core.umath failed to import";
 static PyObject *__pyx_n_s_FLOATDTYPE;
 static PyObject *__pyx_n_s_INTDTYPE;
 static PyObject *__pyx_n_s_ImportError;
-static PyObject *__pyx_n_s__4;
-static PyObject *__pyx_n_s_acquired_intensity;
-static PyObject *__pyx_kp_s_audurand_pysted_pysted_raster_py;
-static PyObject *__pyx_n_s_base;
-static PyObject *__pyx_n_s_bleach;
+static PyObject *__pyx_kp_s_audurand_pysted_pysted_bleach_fu;
 static PyObject *__pyx_n_s_bleach_funcs;
-static PyObject *__pyx_n_s_bleached_datamap;
 static PyObject *__pyx_n_s_bleached_sub_datamaps_dict;
-static PyObject *__pyx_n_s_cache;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_col;
-static PyObject *__pyx_n_s_cols_pad;
 static PyObject *__pyx_n_s_current;
-static PyObject *__pyx_n_s_datamap;
 static PyObject *__pyx_n_s_default_bleach;
-static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_duty_cycle;
-static PyObject *__pyx_n_s_effective;
-static PyObject *__pyx_n_s_end;
 static PyObject *__pyx_n_s_excitation;
-static PyObject *__pyx_n_s_file;
 static PyObject *__pyx_n_s_float64;
 static PyObject *__pyx_n_s_fluo;
-static PyObject *__pyx_n_s_get_effective;
 static PyObject *__pyx_n_s_get_k_bleach;
 static PyObject *__pyx_n_s_get_photons;
 static PyObject *__pyx_n_s_h;
@@ -1917,115 +1846,82 @@ static PyObject *__pyx_n_s_k_ex;
 static PyObject *__pyx_n_s_k_sted;
 static PyObject *__pyx_n_s_key;
 static PyObject *__pyx_n_s_lambda;
-static PyObject *__pyx_n_s_laser_pad;
 static PyObject *__pyx_n_s_main;
-static PyObject *__pyx_n_s_max_len;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_numpy;
 static PyObject *__pyx_kp_s_numpy_core_multiarray_failed_to;
 static PyObject *__pyx_kp_s_numpy_core_umath_failed_to_impor;
 static PyObject *__pyx_n_s_o;
 static PyObject *__pyx_n_s_p_ex;
-static PyObject *__pyx_n_s_p_ex_roi;
 static PyObject *__pyx_n_s_p_sted;
-static PyObject *__pyx_n_s_p_sted_roi;
 static PyObject *__pyx_n_s_pdt;
-static PyObject *__pyx_n_s_pdt_roi;
 static PyObject *__pyx_n_s_photons_ex;
 static PyObject *__pyx_n_s_photons_sted;
-static PyObject *__pyx_n_s_pixel_list;
-static PyObject *__pyx_n_s_pixelsize;
-static PyObject *__pyx_n_s_pre_effective;
-static PyObject *__pyx_n_s_print;
 static PyObject *__pyx_n_s_prob;
 static PyObject *__pyx_n_s_prob_ex;
 static PyObject *__pyx_n_s_prob_sted;
-static PyObject *__pyx_n_s_pysted_raster;
+static PyObject *__pyx_n_s_pysted_bleach_funcs;
 static PyObject *__pyx_n_s_range;
-static PyObject *__pyx_n_s_raster_func_c_self_bleach_split;
 static PyObject *__pyx_n_s_rate;
-static PyObject *__pyx_n_s_ratio;
 static PyObject *__pyx_n_s_row;
-static PyObject *__pyx_n_s_rows_pad;
 static PyObject *__pyx_n_s_rsamp;
 static PyObject *__pyx_n_s_s;
 static PyObject *__pyx_n_s_sampled_value;
-static PyObject *__pyx_n_s_seed;
 static PyObject *__pyx_n_s_self;
-static PyObject *__pyx_n_s_shape;
 static PyObject *__pyx_n_s_sprime;
 static PyObject *__pyx_n_s_sted;
 static PyObject *__pyx_n_s_t;
 static PyObject *__pyx_n_s_tau;
 static PyObject *__pyx_n_s_test;
-static PyObject *__pyx_kp_s_test_func_xD;
-static PyObject *__pyx_n_s_test_var_bleach;
 static PyObject *__pyx_n_s_time;
-static PyObject *__pyx_n_s_time_ns;
 static PyObject *__pyx_n_s_tprime;
 static PyObject *__pyx_n_s_value;
 static PyObject *__pyx_n_s_w;
-static PyObject *__pyx_n_s_zeros;
-static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed); /* proto */
-static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed); /* proto */
-static PyObject *__pyx_int_neg_1;
-static PyObject *__pyx_int_neg_5;
-static PyObject *__pyx_slice_;
+static PyObject *__pyx_pf_6pysted_12bleach_funcs_default_bleach(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyArrayObject *__pyx_v_i_ex, PyArrayObject *__pyx_v_i_sted, float __pyx_v_p_ex, float __pyx_v_p_sted, float __pyx_v_pdt, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_row, int __pyx_v_col, int __pyx_v_h, int __pyx_v_w, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted); /* proto */
+static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__3;
-static PyObject *__pyx_tuple__5;
-static PyObject *__pyx_tuple__7;
-static PyObject *__pyx_codeobj__6;
-static PyObject *__pyx_codeobj__8;
+static PyObject *__pyx_codeobj__4;
 /* Late includes */
 
-/* "pysted/raster.pyx":19
+/* "pysted/bleach_funcs.pyx":19
  * @cython.boundscheck(False)  # turn off bounds-checking for entire function
  * @cython.wraparound(False)  # turn off negative index wrapping for entire function
- * def raster_func_c_self_bleach_split_g(             # <<<<<<<<<<<<<<
- *         object self,
- *         object datamap,
+ * def default_bleach(object self,             # <<<<<<<<<<<<<<
+ *                    numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex,
+ *                    numpy.ndarray[FLOATDTYPE_t, ndim=2] i_sted,
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6pysted_6raster_1raster_func_c_self_bleach_split_g(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_6pysted_6raster_1raster_func_c_self_bleach_split_g = {"raster_func_c_self_bleach_split_g", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_6pysted_6raster_1raster_func_c_self_bleach_split_g, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6pysted_6raster_1raster_func_c_self_bleach_split_g(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_6pysted_12bleach_funcs_1default_bleach(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_6pysted_12bleach_funcs_1default_bleach = {"default_bleach", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_6pysted_12bleach_funcs_1default_bleach, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_6pysted_12bleach_funcs_1default_bleach(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_self = 0;
-  PyObject *__pyx_v_datamap = 0;
-  PyArrayObject *__pyx_v_acquired_intensity = 0;
-  PyArrayObject *__pyx_v_pixel_list = 0;
-  int __pyx_v_ratio;
-  CYTHON_UNUSED int __pyx_v_rows_pad;
-  CYTHON_UNUSED int __pyx_v_cols_pad;
-  CYTHON_UNUSED int __pyx_v_laser_pad;
+  PyArrayObject *__pyx_v_i_ex = 0;
+  PyArrayObject *__pyx_v_i_sted = 0;
+  float __pyx_v_p_ex;
+  float __pyx_v_p_sted;
+  float __pyx_v_pdt;
+  PyObject *__pyx_v_bleached_sub_datamaps_dict = 0;
+  int __pyx_v_row;
+  int __pyx_v_col;
+  int __pyx_v_h;
+  int __pyx_v_w;
   PyArrayObject *__pyx_v_prob_ex = 0;
   PyArrayObject *__pyx_v_prob_sted = 0;
-  PyArrayObject *__pyx_v_pdt_roi = 0;
-  PyArrayObject *__pyx_v_p_ex_roi = 0;
-  PyArrayObject *__pyx_v_p_sted_roi = 0;
-  int __pyx_v_bleach;
-  PyObject *__pyx_v_bleached_sub_datamaps_dict = 0;
-  int __pyx_v_seed;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("raster_func_c_self_bleach_split_g (wrapper)", 0);
+  __Pyx_RefNannySetupContext("default_bleach (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_self,&__pyx_n_s_datamap,&__pyx_n_s_acquired_intensity,&__pyx_n_s_pixel_list,&__pyx_n_s_ratio,&__pyx_n_s_rows_pad,&__pyx_n_s_cols_pad,&__pyx_n_s_laser_pad,&__pyx_n_s_prob_ex,&__pyx_n_s_prob_sted,&__pyx_n_s_pdt_roi,&__pyx_n_s_p_ex_roi,&__pyx_n_s_p_sted_roi,&__pyx_n_s_bleach,&__pyx_n_s_bleached_sub_datamaps_dict,&__pyx_n_s_seed,0};
-    PyObject* values[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_self,&__pyx_n_s_i_ex,&__pyx_n_s_i_sted,&__pyx_n_s_p_ex,&__pyx_n_s_p_sted,&__pyx_n_s_pdt,&__pyx_n_s_bleached_sub_datamaps_dict,&__pyx_n_s_row,&__pyx_n_s_col,&__pyx_n_s_h,&__pyx_n_s_w,&__pyx_n_s_prob_ex,&__pyx_n_s_prob_sted,0};
+    PyObject* values[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
-        case 16: values[15] = PyTuple_GET_ITEM(__pyx_args, 15);
-        CYTHON_FALLTHROUGH;
-        case 15: values[14] = PyTuple_GET_ITEM(__pyx_args, 14);
-        CYTHON_FALLTHROUGH;
-        case 14: values[13] = PyTuple_GET_ITEM(__pyx_args, 13);
-        CYTHON_FALLTHROUGH;
         case 13: values[12] = PyTuple_GET_ITEM(__pyx_args, 12);
         CYTHON_FALLTHROUGH;
         case 12: values[11] = PyTuple_GET_ITEM(__pyx_args, 11);
@@ -2062,99 +1958,81 @@ static PyObject *__pyx_pw_6pysted_6raster_1raster_func_c_self_bleach_split_g(PyO
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
-        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_datamap)) != 0)) kw_args--;
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_i_ex)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 1); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 1); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
-        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_acquired_intensity)) != 0)) kw_args--;
+        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_i_sted)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 2); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 2); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
-        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pixel_list)) != 0)) kw_args--;
+        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p_ex)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 3); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 3); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
-        if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ratio)) != 0)) kw_args--;
+        if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p_sted)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 4); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 4); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
-        if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_rows_pad)) != 0)) kw_args--;
+        if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pdt)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 5); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 5); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
-        if (likely((values[6] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_cols_pad)) != 0)) kw_args--;
+        if (likely((values[6] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_bleached_sub_datamaps_dict)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 6); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 6); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
-        if (likely((values[7] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_laser_pad)) != 0)) kw_args--;
+        if (likely((values[7] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_row)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 7); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 7); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  8:
-        if (likely((values[8] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_prob_ex)) != 0)) kw_args--;
+        if (likely((values[8] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_col)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 8); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 8); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  9:
-        if (likely((values[9] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_prob_sted)) != 0)) kw_args--;
+        if (likely((values[9] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_h)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 9); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 9); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case 10:
-        if (likely((values[10] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pdt_roi)) != 0)) kw_args--;
+        if (likely((values[10] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_w)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 10); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 10); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case 11:
-        if (likely((values[11] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p_ex_roi)) != 0)) kw_args--;
+        if (likely((values[11] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_prob_ex)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 11); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 11); __PYX_ERR(0, 19, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case 12:
-        if (likely((values[12] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p_sted_roi)) != 0)) kw_args--;
+        if (likely((values[12] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_prob_sted)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 12); __PYX_ERR(0, 19, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case 13:
-        if (likely((values[13] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_bleach)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 13); __PYX_ERR(0, 19, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case 14:
-        if (likely((values[14] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_bleached_sub_datamaps_dict)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 14); __PYX_ERR(0, 19, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case 15:
-        if (likely((values[15] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_seed)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, 15); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, 12); __PYX_ERR(0, 19, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "raster_func_c_self_bleach_split_g") < 0)) __PYX_ERR(0, 19, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "default_bleach") < 0)) __PYX_ERR(0, 19, __pyx_L3_error)
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 16) {
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 13) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
@@ -2170,44 +2048,35 @@ static PyObject *__pyx_pw_6pysted_6raster_1raster_func_c_self_bleach_split_g(PyO
       values[10] = PyTuple_GET_ITEM(__pyx_args, 10);
       values[11] = PyTuple_GET_ITEM(__pyx_args, 11);
       values[12] = PyTuple_GET_ITEM(__pyx_args, 12);
-      values[13] = PyTuple_GET_ITEM(__pyx_args, 13);
-      values[14] = PyTuple_GET_ITEM(__pyx_args, 14);
-      values[15] = PyTuple_GET_ITEM(__pyx_args, 15);
     }
     __pyx_v_self = values[0];
-    __pyx_v_datamap = values[1];
-    __pyx_v_acquired_intensity = ((PyArrayObject *)values[2]);
-    __pyx_v_pixel_list = ((PyArrayObject *)values[3]);
-    __pyx_v_ratio = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_ratio == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 24, __pyx_L3_error)
-    __pyx_v_rows_pad = __Pyx_PyInt_As_int(values[5]); if (unlikely((__pyx_v_rows_pad == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 25, __pyx_L3_error)
-    __pyx_v_cols_pad = __Pyx_PyInt_As_int(values[6]); if (unlikely((__pyx_v_cols_pad == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 26, __pyx_L3_error)
-    __pyx_v_laser_pad = __Pyx_PyInt_As_int(values[7]); if (unlikely((__pyx_v_laser_pad == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
-    __pyx_v_prob_ex = ((PyArrayObject *)values[8]);
-    __pyx_v_prob_sted = ((PyArrayObject *)values[9]);
-    __pyx_v_pdt_roi = ((PyArrayObject *)values[10]);
-    __pyx_v_p_ex_roi = ((PyArrayObject *)values[11]);
-    __pyx_v_p_sted_roi = ((PyArrayObject *)values[12]);
-    __pyx_v_bleach = __Pyx_PyObject_IsTrue(values[13]); if (unlikely((__pyx_v_bleach == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
-    __pyx_v_bleached_sub_datamaps_dict = ((PyObject*)values[14]);
-    __pyx_v_seed = __Pyx_PyInt_As_int(values[15]); if (unlikely((__pyx_v_seed == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 35, __pyx_L3_error)
+    __pyx_v_i_ex = ((PyArrayObject *)values[1]);
+    __pyx_v_i_sted = ((PyArrayObject *)values[2]);
+    __pyx_v_p_ex = __pyx_PyFloat_AsFloat(values[3]); if (unlikely((__pyx_v_p_ex == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 22, __pyx_L3_error)
+    __pyx_v_p_sted = __pyx_PyFloat_AsFloat(values[4]); if (unlikely((__pyx_v_p_sted == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L3_error)
+    __pyx_v_pdt = __pyx_PyFloat_AsFloat(values[5]); if (unlikely((__pyx_v_pdt == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 24, __pyx_L3_error)
+    __pyx_v_bleached_sub_datamaps_dict = ((PyObject*)values[6]);
+    __pyx_v_row = __Pyx_PyInt_As_int(values[7]); if (unlikely((__pyx_v_row == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 26, __pyx_L3_error)
+    __pyx_v_col = __Pyx_PyInt_As_int(values[8]); if (unlikely((__pyx_v_col == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+    __pyx_v_h = __Pyx_PyInt_As_int(values[9]); if (unlikely((__pyx_v_h == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 28, __pyx_L3_error)
+    __pyx_v_w = __Pyx_PyInt_As_int(values[10]); if (unlikely((__pyx_v_w == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
+    __pyx_v_prob_ex = ((PyArrayObject *)values[11]);
+    __pyx_v_prob_sted = ((PyArrayObject *)values[12]);
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("raster_func_c_self_bleach_split_g", 1, 16, 16, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 19, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("default_bleach", 1, 13, 13, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 19, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("pysted.raster.raster_func_c_self_bleach_split_g", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pysted.bleach_funcs.default_bleach", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_acquired_intensity), __pyx_ptype_5numpy_ndarray, 1, "acquired_intensity", 0))) __PYX_ERR(0, 22, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pixel_list), __pyx_ptype_5numpy_ndarray, 1, "pixel_list", 0))) __PYX_ERR(0, 23, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_prob_ex), __pyx_ptype_5numpy_ndarray, 1, "prob_ex", 0))) __PYX_ERR(0, 28, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_prob_sted), __pyx_ptype_5numpy_ndarray, 1, "prob_sted", 0))) __PYX_ERR(0, 29, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pdt_roi), __pyx_ptype_5numpy_ndarray, 1, "pdt_roi", 0))) __PYX_ERR(0, 30, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_p_ex_roi), __pyx_ptype_5numpy_ndarray, 1, "p_ex_roi", 0))) __PYX_ERR(0, 31, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_p_sted_roi), __pyx_ptype_5numpy_ndarray, 1, "p_sted_roi", 0))) __PYX_ERR(0, 32, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_bleached_sub_datamaps_dict), (&PyDict_Type), 1, "bleached_sub_datamaps_dict", 1))) __PYX_ERR(0, 34, __pyx_L1_error)
-  __pyx_r = __pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(__pyx_self, __pyx_v_self, __pyx_v_datamap, __pyx_v_acquired_intensity, __pyx_v_pixel_list, __pyx_v_ratio, __pyx_v_rows_pad, __pyx_v_cols_pad, __pyx_v_laser_pad, __pyx_v_prob_ex, __pyx_v_prob_sted, __pyx_v_pdt_roi, __pyx_v_p_ex_roi, __pyx_v_p_sted_roi, __pyx_v_bleach, __pyx_v_bleached_sub_datamaps_dict, __pyx_v_seed);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_i_ex), __pyx_ptype_5numpy_ndarray, 1, "i_ex", 0))) __PYX_ERR(0, 20, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_i_sted), __pyx_ptype_5numpy_ndarray, 1, "i_sted", 0))) __PYX_ERR(0, 21, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_bleached_sub_datamaps_dict), (&PyDict_Type), 1, "bleached_sub_datamaps_dict", 1))) __PYX_ERR(0, 25, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_prob_ex), __pyx_ptype_5numpy_ndarray, 1, "prob_ex", 0))) __PYX_ERR(0, 30, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_prob_sted), __pyx_ptype_5numpy_ndarray, 1, "prob_sted", 0))) __PYX_ERR(0, 31, __pyx_L1_error)
+  __pyx_r = __pyx_pf_6pysted_12bleach_funcs_default_bleach(__pyx_self, __pyx_v_self, __pyx_v_i_ex, __pyx_v_i_sted, __pyx_v_p_ex, __pyx_v_p_sted, __pyx_v_pdt, __pyx_v_bleached_sub_datamaps_dict, __pyx_v_row, __pyx_v_col, __pyx_v_h, __pyx_v_w, __pyx_v_prob_ex, __pyx_v_prob_sted);
 
   /* function exit code */
   goto __pyx_L0;
@@ -2218,43 +2087,22 @@ static PyObject *__pyx_pw_6pysted_6raster_1raster_func_c_self_bleach_split_g(PyO
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed) {
-  int __pyx_v_row;
-  int __pyx_v_col;
+static PyObject *__pyx_pf_6pysted_12bleach_funcs_default_bleach(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyArrayObject *__pyx_v_i_ex, PyArrayObject *__pyx_v_i_sted, float __pyx_v_p_ex, float __pyx_v_p_sted, float __pyx_v_pdt, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_row, int __pyx_v_col, int __pyx_v_h, int __pyx_v_w, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted) {
+  PyArrayObject *__pyx_v_photons_ex = 0;
+  PyArrayObject *__pyx_v_photons_sted = 0;
+  PyArrayObject *__pyx_v_k_ex = 0;
+  PyArrayObject *__pyx_v_k_sted = 0;
+  int __pyx_v_s;
   int __pyx_v_sprime;
+  int __pyx_v_t;
   int __pyx_v_tprime;
-  int __pyx_v_h;
-  int __pyx_v_w;
-  int __pyx_v_current;
-  CYTHON_UNUSED int __pyx_v_max_len;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_v_value;
   int __pyx_v_sampled_value;
   int __pyx_v_prob;
   int __pyx_v_rsamp;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_v_pdt;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_v_p_ex;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_v_p_sted;
-  PyArrayObject *__pyx_v_pre_effective = 0;
-  PyArrayObject *__pyx_v_effective = 0;
-  PyArrayObject *__pyx_v_k_ex = 0;
-  PyArrayObject *__pyx_v_k_sted = 0;
-  PyArrayObject *__pyx_v_i_ex = 0;
-  PyArrayObject *__pyx_v_i_sted = 0;
-  PyArrayObject *__pyx_v_photons_ex = 0;
-  PyArrayObject *__pyx_v_photons_sted = 0;
-  PyArrayObject *__pyx_v_bleached_datamap = 0;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_v_duty_cycle;
-  CYTHON_UNUSED PyObject *__pyx_v__ = NULL;
-  PyObject *__pyx_v_key = NULL;
-  int __pyx_v_s;
-  int __pyx_v_t;
+  int __pyx_v_current;
+  PyObject *__pyx_v_key = 0;
+  float __pyx_v_duty_cycle;
   CYTHON_UNUSED int __pyx_v_o;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_acquired_intensity;
-  __Pyx_Buffer __pyx_pybuffer_acquired_intensity;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_bleached_datamap;
-  __Pyx_Buffer __pyx_pybuffer_bleached_datamap;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_effective;
-  __Pyx_Buffer __pyx_pybuffer_effective;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_i_ex;
   __Pyx_Buffer __pyx_pybuffer_i_ex;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_i_sted;
@@ -2263,80 +2111,59 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
   __Pyx_Buffer __pyx_pybuffer_k_ex;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_k_sted;
   __Pyx_Buffer __pyx_pybuffer_k_sted;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_p_ex_roi;
-  __Pyx_Buffer __pyx_pybuffer_p_ex_roi;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_p_sted_roi;
-  __Pyx_Buffer __pyx_pybuffer_p_sted_roi;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_pdt_roi;
-  __Pyx_Buffer __pyx_pybuffer_pdt_roi;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_photons_ex;
   __Pyx_Buffer __pyx_pybuffer_photons_ex;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_photons_sted;
   __Pyx_Buffer __pyx_pybuffer_photons_sted;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_pixel_list;
-  __Pyx_Buffer __pyx_pybuffer_pixel_list;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_pre_effective;
-  __Pyx_Buffer __pyx_pybuffer_pre_effective;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_prob_ex;
   __Pyx_Buffer __pyx_pybuffer_prob_ex;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_prob_sted;
   __Pyx_Buffer __pyx_pybuffer_prob_sted;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  int __pyx_t_2;
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  unsigned int __pyx_t_6;
+  PyArrayObject *__pyx_t_5 = NULL;
+  int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   PyObject *__pyx_t_8 = NULL;
-  PyObject *(*__pyx_t_9)(PyObject *);
-  PyArrayObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  PyObject *__pyx_t_12 = NULL;
-  PyObject *__pyx_t_13 = NULL;
-  PyObject *__pyx_t_14 = NULL;
-  Py_ssize_t __pyx_t_15;
-  Py_ssize_t __pyx_t_16;
-  PyObject *__pyx_t_17 = NULL;
-  PyObject *__pyx_t_18 = NULL;
-  PyArrayObject *__pyx_t_19 = NULL;
-  npy_intp __pyx_t_20;
-  npy_intp __pyx_t_21;
-  PyObject *(*__pyx_t_22)(PyObject *);
-  int __pyx_t_23;
-  PyObject *__pyx_t_24 = NULL;
-  PyArrayObject *__pyx_t_25 = NULL;
+  PyObject *__pyx_t_9 = NULL;
+  PyObject *__pyx_t_10 = NULL;
+  PyArrayObject *__pyx_t_11 = NULL;
+  float __pyx_t_12;
+  Py_ssize_t __pyx_t_13;
+  Py_ssize_t __pyx_t_14;
+  int __pyx_t_15;
+  int __pyx_t_16;
+  int __pyx_t_17;
+  int __pyx_t_18;
+  int __pyx_t_19;
+  int __pyx_t_20;
+  Py_ssize_t __pyx_t_21;
+  Py_ssize_t __pyx_t_22;
+  Py_ssize_t __pyx_t_23;
+  Py_ssize_t __pyx_t_24;
+  Py_ssize_t __pyx_t_25;
   Py_ssize_t __pyx_t_26;
-  Py_ssize_t __pyx_t_27;
+  int __pyx_t_27;
   int __pyx_t_28;
   int __pyx_t_29;
   int __pyx_t_30;
-  int __pyx_t_31;
-  Py_ssize_t __pyx_t_32;
-  Py_ssize_t __pyx_t_33;
-  PyArrayObject *__pyx_t_34 = NULL;
-  PyArrayObject *__pyx_t_35 = NULL;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_t_36;
-  int __pyx_t_37;
-  Py_ssize_t __pyx_t_38;
-  Py_ssize_t __pyx_t_39;
-  int __pyx_t_40;
-  int __pyx_t_41;
-  int __pyx_t_42;
+  PyObject *__pyx_t_31 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("raster_func_c_self_bleach_split_g", 0);
-  __pyx_pybuffer_pre_effective.pybuffer.buf = NULL;
-  __pyx_pybuffer_pre_effective.refcount = 0;
-  __pyx_pybuffernd_pre_effective.data = NULL;
-  __pyx_pybuffernd_pre_effective.rcbuffer = &__pyx_pybuffer_pre_effective;
-  __pyx_pybuffer_effective.pybuffer.buf = NULL;
-  __pyx_pybuffer_effective.refcount = 0;
-  __pyx_pybuffernd_effective.data = NULL;
-  __pyx_pybuffernd_effective.rcbuffer = &__pyx_pybuffer_effective;
+  __Pyx_RefNannySetupContext("default_bleach", 0);
+  __pyx_pybuffer_photons_ex.pybuffer.buf = NULL;
+  __pyx_pybuffer_photons_ex.refcount = 0;
+  __pyx_pybuffernd_photons_ex.data = NULL;
+  __pyx_pybuffernd_photons_ex.rcbuffer = &__pyx_pybuffer_photons_ex;
+  __pyx_pybuffer_photons_sted.pybuffer.buf = NULL;
+  __pyx_pybuffer_photons_sted.refcount = 0;
+  __pyx_pybuffernd_photons_sted.data = NULL;
+  __pyx_pybuffernd_photons_sted.rcbuffer = &__pyx_pybuffer_photons_sted;
   __pyx_pybuffer_k_ex.pybuffer.buf = NULL;
   __pyx_pybuffer_k_ex.refcount = 0;
   __pyx_pybuffernd_k_ex.data = NULL;
@@ -2353,26 +2180,6 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
   __pyx_pybuffer_i_sted.refcount = 0;
   __pyx_pybuffernd_i_sted.data = NULL;
   __pyx_pybuffernd_i_sted.rcbuffer = &__pyx_pybuffer_i_sted;
-  __pyx_pybuffer_photons_ex.pybuffer.buf = NULL;
-  __pyx_pybuffer_photons_ex.refcount = 0;
-  __pyx_pybuffernd_photons_ex.data = NULL;
-  __pyx_pybuffernd_photons_ex.rcbuffer = &__pyx_pybuffer_photons_ex;
-  __pyx_pybuffer_photons_sted.pybuffer.buf = NULL;
-  __pyx_pybuffer_photons_sted.refcount = 0;
-  __pyx_pybuffernd_photons_sted.data = NULL;
-  __pyx_pybuffernd_photons_sted.rcbuffer = &__pyx_pybuffer_photons_sted;
-  __pyx_pybuffer_bleached_datamap.pybuffer.buf = NULL;
-  __pyx_pybuffer_bleached_datamap.refcount = 0;
-  __pyx_pybuffernd_bleached_datamap.data = NULL;
-  __pyx_pybuffernd_bleached_datamap.rcbuffer = &__pyx_pybuffer_bleached_datamap;
-  __pyx_pybuffer_acquired_intensity.pybuffer.buf = NULL;
-  __pyx_pybuffer_acquired_intensity.refcount = 0;
-  __pyx_pybuffernd_acquired_intensity.data = NULL;
-  __pyx_pybuffernd_acquired_intensity.rcbuffer = &__pyx_pybuffer_acquired_intensity;
-  __pyx_pybuffer_pixel_list.pybuffer.buf = NULL;
-  __pyx_pybuffer_pixel_list.refcount = 0;
-  __pyx_pybuffernd_pixel_list.data = NULL;
-  __pyx_pybuffernd_pixel_list.rcbuffer = &__pyx_pybuffer_pixel_list;
   __pyx_pybuffer_prob_ex.pybuffer.buf = NULL;
   __pyx_pybuffer_prob_ex.refcount = 0;
   __pyx_pybuffernd_prob_ex.data = NULL;
@@ -2381,2981 +2188,665 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
   __pyx_pybuffer_prob_sted.refcount = 0;
   __pyx_pybuffernd_prob_sted.data = NULL;
   __pyx_pybuffernd_prob_sted.rcbuffer = &__pyx_pybuffer_prob_sted;
-  __pyx_pybuffer_pdt_roi.pybuffer.buf = NULL;
-  __pyx_pybuffer_pdt_roi.refcount = 0;
-  __pyx_pybuffernd_pdt_roi.data = NULL;
-  __pyx_pybuffernd_pdt_roi.rcbuffer = &__pyx_pybuffer_pdt_roi;
-  __pyx_pybuffer_p_ex_roi.pybuffer.buf = NULL;
-  __pyx_pybuffer_p_ex_roi.refcount = 0;
-  __pyx_pybuffernd_p_ex_roi.data = NULL;
-  __pyx_pybuffernd_p_ex_roi.rcbuffer = &__pyx_pybuffer_p_ex_roi;
-  __pyx_pybuffer_p_sted_roi.pybuffer.buf = NULL;
-  __pyx_pybuffer_p_sted_roi.refcount = 0;
-  __pyx_pybuffernd_p_sted_roi.data = NULL;
-  __pyx_pybuffernd_p_sted_roi.rcbuffer = &__pyx_pybuffer_p_sted_roi;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer, (PyObject*)__pyx_v_acquired_intensity, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_i_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
   }
-  __pyx_pybuffernd_acquired_intensity.diminfo[0].strides = __pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_acquired_intensity.diminfo[0].shape = __pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_acquired_intensity.diminfo[1].strides = __pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_acquired_intensity.diminfo[1].shape = __pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer.shape[1];
+  __pyx_pybuffernd_i_ex.diminfo[0].strides = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_i_ex.diminfo[0].shape = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_i_ex.diminfo[1].strides = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_i_ex.diminfo[1].shape = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_pixel_list.rcbuffer->pybuffer, (PyObject*)__pyx_v_pixel_list, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_i_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
   }
-  __pyx_pybuffernd_pixel_list.diminfo[0].strides = __pyx_pybuffernd_pixel_list.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_pixel_list.diminfo[0].shape = __pyx_pybuffernd_pixel_list.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_pixel_list.diminfo[1].strides = __pyx_pybuffernd_pixel_list.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_pixel_list.diminfo[1].shape = __pyx_pybuffernd_pixel_list.rcbuffer->pybuffer.shape[1];
+  __pyx_pybuffernd_i_sted.diminfo[0].strides = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_i_sted.diminfo[0].shape = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_i_sted.diminfo[1].strides = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_i_sted.diminfo[1].shape = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_prob_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_prob_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_prob_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_prob_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
   }
   __pyx_pybuffernd_prob_ex.diminfo[0].strides = __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_prob_ex.diminfo[0].shape = __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_prob_ex.diminfo[1].strides = __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_prob_ex.diminfo[1].shape = __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_prob_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_prob_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_prob_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_prob_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
   }
   __pyx_pybuffernd_prob_sted.diminfo[0].strides = __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_prob_sted.diminfo[0].shape = __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_prob_sted.diminfo[1].strides = __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_prob_sted.diminfo[1].shape = __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.shape[1];
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer, (PyObject*)__pyx_v_pdt_roi, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_pdt_roi.diminfo[0].strides = __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_pdt_roi.diminfo[0].shape = __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_pdt_roi.diminfo[1].strides = __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_pdt_roi.diminfo[1].shape = __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.shape[1];
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer, (PyObject*)__pyx_v_p_ex_roi, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_p_ex_roi.diminfo[0].strides = __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_p_ex_roi.diminfo[0].shape = __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_p_ex_roi.diminfo[1].strides = __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_p_ex_roi.diminfo[1].shape = __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.shape[1];
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer, (PyObject*)__pyx_v_p_sted_roi, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 19, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_p_sted_roi.diminfo[0].strides = __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_p_sted_roi.diminfo[0].shape = __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_p_sted_roi.diminfo[1].strides = __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_p_sted_roi.diminfo[1].shape = __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.shape[1];
 
-  /* "pysted/raster.pyx":41
- *     cdef int h, w
- *     cdef int current
- *     cdef int max_len = len(pixel_list)             # <<<<<<<<<<<<<<
- *     cdef FLOATDTYPE_t value
- *     cdef int sampled_value
- */
-  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_pixel_list)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 41, __pyx_L1_error)
-  __pyx_v_max_len = __pyx_t_1;
-
-  /* "pysted/raster.pyx":63
- *     """
+  /* "pysted/bleach_funcs.pyx":45
+ *     # print("CUMaroonie")
  * 
- *     if seed == 0:             # <<<<<<<<<<<<<<
- *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
- *         srand(int(str(time.time_ns())[-5:-1]))
+ *     photons_ex = self.fluo.get_photons(i_ex * p_ex)             # <<<<<<<<<<<<<<
+ *     k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+ *     duty_cycle = self.sted.tau * self.sted.rate
  */
-  __pyx_t_2 = ((__pyx_v_seed == 0) != 0);
-  if (__pyx_t_2) {
-
-    /* "pysted/raster.pyx":65
- *     if seed == 0:
- *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
- *         srand(int(str(time.time_ns())[-5:-1]))             # <<<<<<<<<<<<<<
- *     else:
- *         srand(seed)
- */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_time); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_time_ns); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 65, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_5))) {
-      __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_5);
-      if (likely(__pyx_t_4)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-        __Pyx_INCREF(__pyx_t_4);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_5, function);
-      }
-    }
-    __pyx_t_3 = (__pyx_t_4) ? __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_4) : __Pyx_PyObject_CallNoArg(__pyx_t_5);
-    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 65, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyObject_GetSlice(__pyx_t_5, -5L, -1L, NULL, NULL, &__pyx_slice_, 1, 1, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 65, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_6 = __Pyx_PyInt_As_unsigned_int(__pyx_t_5); if (unlikely((__pyx_t_6 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 65, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    srand(__pyx_t_6);
-
-    /* "pysted/raster.pyx":63
- *     """
- * 
- *     if seed == 0:             # <<<<<<<<<<<<<<
- *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
- *         srand(int(str(time.time_ns())[-5:-1]))
- */
-    goto __pyx_L3;
-  }
-
-  /* "pysted/raster.pyx":67
- *         srand(int(str(time.time_ns())[-5:-1]))
- *     else:
- *         srand(seed)             # <<<<<<<<<<<<<<
- * 
- *     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
- */
-  /*else*/ {
-    srand(__pyx_v_seed);
-  }
-  __pyx_L3:;
-
-  /* "pysted/raster.pyx":69
- *         srand(seed)
- * 
- *     i_ex, i_sted, _ = self.cache(datamap.pixelsize)             # <<<<<<<<<<<<<<
- *     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
- *     h, w = pre_effective.shape[0], pre_effective.shape[1]
- */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_cache); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_fluo); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_get_photons); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_datamap, __pyx_n_s_pixelsize); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 69, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_p_ex); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = PyNumber_Multiply(((PyObject *)__pyx_v_i_ex), __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_7 = NULL;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_7)) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_2)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_7);
+      __Pyx_INCREF(__pyx_t_2);
       __Pyx_INCREF(function);
       __Pyx_DECREF_SET(__pyx_t_3, function);
     }
   }
-  __pyx_t_5 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_7, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+  __pyx_t_1 = (__pyx_t_2) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_2, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 69, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if ((likely(PyTuple_CheckExact(__pyx_t_5))) || (PyList_CheckExact(__pyx_t_5))) {
-    PyObject* sequence = __pyx_t_5;
-    Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
-    if (unlikely(size != 3)) {
-      if (size > 3) __Pyx_RaiseTooManyValuesError(3);
-      else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 69, __pyx_L1_error)
-    }
-    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    if (likely(PyTuple_CheckExact(sequence))) {
-      __pyx_t_3 = PyTuple_GET_ITEM(sequence, 0); 
-      __pyx_t_4 = PyTuple_GET_ITEM(sequence, 1); 
-      __pyx_t_7 = PyTuple_GET_ITEM(sequence, 2); 
-    } else {
-      __pyx_t_3 = PyList_GET_ITEM(sequence, 0); 
-      __pyx_t_4 = PyList_GET_ITEM(sequence, 1); 
-      __pyx_t_7 = PyList_GET_ITEM(sequence, 2); 
-    }
-    __Pyx_INCREF(__pyx_t_3);
-    __Pyx_INCREF(__pyx_t_4);
-    __Pyx_INCREF(__pyx_t_7);
-    #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 69, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 69, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_7 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 69, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    #endif
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  } else {
-    Py_ssize_t index = -1;
-    __pyx_t_8 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 69, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_9 = Py_TYPE(__pyx_t_8)->tp_iternext;
-    index = 0; __pyx_t_3 = __pyx_t_9(__pyx_t_8); if (unlikely(!__pyx_t_3)) goto __pyx_L4_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_3);
-    index = 1; __pyx_t_4 = __pyx_t_9(__pyx_t_8); if (unlikely(!__pyx_t_4)) goto __pyx_L4_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_4);
-    index = 2; __pyx_t_7 = __pyx_t_9(__pyx_t_8); if (unlikely(!__pyx_t_7)) goto __pyx_L4_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_7);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_9(__pyx_t_8), 3) < 0) __PYX_ERR(0, 69, __pyx_L1_error)
-    __pyx_t_9 = NULL;
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    goto __pyx_L5_unpacking_done;
-    __pyx_L4_unpacking_failed:;
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_9 = NULL;
-    if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 69, __pyx_L1_error)
-    __pyx_L5_unpacking_done:;
-  }
-  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 69, __pyx_L1_error)
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 69, __pyx_L1_error)
-  __pyx_t_10 = ((PyArrayObject *)__pyx_t_3);
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_t_5 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer);
-    __pyx_t_11 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer, (PyObject*)__pyx_t_10, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-    if (unlikely(__pyx_t_11 < 0)) {
-      PyErr_Fetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
-      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_i_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-        Py_XDECREF(__pyx_t_12); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_photons_ex.rcbuffer->pybuffer);
+    __pyx_t_6 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_photons_ex.rcbuffer->pybuffer, (PyObject*)__pyx_t_5, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
+    if (unlikely(__pyx_t_6 < 0)) {
+      PyErr_Fetch(&__pyx_t_7, &__pyx_t_8, &__pyx_t_9);
+      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_photons_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_photons_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+        Py_XDECREF(__pyx_t_7); Py_XDECREF(__pyx_t_8); Py_XDECREF(__pyx_t_9);
         __Pyx_RaiseBufferFallbackError();
       } else {
-        PyErr_Restore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
+        PyErr_Restore(__pyx_t_7, __pyx_t_8, __pyx_t_9);
       }
-      __pyx_t_12 = __pyx_t_13 = __pyx_t_14 = 0;
+      __pyx_t_7 = __pyx_t_8 = __pyx_t_9 = 0;
     }
-    __pyx_pybuffernd_i_ex.diminfo[0].strides = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_i_ex.diminfo[0].shape = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_i_ex.diminfo[1].strides = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_i_ex.diminfo[1].shape = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.shape[1];
-    if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(0, 69, __pyx_L1_error)
+    __pyx_pybuffernd_photons_ex.diminfo[0].strides = __pyx_pybuffernd_photons_ex.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_photons_ex.diminfo[0].shape = __pyx_pybuffernd_photons_ex.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_photons_ex.diminfo[1].strides = __pyx_pybuffernd_photons_ex.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_photons_ex.diminfo[1].shape = __pyx_pybuffernd_photons_ex.rcbuffer->pybuffer.shape[1];
+    if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 45, __pyx_L1_error)
   }
-  __pyx_t_10 = 0;
-  __pyx_v_i_ex = ((PyArrayObject *)__pyx_t_3);
-  __pyx_t_3 = 0;
-  __pyx_t_10 = ((PyArrayObject *)__pyx_t_4);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer);
-    __pyx_t_11 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer, (PyObject*)__pyx_t_10, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-    if (unlikely(__pyx_t_11 < 0)) {
-      PyErr_Fetch(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_i_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-        Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_12);
-        __Pyx_RaiseBufferFallbackError();
-      } else {
-        PyErr_Restore(__pyx_t_14, __pyx_t_13, __pyx_t_12);
-      }
-      __pyx_t_14 = __pyx_t_13 = __pyx_t_12 = 0;
-    }
-    __pyx_pybuffernd_i_sted.diminfo[0].strides = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_i_sted.diminfo[0].shape = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_i_sted.diminfo[1].strides = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_i_sted.diminfo[1].shape = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.shape[1];
-    if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(0, 69, __pyx_L1_error)
-  }
-  __pyx_t_10 = 0;
-  __pyx_v_i_sted = ((PyArrayObject *)__pyx_t_4);
-  __pyx_t_4 = 0;
-  __pyx_v__ = __pyx_t_7;
-  __pyx_t_7 = 0;
+  __pyx_t_5 = 0;
+  __pyx_v_photons_ex = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
 
-  /* "pysted/raster.pyx":70
+  /* "pysted/bleach_funcs.pyx":46
  * 
- *     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
- *     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])             # <<<<<<<<<<<<<<
- *     h, w = pre_effective.shape[0], pre_effective.shape[1]
- * 
+ *     photons_ex = self.fluo.get_photons(i_ex * p_ex)
+ *     k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)             # <<<<<<<<<<<<<<
+ *     duty_cycle = self.sted.tau * self.sted.rate
+ *     photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
  */
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_get_effective); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 70, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_datamap, __pyx_n_s_pixelsize); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 70, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_15 = 0;
-  __pyx_t_16 = 0;
-  __pyx_t_3 = PyFloat_FromDouble((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_p_ex_roi.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_p_ex_roi.diminfo[1].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_fluo); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_16 = 0;
-  __pyx_t_15 = 0;
-  __pyx_t_8 = PyFloat_FromDouble((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_p_sted_roi.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_p_sted_roi.diminfo[1].strides))); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 70, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_17 = NULL;
-  __pyx_t_11 = 0;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
-    __pyx_t_17 = PyMethod_GET_SELF(__pyx_t_7);
-    if (likely(__pyx_t_17)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
-      __Pyx_INCREF(__pyx_t_17);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_get_k_bleach); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_excitation); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_lambda); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_3 = NULL;
+  __pyx_t_6 = 0;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_3);
       __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_7, function);
-      __pyx_t_11 = 1;
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+      __pyx_t_6 = 1;
     }
   }
   #if CYTHON_FAST_PYCALL
-  if (PyFunction_Check(__pyx_t_7)) {
-    PyObject *__pyx_temp[4] = {__pyx_t_17, __pyx_t_4, __pyx_t_3, __pyx_t_8};
-    __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_11, 3+__pyx_t_11); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 70, __pyx_L1_error)
-    __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  if (PyFunction_Check(__pyx_t_4)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_t_2, ((PyObject *)__pyx_v_photons_ex)};
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else
   #endif
   #if CYTHON_FAST_PYCCALL
-  if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
-    PyObject *__pyx_temp[4] = {__pyx_t_17, __pyx_t_4, __pyx_t_3, __pyx_t_8};
-    __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_11, 3+__pyx_t_11); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 70, __pyx_L1_error)
-    __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_t_2, ((PyObject *)__pyx_v_photons_ex)};
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else
   #endif
   {
-    __pyx_t_18 = PyTuple_New(3+__pyx_t_11); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 70, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_18);
-    if (__pyx_t_17) {
-      __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_18, 0, __pyx_t_17); __pyx_t_17 = NULL;
+    __pyx_t_10 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_10);
+    if (__pyx_t_3) {
+      __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_3); __pyx_t_3 = NULL;
     }
-    __Pyx_GIVEREF(__pyx_t_4);
-    PyTuple_SET_ITEM(__pyx_t_18, 0+__pyx_t_11, __pyx_t_4);
-    __Pyx_GIVEREF(__pyx_t_3);
-    PyTuple_SET_ITEM(__pyx_t_18, 1+__pyx_t_11, __pyx_t_3);
-    __Pyx_GIVEREF(__pyx_t_8);
-    PyTuple_SET_ITEM(__pyx_t_18, 2+__pyx_t_11, __pyx_t_8);
-    __pyx_t_4 = 0;
-    __pyx_t_3 = 0;
-    __pyx_t_8 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_18, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 70, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
+    __Pyx_GIVEREF(__pyx_t_2);
+    PyTuple_SET_ITEM(__pyx_t_10, 0+__pyx_t_6, __pyx_t_2);
+    __Pyx_INCREF(((PyObject *)__pyx_v_photons_ex));
+    __Pyx_GIVEREF(((PyObject *)__pyx_v_photons_ex));
+    PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_6, ((PyObject *)__pyx_v_photons_ex));
+    __pyx_t_2 = 0;
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_10, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   }
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 70, __pyx_L1_error)
-  __pyx_t_19 = ((PyArrayObject *)__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_11 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer);
-    __pyx_t_11 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer, (PyObject*)__pyx_t_19, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-    if (unlikely(__pyx_t_11 < 0)) {
-      PyErr_Fetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
-      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer, (PyObject*)__pyx_v_pre_effective, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-        Py_XDECREF(__pyx_t_12); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_k_ex.rcbuffer->pybuffer);
+    __pyx_t_6 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_k_ex.rcbuffer->pybuffer, (PyObject*)__pyx_t_11, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
+    if (unlikely(__pyx_t_6 < 0)) {
+      PyErr_Fetch(&__pyx_t_9, &__pyx_t_8, &__pyx_t_7);
+      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_k_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_k_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+        Py_XDECREF(__pyx_t_9); Py_XDECREF(__pyx_t_8); Py_XDECREF(__pyx_t_7);
         __Pyx_RaiseBufferFallbackError();
       } else {
-        PyErr_Restore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
+        PyErr_Restore(__pyx_t_9, __pyx_t_8, __pyx_t_7);
       }
-      __pyx_t_12 = __pyx_t_13 = __pyx_t_14 = 0;
+      __pyx_t_9 = __pyx_t_8 = __pyx_t_7 = 0;
     }
-    __pyx_pybuffernd_pre_effective.diminfo[0].strides = __pyx_pybuffernd_pre_effective.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_pre_effective.diminfo[0].shape = __pyx_pybuffernd_pre_effective.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_pre_effective.diminfo[1].strides = __pyx_pybuffernd_pre_effective.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_pre_effective.diminfo[1].shape = __pyx_pybuffernd_pre_effective.rcbuffer->pybuffer.shape[1];
-    if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_pybuffernd_k_ex.diminfo[0].strides = __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_k_ex.diminfo[0].shape = __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_k_ex.diminfo[1].strides = __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_k_ex.diminfo[1].shape = __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.shape[1];
+    if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 46, __pyx_L1_error)
   }
-  __pyx_t_19 = 0;
-  __pyx_v_pre_effective = ((PyArrayObject *)__pyx_t_5);
+  __pyx_t_11 = 0;
+  __pyx_v_k_ex = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "pysted/bleach_funcs.pyx":47
+ *     photons_ex = self.fluo.get_photons(i_ex * p_ex)
+ *     k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+ *     duty_cycle = self.sted.tau * self.sted.rate             # <<<<<<<<<<<<<<
+ *     photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
+ *     k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+ */
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_sted); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_tau); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_sted); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_rate); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyNumber_Multiply(__pyx_t_4, __pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  __pyx_t_12 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_12 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_duty_cycle = __pyx_t_12;
+
+  /* "pysted/bleach_funcs.pyx":48
+ *     k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
+ *     duty_cycle = self.sted.tau * self.sted.rate
+ *     photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)             # <<<<<<<<<<<<<<
+ *     k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+ * 
+ */
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_fluo); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_10, __pyx_n_s_get_photons); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  __pyx_t_10 = PyFloat_FromDouble(__pyx_v_p_sted); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __pyx_t_2 = PyNumber_Multiply(((PyObject *)__pyx_v_i_sted), __pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  __pyx_t_10 = PyFloat_FromDouble(__pyx_v_duty_cycle); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __pyx_t_3 = PyNumber_Multiply(__pyx_t_2, __pyx_t_10); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  __pyx_t_10 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_10)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_10);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+    }
+  }
+  __pyx_t_1 = (__pyx_t_10) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_10, __pyx_t_3) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_5 = ((PyArrayObject *)__pyx_t_1);
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_photons_sted.rcbuffer->pybuffer);
+    __pyx_t_6 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_photons_sted.rcbuffer->pybuffer, (PyObject*)__pyx_t_5, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
+    if (unlikely(__pyx_t_6 < 0)) {
+      PyErr_Fetch(&__pyx_t_7, &__pyx_t_8, &__pyx_t_9);
+      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_photons_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_photons_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+        Py_XDECREF(__pyx_t_7); Py_XDECREF(__pyx_t_8); Py_XDECREF(__pyx_t_9);
+        __Pyx_RaiseBufferFallbackError();
+      } else {
+        PyErr_Restore(__pyx_t_7, __pyx_t_8, __pyx_t_9);
+      }
+      __pyx_t_7 = __pyx_t_8 = __pyx_t_9 = 0;
+    }
+    __pyx_pybuffernd_photons_sted.diminfo[0].strides = __pyx_pybuffernd_photons_sted.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_photons_sted.diminfo[0].shape = __pyx_pybuffernd_photons_sted.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_photons_sted.diminfo[1].strides = __pyx_pybuffernd_photons_sted.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_photons_sted.diminfo[1].shape = __pyx_pybuffernd_photons_sted.rcbuffer->pybuffer.shape[1];
+    if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
+  }
   __pyx_t_5 = 0;
+  __pyx_v_photons_sted = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
 
-  /* "pysted/raster.pyx":71
- *     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
- *     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
- *     h, w = pre_effective.shape[0], pre_effective.shape[1]             # <<<<<<<<<<<<<<
+  /* "pysted/bleach_funcs.pyx":49
+ *     duty_cycle = self.sted.tau * self.sted.rate
+ *     photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
+ *     k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)             # <<<<<<<<<<<<<<
  * 
- *     # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape)
+ *     for key in bleached_sub_datamaps_dict:
  */
-  __pyx_t_20 = (__pyx_v_pre_effective->dimensions[0]);
-  __pyx_t_21 = (__pyx_v_pre_effective->dimensions[1]);
-  __pyx_v_h = __pyx_t_20;
-  __pyx_v_w = __pyx_t_21;
-
-  /* "pysted/raster.pyx":75
- *     # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape)
- * 
- *     for (row, col) in pixel_list:             # <<<<<<<<<<<<<<
- *         pdt = pdt_roi[row, col]
- *         p_ex = p_ex_roi[row, col]
- */
-  if (likely(PyList_CheckExact(((PyObject *)__pyx_v_pixel_list))) || PyTuple_CheckExact(((PyObject *)__pyx_v_pixel_list))) {
-    __pyx_t_5 = ((PyObject *)__pyx_v_pixel_list); __Pyx_INCREF(__pyx_t_5); __pyx_t_1 = 0;
-    __pyx_t_22 = NULL;
-  } else {
-    __pyx_t_1 = -1; __pyx_t_5 = PyObject_GetIter(((PyObject *)__pyx_v_pixel_list)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 75, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_22 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_fluo); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_get_k_bleach); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_sted); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_lambda); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 49, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = NULL;
+  __pyx_t_6 = 0;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+      __pyx_t_6 = 1;
+    }
   }
-  for (;;) {
-    if (likely(!__pyx_t_22)) {
-      if (likely(PyList_CheckExact(__pyx_t_5))) {
-        if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_5)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_7 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_1); __Pyx_INCREF(__pyx_t_7); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 75, __pyx_L1_error)
-        #else
-        __pyx_t_7 = PySequence_ITEM(__pyx_t_5, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 75, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
-        #endif
+  #if CYTHON_FAST_PYCALL
+  if (PyFunction_Check(__pyx_t_3)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_t_10, ((PyObject *)__pyx_v_photons_sted)};
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  } else
+  #endif
+  #if CYTHON_FAST_PYCCALL
+  if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
+    PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_t_10, ((PyObject *)__pyx_v_photons_sted)};
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  } else
+  #endif
+  {
+    __pyx_t_2 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    if (__pyx_t_4) {
+      __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4); __pyx_t_4 = NULL;
+    }
+    __Pyx_GIVEREF(__pyx_t_10);
+    PyTuple_SET_ITEM(__pyx_t_2, 0+__pyx_t_6, __pyx_t_10);
+    __Pyx_INCREF(((PyObject *)__pyx_v_photons_sted));
+    __Pyx_GIVEREF(((PyObject *)__pyx_v_photons_sted));
+    PyTuple_SET_ITEM(__pyx_t_2, 1+__pyx_t_6, ((PyObject *)__pyx_v_photons_sted));
+    __pyx_t_10 = 0;
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 49, __pyx_L1_error)
+  __pyx_t_11 = ((PyArrayObject *)__pyx_t_1);
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_k_sted.rcbuffer->pybuffer);
+    __pyx_t_6 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_k_sted.rcbuffer->pybuffer, (PyObject*)__pyx_t_11, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
+    if (unlikely(__pyx_t_6 < 0)) {
+      PyErr_Fetch(&__pyx_t_9, &__pyx_t_8, &__pyx_t_7);
+      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_k_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_k_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+        Py_XDECREF(__pyx_t_9); Py_XDECREF(__pyx_t_8); Py_XDECREF(__pyx_t_7);
+        __Pyx_RaiseBufferFallbackError();
       } else {
-        if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_7 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_1); __Pyx_INCREF(__pyx_t_7); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 75, __pyx_L1_error)
-        #else
-        __pyx_t_7 = PySequence_ITEM(__pyx_t_5, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 75, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
-        #endif
+        PyErr_Restore(__pyx_t_9, __pyx_t_8, __pyx_t_7);
       }
-    } else {
-      __pyx_t_7 = __pyx_t_22(__pyx_t_5);
-      if (unlikely(!__pyx_t_7)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 75, __pyx_L1_error)
-        }
-        break;
-      }
-      __Pyx_GOTREF(__pyx_t_7);
+      __pyx_t_9 = __pyx_t_8 = __pyx_t_7 = 0;
     }
-    if ((likely(PyTuple_CheckExact(__pyx_t_7))) || (PyList_CheckExact(__pyx_t_7))) {
-      PyObject* sequence = __pyx_t_7;
-      Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
-      if (unlikely(size != 2)) {
-        if (size > 2) __Pyx_RaiseTooManyValuesError(2);
-        else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 75, __pyx_L1_error)
-      }
-      #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-      if (likely(PyTuple_CheckExact(sequence))) {
-        __pyx_t_18 = PyTuple_GET_ITEM(sequence, 0); 
-        __pyx_t_8 = PyTuple_GET_ITEM(sequence, 1); 
-      } else {
-        __pyx_t_18 = PyList_GET_ITEM(sequence, 0); 
-        __pyx_t_8 = PyList_GET_ITEM(sequence, 1); 
-      }
-      __Pyx_INCREF(__pyx_t_18);
-      __Pyx_INCREF(__pyx_t_8);
-      #else
-      __pyx_t_18 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 75, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_18);
-      __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 75, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      #endif
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    } else {
-      Py_ssize_t index = -1;
-      __pyx_t_3 = PyObject_GetIter(__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_9 = Py_TYPE(__pyx_t_3)->tp_iternext;
-      index = 0; __pyx_t_18 = __pyx_t_9(__pyx_t_3); if (unlikely(!__pyx_t_18)) goto __pyx_L8_unpacking_failed;
-      __Pyx_GOTREF(__pyx_t_18);
-      index = 1; __pyx_t_8 = __pyx_t_9(__pyx_t_3); if (unlikely(!__pyx_t_8)) goto __pyx_L8_unpacking_failed;
-      __Pyx_GOTREF(__pyx_t_8);
-      if (__Pyx_IternextUnpackEndCheck(__pyx_t_9(__pyx_t_3), 2) < 0) __PYX_ERR(0, 75, __pyx_L1_error)
-      __pyx_t_9 = NULL;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      goto __pyx_L9_unpacking_done;
-      __pyx_L8_unpacking_failed:;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_9 = NULL;
-      if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-      __PYX_ERR(0, 75, __pyx_L1_error)
-      __pyx_L9_unpacking_done:;
-    }
-    __pyx_t_11 = __Pyx_PyInt_As_int(__pyx_t_18); if (unlikely((__pyx_t_11 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-    __pyx_t_23 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_23 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_v_row = __pyx_t_11;
-    __pyx_v_col = __pyx_t_23;
+    __pyx_pybuffernd_k_sted.diminfo[0].strides = __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_k_sted.diminfo[0].shape = __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_k_sted.diminfo[1].strides = __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_k_sted.diminfo[1].shape = __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.shape[1];
+    if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 49, __pyx_L1_error)
+  }
+  __pyx_t_11 = 0;
+  __pyx_v_k_sted = ((PyArrayObject *)__pyx_t_1);
+  __pyx_t_1 = 0;
 
-    /* "pysted/raster.pyx":76
+  /* "pysted/bleach_funcs.pyx":51
+ *     k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
  * 
- *     for (row, col) in pixel_list:
- *         pdt = pdt_roi[row, col]             # <<<<<<<<<<<<<<
- *         p_ex = p_ex_roi[row, col]
- *         p_sted = p_sted_roi[row, col]
- */
-    __pyx_t_15 = __pyx_v_row;
-    __pyx_t_16 = __pyx_v_col;
-    __pyx_v_pdt = (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_pdt_roi.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_pdt_roi.diminfo[1].strides));
-
-    /* "pysted/raster.pyx":77
- *     for (row, col) in pixel_list:
- *         pdt = pdt_roi[row, col]
- *         p_ex = p_ex_roi[row, col]             # <<<<<<<<<<<<<<
- *         p_sted = p_sted_roi[row, col]
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
- */
-    __pyx_t_16 = __pyx_v_row;
-    __pyx_t_15 = __pyx_v_col;
-    __pyx_v_p_ex = (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_p_ex_roi.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_p_ex_roi.diminfo[1].strides));
-
-    /* "pysted/raster.pyx":78
- *         pdt = pdt_roi[row, col]
- *         p_ex = p_ex_roi[row, col]
- *         p_sted = p_sted_roi[row, col]             # <<<<<<<<<<<<<<
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
- */
-    __pyx_t_15 = __pyx_v_row;
-    __pyx_t_16 = __pyx_v_col;
-    __pyx_v_p_sted = (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_p_sted_roi.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_p_sted_roi.diminfo[1].strides));
-
-    /* "pysted/raster.pyx":79
- *         p_ex = p_ex_roi[row, col]
- *         p_sted = p_sted_roi[row, col]
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)             # <<<<<<<<<<<<<<
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
- *         for key in bleached_sub_datamaps_dict:
- */
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_get_effective); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 79, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_18 = __Pyx_PyObject_GetAttrStr(__pyx_v_datamap, __pyx_n_s_pixelsize); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 79, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_18);
-    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_p_ex); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_p_sted); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 79, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_17 = NULL;
-    __pyx_t_23 = 0;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_8))) {
-      __pyx_t_17 = PyMethod_GET_SELF(__pyx_t_8);
-      if (likely(__pyx_t_17)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
-        __Pyx_INCREF(__pyx_t_17);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_8, function);
-        __pyx_t_23 = 1;
-      }
-    }
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_8)) {
-      PyObject *__pyx_temp[4] = {__pyx_t_17, __pyx_t_18, __pyx_t_3, __pyx_t_4};
-      __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_23, 3+__pyx_t_23); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 79, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
-      PyObject *__pyx_temp[4] = {__pyx_t_17, __pyx_t_18, __pyx_t_3, __pyx_t_4};
-      __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_23, 3+__pyx_t_23); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 79, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    } else
-    #endif
-    {
-      __pyx_t_24 = PyTuple_New(3+__pyx_t_23); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 79, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      if (__pyx_t_17) {
-        __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_24, 0, __pyx_t_17); __pyx_t_17 = NULL;
-      }
-      __Pyx_GIVEREF(__pyx_t_18);
-      PyTuple_SET_ITEM(__pyx_t_24, 0+__pyx_t_23, __pyx_t_18);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_24, 1+__pyx_t_23, __pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_4);
-      PyTuple_SET_ITEM(__pyx_t_24, 2+__pyx_t_23, __pyx_t_4);
-      __pyx_t_18 = 0;
-      __pyx_t_3 = 0;
-      __pyx_t_4 = 0;
-      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_24, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 79, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-    }
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 79, __pyx_L1_error)
-    __pyx_t_19 = ((PyArrayObject *)__pyx_t_7);
-    {
-      __Pyx_BufFmt_StackElem __pyx_stack[1];
-      __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_effective.rcbuffer->pybuffer);
-      __pyx_t_23 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_effective.rcbuffer->pybuffer, (PyObject*)__pyx_t_19, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-      if (unlikely(__pyx_t_23 < 0)) {
-        PyErr_Fetch(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_effective.rcbuffer->pybuffer, (PyObject*)__pyx_v_effective, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-          Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_12);
-          __Pyx_RaiseBufferFallbackError();
-        } else {
-          PyErr_Restore(__pyx_t_14, __pyx_t_13, __pyx_t_12);
-        }
-        __pyx_t_14 = __pyx_t_13 = __pyx_t_12 = 0;
-      }
-      __pyx_pybuffernd_effective.diminfo[0].strides = __pyx_pybuffernd_effective.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_effective.diminfo[0].shape = __pyx_pybuffernd_effective.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_effective.diminfo[1].strides = __pyx_pybuffernd_effective.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_effective.diminfo[1].shape = __pyx_pybuffernd_effective.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_23 < 0)) __PYX_ERR(0, 79, __pyx_L1_error)
-    }
-    __pyx_t_19 = 0;
-    __Pyx_XDECREF_SET(__pyx_v_effective, ((PyArrayObject *)__pyx_t_7));
-    __pyx_t_7 = 0;
-
-    /* "pysted/raster.pyx":80
- *         p_sted = p_sted_roi[row, col]
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)             # <<<<<<<<<<<<<<
- *         for key in bleached_sub_datamaps_dict:
- *             bleached_datamap += bleached_sub_datamaps_dict[key]
- */
-    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_numpy); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 80, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_zeros); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 80, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
-      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 80, __pyx_L1_error)
-    }
-    __pyx_t_7 = __Pyx_PyDict_GetItem(__pyx_v_bleached_sub_datamaps_dict, __pyx_n_s_base); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 80, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_shape); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 80, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_24);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 80, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_GIVEREF(__pyx_t_24);
-    PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_24);
-    __pyx_t_24 = 0;
-    __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 80, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_24);
-    if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 80, __pyx_L1_error)
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_7, __pyx_t_24); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 80, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 80, __pyx_L1_error)
-    __pyx_t_25 = ((PyArrayObject *)__pyx_t_4);
-    {
-      __Pyx_BufFmt_StackElem __pyx_stack[1];
-      __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer);
-      __pyx_t_23 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer, (PyObject*)__pyx_t_25, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-      if (unlikely(__pyx_t_23 < 0)) {
-        PyErr_Fetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
-        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer, (PyObject*)__pyx_v_bleached_datamap, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-          Py_XDECREF(__pyx_t_12); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14);
-          __Pyx_RaiseBufferFallbackError();
-        } else {
-          PyErr_Restore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-        }
-        __pyx_t_12 = __pyx_t_13 = __pyx_t_14 = 0;
-      }
-      __pyx_pybuffernd_bleached_datamap.diminfo[0].strides = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_bleached_datamap.diminfo[0].shape = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_bleached_datamap.diminfo[1].strides = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_bleached_datamap.diminfo[1].shape = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_23 < 0)) __PYX_ERR(0, 80, __pyx_L1_error)
-    }
-    __pyx_t_25 = 0;
-    __Pyx_XDECREF_SET(__pyx_v_bleached_datamap, ((PyArrayObject *)__pyx_t_4));
-    __pyx_t_4 = 0;
-
-    /* "pysted/raster.pyx":81
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
- *         for key in bleached_sub_datamaps_dict:             # <<<<<<<<<<<<<<
- *             bleached_datamap += bleached_sub_datamaps_dict[key]
- * 
- */
-    __pyx_t_26 = 0;
-    if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
-      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-      __PYX_ERR(0, 81, __pyx_L1_error)
-    }
-    __pyx_t_24 = __Pyx_dict_iterator(__pyx_v_bleached_sub_datamaps_dict, 1, ((PyObject *)NULL), (&__pyx_t_27), (&__pyx_t_23)); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 81, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_24);
-    __Pyx_XDECREF(__pyx_t_4);
-    __pyx_t_4 = __pyx_t_24;
-    __pyx_t_24 = 0;
-    while (1) {
-      __pyx_t_11 = __Pyx_dict_iter_next(__pyx_t_4, __pyx_t_27, &__pyx_t_26, &__pyx_t_24, NULL, NULL, __pyx_t_23);
-      if (unlikely(__pyx_t_11 == 0)) break;
-      if (unlikely(__pyx_t_11 == -1)) __PYX_ERR(0, 81, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __Pyx_XDECREF_SET(__pyx_v_key, __pyx_t_24);
-      __pyx_t_24 = 0;
-
-      /* "pysted/raster.pyx":82
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
- *         for key in bleached_sub_datamaps_dict:
- *             bleached_datamap += bleached_sub_datamaps_dict[key]             # <<<<<<<<<<<<<<
- * 
- *         value = 0.0
- */
-      if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
-        PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-        __PYX_ERR(0, 82, __pyx_L1_error)
-      }
-      __pyx_t_24 = __Pyx_PyDict_GetItem(__pyx_v_bleached_sub_datamaps_dict, __pyx_v_key); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 82, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __pyx_t_7 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_bleached_datamap), __pyx_t_24); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 82, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-      if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 82, __pyx_L1_error)
-      __pyx_t_25 = ((PyArrayObject *)__pyx_t_7);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer);
-        __pyx_t_11 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer, (PyObject*)__pyx_t_25, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-        if (unlikely(__pyx_t_11 < 0)) {
-          PyErr_Fetch(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer, (PyObject*)__pyx_v_bleached_datamap, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_12);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_14, __pyx_t_13, __pyx_t_12);
-          }
-          __pyx_t_14 = __pyx_t_13 = __pyx_t_12 = 0;
-        }
-        __pyx_pybuffernd_bleached_datamap.diminfo[0].strides = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_bleached_datamap.diminfo[0].shape = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_bleached_datamap.diminfo[1].strides = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_bleached_datamap.diminfo[1].shape = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.shape[1];
-        if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(0, 82, __pyx_L1_error)
-      }
-      __pyx_t_25 = 0;
-      __Pyx_DECREF_SET(__pyx_v_bleached_datamap, ((PyArrayObject *)__pyx_t_7));
-      __pyx_t_7 = 0;
-    }
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-
-    /* "pysted/raster.pyx":84
- *             bleached_datamap += bleached_sub_datamaps_dict[key]
- * 
- *         value = 0.0             # <<<<<<<<<<<<<<
+ *     for key in bleached_sub_datamaps_dict:             # <<<<<<<<<<<<<<
  *         sprime = 0
  *         for s in range(row, row + h):
  */
-    __pyx_v_value = 0.0;
+  __pyx_t_13 = 0;
+  if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
+    __PYX_ERR(0, 51, __pyx_L1_error)
+  }
+  __pyx_t_3 = __Pyx_dict_iterator(__pyx_v_bleached_sub_datamaps_dict, 1, ((PyObject *)NULL), (&__pyx_t_14), (&__pyx_t_6)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_1);
+  __pyx_t_1 = __pyx_t_3;
+  __pyx_t_3 = 0;
+  while (1) {
+    __pyx_t_15 = __Pyx_dict_iter_next(__pyx_t_1, __pyx_t_14, &__pyx_t_13, &__pyx_t_3, NULL, NULL, __pyx_t_6);
+    if (unlikely(__pyx_t_15 == 0)) break;
+    if (unlikely(__pyx_t_15 == -1)) __PYX_ERR(0, 51, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    if (!(likely(PyString_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "str", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 51, __pyx_L1_error)
+    __Pyx_XDECREF_SET(__pyx_v_key, ((PyObject*)__pyx_t_3));
+    __pyx_t_3 = 0;
 
-    /* "pysted/raster.pyx":85
+    /* "pysted/bleach_funcs.pyx":52
  * 
- *         value = 0.0
+ *     for key in bleached_sub_datamaps_dict:
  *         sprime = 0             # <<<<<<<<<<<<<<
  *         for s in range(row, row + h):
  *             tprime = 0
  */
     __pyx_v_sprime = 0;
 
-    /* "pysted/raster.pyx":86
- *         value = 0.0
+    /* "pysted/bleach_funcs.pyx":53
+ *     for key in bleached_sub_datamaps_dict:
  *         sprime = 0
  *         for s in range(row, row + h):             # <<<<<<<<<<<<<<
  *             tprime = 0
  *             for t in range(col, col + w):
  */
-    __pyx_t_23 = (__pyx_v_row + __pyx_v_h);
-    __pyx_t_11 = __pyx_t_23;
-    for (__pyx_t_28 = __pyx_v_row; __pyx_t_28 < __pyx_t_11; __pyx_t_28+=1) {
-      __pyx_v_s = __pyx_t_28;
+    __pyx_t_15 = (__pyx_v_row + __pyx_v_h);
+    __pyx_t_16 = __pyx_t_15;
+    for (__pyx_t_17 = __pyx_v_row; __pyx_t_17 < __pyx_t_16; __pyx_t_17+=1) {
+      __pyx_v_s = __pyx_t_17;
 
-      /* "pysted/raster.pyx":87
+      /* "pysted/bleach_funcs.pyx":54
  *         sprime = 0
  *         for s in range(row, row + h):
  *             tprime = 0             # <<<<<<<<<<<<<<
  *             for t in range(col, col + w):
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]
+ *                 # Updates probabilites
  */
       __pyx_v_tprime = 0;
 
-      /* "pysted/raster.pyx":88
+      /* "pysted/bleach_funcs.pyx":55
  *         for s in range(row, row + h):
  *             tprime = 0
  *             for t in range(col, col + w):             # <<<<<<<<<<<<<<
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]
+ *                 # Updates probabilites
+ *                 # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
+ */
+      __pyx_t_18 = (__pyx_v_col + __pyx_v_w);
+      __pyx_t_19 = __pyx_t_18;
+      for (__pyx_t_20 = __pyx_v_col; __pyx_t_20 < __pyx_t_19; __pyx_t_20+=1) {
+        __pyx_v_t = __pyx_t_20;
+
+        /* "pysted/bleach_funcs.pyx":58
+ *                 # Updates probabilites
+ *                 # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
+ *                 prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)             # <<<<<<<<<<<<<<
+ *                 prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
+ * 
+ */
+        __pyx_t_21 = __pyx_v_s;
+        __pyx_t_22 = __pyx_v_t;
+        __pyx_t_23 = __pyx_v_sprime;
+        __pyx_t_24 = __pyx_v_tprime;
+        __pyx_t_25 = __pyx_v_s;
+        __pyx_t_26 = __pyx_v_t;
+        *__Pyx_BufPtrStrided2d(__pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t *, __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_prob_ex.diminfo[0].strides, __pyx_t_26, __pyx_pybuffernd_prob_ex.diminfo[1].strides) = ((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t *, __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_prob_ex.diminfo[0].strides, __pyx_t_22, __pyx_pybuffernd_prob_ex.diminfo[1].strides)) * exp(((-1. * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t *, __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_k_ex.diminfo[0].strides, __pyx_t_24, __pyx_pybuffernd_k_ex.diminfo[1].strides))) * __pyx_v_pdt)));
+
+        /* "pysted/bleach_funcs.pyx":59
+ *                 # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
+ *                 prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
+ *                 prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)             # <<<<<<<<<<<<<<
+ * 
+ *                 # only need to compute bleaching (resampling) if the pixel is not empty
+ */
+        __pyx_t_24 = __pyx_v_s;
+        __pyx_t_23 = __pyx_v_t;
+        __pyx_t_22 = __pyx_v_sprime;
+        __pyx_t_21 = __pyx_v_tprime;
+        __pyx_t_26 = __pyx_v_s;
+        __pyx_t_25 = __pyx_v_t;
+        *__Pyx_BufPtrStrided2d(__pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t *, __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.buf, __pyx_t_26, __pyx_pybuffernd_prob_sted.diminfo[0].strides, __pyx_t_25, __pyx_pybuffernd_prob_sted.diminfo[1].strides) = ((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t *, __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.buf, __pyx_t_24, __pyx_pybuffernd_prob_sted.diminfo[0].strides, __pyx_t_23, __pyx_pybuffernd_prob_sted.diminfo[1].strides)) * exp(((-1. * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t *, __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_k_sted.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_k_sted.diminfo[1].strides))) * __pyx_v_pdt)));
+
+        /* "pysted/bleach_funcs.pyx":62
+ * 
+ *                 # only need to compute bleaching (resampling) if the pixel is not empty
+ *                 current = bleached_sub_datamaps_dict[key][s, t]             # <<<<<<<<<<<<<<
+ *                 if current > 0:
+ *                     # Calculates the binomial sampling
+ */
+        if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
+          PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+          __PYX_ERR(0, 62, __pyx_L1_error)
+        }
+        __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_bleached_sub_datamaps_dict, __pyx_v_key); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_s); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 62, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_2);
+        __pyx_t_10 = __Pyx_PyInt_From_int(__pyx_v_t); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 62, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_10);
+        __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 62, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __Pyx_GIVEREF(__pyx_t_2);
+        PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
+        __Pyx_GIVEREF(__pyx_t_10);
+        PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_10);
+        __pyx_t_2 = 0;
+        __pyx_t_10 = 0;
+        __pyx_t_10 = __Pyx_PyObject_GetItem(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 62, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_10);
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __pyx_t_27 = __Pyx_PyInt_As_int(__pyx_t_10); if (unlikely((__pyx_t_27 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 62, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+        __pyx_v_current = __pyx_t_27;
+
+        /* "pysted/bleach_funcs.pyx":63
+ *                 # only need to compute bleaching (resampling) if the pixel is not empty
+ *                 current = bleached_sub_datamaps_dict[key][s, t]
+ *                 if current > 0:             # <<<<<<<<<<<<<<
+ *                     # Calculates the binomial sampling
+ *                     sampled_value = 0
+ */
+        __pyx_t_28 = ((__pyx_v_current > 0) != 0);
+        if (__pyx_t_28) {
+
+          /* "pysted/bleach_funcs.pyx":65
+ *                 if current > 0:
+ *                     # Calculates the binomial sampling
+ *                     sampled_value = 0             # <<<<<<<<<<<<<<
+ *                     prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
+ *                     # For each count we sample a random variable
+ */
+          __pyx_v_sampled_value = 0;
+
+          /* "pysted/bleach_funcs.pyx":66
+ *                     # Calculates the binomial sampling
+ *                     sampled_value = 0
+ *                     prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)             # <<<<<<<<<<<<<<
+ *                     # For each count we sample a random variable
+ *                     for o in range(current):
+ */
+          __pyx_t_21 = __pyx_v_s;
+          __pyx_t_22 = __pyx_v_t;
+          __pyx_t_23 = __pyx_v_s;
+          __pyx_t_24 = __pyx_v_t;
+          __pyx_v_prob = ((int)(((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t *, __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_prob_ex.diminfo[0].strides, __pyx_t_22, __pyx_pybuffernd_prob_ex.diminfo[1].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_12bleach_funcs_FLOATDTYPE_t *, __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_prob_sted.diminfo[0].strides, __pyx_t_24, __pyx_pybuffernd_prob_sted.diminfo[1].strides))) * RAND_MAX));
+
+          /* "pysted/bleach_funcs.pyx":68
+ *                     prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
+ *                     # For each count we sample a random variable
+ *                     for o in range(current):             # <<<<<<<<<<<<<<
+ *                         rsamp = rand()
+ *                         if rsamp <= prob:
+ */
+          __pyx_t_27 = __pyx_v_current;
+          __pyx_t_29 = __pyx_t_27;
+          for (__pyx_t_30 = 0; __pyx_t_30 < __pyx_t_29; __pyx_t_30+=1) {
+            __pyx_v_o = __pyx_t_30;
+
+            /* "pysted/bleach_funcs.pyx":69
+ *                     # For each count we sample a random variable
+ *                     for o in range(current):
+ *                         rsamp = rand()             # <<<<<<<<<<<<<<
+ *                         if rsamp <= prob:
+ *                             sampled_value += 1
+ */
+            __pyx_v_rsamp = rand();
+
+            /* "pysted/bleach_funcs.pyx":70
+ *                     for o in range(current):
+ *                         rsamp = rand()
+ *                         if rsamp <= prob:             # <<<<<<<<<<<<<<
+ *                             sampled_value += 1
+ *                     bleached_sub_datamaps_dict[key][s, t] = sampled_value
+ */
+            __pyx_t_28 = ((__pyx_v_rsamp <= __pyx_v_prob) != 0);
+            if (__pyx_t_28) {
+
+              /* "pysted/bleach_funcs.pyx":71
+ *                         rsamp = rand()
+ *                         if rsamp <= prob:
+ *                             sampled_value += 1             # <<<<<<<<<<<<<<
+ *                     bleached_sub_datamaps_dict[key][s, t] = sampled_value
+ * 
+ */
+              __pyx_v_sampled_value = (__pyx_v_sampled_value + 1);
+
+              /* "pysted/bleach_funcs.pyx":70
+ *                     for o in range(current):
+ *                         rsamp = rand()
+ *                         if rsamp <= prob:             # <<<<<<<<<<<<<<
+ *                             sampled_value += 1
+ *                     bleached_sub_datamaps_dict[key][s, t] = sampled_value
+ */
+            }
+          }
+
+          /* "pysted/bleach_funcs.pyx":72
+ *                         if rsamp <= prob:
+ *                             sampled_value += 1
+ *                     bleached_sub_datamaps_dict[key][s, t] = sampled_value             # <<<<<<<<<<<<<<
+ * 
  *                 tprime += 1
  */
-      __pyx_t_29 = (__pyx_v_col + __pyx_v_w);
-      __pyx_t_30 = __pyx_t_29;
-      for (__pyx_t_31 = __pyx_v_col; __pyx_t_31 < __pyx_t_30; __pyx_t_31+=1) {
-        __pyx_v_t = __pyx_t_31;
+          __pyx_t_10 = __Pyx_PyInt_From_int(__pyx_v_sampled_value); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 72, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_10);
+          if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
+            PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+            __PYX_ERR(0, 72, __pyx_L1_error)
+          }
+          __pyx_t_4 = __Pyx_PyDict_GetItem(__pyx_v_bleached_sub_datamaps_dict, __pyx_v_key); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_4);
+          __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_s); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_3);
+          __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_t); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_2);
+          __pyx_t_31 = PyTuple_New(2); if (unlikely(!__pyx_t_31)) __PYX_ERR(0, 72, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_31);
+          __Pyx_GIVEREF(__pyx_t_3);
+          PyTuple_SET_ITEM(__pyx_t_31, 0, __pyx_t_3);
+          __Pyx_GIVEREF(__pyx_t_2);
+          PyTuple_SET_ITEM(__pyx_t_31, 1, __pyx_t_2);
+          __pyx_t_3 = 0;
+          __pyx_t_2 = 0;
+          if (unlikely(PyObject_SetItem(__pyx_t_4, __pyx_t_31, __pyx_t_10) < 0)) __PYX_ERR(0, 72, __pyx_L1_error)
+          __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+          __Pyx_DECREF(__pyx_t_31); __pyx_t_31 = 0;
+          __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-        /* "pysted/raster.pyx":89
- *             tprime = 0
- *             for t in range(col, col + w):
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]             # <<<<<<<<<<<<<<
- *                 tprime += 1
- *             sprime += 1
+          /* "pysted/bleach_funcs.pyx":63
+ *                 # only need to compute bleaching (resampling) if the pixel is not empty
+ *                 current = bleached_sub_datamaps_dict[key][s, t]
+ *                 if current > 0:             # <<<<<<<<<<<<<<
+ *                     # Calculates the binomial sampling
+ *                     sampled_value = 0
  */
-        __pyx_t_16 = __pyx_v_sprime;
-        __pyx_t_15 = __pyx_v_tprime;
-        __pyx_t_32 = __pyx_v_s;
-        __pyx_t_33 = __pyx_v_t;
-        __pyx_v_value = (__pyx_v_value + ((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_effective.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_effective.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_effective.diminfo[1].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_INTDTYPE_t *, __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_bleached_datamap.diminfo[0].strides, __pyx_t_33, __pyx_pybuffernd_bleached_datamap.diminfo[1].strides))));
+        }
 
-        /* "pysted/raster.pyx":90
- *             for t in range(col, col + w):
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]
+        /* "pysted/bleach_funcs.pyx":74
+ *                     bleached_sub_datamaps_dict[key][s, t] = sampled_value
+ * 
  *                 tprime += 1             # <<<<<<<<<<<<<<
  *             sprime += 1
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
  */
         __pyx_v_tprime = (__pyx_v_tprime + 1);
       }
 
-      /* "pysted/raster.pyx":91
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]
+      /* "pysted/bleach_funcs.pyx":75
+ * 
  *                 tprime += 1
  *             sprime += 1             # <<<<<<<<<<<<<<
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
- * 
  */
       __pyx_v_sprime = (__pyx_v_sprime + 1);
     }
-
-    /* "pysted/raster.pyx":92
- *                 tprime += 1
- *             sprime += 1
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value             # <<<<<<<<<<<<<<
- * 
- *         if bleach:
- */
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_value); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 92, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__pyx_v_ratio == 0)) {
-      PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 92, __pyx_L1_error)
-    }
-    else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_ratio == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_row))) {
-      PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-      __PYX_ERR(0, 92, __pyx_L1_error)
-    }
-    __pyx_t_7 = __Pyx_PyInt_From_int(__Pyx_div_int(__pyx_v_row, __pyx_v_ratio)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 92, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_24 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_7); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 92, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_24);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(__pyx_v_ratio == 0)) {
-      PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 92, __pyx_L1_error)
-    }
-    else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_ratio == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_col))) {
-      PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-      __PYX_ERR(0, 92, __pyx_L1_error)
-    }
-    __pyx_t_7 = __Pyx_PyInt_From_int(__Pyx_div_int(__pyx_v_col, __pyx_v_ratio)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 92, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 92, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 92, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_GIVEREF(__pyx_t_24);
-    PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_24);
-    __Pyx_GIVEREF(__pyx_t_8);
-    PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_8);
-    __pyx_t_24 = 0;
-    __pyx_t_8 = 0;
-    if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_acquired_intensity), __pyx_t_7, __pyx_t_4) < 0)) __PYX_ERR(0, 92, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-
-    /* "pysted/raster.pyx":94
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
- * 
- *         if bleach:             # <<<<<<<<<<<<<<
- *             photons_ex = self.fluo.get_photons(i_ex * p_ex)
- *             k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
- */
-    __pyx_t_2 = (__pyx_v_bleach != 0);
-    if (__pyx_t_2) {
-
-      /* "pysted/raster.pyx":95
- * 
- *         if bleach:
- *             photons_ex = self.fluo.get_photons(i_ex * p_ex)             # <<<<<<<<<<<<<<
- *             k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
- *             duty_cycle = self.sted.tau * self.sted.rate
- */
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_fluo); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 95, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_get_photons); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 95, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_p_ex); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 95, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_24 = PyNumber_Multiply(((PyObject *)__pyx_v_i_ex), __pyx_t_7); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 95, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_7 = NULL;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_8))) {
-        __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_8);
-        if (likely(__pyx_t_7)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
-          __Pyx_INCREF(__pyx_t_7);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_8, function);
-        }
-      }
-      __pyx_t_4 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_8, __pyx_t_7, __pyx_t_24) : __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_24);
-      __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 95, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 95, __pyx_L1_error)
-      __pyx_t_34 = ((PyArrayObject *)__pyx_t_4);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_photons_ex.rcbuffer->pybuffer);
-        __pyx_t_23 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_photons_ex.rcbuffer->pybuffer, (PyObject*)__pyx_t_34, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-        if (unlikely(__pyx_t_23 < 0)) {
-          PyErr_Fetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_photons_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_photons_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_12); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-          }
-          __pyx_t_12 = __pyx_t_13 = __pyx_t_14 = 0;
-        }
-        __pyx_pybuffernd_photons_ex.diminfo[0].strides = __pyx_pybuffernd_photons_ex.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_photons_ex.diminfo[0].shape = __pyx_pybuffernd_photons_ex.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_photons_ex.diminfo[1].strides = __pyx_pybuffernd_photons_ex.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_photons_ex.diminfo[1].shape = __pyx_pybuffernd_photons_ex.rcbuffer->pybuffer.shape[1];
-        if (unlikely(__pyx_t_23 < 0)) __PYX_ERR(0, 95, __pyx_L1_error)
-      }
-      __pyx_t_34 = 0;
-      __Pyx_XDECREF_SET(__pyx_v_photons_ex, ((PyArrayObject *)__pyx_t_4));
-      __pyx_t_4 = 0;
-
-      /* "pysted/raster.pyx":96
- *         if bleach:
- *             photons_ex = self.fluo.get_photons(i_ex * p_ex)
- *             k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)             # <<<<<<<<<<<<<<
- *             duty_cycle = self.sted.tau * self.sted.rate
- *             photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
- */
-      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_fluo); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 96, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_get_k_bleach); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 96, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_excitation); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 96, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_lambda); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 96, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __pyx_t_8 = NULL;
-      __pyx_t_23 = 0;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_24))) {
-        __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_24);
-        if (likely(__pyx_t_8)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_24);
-          __Pyx_INCREF(__pyx_t_8);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_24, function);
-          __pyx_t_23 = 1;
-        }
-      }
-      #if CYTHON_FAST_PYCALL
-      if (PyFunction_Check(__pyx_t_24)) {
-        PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_t_7, ((PyObject *)__pyx_v_photons_ex)};
-        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_24, __pyx_temp+1-__pyx_t_23, 2+__pyx_t_23); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 96, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      } else
-      #endif
-      #if CYTHON_FAST_PYCCALL
-      if (__Pyx_PyFastCFunction_Check(__pyx_t_24)) {
-        PyObject *__pyx_temp[3] = {__pyx_t_8, __pyx_t_7, ((PyObject *)__pyx_v_photons_ex)};
-        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_24, __pyx_temp+1-__pyx_t_23, 2+__pyx_t_23); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 96, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      } else
-      #endif
-      {
-        __pyx_t_3 = PyTuple_New(2+__pyx_t_23); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 96, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        if (__pyx_t_8) {
-          __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_8); __pyx_t_8 = NULL;
-        }
-        __Pyx_GIVEREF(__pyx_t_7);
-        PyTuple_SET_ITEM(__pyx_t_3, 0+__pyx_t_23, __pyx_t_7);
-        __Pyx_INCREF(((PyObject *)__pyx_v_photons_ex));
-        __Pyx_GIVEREF(((PyObject *)__pyx_v_photons_ex));
-        PyTuple_SET_ITEM(__pyx_t_3, 1+__pyx_t_23, ((PyObject *)__pyx_v_photons_ex));
-        __pyx_t_7 = 0;
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_24, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 96, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      }
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-      if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 96, __pyx_L1_error)
-      __pyx_t_35 = ((PyArrayObject *)__pyx_t_4);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_k_ex.rcbuffer->pybuffer);
-        __pyx_t_23 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_k_ex.rcbuffer->pybuffer, (PyObject*)__pyx_t_35, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-        if (unlikely(__pyx_t_23 < 0)) {
-          PyErr_Fetch(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_k_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_k_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_12);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_14, __pyx_t_13, __pyx_t_12);
-          }
-          __pyx_t_14 = __pyx_t_13 = __pyx_t_12 = 0;
-        }
-        __pyx_pybuffernd_k_ex.diminfo[0].strides = __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_k_ex.diminfo[0].shape = __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_k_ex.diminfo[1].strides = __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_k_ex.diminfo[1].shape = __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.shape[1];
-        if (unlikely(__pyx_t_23 < 0)) __PYX_ERR(0, 96, __pyx_L1_error)
-      }
-      __pyx_t_35 = 0;
-      __Pyx_XDECREF_SET(__pyx_v_k_ex, ((PyArrayObject *)__pyx_t_4));
-      __pyx_t_4 = 0;
-
-      /* "pysted/raster.pyx":97
- *             photons_ex = self.fluo.get_photons(i_ex * p_ex)
- *             k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
- *             duty_cycle = self.sted.tau * self.sted.rate             # <<<<<<<<<<<<<<
- *             photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
- *             k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
- */
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_sted); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_tau); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 97, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_sted); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_rate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = PyNumber_Multiply(__pyx_t_24, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_36 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_36 == ((npy_float64)-1)) && PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_v_duty_cycle = __pyx_t_36;
-
-      /* "pysted/raster.pyx":98
- *             k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
- *             duty_cycle = self.sted.tau * self.sted.rate
- *             photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)             # <<<<<<<<<<<<<<
- *             k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
- * 
- */
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_fluo); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 98, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_get_photons); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 98, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyFloat_FromDouble(__pyx_v_p_sted); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 98, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_7 = PyNumber_Multiply(((PyObject *)__pyx_v_i_sted), __pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 98, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyFloat_FromDouble(__pyx_v_duty_cycle); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 98, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_8 = PyNumber_Multiply(__pyx_t_7, __pyx_t_3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 98, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = NULL;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_24))) {
-        __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_24);
-        if (likely(__pyx_t_3)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_24);
-          __Pyx_INCREF(__pyx_t_3);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_24, function);
-        }
-      }
-      __pyx_t_4 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_24, __pyx_t_3, __pyx_t_8) : __Pyx_PyObject_CallOneArg(__pyx_t_24, __pyx_t_8);
-      __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 98, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-      if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 98, __pyx_L1_error)
-      __pyx_t_34 = ((PyArrayObject *)__pyx_t_4);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_photons_sted.rcbuffer->pybuffer);
-        __pyx_t_23 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_photons_sted.rcbuffer->pybuffer, (PyObject*)__pyx_t_34, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-        if (unlikely(__pyx_t_23 < 0)) {
-          PyErr_Fetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_photons_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_photons_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_12); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-          }
-          __pyx_t_12 = __pyx_t_13 = __pyx_t_14 = 0;
-        }
-        __pyx_pybuffernd_photons_sted.diminfo[0].strides = __pyx_pybuffernd_photons_sted.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_photons_sted.diminfo[0].shape = __pyx_pybuffernd_photons_sted.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_photons_sted.diminfo[1].strides = __pyx_pybuffernd_photons_sted.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_photons_sted.diminfo[1].shape = __pyx_pybuffernd_photons_sted.rcbuffer->pybuffer.shape[1];
-        if (unlikely(__pyx_t_23 < 0)) __PYX_ERR(0, 98, __pyx_L1_error)
-      }
-      __pyx_t_34 = 0;
-      __Pyx_XDECREF_SET(__pyx_v_photons_sted, ((PyArrayObject *)__pyx_t_4));
-      __pyx_t_4 = 0;
-
-      /* "pysted/raster.pyx":99
- *             duty_cycle = self.sted.tau * self.sted.rate
- *             photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
- *             k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)             # <<<<<<<<<<<<<<
- * 
- *             for key in bleached_sub_datamaps_dict:
- */
-      __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_fluo); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 99, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_24, __pyx_n_s_get_k_bleach); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 99, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-      __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_sted); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 99, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_24, __pyx_n_s_lambda); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 99, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-      __pyx_t_24 = NULL;
-      __pyx_t_23 = 0;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_8))) {
-        __pyx_t_24 = PyMethod_GET_SELF(__pyx_t_8);
-        if (likely(__pyx_t_24)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
-          __Pyx_INCREF(__pyx_t_24);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_8, function);
-          __pyx_t_23 = 1;
-        }
-      }
-      #if CYTHON_FAST_PYCALL
-      if (PyFunction_Check(__pyx_t_8)) {
-        PyObject *__pyx_temp[3] = {__pyx_t_24, __pyx_t_3, ((PyObject *)__pyx_v_photons_sted)};
-        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_23, 2+__pyx_t_23); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 99, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_24); __pyx_t_24 = 0;
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      } else
-      #endif
-      #if CYTHON_FAST_PYCCALL
-      if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
-        PyObject *__pyx_temp[3] = {__pyx_t_24, __pyx_t_3, ((PyObject *)__pyx_v_photons_sted)};
-        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_23, 2+__pyx_t_23); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 99, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_24); __pyx_t_24 = 0;
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      } else
-      #endif
-      {
-        __pyx_t_7 = PyTuple_New(2+__pyx_t_23); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 99, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
-        if (__pyx_t_24) {
-          __Pyx_GIVEREF(__pyx_t_24); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_24); __pyx_t_24 = NULL;
-        }
-        __Pyx_GIVEREF(__pyx_t_3);
-        PyTuple_SET_ITEM(__pyx_t_7, 0+__pyx_t_23, __pyx_t_3);
-        __Pyx_INCREF(((PyObject *)__pyx_v_photons_sted));
-        __Pyx_GIVEREF(((PyObject *)__pyx_v_photons_sted));
-        PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_23, ((PyObject *)__pyx_v_photons_sted));
-        __pyx_t_3 = 0;
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_7, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 99, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      }
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 99, __pyx_L1_error)
-      __pyx_t_35 = ((PyArrayObject *)__pyx_t_4);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_k_sted.rcbuffer->pybuffer);
-        __pyx_t_23 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_k_sted.rcbuffer->pybuffer, (PyObject*)__pyx_t_35, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-        if (unlikely(__pyx_t_23 < 0)) {
-          PyErr_Fetch(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_k_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_k_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_12);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_14, __pyx_t_13, __pyx_t_12);
-          }
-          __pyx_t_14 = __pyx_t_13 = __pyx_t_12 = 0;
-        }
-        __pyx_pybuffernd_k_sted.diminfo[0].strides = __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_k_sted.diminfo[0].shape = __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_k_sted.diminfo[1].strides = __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_k_sted.diminfo[1].shape = __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.shape[1];
-        if (unlikely(__pyx_t_23 < 0)) __PYX_ERR(0, 99, __pyx_L1_error)
-      }
-      __pyx_t_35 = 0;
-      __Pyx_XDECREF_SET(__pyx_v_k_sted, ((PyArrayObject *)__pyx_t_4));
-      __pyx_t_4 = 0;
-
-      /* "pysted/raster.pyx":101
- *             k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
- * 
- *             for key in bleached_sub_datamaps_dict:             # <<<<<<<<<<<<<<
- *                 sprime = 0
- *                 for s in range(row, row + h):
- */
-      __pyx_t_27 = 0;
-      if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
-        PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-        __PYX_ERR(0, 101, __pyx_L1_error)
-      }
-      __pyx_t_8 = __Pyx_dict_iterator(__pyx_v_bleached_sub_datamaps_dict, 1, ((PyObject *)NULL), (&__pyx_t_26), (&__pyx_t_23)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 101, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __Pyx_XDECREF(__pyx_t_4);
-      __pyx_t_4 = __pyx_t_8;
-      __pyx_t_8 = 0;
-      while (1) {
-        __pyx_t_11 = __Pyx_dict_iter_next(__pyx_t_4, __pyx_t_26, &__pyx_t_27, &__pyx_t_8, NULL, NULL, __pyx_t_23);
-        if (unlikely(__pyx_t_11 == 0)) break;
-        if (unlikely(__pyx_t_11 == -1)) __PYX_ERR(0, 101, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_8);
-        __Pyx_XDECREF_SET(__pyx_v_key, __pyx_t_8);
-        __pyx_t_8 = 0;
-
-        /* "pysted/raster.pyx":102
- * 
- *             for key in bleached_sub_datamaps_dict:
- *                 sprime = 0             # <<<<<<<<<<<<<<
- *                 for s in range(row, row + h):
- *                     tprime = 0
- */
-        __pyx_v_sprime = 0;
-
-        /* "pysted/raster.pyx":103
- *             for key in bleached_sub_datamaps_dict:
- *                 sprime = 0
- *                 for s in range(row, row + h):             # <<<<<<<<<<<<<<
- *                     tprime = 0
- *                     for t in range(col, col + w):
- */
-        __pyx_t_11 = (__pyx_v_row + __pyx_v_h);
-        __pyx_t_28 = __pyx_t_11;
-        for (__pyx_t_29 = __pyx_v_row; __pyx_t_29 < __pyx_t_28; __pyx_t_29+=1) {
-          __pyx_v_s = __pyx_t_29;
-
-          /* "pysted/raster.pyx":104
- *                 sprime = 0
- *                 for s in range(row, row + h):
- *                     tprime = 0             # <<<<<<<<<<<<<<
- *                     for t in range(col, col + w):
- *                         # Updates probabilites
- */
-          __pyx_v_tprime = 0;
-
-          /* "pysted/raster.pyx":105
- *                 for s in range(row, row + h):
- *                     tprime = 0
- *                     for t in range(col, col + w):             # <<<<<<<<<<<<<<
- *                         # Updates probabilites
- *                         # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
- */
-          __pyx_t_30 = (__pyx_v_col + __pyx_v_w);
-          __pyx_t_31 = __pyx_t_30;
-          for (__pyx_t_37 = __pyx_v_col; __pyx_t_37 < __pyx_t_31; __pyx_t_37+=1) {
-            __pyx_v_t = __pyx_t_37;
-
-            /* "pysted/raster.pyx":108
- *                         # Updates probabilites
- *                         # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
- *                         prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)             # <<<<<<<<<<<<<<
- *                         prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
- * 
- */
-            __pyx_t_33 = __pyx_v_s;
-            __pyx_t_32 = __pyx_v_t;
-            __pyx_t_15 = __pyx_v_sprime;
-            __pyx_t_16 = __pyx_v_tprime;
-            __pyx_t_38 = __pyx_v_s;
-            __pyx_t_39 = __pyx_v_t;
-            *__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.buf, __pyx_t_38, __pyx_pybuffernd_prob_ex.diminfo[0].strides, __pyx_t_39, __pyx_pybuffernd_prob_ex.diminfo[1].strides) = ((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_prob_ex.diminfo[0].strides, __pyx_t_32, __pyx_pybuffernd_prob_ex.diminfo[1].strides)) * exp(((-1. * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_k_ex.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_k_ex.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_k_ex.diminfo[1].strides))) * __pyx_v_pdt)));
-
-            /* "pysted/raster.pyx":109
- *                         # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
- *                         prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
- *                         prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)             # <<<<<<<<<<<<<<
- * 
- *                         # only need to compute bleaching (resampling) if the pixel is not empty
- */
-            __pyx_t_16 = __pyx_v_s;
-            __pyx_t_15 = __pyx_v_t;
-            __pyx_t_32 = __pyx_v_sprime;
-            __pyx_t_33 = __pyx_v_tprime;
-            __pyx_t_39 = __pyx_v_s;
-            __pyx_t_38 = __pyx_v_t;
-            *__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.buf, __pyx_t_39, __pyx_pybuffernd_prob_sted.diminfo[0].strides, __pyx_t_38, __pyx_pybuffernd_prob_sted.diminfo[1].strides) = ((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_prob_sted.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_prob_sted.diminfo[1].strides)) * exp(((-1. * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_k_sted.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_k_sted.diminfo[0].strides, __pyx_t_33, __pyx_pybuffernd_k_sted.diminfo[1].strides))) * __pyx_v_pdt)));
-
-            /* "pysted/raster.pyx":112
- * 
- *                         # only need to compute bleaching (resampling) if the pixel is not empty
- *                         current = bleached_sub_datamaps_dict[key][s, t]             # <<<<<<<<<<<<<<
- *                         if current > 0:
- *                             # Calculates the binomial sampling
- */
-            if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
-              PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-              __PYX_ERR(0, 112, __pyx_L1_error)
-            }
-            __pyx_t_8 = __Pyx_PyDict_GetItem(__pyx_v_bleached_sub_datamaps_dict, __pyx_v_key); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 112, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_8);
-            __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_s); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 112, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_7);
-            __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_t); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 112, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_24 = PyTuple_New(2); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 112, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_24);
-            __Pyx_GIVEREF(__pyx_t_7);
-            PyTuple_SET_ITEM(__pyx_t_24, 0, __pyx_t_7);
-            __Pyx_GIVEREF(__pyx_t_3);
-            PyTuple_SET_ITEM(__pyx_t_24, 1, __pyx_t_3);
-            __pyx_t_7 = 0;
-            __pyx_t_3 = 0;
-            __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_t_8, __pyx_t_24); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 112, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_3);
-            __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-            __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-            __pyx_t_40 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_40 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 112, __pyx_L1_error)
-            __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-            __pyx_v_current = __pyx_t_40;
-
-            /* "pysted/raster.pyx":113
- *                         # only need to compute bleaching (resampling) if the pixel is not empty
- *                         current = bleached_sub_datamaps_dict[key][s, t]
- *                         if current > 0:             # <<<<<<<<<<<<<<
- *                             # Calculates the binomial sampling
- *                             sampled_value = 0
- */
-            __pyx_t_2 = ((__pyx_v_current > 0) != 0);
-            if (__pyx_t_2) {
-
-              /* "pysted/raster.pyx":115
- *                         if current > 0:
- *                             # Calculates the binomial sampling
- *                             sampled_value = 0             # <<<<<<<<<<<<<<
- *                             prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
- *                             # For each count we sample a random variable
- */
-              __pyx_v_sampled_value = 0;
-
-              /* "pysted/raster.pyx":116
- *                             # Calculates the binomial sampling
- *                             sampled_value = 0
- *                             prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)             # <<<<<<<<<<<<<<
- *                             # For each count we sample a random variable
- *                             for o in range(current):
- */
-              __pyx_t_33 = __pyx_v_s;
-              __pyx_t_32 = __pyx_v_t;
-              __pyx_t_15 = __pyx_v_s;
-              __pyx_t_16 = __pyx_v_t;
-              __pyx_v_prob = ((int)(((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_prob_ex.diminfo[0].strides, __pyx_t_32, __pyx_pybuffernd_prob_ex.diminfo[1].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_prob_sted.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_prob_sted.diminfo[1].strides))) * RAND_MAX));
-
-              /* "pysted/raster.pyx":118
- *                             prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
- *                             # For each count we sample a random variable
- *                             for o in range(current):             # <<<<<<<<<<<<<<
- *                                 rsamp = rand()
- *                                 if rsamp <= prob:
- */
-              __pyx_t_40 = __pyx_v_current;
-              __pyx_t_41 = __pyx_t_40;
-              for (__pyx_t_42 = 0; __pyx_t_42 < __pyx_t_41; __pyx_t_42+=1) {
-                __pyx_v_o = __pyx_t_42;
-
-                /* "pysted/raster.pyx":119
- *                             # For each count we sample a random variable
- *                             for o in range(current):
- *                                 rsamp = rand()             # <<<<<<<<<<<<<<
- *                                 if rsamp <= prob:
- *                                     sampled_value += 1
- */
-                __pyx_v_rsamp = rand();
-
-                /* "pysted/raster.pyx":120
- *                             for o in range(current):
- *                                 rsamp = rand()
- *                                 if rsamp <= prob:             # <<<<<<<<<<<<<<
- *                                     sampled_value += 1
- *                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
- */
-                __pyx_t_2 = ((__pyx_v_rsamp <= __pyx_v_prob) != 0);
-                if (__pyx_t_2) {
-
-                  /* "pysted/raster.pyx":121
- *                                 rsamp = rand()
- *                                 if rsamp <= prob:
- *                                     sampled_value += 1             # <<<<<<<<<<<<<<
- *                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
- * 
- */
-                  __pyx_v_sampled_value = (__pyx_v_sampled_value + 1);
-
-                  /* "pysted/raster.pyx":120
- *                             for o in range(current):
- *                                 rsamp = rand()
- *                                 if rsamp <= prob:             # <<<<<<<<<<<<<<
- *                                     sampled_value += 1
- *                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
- */
-                }
-              }
-
-              /* "pysted/raster.pyx":122
- *                                 if rsamp <= prob:
- *                                     sampled_value += 1
- *                             bleached_sub_datamaps_dict[key][s, t] = sampled_value             # <<<<<<<<<<<<<<
- * 
- *                         tprime += 1
- */
-              __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_sampled_value); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 122, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_3);
-              if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
-                PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-                __PYX_ERR(0, 122, __pyx_L1_error)
-              }
-              __pyx_t_24 = __Pyx_PyDict_GetItem(__pyx_v_bleached_sub_datamaps_dict, __pyx_v_key); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 122, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_24);
-              __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_s); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 122, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_8);
-              __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_t); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 122, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_7);
-              __pyx_t_18 = PyTuple_New(2); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 122, __pyx_L1_error)
-              __Pyx_GOTREF(__pyx_t_18);
-              __Pyx_GIVEREF(__pyx_t_8);
-              PyTuple_SET_ITEM(__pyx_t_18, 0, __pyx_t_8);
-              __Pyx_GIVEREF(__pyx_t_7);
-              PyTuple_SET_ITEM(__pyx_t_18, 1, __pyx_t_7);
-              __pyx_t_8 = 0;
-              __pyx_t_7 = 0;
-              if (unlikely(PyObject_SetItem(__pyx_t_24, __pyx_t_18, __pyx_t_3) < 0)) __PYX_ERR(0, 122, __pyx_L1_error)
-              __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-              __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-              __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-              /* "pysted/raster.pyx":113
- *                         # only need to compute bleaching (resampling) if the pixel is not empty
- *                         current = bleached_sub_datamaps_dict[key][s, t]
- *                         if current > 0:             # <<<<<<<<<<<<<<
- *                             # Calculates the binomial sampling
- *                             sampled_value = 0
- */
-            }
-
-            /* "pysted/raster.pyx":124
- *                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
- * 
- *                         tprime += 1             # <<<<<<<<<<<<<<
- *                     sprime += 1
- * 
- */
-            __pyx_v_tprime = (__pyx_v_tprime + 1);
-          }
-
-          /* "pysted/raster.pyx":125
- * 
- *                         tprime += 1
- *                     sprime += 1             # <<<<<<<<<<<<<<
- * 
- * 
- */
-          __pyx_v_sprime = (__pyx_v_sprime + 1);
-        }
-      }
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-
-      /* "pysted/raster.pyx":94
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
- * 
- *         if bleach:             # <<<<<<<<<<<<<<
- *             photons_ex = self.fluo.get_photons(i_ex * p_ex)
- *             k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
- */
-    }
-
-    /* "pysted/raster.pyx":75
- *     # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape)
- * 
- *     for (row, col) in pixel_list:             # <<<<<<<<<<<<<<
- *         pdt = pdt_roi[row, col]
- *         p_ex = p_ex_roi[row, col]
- */
   }
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pysted/raster.pyx":19
+  /* "pysted/bleach_funcs.pyx":19
  * @cython.boundscheck(False)  # turn off bounds-checking for entire function
  * @cython.wraparound(False)  # turn off negative index wrapping for entire function
- * def raster_func_c_self_bleach_split_g(             # <<<<<<<<<<<<<<
- *         object self,
- *         object datamap,
+ * def default_bleach(object self,             # <<<<<<<<<<<<<<
+ *                    numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex,
+ *                    numpy.ndarray[FLOATDTYPE_t, ndim=2] i_sted,
  */
 
   /* function exit code */
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_XDECREF(__pyx_t_17);
-  __Pyx_XDECREF(__pyx_t_18);
-  __Pyx_XDECREF(__pyx_t_24);
+  __Pyx_XDECREF(__pyx_t_10);
+  __Pyx_XDECREF(__pyx_t_31);
   { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
     __Pyx_PyThreadState_declare
     __Pyx_PyThreadState_assign
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_effective.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_k_ex.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_k_sted.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_photons_ex.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_photons_sted.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pixel_list.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_prob_ex.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_prob_sted.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("pysted.raster.raster_func_c_self_bleach_split_g", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pysted.bleach_funcs.default_bleach", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_effective.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_k_ex.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_k_sted.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_photons_ex.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_photons_sted.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pixel_list.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_prob_ex.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_prob_sted.rcbuffer->pybuffer);
   __pyx_L2:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_pre_effective);
-  __Pyx_XDECREF((PyObject *)__pyx_v_effective);
-  __Pyx_XDECREF((PyObject *)__pyx_v_k_ex);
-  __Pyx_XDECREF((PyObject *)__pyx_v_k_sted);
-  __Pyx_XDECREF((PyObject *)__pyx_v_i_ex);
-  __Pyx_XDECREF((PyObject *)__pyx_v_i_sted);
   __Pyx_XDECREF((PyObject *)__pyx_v_photons_ex);
   __Pyx_XDECREF((PyObject *)__pyx_v_photons_sted);
-  __Pyx_XDECREF((PyObject *)__pyx_v_bleached_datamap);
-  __Pyx_XDECREF(__pyx_v__);
-  __Pyx_XDECREF(__pyx_v_key);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pysted/raster.pyx":130
- * @cython.boundscheck(False)  # turn off bounds-checking for entire function
- * @cython.wraparound(False)  # turn off negative index wrapping for entire function
- * def test_var_bleach(             # <<<<<<<<<<<<<<
- *         object self,
- *         object datamap,
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_6pysted_6raster_3test_var_bleach(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_6pysted_6raster_3test_var_bleach = {"test_var_bleach", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_6pysted_6raster_3test_var_bleach, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6pysted_6raster_3test_var_bleach(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  PyObject *__pyx_v_self = 0;
-  PyObject *__pyx_v_datamap = 0;
-  PyArrayObject *__pyx_v_acquired_intensity = 0;
-  PyArrayObject *__pyx_v_pixel_list = 0;
-  int __pyx_v_ratio;
-  CYTHON_UNUSED int __pyx_v_rows_pad;
-  CYTHON_UNUSED int __pyx_v_cols_pad;
-  CYTHON_UNUSED int __pyx_v_laser_pad;
-  PyArrayObject *__pyx_v_prob_ex = 0;
-  PyArrayObject *__pyx_v_prob_sted = 0;
-  PyArrayObject *__pyx_v_pdt_roi = 0;
-  PyArrayObject *__pyx_v_p_ex_roi = 0;
-  PyArrayObject *__pyx_v_p_sted_roi = 0;
-  int __pyx_v_bleach;
-  PyObject *__pyx_v_bleached_sub_datamaps_dict = 0;
-  int __pyx_v_seed;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("test_var_bleach (wrapper)", 0);
-  {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_self,&__pyx_n_s_datamap,&__pyx_n_s_acquired_intensity,&__pyx_n_s_pixel_list,&__pyx_n_s_ratio,&__pyx_n_s_rows_pad,&__pyx_n_s_cols_pad,&__pyx_n_s_laser_pad,&__pyx_n_s_prob_ex,&__pyx_n_s_prob_sted,&__pyx_n_s_pdt_roi,&__pyx_n_s_p_ex_roi,&__pyx_n_s_p_sted_roi,&__pyx_n_s_bleach,&__pyx_n_s_bleached_sub_datamaps_dict,&__pyx_n_s_seed,0};
-    PyObject* values[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    if (unlikely(__pyx_kwds)) {
-      Py_ssize_t kw_args;
-      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
-      switch (pos_args) {
-        case 16: values[15] = PyTuple_GET_ITEM(__pyx_args, 15);
-        CYTHON_FALLTHROUGH;
-        case 15: values[14] = PyTuple_GET_ITEM(__pyx_args, 14);
-        CYTHON_FALLTHROUGH;
-        case 14: values[13] = PyTuple_GET_ITEM(__pyx_args, 13);
-        CYTHON_FALLTHROUGH;
-        case 13: values[12] = PyTuple_GET_ITEM(__pyx_args, 12);
-        CYTHON_FALLTHROUGH;
-        case 12: values[11] = PyTuple_GET_ITEM(__pyx_args, 11);
-        CYTHON_FALLTHROUGH;
-        case 11: values[10] = PyTuple_GET_ITEM(__pyx_args, 10);
-        CYTHON_FALLTHROUGH;
-        case 10: values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
-        CYTHON_FALLTHROUGH;
-        case  9: values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
-        CYTHON_FALLTHROUGH;
-        case  8: values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
-        CYTHON_FALLTHROUGH;
-        case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
-        CYTHON_FALLTHROUGH;
-        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
-        CYTHON_FALLTHROUGH;
-        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
-        CYTHON_FALLTHROUGH;
-        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
-        CYTHON_FALLTHROUGH;
-        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
-        CYTHON_FALLTHROUGH;
-        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-        CYTHON_FALLTHROUGH;
-        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-        CYTHON_FALLTHROUGH;
-        case  0: break;
-        default: goto __pyx_L5_argtuple_error;
-      }
-      kw_args = PyDict_Size(__pyx_kwds);
-      switch (pos_args) {
-        case  0:
-        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_self)) != 0)) kw_args--;
-        else goto __pyx_L5_argtuple_error;
-        CYTHON_FALLTHROUGH;
-        case  1:
-        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_datamap)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 1); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  2:
-        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_acquired_intensity)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 2); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  3:
-        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pixel_list)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 3); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  4:
-        if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ratio)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 4); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  5:
-        if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_rows_pad)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 5); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  6:
-        if (likely((values[6] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_cols_pad)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 6); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  7:
-        if (likely((values[7] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_laser_pad)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 7); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  8:
-        if (likely((values[8] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_prob_ex)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 8); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case  9:
-        if (likely((values[9] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_prob_sted)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 9); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case 10:
-        if (likely((values[10] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pdt_roi)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 10); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case 11:
-        if (likely((values[11] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p_ex_roi)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 11); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case 12:
-        if (likely((values[12] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p_sted_roi)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 12); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case 13:
-        if (likely((values[13] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_bleach)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 13); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case 14:
-        if (likely((values[14] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_bleached_sub_datamaps_dict)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 14); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-        CYTHON_FALLTHROUGH;
-        case 15:
-        if (likely((values[15] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_seed)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, 15); __PYX_ERR(0, 130, __pyx_L3_error)
-        }
-      }
-      if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "test_var_bleach") < 0)) __PYX_ERR(0, 130, __pyx_L3_error)
-      }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 16) {
-      goto __pyx_L5_argtuple_error;
-    } else {
-      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
-      values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
-      values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
-      values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
-      values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
-      values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
-      values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
-      values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
-      values[10] = PyTuple_GET_ITEM(__pyx_args, 10);
-      values[11] = PyTuple_GET_ITEM(__pyx_args, 11);
-      values[12] = PyTuple_GET_ITEM(__pyx_args, 12);
-      values[13] = PyTuple_GET_ITEM(__pyx_args, 13);
-      values[14] = PyTuple_GET_ITEM(__pyx_args, 14);
-      values[15] = PyTuple_GET_ITEM(__pyx_args, 15);
-    }
-    __pyx_v_self = values[0];
-    __pyx_v_datamap = values[1];
-    __pyx_v_acquired_intensity = ((PyArrayObject *)values[2]);
-    __pyx_v_pixel_list = ((PyArrayObject *)values[3]);
-    __pyx_v_ratio = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_ratio == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 135, __pyx_L3_error)
-    __pyx_v_rows_pad = __Pyx_PyInt_As_int(values[5]); if (unlikely((__pyx_v_rows_pad == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 136, __pyx_L3_error)
-    __pyx_v_cols_pad = __Pyx_PyInt_As_int(values[6]); if (unlikely((__pyx_v_cols_pad == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 137, __pyx_L3_error)
-    __pyx_v_laser_pad = __Pyx_PyInt_As_int(values[7]); if (unlikely((__pyx_v_laser_pad == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 138, __pyx_L3_error)
-    __pyx_v_prob_ex = ((PyArrayObject *)values[8]);
-    __pyx_v_prob_sted = ((PyArrayObject *)values[9]);
-    __pyx_v_pdt_roi = ((PyArrayObject *)values[10]);
-    __pyx_v_p_ex_roi = ((PyArrayObject *)values[11]);
-    __pyx_v_p_sted_roi = ((PyArrayObject *)values[12]);
-    __pyx_v_bleach = __Pyx_PyObject_IsTrue(values[13]); if (unlikely((__pyx_v_bleach == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 144, __pyx_L3_error)
-    __pyx_v_bleached_sub_datamaps_dict = ((PyObject*)values[14]);
-    __pyx_v_seed = __Pyx_PyInt_As_int(values[15]); if (unlikely((__pyx_v_seed == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 146, __pyx_L3_error)
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("test_var_bleach", 1, 16, 16, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 130, __pyx_L3_error)
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("pysted.raster.test_var_bleach", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_acquired_intensity), __pyx_ptype_5numpy_ndarray, 1, "acquired_intensity", 0))) __PYX_ERR(0, 133, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pixel_list), __pyx_ptype_5numpy_ndarray, 1, "pixel_list", 0))) __PYX_ERR(0, 134, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_prob_ex), __pyx_ptype_5numpy_ndarray, 1, "prob_ex", 0))) __PYX_ERR(0, 139, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_prob_sted), __pyx_ptype_5numpy_ndarray, 1, "prob_sted", 0))) __PYX_ERR(0, 140, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pdt_roi), __pyx_ptype_5numpy_ndarray, 1, "pdt_roi", 0))) __PYX_ERR(0, 141, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_p_ex_roi), __pyx_ptype_5numpy_ndarray, 1, "p_ex_roi", 0))) __PYX_ERR(0, 142, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_p_sted_roi), __pyx_ptype_5numpy_ndarray, 1, "p_sted_roi", 0))) __PYX_ERR(0, 143, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_bleached_sub_datamaps_dict), (&PyDict_Type), 1, "bleached_sub_datamaps_dict", 1))) __PYX_ERR(0, 145, __pyx_L1_error)
-  __pyx_r = __pyx_pf_6pysted_6raster_2test_var_bleach(__pyx_self, __pyx_v_self, __pyx_v_datamap, __pyx_v_acquired_intensity, __pyx_v_pixel_list, __pyx_v_ratio, __pyx_v_rows_pad, __pyx_v_cols_pad, __pyx_v_laser_pad, __pyx_v_prob_ex, __pyx_v_prob_sted, __pyx_v_pdt_roi, __pyx_v_p_ex_roi, __pyx_v_p_sted_roi, __pyx_v_bleach, __pyx_v_bleached_sub_datamaps_dict, __pyx_v_seed);
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed) {
-  int __pyx_v_row;
-  int __pyx_v_col;
-  int __pyx_v_sprime;
-  int __pyx_v_tprime;
-  int __pyx_v_h;
-  int __pyx_v_w;
-  CYTHON_UNUSED int __pyx_v_max_len;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_v_value;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_v_pdt;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_v_p_ex;
-  __pyx_t_6pysted_6raster_FLOATDTYPE_t __pyx_v_p_sted;
-  PyArrayObject *__pyx_v_pre_effective = 0;
-  PyArrayObject *__pyx_v_effective = 0;
-  PyArrayObject *__pyx_v_i_ex = 0;
-  PyArrayObject *__pyx_v_i_sted = 0;
-  PyArrayObject *__pyx_v_bleached_datamap = 0;
-  CYTHON_UNUSED PyObject *__pyx_v__ = NULL;
-  PyObject *__pyx_v_key = NULL;
-  int __pyx_v_s;
-  int __pyx_v_t;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_acquired_intensity;
-  __Pyx_Buffer __pyx_pybuffer_acquired_intensity;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_bleached_datamap;
-  __Pyx_Buffer __pyx_pybuffer_bleached_datamap;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_effective;
-  __Pyx_Buffer __pyx_pybuffer_effective;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_i_ex;
-  __Pyx_Buffer __pyx_pybuffer_i_ex;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_i_sted;
-  __Pyx_Buffer __pyx_pybuffer_i_sted;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_p_ex_roi;
-  __Pyx_Buffer __pyx_pybuffer_p_ex_roi;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_p_sted_roi;
-  __Pyx_Buffer __pyx_pybuffer_p_sted_roi;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_pdt_roi;
-  __Pyx_Buffer __pyx_pybuffer_pdt_roi;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_pixel_list;
-  __Pyx_Buffer __pyx_pybuffer_pixel_list;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_pre_effective;
-  __Pyx_Buffer __pyx_pybuffer_pre_effective;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_prob_ex;
-  __Pyx_Buffer __pyx_pybuffer_prob_ex;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_prob_sted;
-  __Pyx_Buffer __pyx_pybuffer_prob_sted;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  int __pyx_t_2;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
-  unsigned int __pyx_t_6;
-  PyObject *__pyx_t_7 = NULL;
-  PyObject *__pyx_t_8 = NULL;
-  PyObject *(*__pyx_t_9)(PyObject *);
-  PyArrayObject *__pyx_t_10 = NULL;
-  int __pyx_t_11;
-  PyObject *__pyx_t_12 = NULL;
-  PyObject *__pyx_t_13 = NULL;
-  PyObject *__pyx_t_14 = NULL;
-  Py_ssize_t __pyx_t_15;
-  Py_ssize_t __pyx_t_16;
-  PyObject *__pyx_t_17 = NULL;
-  PyObject *__pyx_t_18 = NULL;
-  PyArrayObject *__pyx_t_19 = NULL;
-  npy_intp __pyx_t_20;
-  npy_intp __pyx_t_21;
-  PyObject *(*__pyx_t_22)(PyObject *);
-  int __pyx_t_23;
-  PyObject *__pyx_t_24 = NULL;
-  PyArrayObject *__pyx_t_25 = NULL;
-  Py_ssize_t __pyx_t_26;
-  Py_ssize_t __pyx_t_27;
-  int __pyx_t_28;
-  int __pyx_t_29;
-  int __pyx_t_30;
-  int __pyx_t_31;
-  Py_ssize_t __pyx_t_32;
-  Py_ssize_t __pyx_t_33;
-  PyObject *__pyx_t_34 = NULL;
-  PyObject *__pyx_t_35 = NULL;
-  PyObject *__pyx_t_36 = NULL;
-  PyObject *__pyx_t_37 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("test_var_bleach", 0);
-  __pyx_pybuffer_pre_effective.pybuffer.buf = NULL;
-  __pyx_pybuffer_pre_effective.refcount = 0;
-  __pyx_pybuffernd_pre_effective.data = NULL;
-  __pyx_pybuffernd_pre_effective.rcbuffer = &__pyx_pybuffer_pre_effective;
-  __pyx_pybuffer_effective.pybuffer.buf = NULL;
-  __pyx_pybuffer_effective.refcount = 0;
-  __pyx_pybuffernd_effective.data = NULL;
-  __pyx_pybuffernd_effective.rcbuffer = &__pyx_pybuffer_effective;
-  __pyx_pybuffer_i_ex.pybuffer.buf = NULL;
-  __pyx_pybuffer_i_ex.refcount = 0;
-  __pyx_pybuffernd_i_ex.data = NULL;
-  __pyx_pybuffernd_i_ex.rcbuffer = &__pyx_pybuffer_i_ex;
-  __pyx_pybuffer_i_sted.pybuffer.buf = NULL;
-  __pyx_pybuffer_i_sted.refcount = 0;
-  __pyx_pybuffernd_i_sted.data = NULL;
-  __pyx_pybuffernd_i_sted.rcbuffer = &__pyx_pybuffer_i_sted;
-  __pyx_pybuffer_bleached_datamap.pybuffer.buf = NULL;
-  __pyx_pybuffer_bleached_datamap.refcount = 0;
-  __pyx_pybuffernd_bleached_datamap.data = NULL;
-  __pyx_pybuffernd_bleached_datamap.rcbuffer = &__pyx_pybuffer_bleached_datamap;
-  __pyx_pybuffer_acquired_intensity.pybuffer.buf = NULL;
-  __pyx_pybuffer_acquired_intensity.refcount = 0;
-  __pyx_pybuffernd_acquired_intensity.data = NULL;
-  __pyx_pybuffernd_acquired_intensity.rcbuffer = &__pyx_pybuffer_acquired_intensity;
-  __pyx_pybuffer_pixel_list.pybuffer.buf = NULL;
-  __pyx_pybuffer_pixel_list.refcount = 0;
-  __pyx_pybuffernd_pixel_list.data = NULL;
-  __pyx_pybuffernd_pixel_list.rcbuffer = &__pyx_pybuffer_pixel_list;
-  __pyx_pybuffer_prob_ex.pybuffer.buf = NULL;
-  __pyx_pybuffer_prob_ex.refcount = 0;
-  __pyx_pybuffernd_prob_ex.data = NULL;
-  __pyx_pybuffernd_prob_ex.rcbuffer = &__pyx_pybuffer_prob_ex;
-  __pyx_pybuffer_prob_sted.pybuffer.buf = NULL;
-  __pyx_pybuffer_prob_sted.refcount = 0;
-  __pyx_pybuffernd_prob_sted.data = NULL;
-  __pyx_pybuffernd_prob_sted.rcbuffer = &__pyx_pybuffer_prob_sted;
-  __pyx_pybuffer_pdt_roi.pybuffer.buf = NULL;
-  __pyx_pybuffer_pdt_roi.refcount = 0;
-  __pyx_pybuffernd_pdt_roi.data = NULL;
-  __pyx_pybuffernd_pdt_roi.rcbuffer = &__pyx_pybuffer_pdt_roi;
-  __pyx_pybuffer_p_ex_roi.pybuffer.buf = NULL;
-  __pyx_pybuffer_p_ex_roi.refcount = 0;
-  __pyx_pybuffernd_p_ex_roi.data = NULL;
-  __pyx_pybuffernd_p_ex_roi.rcbuffer = &__pyx_pybuffer_p_ex_roi;
-  __pyx_pybuffer_p_sted_roi.pybuffer.buf = NULL;
-  __pyx_pybuffer_p_sted_roi.refcount = 0;
-  __pyx_pybuffernd_p_sted_roi.data = NULL;
-  __pyx_pybuffernd_p_sted_roi.rcbuffer = &__pyx_pybuffer_p_sted_roi;
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer, (PyObject*)__pyx_v_acquired_intensity, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 130, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_acquired_intensity.diminfo[0].strides = __pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_acquired_intensity.diminfo[0].shape = __pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_acquired_intensity.diminfo[1].strides = __pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_acquired_intensity.diminfo[1].shape = __pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer.shape[1];
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_pixel_list.rcbuffer->pybuffer, (PyObject*)__pyx_v_pixel_list, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 130, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_pixel_list.diminfo[0].strides = __pyx_pybuffernd_pixel_list.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_pixel_list.diminfo[0].shape = __pyx_pybuffernd_pixel_list.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_pixel_list.diminfo[1].strides = __pyx_pybuffernd_pixel_list.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_pixel_list.diminfo[1].shape = __pyx_pybuffernd_pixel_list.rcbuffer->pybuffer.shape[1];
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_prob_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_prob_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 130, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_prob_ex.diminfo[0].strides = __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_prob_ex.diminfo[0].shape = __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_prob_ex.diminfo[1].strides = __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_prob_ex.diminfo[1].shape = __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.shape[1];
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_prob_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_prob_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 130, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_prob_sted.diminfo[0].strides = __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_prob_sted.diminfo[0].shape = __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_prob_sted.diminfo[1].strides = __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_prob_sted.diminfo[1].shape = __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.shape[1];
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer, (PyObject*)__pyx_v_pdt_roi, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 130, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_pdt_roi.diminfo[0].strides = __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_pdt_roi.diminfo[0].shape = __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_pdt_roi.diminfo[1].strides = __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_pdt_roi.diminfo[1].shape = __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.shape[1];
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer, (PyObject*)__pyx_v_p_ex_roi, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 130, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_p_ex_roi.diminfo[0].strides = __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_p_ex_roi.diminfo[0].shape = __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_p_ex_roi.diminfo[1].strides = __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_p_ex_roi.diminfo[1].shape = __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.shape[1];
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer, (PyObject*)__pyx_v_p_sted_roi, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 130, __pyx_L1_error)
-  }
-  __pyx_pybuffernd_p_sted_roi.diminfo[0].strides = __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_p_sted_roi.diminfo[0].shape = __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_p_sted_roi.diminfo[1].strides = __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_p_sted_roi.diminfo[1].shape = __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.shape[1];
-
-  /* "pysted/raster.pyx":152
- *     cdef int h, w
- *     cdef int current
- *     cdef int max_len = len(pixel_list)             # <<<<<<<<<<<<<<
- *     cdef FLOATDTYPE_t value
- *     cdef int sampled_value
- */
-  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_pixel_list)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 152, __pyx_L1_error)
-  __pyx_v_max_len = __pyx_t_1;
-
-  /* "pysted/raster.pyx":174
- *     """
- * 
- *     print("test func xD")             # <<<<<<<<<<<<<<
- * 
- *     if seed == 0:
- */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_test_func_xD) < 0) __PYX_ERR(0, 174, __pyx_L1_error)
-
-  /* "pysted/raster.pyx":176
- *     print("test func xD")
- * 
- *     if seed == 0:             # <<<<<<<<<<<<<<
- *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
- *         srand(int(str(time.time_ns())[-5:-1]))
- */
-  __pyx_t_2 = ((__pyx_v_seed == 0) != 0);
-  if (__pyx_t_2) {
-
-    /* "pysted/raster.pyx":178
- *     if seed == 0:
- *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
- *         srand(int(str(time.time_ns())[-5:-1]))             # <<<<<<<<<<<<<<
- *     else:
- *         srand(seed)
- */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_time); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_time_ns); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = NULL;
-    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_5))) {
-      __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_5);
-      if (likely(__pyx_t_4)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-        __Pyx_INCREF(__pyx_t_4);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_5, function);
-      }
-    }
-    __pyx_t_3 = (__pyx_t_4) ? __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_4) : __Pyx_PyObject_CallNoArg(__pyx_t_5);
-    __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyString_Type)), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyObject_GetSlice(__pyx_t_5, -5L, -1L, NULL, NULL, &__pyx_slice_, 1, 1, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_6 = __Pyx_PyInt_As_unsigned_int(__pyx_t_5); if (unlikely((__pyx_t_6 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 178, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    srand(__pyx_t_6);
-
-    /* "pysted/raster.pyx":176
- *     print("test func xD")
- * 
- *     if seed == 0:             # <<<<<<<<<<<<<<
- *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
- *         srand(int(str(time.time_ns())[-5:-1]))
- */
-    goto __pyx_L3;
-  }
-
-  /* "pysted/raster.pyx":180
- *         srand(int(str(time.time_ns())[-5:-1]))
- *     else:
- *         srand(seed)             # <<<<<<<<<<<<<<
- * 
- *     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
- */
-  /*else*/ {
-    srand(__pyx_v_seed);
-  }
-  __pyx_L3:;
-
-  /* "pysted/raster.pyx":182
- *         srand(seed)
- * 
- *     i_ex, i_sted, _ = self.cache(datamap.pixelsize)             # <<<<<<<<<<<<<<
- *     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
- *     h, w = pre_effective.shape[0], pre_effective.shape[1]
- */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_cache); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 182, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_datamap, __pyx_n_s_pixelsize); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 182, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_7 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_7)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_7);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
-    }
-  }
-  __pyx_t_5 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_7, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 182, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if ((likely(PyTuple_CheckExact(__pyx_t_5))) || (PyList_CheckExact(__pyx_t_5))) {
-    PyObject* sequence = __pyx_t_5;
-    Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
-    if (unlikely(size != 3)) {
-      if (size > 3) __Pyx_RaiseTooManyValuesError(3);
-      else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(0, 182, __pyx_L1_error)
-    }
-    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    if (likely(PyTuple_CheckExact(sequence))) {
-      __pyx_t_3 = PyTuple_GET_ITEM(sequence, 0); 
-      __pyx_t_4 = PyTuple_GET_ITEM(sequence, 1); 
-      __pyx_t_7 = PyTuple_GET_ITEM(sequence, 2); 
-    } else {
-      __pyx_t_3 = PyList_GET_ITEM(sequence, 0); 
-      __pyx_t_4 = PyList_GET_ITEM(sequence, 1); 
-      __pyx_t_7 = PyList_GET_ITEM(sequence, 2); 
-    }
-    __Pyx_INCREF(__pyx_t_3);
-    __Pyx_INCREF(__pyx_t_4);
-    __Pyx_INCREF(__pyx_t_7);
-    #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 182, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 182, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_7 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 182, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    #endif
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  } else {
-    Py_ssize_t index = -1;
-    __pyx_t_8 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 182, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_9 = Py_TYPE(__pyx_t_8)->tp_iternext;
-    index = 0; __pyx_t_3 = __pyx_t_9(__pyx_t_8); if (unlikely(!__pyx_t_3)) goto __pyx_L4_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_3);
-    index = 1; __pyx_t_4 = __pyx_t_9(__pyx_t_8); if (unlikely(!__pyx_t_4)) goto __pyx_L4_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_4);
-    index = 2; __pyx_t_7 = __pyx_t_9(__pyx_t_8); if (unlikely(!__pyx_t_7)) goto __pyx_L4_unpacking_failed;
-    __Pyx_GOTREF(__pyx_t_7);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_9(__pyx_t_8), 3) < 0) __PYX_ERR(0, 182, __pyx_L1_error)
-    __pyx_t_9 = NULL;
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    goto __pyx_L5_unpacking_done;
-    __pyx_L4_unpacking_failed:;
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_9 = NULL;
-    if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(0, 182, __pyx_L1_error)
-    __pyx_L5_unpacking_done:;
-  }
-  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 182, __pyx_L1_error)
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 182, __pyx_L1_error)
-  __pyx_t_10 = ((PyArrayObject *)__pyx_t_3);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer);
-    __pyx_t_11 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer, (PyObject*)__pyx_t_10, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-    if (unlikely(__pyx_t_11 < 0)) {
-      PyErr_Fetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
-      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer, (PyObject*)__pyx_v_i_ex, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-        Py_XDECREF(__pyx_t_12); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14);
-        __Pyx_RaiseBufferFallbackError();
-      } else {
-        PyErr_Restore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-      }
-      __pyx_t_12 = __pyx_t_13 = __pyx_t_14 = 0;
-    }
-    __pyx_pybuffernd_i_ex.diminfo[0].strides = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_i_ex.diminfo[0].shape = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_i_ex.diminfo[1].strides = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_i_ex.diminfo[1].shape = __pyx_pybuffernd_i_ex.rcbuffer->pybuffer.shape[1];
-    if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(0, 182, __pyx_L1_error)
-  }
-  __pyx_t_10 = 0;
-  __pyx_v_i_ex = ((PyArrayObject *)__pyx_t_3);
-  __pyx_t_3 = 0;
-  __pyx_t_10 = ((PyArrayObject *)__pyx_t_4);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer);
-    __pyx_t_11 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer, (PyObject*)__pyx_t_10, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-    if (unlikely(__pyx_t_11 < 0)) {
-      PyErr_Fetch(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer, (PyObject*)__pyx_v_i_sted, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-        Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_12);
-        __Pyx_RaiseBufferFallbackError();
-      } else {
-        PyErr_Restore(__pyx_t_14, __pyx_t_13, __pyx_t_12);
-      }
-      __pyx_t_14 = __pyx_t_13 = __pyx_t_12 = 0;
-    }
-    __pyx_pybuffernd_i_sted.diminfo[0].strides = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_i_sted.diminfo[0].shape = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_i_sted.diminfo[1].strides = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_i_sted.diminfo[1].shape = __pyx_pybuffernd_i_sted.rcbuffer->pybuffer.shape[1];
-    if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(0, 182, __pyx_L1_error)
-  }
-  __pyx_t_10 = 0;
-  __pyx_v_i_sted = ((PyArrayObject *)__pyx_t_4);
-  __pyx_t_4 = 0;
-  __pyx_v__ = __pyx_t_7;
-  __pyx_t_7 = 0;
-
-  /* "pysted/raster.pyx":183
- * 
- *     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
- *     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])             # <<<<<<<<<<<<<<
- *     h, w = pre_effective.shape[0], pre_effective.shape[1]
- * 
- */
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_get_effective); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 183, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_datamap, __pyx_n_s_pixelsize); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 183, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_15 = 0;
-  __pyx_t_16 = 0;
-  __pyx_t_3 = PyFloat_FromDouble((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_p_ex_roi.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_p_ex_roi.diminfo[1].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 183, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_16 = 0;
-  __pyx_t_15 = 0;
-  __pyx_t_8 = PyFloat_FromDouble((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_p_sted_roi.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_p_sted_roi.diminfo[1].strides))); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 183, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_17 = NULL;
-  __pyx_t_11 = 0;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
-    __pyx_t_17 = PyMethod_GET_SELF(__pyx_t_7);
-    if (likely(__pyx_t_17)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
-      __Pyx_INCREF(__pyx_t_17);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_7, function);
-      __pyx_t_11 = 1;
-    }
-  }
-  #if CYTHON_FAST_PYCALL
-  if (PyFunction_Check(__pyx_t_7)) {
-    PyObject *__pyx_temp[4] = {__pyx_t_17, __pyx_t_4, __pyx_t_3, __pyx_t_8};
-    __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_11, 3+__pyx_t_11); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 183, __pyx_L1_error)
-    __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  } else
-  #endif
-  #if CYTHON_FAST_PYCCALL
-  if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
-    PyObject *__pyx_temp[4] = {__pyx_t_17, __pyx_t_4, __pyx_t_3, __pyx_t_8};
-    __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_11, 3+__pyx_t_11); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 183, __pyx_L1_error)
-    __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  } else
-  #endif
-  {
-    __pyx_t_18 = PyTuple_New(3+__pyx_t_11); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 183, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_18);
-    if (__pyx_t_17) {
-      __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_18, 0, __pyx_t_17); __pyx_t_17 = NULL;
-    }
-    __Pyx_GIVEREF(__pyx_t_4);
-    PyTuple_SET_ITEM(__pyx_t_18, 0+__pyx_t_11, __pyx_t_4);
-    __Pyx_GIVEREF(__pyx_t_3);
-    PyTuple_SET_ITEM(__pyx_t_18, 1+__pyx_t_11, __pyx_t_3);
-    __Pyx_GIVEREF(__pyx_t_8);
-    PyTuple_SET_ITEM(__pyx_t_18, 2+__pyx_t_11, __pyx_t_8);
-    __pyx_t_4 = 0;
-    __pyx_t_3 = 0;
-    __pyx_t_8 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_18, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 183, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-  }
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 183, __pyx_L1_error)
-  __pyx_t_19 = ((PyArrayObject *)__pyx_t_5);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer);
-    __pyx_t_11 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer, (PyObject*)__pyx_t_19, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-    if (unlikely(__pyx_t_11 < 0)) {
-      PyErr_Fetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
-      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer, (PyObject*)__pyx_v_pre_effective, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-        Py_XDECREF(__pyx_t_12); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14);
-        __Pyx_RaiseBufferFallbackError();
-      } else {
-        PyErr_Restore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-      }
-      __pyx_t_12 = __pyx_t_13 = __pyx_t_14 = 0;
-    }
-    __pyx_pybuffernd_pre_effective.diminfo[0].strides = __pyx_pybuffernd_pre_effective.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_pre_effective.diminfo[0].shape = __pyx_pybuffernd_pre_effective.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_pre_effective.diminfo[1].strides = __pyx_pybuffernd_pre_effective.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_pre_effective.diminfo[1].shape = __pyx_pybuffernd_pre_effective.rcbuffer->pybuffer.shape[1];
-    if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(0, 183, __pyx_L1_error)
-  }
-  __pyx_t_19 = 0;
-  __pyx_v_pre_effective = ((PyArrayObject *)__pyx_t_5);
-  __pyx_t_5 = 0;
-
-  /* "pysted/raster.pyx":184
- *     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
- *     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
- *     h, w = pre_effective.shape[0], pre_effective.shape[1]             # <<<<<<<<<<<<<<
- * 
- *     # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape)
- */
-  __pyx_t_20 = (__pyx_v_pre_effective->dimensions[0]);
-  __pyx_t_21 = (__pyx_v_pre_effective->dimensions[1]);
-  __pyx_v_h = __pyx_t_20;
-  __pyx_v_w = __pyx_t_21;
-
-  /* "pysted/raster.pyx":188
- *     # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape)
- * 
- *     for (row, col) in pixel_list:             # <<<<<<<<<<<<<<
- *         pdt = pdt_roi[row, col]
- *         p_ex = p_ex_roi[row, col]
- */
-  if (likely(PyList_CheckExact(((PyObject *)__pyx_v_pixel_list))) || PyTuple_CheckExact(((PyObject *)__pyx_v_pixel_list))) {
-    __pyx_t_5 = ((PyObject *)__pyx_v_pixel_list); __Pyx_INCREF(__pyx_t_5); __pyx_t_1 = 0;
-    __pyx_t_22 = NULL;
-  } else {
-    __pyx_t_1 = -1; __pyx_t_5 = PyObject_GetIter(((PyObject *)__pyx_v_pixel_list)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 188, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_22 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 188, __pyx_L1_error)
-  }
-  for (;;) {
-    if (likely(!__pyx_t_22)) {
-      if (likely(PyList_CheckExact(__pyx_t_5))) {
-        if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_5)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_7 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_1); __Pyx_INCREF(__pyx_t_7); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 188, __pyx_L1_error)
-        #else
-        __pyx_t_7 = PySequence_ITEM(__pyx_t_5, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 188, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
-        #endif
-      } else {
-        if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_7 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_1); __Pyx_INCREF(__pyx_t_7); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 188, __pyx_L1_error)
-        #else
-        __pyx_t_7 = PySequence_ITEM(__pyx_t_5, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 188, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
-        #endif
-      }
-    } else {
-      __pyx_t_7 = __pyx_t_22(__pyx_t_5);
-      if (unlikely(!__pyx_t_7)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 188, __pyx_L1_error)
-        }
-        break;
-      }
-      __Pyx_GOTREF(__pyx_t_7);
-    }
-    if ((likely(PyTuple_CheckExact(__pyx_t_7))) || (PyList_CheckExact(__pyx_t_7))) {
-      PyObject* sequence = __pyx_t_7;
-      Py_ssize_t size = __Pyx_PySequence_SIZE(sequence);
-      if (unlikely(size != 2)) {
-        if (size > 2) __Pyx_RaiseTooManyValuesError(2);
-        else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-        __PYX_ERR(0, 188, __pyx_L1_error)
-      }
-      #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-      if (likely(PyTuple_CheckExact(sequence))) {
-        __pyx_t_18 = PyTuple_GET_ITEM(sequence, 0); 
-        __pyx_t_8 = PyTuple_GET_ITEM(sequence, 1); 
-      } else {
-        __pyx_t_18 = PyList_GET_ITEM(sequence, 0); 
-        __pyx_t_8 = PyList_GET_ITEM(sequence, 1); 
-      }
-      __Pyx_INCREF(__pyx_t_18);
-      __Pyx_INCREF(__pyx_t_8);
-      #else
-      __pyx_t_18 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 188, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_18);
-      __pyx_t_8 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 188, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      #endif
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    } else {
-      Py_ssize_t index = -1;
-      __pyx_t_3 = PyObject_GetIter(__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 188, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_9 = Py_TYPE(__pyx_t_3)->tp_iternext;
-      index = 0; __pyx_t_18 = __pyx_t_9(__pyx_t_3); if (unlikely(!__pyx_t_18)) goto __pyx_L8_unpacking_failed;
-      __Pyx_GOTREF(__pyx_t_18);
-      index = 1; __pyx_t_8 = __pyx_t_9(__pyx_t_3); if (unlikely(!__pyx_t_8)) goto __pyx_L8_unpacking_failed;
-      __Pyx_GOTREF(__pyx_t_8);
-      if (__Pyx_IternextUnpackEndCheck(__pyx_t_9(__pyx_t_3), 2) < 0) __PYX_ERR(0, 188, __pyx_L1_error)
-      __pyx_t_9 = NULL;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      goto __pyx_L9_unpacking_done;
-      __pyx_L8_unpacking_failed:;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_9 = NULL;
-      if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-      __PYX_ERR(0, 188, __pyx_L1_error)
-      __pyx_L9_unpacking_done:;
-    }
-    __pyx_t_11 = __Pyx_PyInt_As_int(__pyx_t_18); if (unlikely((__pyx_t_11 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-    __pyx_t_23 = __Pyx_PyInt_As_int(__pyx_t_8); if (unlikely((__pyx_t_23 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_v_row = __pyx_t_11;
-    __pyx_v_col = __pyx_t_23;
-
-    /* "pysted/raster.pyx":189
- * 
- *     for (row, col) in pixel_list:
- *         pdt = pdt_roi[row, col]             # <<<<<<<<<<<<<<
- *         p_ex = p_ex_roi[row, col]
- *         p_sted = p_sted_roi[row, col]
- */
-    __pyx_t_15 = __pyx_v_row;
-    __pyx_t_16 = __pyx_v_col;
-    __pyx_v_pdt = (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_pdt_roi.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_pdt_roi.diminfo[1].strides));
-
-    /* "pysted/raster.pyx":190
- *     for (row, col) in pixel_list:
- *         pdt = pdt_roi[row, col]
- *         p_ex = p_ex_roi[row, col]             # <<<<<<<<<<<<<<
- *         p_sted = p_sted_roi[row, col]
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
- */
-    __pyx_t_16 = __pyx_v_row;
-    __pyx_t_15 = __pyx_v_col;
-    __pyx_v_p_ex = (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_p_ex_roi.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_p_ex_roi.diminfo[1].strides));
-
-    /* "pysted/raster.pyx":191
- *         pdt = pdt_roi[row, col]
- *         p_ex = p_ex_roi[row, col]
- *         p_sted = p_sted_roi[row, col]             # <<<<<<<<<<<<<<
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
- */
-    __pyx_t_15 = __pyx_v_row;
-    __pyx_t_16 = __pyx_v_col;
-    __pyx_v_p_sted = (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_p_sted_roi.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_p_sted_roi.diminfo[1].strides));
-
-    /* "pysted/raster.pyx":192
- *         p_ex = p_ex_roi[row, col]
- *         p_sted = p_sted_roi[row, col]
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)             # <<<<<<<<<<<<<<
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
- *         for key in bleached_sub_datamaps_dict:
- */
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_get_effective); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 192, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_18 = __Pyx_PyObject_GetAttrStr(__pyx_v_datamap, __pyx_n_s_pixelsize); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 192, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_18);
-    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_p_ex); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 192, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_p_sted); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 192, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_17 = NULL;
-    __pyx_t_23 = 0;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_8))) {
-      __pyx_t_17 = PyMethod_GET_SELF(__pyx_t_8);
-      if (likely(__pyx_t_17)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
-        __Pyx_INCREF(__pyx_t_17);
-        __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_8, function);
-        __pyx_t_23 = 1;
-      }
-    }
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_8)) {
-      PyObject *__pyx_temp[4] = {__pyx_t_17, __pyx_t_18, __pyx_t_3, __pyx_t_4};
-      __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_23, 3+__pyx_t_23); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 192, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
-      PyObject *__pyx_temp[4] = {__pyx_t_17, __pyx_t_18, __pyx_t_3, __pyx_t_4};
-      __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_23, 3+__pyx_t_23); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 192, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    } else
-    #endif
-    {
-      __pyx_t_24 = PyTuple_New(3+__pyx_t_23); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 192, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      if (__pyx_t_17) {
-        __Pyx_GIVEREF(__pyx_t_17); PyTuple_SET_ITEM(__pyx_t_24, 0, __pyx_t_17); __pyx_t_17 = NULL;
-      }
-      __Pyx_GIVEREF(__pyx_t_18);
-      PyTuple_SET_ITEM(__pyx_t_24, 0+__pyx_t_23, __pyx_t_18);
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_24, 1+__pyx_t_23, __pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_4);
-      PyTuple_SET_ITEM(__pyx_t_24, 2+__pyx_t_23, __pyx_t_4);
-      __pyx_t_18 = 0;
-      __pyx_t_3 = 0;
-      __pyx_t_4 = 0;
-      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_24, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 192, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-    }
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 192, __pyx_L1_error)
-    __pyx_t_19 = ((PyArrayObject *)__pyx_t_7);
-    {
-      __Pyx_BufFmt_StackElem __pyx_stack[1];
-      __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_effective.rcbuffer->pybuffer);
-      __pyx_t_23 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_effective.rcbuffer->pybuffer, (PyObject*)__pyx_t_19, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-      if (unlikely(__pyx_t_23 < 0)) {
-        PyErr_Fetch(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_effective.rcbuffer->pybuffer, (PyObject*)__pyx_v_effective, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_FLOATDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-          Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_12);
-          __Pyx_RaiseBufferFallbackError();
-        } else {
-          PyErr_Restore(__pyx_t_14, __pyx_t_13, __pyx_t_12);
-        }
-        __pyx_t_14 = __pyx_t_13 = __pyx_t_12 = 0;
-      }
-      __pyx_pybuffernd_effective.diminfo[0].strides = __pyx_pybuffernd_effective.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_effective.diminfo[0].shape = __pyx_pybuffernd_effective.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_effective.diminfo[1].strides = __pyx_pybuffernd_effective.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_effective.diminfo[1].shape = __pyx_pybuffernd_effective.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_23 < 0)) __PYX_ERR(0, 192, __pyx_L1_error)
-    }
-    __pyx_t_19 = 0;
-    __Pyx_XDECREF_SET(__pyx_v_effective, ((PyArrayObject *)__pyx_t_7));
-    __pyx_t_7 = 0;
-
-    /* "pysted/raster.pyx":193
- *         p_sted = p_sted_roi[row, col]
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)             # <<<<<<<<<<<<<<
- *         for key in bleached_sub_datamaps_dict:
- *             bleached_datamap += bleached_sub_datamaps_dict[key]
- */
-    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_numpy); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 193, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_zeros); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 193, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
-      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 193, __pyx_L1_error)
-    }
-    __pyx_t_7 = __Pyx_PyDict_GetItem(__pyx_v_bleached_sub_datamaps_dict, __pyx_n_s_base); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 193, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_24 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_shape); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 193, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_24);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 193, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_GIVEREF(__pyx_t_24);
-    PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_24);
-    __pyx_t_24 = 0;
-    __pyx_t_24 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 193, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_24);
-    if (PyDict_SetItem(__pyx_t_24, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 193, __pyx_L1_error)
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_7, __pyx_t_24); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 193, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-    if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 193, __pyx_L1_error)
-    __pyx_t_25 = ((PyArrayObject *)__pyx_t_4);
-    {
-      __Pyx_BufFmt_StackElem __pyx_stack[1];
-      __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer);
-      __pyx_t_23 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer, (PyObject*)__pyx_t_25, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-      if (unlikely(__pyx_t_23 < 0)) {
-        PyErr_Fetch(&__pyx_t_12, &__pyx_t_13, &__pyx_t_14);
-        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer, (PyObject*)__pyx_v_bleached_datamap, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-          Py_XDECREF(__pyx_t_12); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14);
-          __Pyx_RaiseBufferFallbackError();
-        } else {
-          PyErr_Restore(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-        }
-        __pyx_t_12 = __pyx_t_13 = __pyx_t_14 = 0;
-      }
-      __pyx_pybuffernd_bleached_datamap.diminfo[0].strides = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_bleached_datamap.diminfo[0].shape = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_bleached_datamap.diminfo[1].strides = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_bleached_datamap.diminfo[1].shape = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.shape[1];
-      if (unlikely(__pyx_t_23 < 0)) __PYX_ERR(0, 193, __pyx_L1_error)
-    }
-    __pyx_t_25 = 0;
-    __Pyx_XDECREF_SET(__pyx_v_bleached_datamap, ((PyArrayObject *)__pyx_t_4));
-    __pyx_t_4 = 0;
-
-    /* "pysted/raster.pyx":194
- *         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
- *         for key in bleached_sub_datamaps_dict:             # <<<<<<<<<<<<<<
- *             bleached_datamap += bleached_sub_datamaps_dict[key]
- * 
- */
-    __pyx_t_26 = 0;
-    if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
-      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-      __PYX_ERR(0, 194, __pyx_L1_error)
-    }
-    __pyx_t_24 = __Pyx_dict_iterator(__pyx_v_bleached_sub_datamaps_dict, 1, ((PyObject *)NULL), (&__pyx_t_27), (&__pyx_t_23)); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 194, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_24);
-    __Pyx_XDECREF(__pyx_t_4);
-    __pyx_t_4 = __pyx_t_24;
-    __pyx_t_24 = 0;
-    while (1) {
-      __pyx_t_11 = __Pyx_dict_iter_next(__pyx_t_4, __pyx_t_27, &__pyx_t_26, &__pyx_t_24, NULL, NULL, __pyx_t_23);
-      if (unlikely(__pyx_t_11 == 0)) break;
-      if (unlikely(__pyx_t_11 == -1)) __PYX_ERR(0, 194, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __Pyx_XDECREF_SET(__pyx_v_key, __pyx_t_24);
-      __pyx_t_24 = 0;
-
-      /* "pysted/raster.pyx":195
- *         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
- *         for key in bleached_sub_datamaps_dict:
- *             bleached_datamap += bleached_sub_datamaps_dict[key]             # <<<<<<<<<<<<<<
- * 
- *         value = 0.0
- */
-      if (unlikely(__pyx_v_bleached_sub_datamaps_dict == Py_None)) {
-        PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-        __PYX_ERR(0, 195, __pyx_L1_error)
-      }
-      __pyx_t_24 = __Pyx_PyDict_GetItem(__pyx_v_bleached_sub_datamaps_dict, __pyx_v_key); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 195, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __pyx_t_7 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_bleached_datamap), __pyx_t_24); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 195, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-      if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 195, __pyx_L1_error)
-      __pyx_t_25 = ((PyArrayObject *)__pyx_t_7);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer);
-        __pyx_t_11 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer, (PyObject*)__pyx_t_25, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-        if (unlikely(__pyx_t_11 < 0)) {
-          PyErr_Fetch(&__pyx_t_14, &__pyx_t_13, &__pyx_t_12);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer, (PyObject*)__pyx_v_bleached_datamap, &__Pyx_TypeInfo_nn___pyx_t_6pysted_6raster_INTDTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_12);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_14, __pyx_t_13, __pyx_t_12);
-          }
-          __pyx_t_14 = __pyx_t_13 = __pyx_t_12 = 0;
-        }
-        __pyx_pybuffernd_bleached_datamap.diminfo[0].strides = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_bleached_datamap.diminfo[0].shape = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_bleached_datamap.diminfo[1].strides = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_bleached_datamap.diminfo[1].shape = __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.shape[1];
-        if (unlikely(__pyx_t_11 < 0)) __PYX_ERR(0, 195, __pyx_L1_error)
-      }
-      __pyx_t_25 = 0;
-      __Pyx_DECREF_SET(__pyx_v_bleached_datamap, ((PyArrayObject *)__pyx_t_7));
-      __pyx_t_7 = 0;
-    }
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-
-    /* "pysted/raster.pyx":197
- *             bleached_datamap += bleached_sub_datamaps_dict[key]
- * 
- *         value = 0.0             # <<<<<<<<<<<<<<
- *         sprime = 0
- *         for s in range(row, row + h):
- */
-    __pyx_v_value = 0.0;
-
-    /* "pysted/raster.pyx":198
- * 
- *         value = 0.0
- *         sprime = 0             # <<<<<<<<<<<<<<
- *         for s in range(row, row + h):
- *             tprime = 0
- */
-    __pyx_v_sprime = 0;
-
-    /* "pysted/raster.pyx":199
- *         value = 0.0
- *         sprime = 0
- *         for s in range(row, row + h):             # <<<<<<<<<<<<<<
- *             tprime = 0
- *             for t in range(col, col + w):
- */
-    __pyx_t_23 = (__pyx_v_row + __pyx_v_h);
-    __pyx_t_11 = __pyx_t_23;
-    for (__pyx_t_28 = __pyx_v_row; __pyx_t_28 < __pyx_t_11; __pyx_t_28+=1) {
-      __pyx_v_s = __pyx_t_28;
-
-      /* "pysted/raster.pyx":200
- *         sprime = 0
- *         for s in range(row, row + h):
- *             tprime = 0             # <<<<<<<<<<<<<<
- *             for t in range(col, col + w):
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]
- */
-      __pyx_v_tprime = 0;
-
-      /* "pysted/raster.pyx":201
- *         for s in range(row, row + h):
- *             tprime = 0
- *             for t in range(col, col + w):             # <<<<<<<<<<<<<<
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]
- *                 tprime += 1
- */
-      __pyx_t_29 = (__pyx_v_col + __pyx_v_w);
-      __pyx_t_30 = __pyx_t_29;
-      for (__pyx_t_31 = __pyx_v_col; __pyx_t_31 < __pyx_t_30; __pyx_t_31+=1) {
-        __pyx_v_t = __pyx_t_31;
-
-        /* "pysted/raster.pyx":202
- *             tprime = 0
- *             for t in range(col, col + w):
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]             # <<<<<<<<<<<<<<
- *                 tprime += 1
- *             sprime += 1
- */
-        __pyx_t_16 = __pyx_v_sprime;
-        __pyx_t_15 = __pyx_v_tprime;
-        __pyx_t_32 = __pyx_v_s;
-        __pyx_t_33 = __pyx_v_t;
-        __pyx_v_value = (__pyx_v_value + ((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_effective.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_effective.diminfo[0].strides, __pyx_t_15, __pyx_pybuffernd_effective.diminfo[1].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_INTDTYPE_t *, __pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_bleached_datamap.diminfo[0].strides, __pyx_t_33, __pyx_pybuffernd_bleached_datamap.diminfo[1].strides))));
-
-        /* "pysted/raster.pyx":203
- *             for t in range(col, col + w):
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]
- *                 tprime += 1             # <<<<<<<<<<<<<<
- *             sprime += 1
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
- */
-        __pyx_v_tprime = (__pyx_v_tprime + 1);
-      }
-
-      /* "pysted/raster.pyx":204
- *                 value += effective[sprime, tprime] * bleached_datamap[s, t]
- *                 tprime += 1
- *             sprime += 1             # <<<<<<<<<<<<<<
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
- * 
- */
-      __pyx_v_sprime = (__pyx_v_sprime + 1);
-    }
-
-    /* "pysted/raster.pyx":205
- *                 tprime += 1
- *             sprime += 1
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value             # <<<<<<<<<<<<<<
- * 
- *         if bleach:
- */
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_value); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 205, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__pyx_v_ratio == 0)) {
-      PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 205, __pyx_L1_error)
-    }
-    else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_ratio == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_row))) {
-      PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-      __PYX_ERR(0, 205, __pyx_L1_error)
-    }
-    __pyx_t_7 = __Pyx_PyInt_From_int(__Pyx_div_int(__pyx_v_row, __pyx_v_ratio)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 205, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_24 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_7); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 205, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_24);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(__pyx_v_ratio == 0)) {
-      PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 205, __pyx_L1_error)
-    }
-    else if (sizeof(int) == sizeof(long) && (!(((int)-1) > 0)) && unlikely(__pyx_v_ratio == (int)-1)  && unlikely(UNARY_NEG_WOULD_OVERFLOW(__pyx_v_col))) {
-      PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
-      __PYX_ERR(0, 205, __pyx_L1_error)
-    }
-    __pyx_t_7 = __Pyx_PyInt_From_int(__Pyx_div_int(__pyx_v_col, __pyx_v_ratio)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 205, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_7); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 205, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 205, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_GIVEREF(__pyx_t_24);
-    PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_24);
-    __Pyx_GIVEREF(__pyx_t_8);
-    PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_8);
-    __pyx_t_24 = 0;
-    __pyx_t_8 = 0;
-    if (unlikely(PyObject_SetItem(((PyObject *)__pyx_v_acquired_intensity), __pyx_t_7, __pyx_t_4) < 0)) __PYX_ERR(0, 205, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-
-    /* "pysted/raster.pyx":207
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
- * 
- *         if bleach:             # <<<<<<<<<<<<<<
- *             bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
- *                                         w, prob_ex, prob_sted)
- */
-    __pyx_t_2 = (__pyx_v_bleach != 0);
-    if (__pyx_t_2) {
-
-      /* "pysted/raster.pyx":208
- * 
- *         if bleach:
- *             bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,             # <<<<<<<<<<<<<<
- *                                         w, prob_ex, prob_sted)
- */
-      __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_bleach_funcs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 208, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_default_bleach); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 208, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_8);
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_p_ex); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 208, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_24 = PyFloat_FromDouble(__pyx_v_p_sted); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 208, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_24);
-      __pyx_t_3 = PyFloat_FromDouble(__pyx_v_pdt); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 208, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_18 = __Pyx_PyInt_From_int(__pyx_v_row); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 208, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_18);
-      __pyx_t_17 = __Pyx_PyInt_From_int(__pyx_v_col); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 208, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_17);
-      __pyx_t_34 = __Pyx_PyInt_From_int(__pyx_v_h); if (unlikely(!__pyx_t_34)) __PYX_ERR(0, 208, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_34);
-
-      /* "pysted/raster.pyx":209
- *         if bleach:
- *             bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
- *                                         w, prob_ex, prob_sted)             # <<<<<<<<<<<<<<
- */
-      __pyx_t_35 = __Pyx_PyInt_From_int(__pyx_v_w); if (unlikely(!__pyx_t_35)) __PYX_ERR(0, 209, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_35);
-      __pyx_t_36 = NULL;
-      __pyx_t_23 = 0;
-      if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_8))) {
-        __pyx_t_36 = PyMethod_GET_SELF(__pyx_t_8);
-        if (likely(__pyx_t_36)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
-          __Pyx_INCREF(__pyx_t_36);
-          __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_8, function);
-          __pyx_t_23 = 1;
-        }
-      }
-      #if CYTHON_FAST_PYCALL
-      if (PyFunction_Check(__pyx_t_8)) {
-        PyObject *__pyx_temp[14] = {__pyx_t_36, __pyx_v_self, ((PyObject *)__pyx_v_i_ex), ((PyObject *)__pyx_v_i_sted), __pyx_t_7, __pyx_t_24, __pyx_t_3, __pyx_v_bleached_sub_datamaps_dict, __pyx_t_18, __pyx_t_17, __pyx_t_34, __pyx_t_35, ((PyObject *)__pyx_v_prob_ex), ((PyObject *)__pyx_v_prob_sted)};
-        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_23, 13+__pyx_t_23); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 208, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_36); __pyx_t_36 = 0;
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-        __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-        __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-        __Pyx_DECREF(__pyx_t_34); __pyx_t_34 = 0;
-        __Pyx_DECREF(__pyx_t_35); __pyx_t_35 = 0;
-      } else
-      #endif
-      #if CYTHON_FAST_PYCCALL
-      if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
-        PyObject *__pyx_temp[14] = {__pyx_t_36, __pyx_v_self, ((PyObject *)__pyx_v_i_ex), ((PyObject *)__pyx_v_i_sted), __pyx_t_7, __pyx_t_24, __pyx_t_3, __pyx_v_bleached_sub_datamaps_dict, __pyx_t_18, __pyx_t_17, __pyx_t_34, __pyx_t_35, ((PyObject *)__pyx_v_prob_ex), ((PyObject *)__pyx_v_prob_sted)};
-        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_23, 13+__pyx_t_23); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 208, __pyx_L1_error)
-        __Pyx_XDECREF(__pyx_t_36); __pyx_t_36 = 0;
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-        __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __Pyx_DECREF(__pyx_t_18); __pyx_t_18 = 0;
-        __Pyx_DECREF(__pyx_t_17); __pyx_t_17 = 0;
-        __Pyx_DECREF(__pyx_t_34); __pyx_t_34 = 0;
-        __Pyx_DECREF(__pyx_t_35); __pyx_t_35 = 0;
-      } else
-      #endif
-      {
-        __pyx_t_37 = PyTuple_New(13+__pyx_t_23); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 208, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_37);
-        if (__pyx_t_36) {
-          __Pyx_GIVEREF(__pyx_t_36); PyTuple_SET_ITEM(__pyx_t_37, 0, __pyx_t_36); __pyx_t_36 = NULL;
-        }
-        __Pyx_INCREF(__pyx_v_self);
-        __Pyx_GIVEREF(__pyx_v_self);
-        PyTuple_SET_ITEM(__pyx_t_37, 0+__pyx_t_23, __pyx_v_self);
-        __Pyx_INCREF(((PyObject *)__pyx_v_i_ex));
-        __Pyx_GIVEREF(((PyObject *)__pyx_v_i_ex));
-        PyTuple_SET_ITEM(__pyx_t_37, 1+__pyx_t_23, ((PyObject *)__pyx_v_i_ex));
-        __Pyx_INCREF(((PyObject *)__pyx_v_i_sted));
-        __Pyx_GIVEREF(((PyObject *)__pyx_v_i_sted));
-        PyTuple_SET_ITEM(__pyx_t_37, 2+__pyx_t_23, ((PyObject *)__pyx_v_i_sted));
-        __Pyx_GIVEREF(__pyx_t_7);
-        PyTuple_SET_ITEM(__pyx_t_37, 3+__pyx_t_23, __pyx_t_7);
-        __Pyx_GIVEREF(__pyx_t_24);
-        PyTuple_SET_ITEM(__pyx_t_37, 4+__pyx_t_23, __pyx_t_24);
-        __Pyx_GIVEREF(__pyx_t_3);
-        PyTuple_SET_ITEM(__pyx_t_37, 5+__pyx_t_23, __pyx_t_3);
-        __Pyx_INCREF(__pyx_v_bleached_sub_datamaps_dict);
-        __Pyx_GIVEREF(__pyx_v_bleached_sub_datamaps_dict);
-        PyTuple_SET_ITEM(__pyx_t_37, 6+__pyx_t_23, __pyx_v_bleached_sub_datamaps_dict);
-        __Pyx_GIVEREF(__pyx_t_18);
-        PyTuple_SET_ITEM(__pyx_t_37, 7+__pyx_t_23, __pyx_t_18);
-        __Pyx_GIVEREF(__pyx_t_17);
-        PyTuple_SET_ITEM(__pyx_t_37, 8+__pyx_t_23, __pyx_t_17);
-        __Pyx_GIVEREF(__pyx_t_34);
-        PyTuple_SET_ITEM(__pyx_t_37, 9+__pyx_t_23, __pyx_t_34);
-        __Pyx_GIVEREF(__pyx_t_35);
-        PyTuple_SET_ITEM(__pyx_t_37, 10+__pyx_t_23, __pyx_t_35);
-        __Pyx_INCREF(((PyObject *)__pyx_v_prob_ex));
-        __Pyx_GIVEREF(((PyObject *)__pyx_v_prob_ex));
-        PyTuple_SET_ITEM(__pyx_t_37, 11+__pyx_t_23, ((PyObject *)__pyx_v_prob_ex));
-        __Pyx_INCREF(((PyObject *)__pyx_v_prob_sted));
-        __Pyx_GIVEREF(((PyObject *)__pyx_v_prob_sted));
-        PyTuple_SET_ITEM(__pyx_t_37, 12+__pyx_t_23, ((PyObject *)__pyx_v_prob_sted));
-        __pyx_t_7 = 0;
-        __pyx_t_24 = 0;
-        __pyx_t_3 = 0;
-        __pyx_t_18 = 0;
-        __pyx_t_17 = 0;
-        __pyx_t_34 = 0;
-        __pyx_t_35 = 0;
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_37, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 208, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
-      }
-      __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-
-      /* "pysted/raster.pyx":207
- *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
- * 
- *         if bleach:             # <<<<<<<<<<<<<<
- *             bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
- *                                         w, prob_ex, prob_sted)
- */
-    }
-
-    /* "pysted/raster.pyx":188
- *     # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape)
- * 
- *     for (row, col) in pixel_list:             # <<<<<<<<<<<<<<
- *         pdt = pdt_roi[row, col]
- *         p_ex = p_ex_roi[row, col]
- */
-  }
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-
-  /* "pysted/raster.pyx":130
- * @cython.boundscheck(False)  # turn off bounds-checking for entire function
- * @cython.wraparound(False)  # turn off negative index wrapping for entire function
- * def test_var_bleach(             # <<<<<<<<<<<<<<
- *         object self,
- *         object datamap,
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_XDECREF(__pyx_t_17);
-  __Pyx_XDECREF(__pyx_t_18);
-  __Pyx_XDECREF(__pyx_t_24);
-  __Pyx_XDECREF(__pyx_t_34);
-  __Pyx_XDECREF(__pyx_t_35);
-  __Pyx_XDECREF(__pyx_t_36);
-  __Pyx_XDECREF(__pyx_t_37);
-  { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
-    __Pyx_PyThreadState_declare
-    __Pyx_PyThreadState_assign
-    __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_effective.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pixel_list.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_prob_ex.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_prob_sted.rcbuffer->pybuffer);
-  __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("pysted.raster.test_var_bleach", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  goto __pyx_L2;
-  __pyx_L0:;
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_acquired_intensity.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_bleached_datamap.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_effective.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_ex.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_i_sted.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_p_ex_roi.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_p_sted_roi.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pdt_roi.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pixel_list.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_pre_effective.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_prob_ex.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_prob_sted.rcbuffer->pybuffer);
-  __pyx_L2:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_pre_effective);
-  __Pyx_XDECREF((PyObject *)__pyx_v_effective);
-  __Pyx_XDECREF((PyObject *)__pyx_v_i_ex);
-  __Pyx_XDECREF((PyObject *)__pyx_v_i_sted);
-  __Pyx_XDECREF((PyObject *)__pyx_v_bleached_datamap);
-  __Pyx_XDECREF(__pyx_v__);
+  __Pyx_XDECREF((PyObject *)__pyx_v_k_ex);
+  __Pyx_XDECREF((PyObject *)__pyx_v_k_sted);
   __Pyx_XDECREF(__pyx_v_key);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
@@ -5894,7 +3385,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
  * 
  * cdef inline int import_umath() except -1:
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 884, __pyx_L5_except_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 884, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -6026,7 +3517,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
  * 
  * cdef inline int import_ufunc() except -1:
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 890, __pyx_L5_except_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 890, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -6158,7 +3649,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
  * 
  * cdef extern from *:
  */
-      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 896, __pyx_L5_except_error)
+      __pyx_t_8 = __Pyx_PyObject_Call(__pyx_builtin_ImportError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 896, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_Raise(__pyx_t_8, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -6212,17 +3703,17 @@ static PyMethodDef __pyx_methods[] = {
 #if PY_MAJOR_VERSION >= 3
 #if CYTHON_PEP489_MULTI_PHASE_INIT
 static PyObject* __pyx_pymod_create(PyObject *spec, PyModuleDef *def); /*proto*/
-static int __pyx_pymod_exec_raster(PyObject* module); /*proto*/
+static int __pyx_pymod_exec_bleach_funcs(PyObject* module); /*proto*/
 static PyModuleDef_Slot __pyx_moduledef_slots[] = {
   {Py_mod_create, (void*)__pyx_pymod_create},
-  {Py_mod_exec, (void*)__pyx_pymod_exec_raster},
+  {Py_mod_exec, (void*)__pyx_pymod_exec_bleach_funcs},
   {0, NULL}
 };
 #endif
 
 static struct PyModuleDef __pyx_moduledef = {
     PyModuleDef_HEAD_INIT,
-    "raster",
+    "bleach_funcs",
     0, /* m_doc */
   #if CYTHON_PEP489_MULTI_PHASE_INIT
     0, /* m_size */
@@ -6254,30 +3745,17 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_FLOATDTYPE, __pyx_k_FLOATDTYPE, sizeof(__pyx_k_FLOATDTYPE), 0, 0, 1, 1},
   {&__pyx_n_s_INTDTYPE, __pyx_k_INTDTYPE, sizeof(__pyx_k_INTDTYPE), 0, 0, 1, 1},
   {&__pyx_n_s_ImportError, __pyx_k_ImportError, sizeof(__pyx_k_ImportError), 0, 0, 1, 1},
-  {&__pyx_n_s__4, __pyx_k__4, sizeof(__pyx_k__4), 0, 0, 1, 1},
-  {&__pyx_n_s_acquired_intensity, __pyx_k_acquired_intensity, sizeof(__pyx_k_acquired_intensity), 0, 0, 1, 1},
-  {&__pyx_kp_s_audurand_pysted_pysted_raster_py, __pyx_k_audurand_pysted_pysted_raster_py, sizeof(__pyx_k_audurand_pysted_pysted_raster_py), 0, 0, 1, 0},
-  {&__pyx_n_s_base, __pyx_k_base, sizeof(__pyx_k_base), 0, 0, 1, 1},
-  {&__pyx_n_s_bleach, __pyx_k_bleach, sizeof(__pyx_k_bleach), 0, 0, 1, 1},
+  {&__pyx_kp_s_audurand_pysted_pysted_bleach_fu, __pyx_k_audurand_pysted_pysted_bleach_fu, sizeof(__pyx_k_audurand_pysted_pysted_bleach_fu), 0, 0, 1, 0},
   {&__pyx_n_s_bleach_funcs, __pyx_k_bleach_funcs, sizeof(__pyx_k_bleach_funcs), 0, 0, 1, 1},
-  {&__pyx_n_s_bleached_datamap, __pyx_k_bleached_datamap, sizeof(__pyx_k_bleached_datamap), 0, 0, 1, 1},
   {&__pyx_n_s_bleached_sub_datamaps_dict, __pyx_k_bleached_sub_datamaps_dict, sizeof(__pyx_k_bleached_sub_datamaps_dict), 0, 0, 1, 1},
-  {&__pyx_n_s_cache, __pyx_k_cache, sizeof(__pyx_k_cache), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_col, __pyx_k_col, sizeof(__pyx_k_col), 0, 0, 1, 1},
-  {&__pyx_n_s_cols_pad, __pyx_k_cols_pad, sizeof(__pyx_k_cols_pad), 0, 0, 1, 1},
   {&__pyx_n_s_current, __pyx_k_current, sizeof(__pyx_k_current), 0, 0, 1, 1},
-  {&__pyx_n_s_datamap, __pyx_k_datamap, sizeof(__pyx_k_datamap), 0, 0, 1, 1},
   {&__pyx_n_s_default_bleach, __pyx_k_default_bleach, sizeof(__pyx_k_default_bleach), 0, 0, 1, 1},
-  {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
   {&__pyx_n_s_duty_cycle, __pyx_k_duty_cycle, sizeof(__pyx_k_duty_cycle), 0, 0, 1, 1},
-  {&__pyx_n_s_effective, __pyx_k_effective, sizeof(__pyx_k_effective), 0, 0, 1, 1},
-  {&__pyx_n_s_end, __pyx_k_end, sizeof(__pyx_k_end), 0, 0, 1, 1},
   {&__pyx_n_s_excitation, __pyx_k_excitation, sizeof(__pyx_k_excitation), 0, 0, 1, 1},
-  {&__pyx_n_s_file, __pyx_k_file, sizeof(__pyx_k_file), 0, 0, 1, 1},
   {&__pyx_n_s_float64, __pyx_k_float64, sizeof(__pyx_k_float64), 0, 0, 1, 1},
   {&__pyx_n_s_fluo, __pyx_k_fluo, sizeof(__pyx_k_fluo), 0, 0, 1, 1},
-  {&__pyx_n_s_get_effective, __pyx_k_get_effective, sizeof(__pyx_k_get_effective), 0, 0, 1, 1},
   {&__pyx_n_s_get_k_bleach, __pyx_k_get_k_bleach, sizeof(__pyx_k_get_k_bleach), 0, 0, 1, 1},
   {&__pyx_n_s_get_photons, __pyx_k_get_photons, sizeof(__pyx_k_get_photons), 0, 0, 1, 1},
   {&__pyx_n_s_h, __pyx_k_h, sizeof(__pyx_k_h), 0, 0, 1, 1},
@@ -6289,59 +3767,41 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_k_sted, __pyx_k_k_sted, sizeof(__pyx_k_k_sted), 0, 0, 1, 1},
   {&__pyx_n_s_key, __pyx_k_key, sizeof(__pyx_k_key), 0, 0, 1, 1},
   {&__pyx_n_s_lambda, __pyx_k_lambda, sizeof(__pyx_k_lambda), 0, 0, 1, 1},
-  {&__pyx_n_s_laser_pad, __pyx_k_laser_pad, sizeof(__pyx_k_laser_pad), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
-  {&__pyx_n_s_max_len, __pyx_k_max_len, sizeof(__pyx_k_max_len), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
   {&__pyx_kp_s_numpy_core_multiarray_failed_to, __pyx_k_numpy_core_multiarray_failed_to, sizeof(__pyx_k_numpy_core_multiarray_failed_to), 0, 0, 1, 0},
   {&__pyx_kp_s_numpy_core_umath_failed_to_impor, __pyx_k_numpy_core_umath_failed_to_impor, sizeof(__pyx_k_numpy_core_umath_failed_to_impor), 0, 0, 1, 0},
   {&__pyx_n_s_o, __pyx_k_o, sizeof(__pyx_k_o), 0, 0, 1, 1},
   {&__pyx_n_s_p_ex, __pyx_k_p_ex, sizeof(__pyx_k_p_ex), 0, 0, 1, 1},
-  {&__pyx_n_s_p_ex_roi, __pyx_k_p_ex_roi, sizeof(__pyx_k_p_ex_roi), 0, 0, 1, 1},
   {&__pyx_n_s_p_sted, __pyx_k_p_sted, sizeof(__pyx_k_p_sted), 0, 0, 1, 1},
-  {&__pyx_n_s_p_sted_roi, __pyx_k_p_sted_roi, sizeof(__pyx_k_p_sted_roi), 0, 0, 1, 1},
   {&__pyx_n_s_pdt, __pyx_k_pdt, sizeof(__pyx_k_pdt), 0, 0, 1, 1},
-  {&__pyx_n_s_pdt_roi, __pyx_k_pdt_roi, sizeof(__pyx_k_pdt_roi), 0, 0, 1, 1},
   {&__pyx_n_s_photons_ex, __pyx_k_photons_ex, sizeof(__pyx_k_photons_ex), 0, 0, 1, 1},
   {&__pyx_n_s_photons_sted, __pyx_k_photons_sted, sizeof(__pyx_k_photons_sted), 0, 0, 1, 1},
-  {&__pyx_n_s_pixel_list, __pyx_k_pixel_list, sizeof(__pyx_k_pixel_list), 0, 0, 1, 1},
-  {&__pyx_n_s_pixelsize, __pyx_k_pixelsize, sizeof(__pyx_k_pixelsize), 0, 0, 1, 1},
-  {&__pyx_n_s_pre_effective, __pyx_k_pre_effective, sizeof(__pyx_k_pre_effective), 0, 0, 1, 1},
-  {&__pyx_n_s_print, __pyx_k_print, sizeof(__pyx_k_print), 0, 0, 1, 1},
   {&__pyx_n_s_prob, __pyx_k_prob, sizeof(__pyx_k_prob), 0, 0, 1, 1},
   {&__pyx_n_s_prob_ex, __pyx_k_prob_ex, sizeof(__pyx_k_prob_ex), 0, 0, 1, 1},
   {&__pyx_n_s_prob_sted, __pyx_k_prob_sted, sizeof(__pyx_k_prob_sted), 0, 0, 1, 1},
-  {&__pyx_n_s_pysted_raster, __pyx_k_pysted_raster, sizeof(__pyx_k_pysted_raster), 0, 0, 1, 1},
+  {&__pyx_n_s_pysted_bleach_funcs, __pyx_k_pysted_bleach_funcs, sizeof(__pyx_k_pysted_bleach_funcs), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
-  {&__pyx_n_s_raster_func_c_self_bleach_split, __pyx_k_raster_func_c_self_bleach_split, sizeof(__pyx_k_raster_func_c_self_bleach_split), 0, 0, 1, 1},
   {&__pyx_n_s_rate, __pyx_k_rate, sizeof(__pyx_k_rate), 0, 0, 1, 1},
-  {&__pyx_n_s_ratio, __pyx_k_ratio, sizeof(__pyx_k_ratio), 0, 0, 1, 1},
   {&__pyx_n_s_row, __pyx_k_row, sizeof(__pyx_k_row), 0, 0, 1, 1},
-  {&__pyx_n_s_rows_pad, __pyx_k_rows_pad, sizeof(__pyx_k_rows_pad), 0, 0, 1, 1},
   {&__pyx_n_s_rsamp, __pyx_k_rsamp, sizeof(__pyx_k_rsamp), 0, 0, 1, 1},
   {&__pyx_n_s_s, __pyx_k_s, sizeof(__pyx_k_s), 0, 0, 1, 1},
   {&__pyx_n_s_sampled_value, __pyx_k_sampled_value, sizeof(__pyx_k_sampled_value), 0, 0, 1, 1},
-  {&__pyx_n_s_seed, __pyx_k_seed, sizeof(__pyx_k_seed), 0, 0, 1, 1},
   {&__pyx_n_s_self, __pyx_k_self, sizeof(__pyx_k_self), 0, 0, 1, 1},
-  {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
   {&__pyx_n_s_sprime, __pyx_k_sprime, sizeof(__pyx_k_sprime), 0, 0, 1, 1},
   {&__pyx_n_s_sted, __pyx_k_sted, sizeof(__pyx_k_sted), 0, 0, 1, 1},
   {&__pyx_n_s_t, __pyx_k_t, sizeof(__pyx_k_t), 0, 0, 1, 1},
   {&__pyx_n_s_tau, __pyx_k_tau, sizeof(__pyx_k_tau), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
-  {&__pyx_kp_s_test_func_xD, __pyx_k_test_func_xD, sizeof(__pyx_k_test_func_xD), 0, 0, 1, 0},
-  {&__pyx_n_s_test_var_bleach, __pyx_k_test_var_bleach, sizeof(__pyx_k_test_var_bleach), 0, 0, 1, 1},
   {&__pyx_n_s_time, __pyx_k_time, sizeof(__pyx_k_time), 0, 0, 1, 1},
-  {&__pyx_n_s_time_ns, __pyx_k_time_ns, sizeof(__pyx_k_time_ns), 0, 0, 1, 1},
   {&__pyx_n_s_tprime, __pyx_k_tprime, sizeof(__pyx_k_tprime), 0, 0, 1, 1},
   {&__pyx_n_s_value, __pyx_k_value, sizeof(__pyx_k_value), 0, 0, 1, 1},
   {&__pyx_n_s_w, __pyx_k_w, sizeof(__pyx_k_w), 0, 0, 1, 1},
-  {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 53, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 884, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
@@ -6352,17 +3812,6 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "pysted/raster.pyx":65
- *     if seed == 0:
- *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
- *         srand(int(str(time.time_ns())[-5:-1]))             # <<<<<<<<<<<<<<
- *     else:
- *         srand(seed)
- */
-  __pyx_slice_ = PySlice_New(__pyx_int_neg_5, __pyx_int_neg_1, Py_None); if (unlikely(!__pyx_slice_)) __PYX_ERR(0, 65, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice_);
-  __Pyx_GIVEREF(__pyx_slice_);
-
   /* "C:/Users/benoi/anaconda3/lib/site-packages/numpy/__init__.pxd":884
  *         __pyx_import_array()
  *     except Exception:
@@ -6370,9 +3819,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * cdef inline int import_umath() except -1:
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_numpy_core_multiarray_failed_to); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(1, 884, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__2);
-  __Pyx_GIVEREF(__pyx_tuple__2);
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_numpy_core_multiarray_failed_to); if (unlikely(!__pyx_tuple_)) __PYX_ERR(1, 884, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple_);
+  __Pyx_GIVEREF(__pyx_tuple_);
 
   /* "C:/Users/benoi/anaconda3/lib/site-packages/numpy/__init__.pxd":890
  *         _import_umath()
@@ -6381,33 +3830,21 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * cdef inline int import_ufunc() except -1:
  */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_numpy_core_umath_failed_to_impor); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(1, 890, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_numpy_core_umath_failed_to_impor); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(1, 890, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__2);
+  __Pyx_GIVEREF(__pyx_tuple__2);
+
+  /* "pysted/bleach_funcs.pyx":19
+ * @cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * @cython.wraparound(False)  # turn off negative index wrapping for entire function
+ * def default_bleach(object self,             # <<<<<<<<<<<<<<
+ *                    numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex,
+ *                    numpy.ndarray[FLOATDTYPE_t, ndim=2] i_sted,
+ */
+  __pyx_tuple__3 = PyTuple_Pack(29, __pyx_n_s_self, __pyx_n_s_i_ex, __pyx_n_s_i_sted, __pyx_n_s_p_ex, __pyx_n_s_p_sted, __pyx_n_s_pdt, __pyx_n_s_bleached_sub_datamaps_dict, __pyx_n_s_row, __pyx_n_s_col, __pyx_n_s_h, __pyx_n_s_w, __pyx_n_s_prob_ex, __pyx_n_s_prob_sted, __pyx_n_s_photons_ex, __pyx_n_s_photons_sted, __pyx_n_s_k_ex, __pyx_n_s_k_sted, __pyx_n_s_s, __pyx_n_s_sprime, __pyx_n_s_t, __pyx_n_s_tprime, __pyx_n_s_value, __pyx_n_s_sampled_value, __pyx_n_s_prob, __pyx_n_s_rsamp, __pyx_n_s_current, __pyx_n_s_key, __pyx_n_s_duty_cycle, __pyx_n_s_o); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
-
-  /* "pysted/raster.pyx":19
- * @cython.boundscheck(False)  # turn off bounds-checking for entire function
- * @cython.wraparound(False)  # turn off negative index wrapping for entire function
- * def raster_func_c_self_bleach_split_g(             # <<<<<<<<<<<<<<
- *         object self,
- *         object datamap,
- */
-  __pyx_tuple__5 = PyTuple_Pack(46, __pyx_n_s_self, __pyx_n_s_datamap, __pyx_n_s_acquired_intensity, __pyx_n_s_pixel_list, __pyx_n_s_ratio, __pyx_n_s_rows_pad, __pyx_n_s_cols_pad, __pyx_n_s_laser_pad, __pyx_n_s_prob_ex, __pyx_n_s_prob_sted, __pyx_n_s_pdt_roi, __pyx_n_s_p_ex_roi, __pyx_n_s_p_sted_roi, __pyx_n_s_bleach, __pyx_n_s_bleached_sub_datamaps_dict, __pyx_n_s_seed, __pyx_n_s_row, __pyx_n_s_col, __pyx_n_s_sprime, __pyx_n_s_tprime, __pyx_n_s_h, __pyx_n_s_w, __pyx_n_s_current, __pyx_n_s_max_len, __pyx_n_s_value, __pyx_n_s_sampled_value, __pyx_n_s_prob, __pyx_n_s_rsamp, __pyx_n_s_pdt, __pyx_n_s_p_ex, __pyx_n_s_p_sted, __pyx_n_s_pre_effective, __pyx_n_s_effective, __pyx_n_s_k_ex, __pyx_n_s_k_sted, __pyx_n_s_i_ex, __pyx_n_s_i_sted, __pyx_n_s_photons_ex, __pyx_n_s_photons_sted, __pyx_n_s_bleached_datamap, __pyx_n_s_duty_cycle, __pyx_n_s__4, __pyx_n_s_key, __pyx_n_s_s, __pyx_n_s_t, __pyx_n_s_o); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 19, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__5);
-  __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(16, 0, 46, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_audurand_pysted_pysted_raster_py, __pyx_n_s_raster_func_c_self_bleach_split, 19, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 19, __pyx_L1_error)
-
-  /* "pysted/raster.pyx":130
- * @cython.boundscheck(False)  # turn off bounds-checking for entire function
- * @cython.wraparound(False)  # turn off negative index wrapping for entire function
- * def test_var_bleach(             # <<<<<<<<<<<<<<
- *         object self,
- *         object datamap,
- */
-  __pyx_tuple__7 = PyTuple_Pack(45, __pyx_n_s_self, __pyx_n_s_datamap, __pyx_n_s_acquired_intensity, __pyx_n_s_pixel_list, __pyx_n_s_ratio, __pyx_n_s_rows_pad, __pyx_n_s_cols_pad, __pyx_n_s_laser_pad, __pyx_n_s_prob_ex, __pyx_n_s_prob_sted, __pyx_n_s_pdt_roi, __pyx_n_s_p_ex_roi, __pyx_n_s_p_sted_roi, __pyx_n_s_bleach, __pyx_n_s_bleached_sub_datamaps_dict, __pyx_n_s_seed, __pyx_n_s_row, __pyx_n_s_col, __pyx_n_s_sprime, __pyx_n_s_tprime, __pyx_n_s_h, __pyx_n_s_w, __pyx_n_s_current, __pyx_n_s_max_len, __pyx_n_s_value, __pyx_n_s_sampled_value, __pyx_n_s_prob, __pyx_n_s_rsamp, __pyx_n_s_pdt, __pyx_n_s_p_ex, __pyx_n_s_p_sted, __pyx_n_s_pre_effective, __pyx_n_s_effective, __pyx_n_s_k_ex, __pyx_n_s_k_sted, __pyx_n_s_i_ex, __pyx_n_s_i_sted, __pyx_n_s_photons_ex, __pyx_n_s_photons_sted, __pyx_n_s_bleached_datamap, __pyx_n_s_duty_cycle, __pyx_n_s__4, __pyx_n_s_key, __pyx_n_s_s, __pyx_n_s_t); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 130, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
-  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(16, 0, 45, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_audurand_pysted_pysted_raster_py, __pyx_n_s_test_var_bleach, 130, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 130, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(13, 0, 29, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_audurand_pysted_pysted_bleach_fu, __pyx_n_s_default_bleach, 19, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -6417,8 +3854,6 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
 static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 2, __pyx_L1_error);
-  __pyx_int_neg_1 = PyInt_FromLong(-1); if (unlikely(!__pyx_int_neg_1)) __PYX_ERR(0, 2, __pyx_L1_error)
-  __pyx_int_neg_5 = PyInt_FromLong(-5); if (unlikely(!__pyx_int_neg_5)) __PYX_ERR(0, 2, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -6539,11 +3974,11 @@ static int __Pyx_modinit_function_import_code(void) {
 
 
 #if PY_MAJOR_VERSION < 3
-__Pyx_PyMODINIT_FUNC initraster(void) CYTHON_SMALL_CODE; /*proto*/
-__Pyx_PyMODINIT_FUNC initraster(void)
+__Pyx_PyMODINIT_FUNC initbleach_funcs(void) CYTHON_SMALL_CODE; /*proto*/
+__Pyx_PyMODINIT_FUNC initbleach_funcs(void)
 #else
-__Pyx_PyMODINIT_FUNC PyInit_raster(void) CYTHON_SMALL_CODE; /*proto*/
-__Pyx_PyMODINIT_FUNC PyInit_raster(void)
+__Pyx_PyMODINIT_FUNC PyInit_bleach_funcs(void) CYTHON_SMALL_CODE; /*proto*/
+__Pyx_PyMODINIT_FUNC PyInit_bleach_funcs(void)
 #if CYTHON_PEP489_MULTI_PHASE_INIT
 {
   return PyModuleDef_Init(&__pyx_moduledef);
@@ -6610,7 +4045,7 @@ bad:
 }
 
 
-static CYTHON_SMALL_CODE int __pyx_pymod_exec_raster(PyObject *__pyx_pyinit_module)
+static CYTHON_SMALL_CODE int __pyx_pymod_exec_bleach_funcs(PyObject *__pyx_pyinit_module)
 #endif
 #endif
 {
@@ -6623,7 +4058,7 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_raster(PyObject *__pyx_pyinit_modu
   #if CYTHON_PEP489_MULTI_PHASE_INIT
   if (__pyx_m) {
     if (__pyx_m == __pyx_pyinit_module) return 0;
-    PyErr_SetString(PyExc_RuntimeError, "Module 'raster' has already been imported. Re-initialisation is not supported.");
+    PyErr_SetString(PyExc_RuntimeError, "Module 'bleach_funcs' has already been imported. Re-initialisation is not supported.");
     return -1;
   }
   #elif PY_MAJOR_VERSION >= 3
@@ -6638,7 +4073,7 @@ if (!__Pyx_RefNanny) {
       Py_FatalError("failed to import 'refnanny' module");
 }
 #endif
-  __Pyx_RefNannySetupContext("__Pyx_PyMODINIT_FUNC PyInit_raster(void)", 0);
+  __Pyx_RefNannySetupContext("__Pyx_PyMODINIT_FUNC PyInit_bleach_funcs(void)", 0);
   if (__Pyx_check_binary_version() < 0) __PYX_ERR(0, 2, __pyx_L1_error)
   #ifdef __Pxy_PyFrame_Initialize_Offsets
   __Pxy_PyFrame_Initialize_Offsets();
@@ -6677,7 +4112,7 @@ if (!__Pyx_RefNanny) {
   Py_INCREF(__pyx_m);
   #else
   #if PY_MAJOR_VERSION < 3
-  __pyx_m = Py_InitModule4("raster", __pyx_methods, 0, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
+  __pyx_m = Py_InitModule4("bleach_funcs", __pyx_methods, 0, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
   #else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
   #endif
@@ -6695,14 +4130,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 2, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_pysted__raster) {
+  if (__pyx_module_is_main_pysted__bleach_funcs) {
     if (PyObject_SetAttr(__pyx_m, __pyx_n_s_name, __pyx_n_s_main) < 0) __PYX_ERR(0, 2, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 2, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "pysted.raster")) {
-      if (unlikely(PyDict_SetItemString(modules, "pysted.raster", __pyx_m) < 0)) __PYX_ERR(0, 2, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "pysted.bleach_funcs")) {
+      if (unlikely(PyDict_SetItemString(modules, "pysted.bleach_funcs", __pyx_m) < 0)) __PYX_ERR(0, 2, __pyx_L1_error)
     }
   }
   #endif
@@ -6723,7 +4158,7 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 2, __pyx_L1_error)
   #endif
 
-  /* "pysted/raster.pyx":2
+  /* "pysted/bleach_funcs.pyx":2
  * 
  * import time             # <<<<<<<<<<<<<<
  * import numpy
@@ -6734,7 +4169,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_time, __pyx_t_1) < 0) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pysted/raster.pyx":3
+  /* "pysted/bleach_funcs.pyx":3
  * 
  * import time
  * import numpy             # <<<<<<<<<<<<<<
@@ -6746,7 +4181,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_numpy, __pyx_t_1) < 0) __PYX_ERR(0, 3, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pysted/raster.pyx":4
+  /* "pysted/bleach_funcs.pyx":4
  * import time
  * import numpy
  * import bleach_funcs             # <<<<<<<<<<<<<<
@@ -6758,7 +4193,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_bleach_funcs, __pyx_t_1) < 0) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pysted/raster.pyx":11
+  /* "pysted/bleach_funcs.pyx":11
  * from libc.stdlib cimport rand, srand, RAND_MAX
  * 
  * INTDTYPE = numpy.int32             # <<<<<<<<<<<<<<
@@ -6773,7 +4208,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_INTDTYPE, __pyx_t_2) < 0) __PYX_ERR(0, 11, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "pysted/raster.pyx":12
+  /* "pysted/bleach_funcs.pyx":12
  * 
  * INTDTYPE = numpy.int32
  * FLOATDTYPE = numpy.float64             # <<<<<<<<<<<<<<
@@ -6788,31 +4223,19 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_FLOATDTYPE, __pyx_t_1) < 0) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pysted/raster.pyx":19
+  /* "pysted/bleach_funcs.pyx":19
  * @cython.boundscheck(False)  # turn off bounds-checking for entire function
  * @cython.wraparound(False)  # turn off negative index wrapping for entire function
- * def raster_func_c_self_bleach_split_g(             # <<<<<<<<<<<<<<
- *         object self,
- *         object datamap,
+ * def default_bleach(object self,             # <<<<<<<<<<<<<<
+ *                    numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex,
+ *                    numpy.ndarray[FLOATDTYPE_t, ndim=2] i_sted,
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6pysted_6raster_1raster_func_c_self_bleach_split_g, NULL, __pyx_n_s_pysted_raster); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6pysted_12bleach_funcs_1default_bleach, NULL, __pyx_n_s_pysted_bleach_funcs); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_raster_func_c_self_bleach_split, __pyx_t_1) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_default_bleach, __pyx_t_1) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pysted/raster.pyx":130
- * @cython.boundscheck(False)  # turn off bounds-checking for entire function
- * @cython.wraparound(False)  # turn off negative index wrapping for entire function
- * def test_var_bleach(             # <<<<<<<<<<<<<<
- *         object self,
- *         object datamap,
- */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6pysted_6raster_3test_var_bleach, NULL, __pyx_n_s_pysted_raster); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 130, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test_var_bleach, __pyx_t_1) < 0) __PYX_ERR(0, 130, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "pysted/raster.pyx":2
+  /* "pysted/bleach_funcs.pyx":2
  * 
  * import time             # <<<<<<<<<<<<<<
  * import numpy
@@ -6839,11 +4262,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_2);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init pysted.raster", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init pysted.bleach_funcs", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     Py_CLEAR(__pyx_m);
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init pysted.raster");
+    PyErr_SetString(PyExc_ImportError, "init pysted.bleach_funcs");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
@@ -7625,66 +5048,28 @@ fail:;
   return -1;
 }
 
-/* PyDictVersioning */
-  #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
-}
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
-    PyObject **dictptr = NULL;
-    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
-    if (offset) {
-#if CYTHON_COMPILING_IN_CPYTHON
-        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
-#else
-        dictptr = _PyObject_GetDictPtr(obj);
-#endif
+/* PyCFunctionFastCall */
+  #if CYTHON_FAST_PYCCALL
+static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
+    PyCFunctionObject *func = (PyCFunctionObject*)func_obj;
+    PyCFunction meth = PyCFunction_GET_FUNCTION(func);
+    PyObject *self = PyCFunction_GET_SELF(func);
+    int flags = PyCFunction_GET_FLAGS(func);
+    assert(PyCFunction_Check(func));
+    assert(METH_FASTCALL == (flags & ~(METH_CLASS | METH_STATIC | METH_COEXIST | METH_KEYWORDS | METH_STACKLESS)));
+    assert(nargs >= 0);
+    assert(nargs == 0 || args != NULL);
+    /* _PyCFunction_FastCallDict() must not be called with an exception set,
+       because it may clear it (directly or indirectly) and so the
+       caller loses its exception */
+    assert(!PyErr_Occurred());
+    if ((PY_VERSION_HEX < 0x030700A0) || unlikely(flags & METH_KEYWORDS)) {
+        return (*((__Pyx_PyCFunctionFastWithKeywords)(void*)meth)) (self, args, nargs, NULL);
+    } else {
+        return (*((__Pyx_PyCFunctionFast)(void*)meth)) (self, args, nargs);
     }
-    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
-}
-static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
-        return 0;
-    return obj_dict_version == __Pyx_get_object_dict_version(obj);
 }
 #endif
-
-/* GetModuleGlobalName */
-  #if CYTHON_USE_DICT_VERSIONS
-static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value)
-#else
-static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
-#endif
-{
-    PyObject *result;
-#if !CYTHON_AVOID_BORROWED_REFS
-#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1
-    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    } else if (unlikely(PyErr_Occurred())) {
-        return NULL;
-    }
-#else
-    result = PyDict_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-#endif
-#else
-    result = PyObject_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-    PyErr_Clear();
-#endif
-    return __Pyx_GetBuiltinName(name);
-}
 
 /* PyFunctionFastCall */
   #if CYTHON_FAST_PYCALL
@@ -7825,6 +5210,35 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 }
 #endif
 
+/* PyObjectCall2Args */
+  static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
+    PyObject *args, *result = NULL;
+    #if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(function)) {
+        PyObject *args[2] = {arg1, arg2};
+        return __Pyx_PyFunction_FastCall(function, args, 2);
+    }
+    #endif
+    #if CYTHON_FAST_PYCCALL
+    if (__Pyx_PyFastCFunction_Check(function)) {
+        PyObject *args[2] = {arg1, arg2};
+        return __Pyx_PyCFunction_FastCall(function, args, 2);
+    }
+    #endif
+    args = PyTuple_New(2);
+    if (unlikely(!args)) goto done;
+    Py_INCREF(arg1);
+    PyTuple_SET_ITEM(args, 0, arg1);
+    Py_INCREF(arg2);
+    PyTuple_SET_ITEM(args, 1, arg2);
+    Py_INCREF(function);
+    result = __Pyx_PyObject_Call(function, args, NULL);
+    Py_DECREF(args);
+    Py_DECREF(function);
+done:
+    return result;
+}
+
 /* PyObjectCallMethO */
   #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
@@ -7842,51 +5256,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject
             "NULL result without error in PyObject_Call");
     }
     return result;
-}
-#endif
-
-/* PyObjectCallNoArg */
-  #if CYTHON_COMPILING_IN_CPYTHON
-static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
-#if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(func)) {
-        return __Pyx_PyFunction_FastCall(func, NULL, 0);
-    }
-#endif
-#ifdef __Pyx_CyFunction_USED
-    if (likely(PyCFunction_Check(func) || __Pyx_CyFunction_Check(func)))
-#else
-    if (likely(PyCFunction_Check(func)))
-#endif
-    {
-        if (likely(PyCFunction_GET_FLAGS(func) & METH_NOARGS)) {
-            return __Pyx_PyObject_CallMethO(func, NULL);
-        }
-    }
-    return __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL);
-}
-#endif
-
-/* PyCFunctionFastCall */
-  #if CYTHON_FAST_PYCCALL
-static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
-    PyCFunctionObject *func = (PyCFunctionObject*)func_obj;
-    PyCFunction meth = PyCFunction_GET_FUNCTION(func);
-    PyObject *self = PyCFunction_GET_SELF(func);
-    int flags = PyCFunction_GET_FLAGS(func);
-    assert(PyCFunction_Check(func));
-    assert(METH_FASTCALL == (flags & ~(METH_CLASS | METH_STATIC | METH_COEXIST | METH_KEYWORDS | METH_STACKLESS)));
-    assert(nargs >= 0);
-    assert(nargs == 0 || args != NULL);
-    /* _PyCFunction_FastCallDict() must not be called with an exception set,
-       because it may clear it (directly or indirectly) and so the
-       caller loses its exception */
-    assert(!PyErr_Occurred());
-    if ((PY_VERSION_HEX < 0x030700A0) || unlikely(flags & METH_KEYWORDS)) {
-        return (*((__Pyx_PyCFunctionFastWithKeywords)(void*)meth)) (self, args, nargs, NULL);
-    } else {
-        return (*((__Pyx_PyCFunctionFast)(void*)meth)) (self, args, nargs);
-    }
 }
 #endif
 
@@ -7930,143 +5299,23 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObjec
 }
 #endif
 
-/* SliceObject */
-  static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(PyObject* obj,
-        Py_ssize_t cstart, Py_ssize_t cstop,
-        PyObject** _py_start, PyObject** _py_stop, PyObject** _py_slice,
-        int has_cstart, int has_cstop, CYTHON_UNUSED int wraparound) {
-#if CYTHON_USE_TYPE_SLOTS
-    PyMappingMethods* mp;
-#if PY_MAJOR_VERSION < 3
-    PySequenceMethods* ms = Py_TYPE(obj)->tp_as_sequence;
-    if (likely(ms && ms->sq_slice)) {
-        if (!has_cstart) {
-            if (_py_start && (*_py_start != Py_None)) {
-                cstart = __Pyx_PyIndex_AsSsize_t(*_py_start);
-                if ((cstart == (Py_ssize_t)-1) && PyErr_Occurred()) goto bad;
-            } else
-                cstart = 0;
-        }
-        if (!has_cstop) {
-            if (_py_stop && (*_py_stop != Py_None)) {
-                cstop = __Pyx_PyIndex_AsSsize_t(*_py_stop);
-                if ((cstop == (Py_ssize_t)-1) && PyErr_Occurred()) goto bad;
-            } else
-                cstop = PY_SSIZE_T_MAX;
-        }
-        if (wraparound && unlikely((cstart < 0) | (cstop < 0)) && likely(ms->sq_length)) {
-            Py_ssize_t l = ms->sq_length(obj);
-            if (likely(l >= 0)) {
-                if (cstop < 0) {
-                    cstop += l;
-                    if (cstop < 0) cstop = 0;
-                }
-                if (cstart < 0) {
-                    cstart += l;
-                    if (cstart < 0) cstart = 0;
-                }
-            } else {
-                if (!PyErr_ExceptionMatches(PyExc_OverflowError))
-                    goto bad;
-                PyErr_Clear();
-            }
-        }
-        return ms->sq_slice(obj, cstart, cstop);
+/* ExtTypeTest */
+  static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type) {
+    if (unlikely(!type)) {
+        PyErr_SetString(PyExc_SystemError, "Missing type object");
+        return 0;
     }
-#endif
-    mp = Py_TYPE(obj)->tp_as_mapping;
-    if (likely(mp && mp->mp_subscript))
-#endif
-    {
-        PyObject* result;
-        PyObject *py_slice, *py_start, *py_stop;
-        if (_py_slice) {
-            py_slice = *_py_slice;
-        } else {
-            PyObject* owned_start = NULL;
-            PyObject* owned_stop = NULL;
-            if (_py_start) {
-                py_start = *_py_start;
-            } else {
-                if (has_cstart) {
-                    owned_start = py_start = PyInt_FromSsize_t(cstart);
-                    if (unlikely(!py_start)) goto bad;
-                } else
-                    py_start = Py_None;
-            }
-            if (_py_stop) {
-                py_stop = *_py_stop;
-            } else {
-                if (has_cstop) {
-                    owned_stop = py_stop = PyInt_FromSsize_t(cstop);
-                    if (unlikely(!py_stop)) {
-                        Py_XDECREF(owned_start);
-                        goto bad;
-                    }
-                } else
-                    py_stop = Py_None;
-            }
-            py_slice = PySlice_New(py_start, py_stop, Py_None);
-            Py_XDECREF(owned_start);
-            Py_XDECREF(owned_stop);
-            if (unlikely(!py_slice)) goto bad;
-        }
-#if CYTHON_USE_TYPE_SLOTS
-        result = mp->mp_subscript(obj, py_slice);
-#else
-        result = PyObject_GetItem(obj, py_slice);
-#endif
-        if (!_py_slice) {
-            Py_DECREF(py_slice);
-        }
-        return result;
-    }
-    PyErr_Format(PyExc_TypeError,
-        "'%.200s' object is unsliceable", Py_TYPE(obj)->tp_name);
-bad:
-    return NULL;
+    if (likely(__Pyx_TypeCheck(obj, type)))
+        return 1;
+    PyErr_Format(PyExc_TypeError, "Cannot convert %.200s to %.200s",
+                 Py_TYPE(obj)->tp_name, type->tp_name);
+    return 0;
 }
 
-/* PyObjectCall2Args */
-  static CYTHON_UNUSED PyObject* __Pyx_PyObject_Call2Args(PyObject* function, PyObject* arg1, PyObject* arg2) {
-    PyObject *args, *result = NULL;
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyFunction_FastCall(function, args, 2);
-    }
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(function)) {
-        PyObject *args[2] = {arg1, arg2};
-        return __Pyx_PyCFunction_FastCall(function, args, 2);
-    }
-    #endif
-    args = PyTuple_New(2);
-    if (unlikely(!args)) goto done;
-    Py_INCREF(arg1);
-    PyTuple_SET_ITEM(args, 0, arg1);
-    Py_INCREF(arg2);
-    PyTuple_SET_ITEM(args, 1, arg2);
-    Py_INCREF(function);
-    result = __Pyx_PyObject_Call(function, args, NULL);
-    Py_DECREF(args);
-    Py_DECREF(function);
-done:
-    return result;
-}
-
-/* RaiseTooManyValuesToUnpack */
-  static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
-    PyErr_Format(PyExc_ValueError,
-                 "too many values to unpack (expected %" CYTHON_FORMAT_SSIZE_T "d)", expected);
-}
-
-/* RaiseNeedMoreValuesToUnpack */
-  static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
-    PyErr_Format(PyExc_ValueError,
-                 "need more than %" CYTHON_FORMAT_SSIZE_T "d value%.1s to unpack",
-                 index, (index == 1) ? "" : "s");
+/* BufferFallbackError */
+  static void __Pyx_RaiseBufferFallbackError(void) {
+  PyErr_SetString(PyExc_ValueError,
+     "Buffer acquisition failed on assignment; and then reacquiring the old buffer failed too!");
 }
 
 /* IterFinish */
@@ -8104,58 +5353,25 @@ done:
 #endif
 }
 
-/* UnpackItemEndCheck */
-  static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected) {
-    if (unlikely(retval)) {
-        Py_DECREF(retval);
-        __Pyx_RaiseTooManyValuesError(expected);
-        return -1;
-    } else {
-        return __Pyx_IterFinish();
+/* PyObjectCallNoArg */
+  #if CYTHON_COMPILING_IN_CPYTHON
+static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func) {
+#if CYTHON_FAST_PYCALL
+    if (PyFunction_Check(func)) {
+        return __Pyx_PyFunction_FastCall(func, NULL, 0);
     }
-    return 0;
-}
-
-/* ExtTypeTest */
-  static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type) {
-    if (unlikely(!type)) {
-        PyErr_SetString(PyExc_SystemError, "Missing type object");
-        return 0;
-    }
-    if (likely(__Pyx_TypeCheck(obj, type)))
-        return 1;
-    PyErr_Format(PyExc_TypeError, "Cannot convert %.200s to %.200s",
-                 Py_TYPE(obj)->tp_name, type->tp_name);
-    return 0;
-}
-
-/* BufferFallbackError */
-  static void __Pyx_RaiseBufferFallbackError(void) {
-  PyErr_SetString(PyExc_ValueError,
-     "Buffer acquisition failed on assignment; and then reacquiring the old buffer failed too!");
-}
-
-/* DictGetItem */
-  #if PY_MAJOR_VERSION >= 3 && !CYTHON_COMPILING_IN_PYPY
-static PyObject *__Pyx_PyDict_GetItem(PyObject *d, PyObject* key) {
-    PyObject *value;
-    value = PyDict_GetItemWithError(d, key);
-    if (unlikely(!value)) {
-        if (!PyErr_Occurred()) {
-            if (unlikely(PyTuple_Check(key))) {
-                PyObject* args = PyTuple_Pack(1, key);
-                if (likely(args)) {
-                    PyErr_SetObject(PyExc_KeyError, args);
-                    Py_DECREF(args);
-                }
-            } else {
-                PyErr_SetObject(PyExc_KeyError, key);
-            }
+#endif
+#ifdef __Pyx_CyFunction_USED
+    if (likely(PyCFunction_Check(func) || __Pyx_CyFunction_Check(func)))
+#else
+    if (likely(PyCFunction_Check(func)))
+#endif
+    {
+        if (likely(PyCFunction_GET_FLAGS(func) & METH_NOARGS)) {
+            return __Pyx_PyObject_CallMethO(func, NULL);
         }
-        return NULL;
     }
-    Py_INCREF(value);
-    return value;
+    return __Pyx_PyObject_Call(func, __pyx_empty_tuple, NULL);
 }
 #endif
 
@@ -8269,6 +5485,31 @@ try_unpack:
     Py_DECREF(method);
 bad:
     return result;
+}
+
+/* RaiseNeedMoreValuesToUnpack */
+  static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index) {
+    PyErr_Format(PyExc_ValueError,
+                 "need more than %" CYTHON_FORMAT_SSIZE_T "d value%.1s to unpack",
+                 index, (index == 1) ? "" : "s");
+}
+
+/* RaiseTooManyValuesToUnpack */
+  static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected) {
+    PyErr_Format(PyExc_ValueError,
+                 "too many values to unpack (expected %" CYTHON_FORMAT_SSIZE_T "d)", expected);
+}
+
+/* UnpackItemEndCheck */
+  static int __Pyx_IternextUnpackEndCheck(PyObject *retval, Py_ssize_t expected) {
+    if (unlikely(retval)) {
+        Py_DECREF(retval);
+        __Pyx_RaiseTooManyValuesError(expected);
+        return -1;
+    } else {
+        return __Pyx_IterFinish();
+    }
+    return 0;
 }
 
 /* RaiseNoneIterError */
@@ -8452,13 +5693,29 @@ static CYTHON_INLINE int __Pyx_dict_iter_next(
     return 1;
 }
 
-/* None */
-  static CYTHON_INLINE int __Pyx_div_int(int a, int b) {
-    int q = a / b;
-    int r = a - q*b;
-    q -= ((r != 0) & ((r ^ b) < 0));
-    return q;
+/* DictGetItem */
+  #if PY_MAJOR_VERSION >= 3 && !CYTHON_COMPILING_IN_PYPY
+static PyObject *__Pyx_PyDict_GetItem(PyObject *d, PyObject* key) {
+    PyObject *value;
+    value = PyDict_GetItemWithError(d, key);
+    if (unlikely(!value)) {
+        if (!PyErr_Occurred()) {
+            if (unlikely(PyTuple_Check(key))) {
+                PyObject* args = PyTuple_Pack(1, key);
+                if (likely(args)) {
+                    PyErr_SetObject(PyExc_KeyError, args);
+                    Py_DECREF(args);
+                }
+            } else {
+                PyErr_SetObject(PyExc_KeyError, key);
+            }
+        }
+        return NULL;
+    }
+    Py_INCREF(value);
+    return value;
 }
+#endif
 
 /* GetItemInt */
   static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {
@@ -9040,6 +6297,67 @@ bad:
     return module;
 }
 
+/* PyDictVersioning */
+  #if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
+}
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
+    PyObject **dictptr = NULL;
+    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
+    if (offset) {
+#if CYTHON_COMPILING_IN_CPYTHON
+        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
+#else
+        dictptr = _PyObject_GetDictPtr(obj);
+#endif
+    }
+    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
+}
+static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
+        return 0;
+    return obj_dict_version == __Pyx_get_object_dict_version(obj);
+}
+#endif
+
+/* GetModuleGlobalName */
+  #if CYTHON_USE_DICT_VERSIONS
+static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value)
+#else
+static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
+#endif
+{
+    PyObject *result;
+#if !CYTHON_AVOID_BORROWED_REFS
+#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1
+    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    } else if (unlikely(PyErr_Occurred())) {
+        return NULL;
+    }
+#else
+    result = PyDict_GetItem(__pyx_d, name);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    }
+#endif
+#else
+    result = PyObject_GetItem(__pyx_d, name);
+    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
+    if (likely(result)) {
+        return __Pyx_NewRef(result);
+    }
+    PyErr_Clear();
+#endif
+    return __Pyx_GetBuiltinName(name);
+}
+
 /* CLineInTraceback */
   #ifndef CYTHON_CLINE_IN_TRACEBACK
 static int __Pyx_CLineForTraceback(CYTHON_NCP_UNUSED PyThreadState *tstate, int c_line) {
@@ -9319,112 +6637,6 @@ static void __Pyx_ReleaseBuffer(Py_buffer *view) {
                                      little, !is_unsigned);
     }
 }
-
-/* Print */
-  #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
-static PyObject *__Pyx_GetStdout(void) {
-    PyObject *f = PySys_GetObject((char *)"stdout");
-    if (!f) {
-        PyErr_SetString(PyExc_RuntimeError, "lost sys.stdout");
-    }
-    return f;
-}
-static int __Pyx_Print(PyObject* f, PyObject *arg_tuple, int newline) {
-    int i;
-    if (!f) {
-        if (!(f = __Pyx_GetStdout()))
-            return -1;
-    }
-    Py_INCREF(f);
-    for (i=0; i < PyTuple_GET_SIZE(arg_tuple); i++) {
-        PyObject* v;
-        if (PyFile_SoftSpace(f, 1)) {
-            if (PyFile_WriteString(" ", f) < 0)
-                goto error;
-        }
-        v = PyTuple_GET_ITEM(arg_tuple, i);
-        if (PyFile_WriteObject(v, f, Py_PRINT_RAW) < 0)
-            goto error;
-        if (PyString_Check(v)) {
-            char *s = PyString_AsString(v);
-            Py_ssize_t len = PyString_Size(v);
-            if (len > 0) {
-                switch (s[len-1]) {
-                    case ' ': break;
-                    case '\f': case '\r': case '\n': case '\t': case '\v':
-                        PyFile_SoftSpace(f, 0);
-                        break;
-                    default:  break;
-                }
-            }
-        }
-    }
-    if (newline) {
-        if (PyFile_WriteString("\n", f) < 0)
-            goto error;
-        PyFile_SoftSpace(f, 0);
-    }
-    Py_DECREF(f);
-    return 0;
-error:
-    Py_DECREF(f);
-    return -1;
-}
-#else
-static int __Pyx_Print(PyObject* stream, PyObject *arg_tuple, int newline) {
-    PyObject* kwargs = 0;
-    PyObject* result = 0;
-    PyObject* end_string;
-    if (unlikely(!__pyx_print)) {
-        __pyx_print = PyObject_GetAttr(__pyx_b, __pyx_n_s_print);
-        if (!__pyx_print)
-            return -1;
-    }
-    if (stream) {
-        kwargs = PyDict_New();
-        if (unlikely(!kwargs))
-            return -1;
-        if (unlikely(PyDict_SetItem(kwargs, __pyx_n_s_file, stream) < 0))
-            goto bad;
-        if (!newline) {
-            end_string = PyUnicode_FromStringAndSize(" ", 1);
-            if (unlikely(!end_string))
-                goto bad;
-            if (PyDict_SetItem(kwargs, __pyx_n_s_end, end_string) < 0) {
-                Py_DECREF(end_string);
-                goto bad;
-            }
-            Py_DECREF(end_string);
-        }
-    } else if (!newline) {
-        if (unlikely(!__pyx_print_kwargs)) {
-            __pyx_print_kwargs = PyDict_New();
-            if (unlikely(!__pyx_print_kwargs))
-                return -1;
-            end_string = PyUnicode_FromStringAndSize(" ", 1);
-            if (unlikely(!end_string))
-                return -1;
-            if (PyDict_SetItem(__pyx_print_kwargs, __pyx_n_s_end, end_string) < 0) {
-                Py_DECREF(end_string);
-                return -1;
-            }
-            Py_DECREF(end_string);
-        }
-        kwargs = __pyx_print_kwargs;
-    }
-    result = PyObject_Call(__pyx_print, arg_tuple, kwargs);
-    if (unlikely(kwargs) && (kwargs != __pyx_print_kwargs))
-        Py_DECREF(kwargs);
-    if (!result)
-        return -1;
-    Py_DECREF(result);
-    return 0;
-bad:
-    if (kwargs != __pyx_print_kwargs)
-        Py_XDECREF(kwargs);
-    return -1;
-}
-#endif
 
 /* Declarations */
   #if CYTHON_CCOMPLEX
@@ -9922,232 +7134,6 @@ raise_neg_overflow:
         "can't convert negative value to int");
     return (int) -1;
 }
-
-/* CIntFromPy */
-  static CYTHON_INLINE unsigned int __Pyx_PyInt_As_unsigned_int(PyObject *x) {
-    const unsigned int neg_one = (unsigned int) ((unsigned int) 0 - (unsigned int) 1), const_zero = (unsigned int) 0;
-    const int is_unsigned = neg_one > const_zero;
-#if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_Check(x))) {
-        if (sizeof(unsigned int) < sizeof(long)) {
-            __PYX_VERIFY_RETURN_INT(unsigned int, long, PyInt_AS_LONG(x))
-        } else {
-            long val = PyInt_AS_LONG(x);
-            if (is_unsigned && unlikely(val < 0)) {
-                goto raise_neg_overflow;
-            }
-            return (unsigned int) val;
-        }
-    } else
-#endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-#if CYTHON_USE_PYLONG_INTERNALS
-            const digit* digits = ((PyLongObject*)x)->ob_digit;
-            switch (Py_SIZE(x)) {
-                case  0: return (unsigned int) 0;
-                case  1: __PYX_VERIFY_RETURN_INT(unsigned int, digit, digits[0])
-                case 2:
-                    if (8 * sizeof(unsigned int) > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(unsigned int, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(unsigned int) >= 2 * PyLong_SHIFT) {
-                            return (unsigned int) (((((unsigned int)digits[1]) << PyLong_SHIFT) | (unsigned int)digits[0]));
-                        }
-                    }
-                    break;
-                case 3:
-                    if (8 * sizeof(unsigned int) > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(unsigned int, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(unsigned int) >= 3 * PyLong_SHIFT) {
-                            return (unsigned int) (((((((unsigned int)digits[2]) << PyLong_SHIFT) | (unsigned int)digits[1]) << PyLong_SHIFT) | (unsigned int)digits[0]));
-                        }
-                    }
-                    break;
-                case 4:
-                    if (8 * sizeof(unsigned int) > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(unsigned int, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(unsigned int) >= 4 * PyLong_SHIFT) {
-                            return (unsigned int) (((((((((unsigned int)digits[3]) << PyLong_SHIFT) | (unsigned int)digits[2]) << PyLong_SHIFT) | (unsigned int)digits[1]) << PyLong_SHIFT) | (unsigned int)digits[0]));
-                        }
-                    }
-                    break;
-            }
-#endif
-#if CYTHON_COMPILING_IN_CPYTHON
-            if (unlikely(Py_SIZE(x) < 0)) {
-                goto raise_neg_overflow;
-            }
-#else
-            {
-                int result = PyObject_RichCompareBool(x, Py_False, Py_LT);
-                if (unlikely(result < 0))
-                    return (unsigned int) -1;
-                if (unlikely(result == 1))
-                    goto raise_neg_overflow;
-            }
-#endif
-            if (sizeof(unsigned int) <= sizeof(unsigned long)) {
-                __PYX_VERIFY_RETURN_INT_EXC(unsigned int, unsigned long, PyLong_AsUnsignedLong(x))
-#ifdef HAVE_LONG_LONG
-            } else if (sizeof(unsigned int) <= sizeof(unsigned PY_LONG_LONG)) {
-                __PYX_VERIFY_RETURN_INT_EXC(unsigned int, unsigned PY_LONG_LONG, PyLong_AsUnsignedLongLong(x))
-#endif
-            }
-        } else {
-#if CYTHON_USE_PYLONG_INTERNALS
-            const digit* digits = ((PyLongObject*)x)->ob_digit;
-            switch (Py_SIZE(x)) {
-                case  0: return (unsigned int) 0;
-                case -1: __PYX_VERIFY_RETURN_INT(unsigned int, sdigit, (sdigit) (-(sdigit)digits[0]))
-                case  1: __PYX_VERIFY_RETURN_INT(unsigned int,  digit, +digits[0])
-                case -2:
-                    if (8 * sizeof(unsigned int) - 1 > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(unsigned int, long, -(long) (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(unsigned int) - 1 > 2 * PyLong_SHIFT) {
-                            return (unsigned int) (((unsigned int)-1)*(((((unsigned int)digits[1]) << PyLong_SHIFT) | (unsigned int)digits[0])));
-                        }
-                    }
-                    break;
-                case 2:
-                    if (8 * sizeof(unsigned int) > 1 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 2 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(unsigned int, unsigned long, (((((unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(unsigned int) - 1 > 2 * PyLong_SHIFT) {
-                            return (unsigned int) ((((((unsigned int)digits[1]) << PyLong_SHIFT) | (unsigned int)digits[0])));
-                        }
-                    }
-                    break;
-                case -3:
-                    if (8 * sizeof(unsigned int) - 1 > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(unsigned int, long, -(long) (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(unsigned int) - 1 > 3 * PyLong_SHIFT) {
-                            return (unsigned int) (((unsigned int)-1)*(((((((unsigned int)digits[2]) << PyLong_SHIFT) | (unsigned int)digits[1]) << PyLong_SHIFT) | (unsigned int)digits[0])));
-                        }
-                    }
-                    break;
-                case 3:
-                    if (8 * sizeof(unsigned int) > 2 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 3 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(unsigned int, unsigned long, (((((((unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(unsigned int) - 1 > 3 * PyLong_SHIFT) {
-                            return (unsigned int) ((((((((unsigned int)digits[2]) << PyLong_SHIFT) | (unsigned int)digits[1]) << PyLong_SHIFT) | (unsigned int)digits[0])));
-                        }
-                    }
-                    break;
-                case -4:
-                    if (8 * sizeof(unsigned int) - 1 > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(unsigned int, long, -(long) (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(unsigned int) - 1 > 4 * PyLong_SHIFT) {
-                            return (unsigned int) (((unsigned int)-1)*(((((((((unsigned int)digits[3]) << PyLong_SHIFT) | (unsigned int)digits[2]) << PyLong_SHIFT) | (unsigned int)digits[1]) << PyLong_SHIFT) | (unsigned int)digits[0])));
-                        }
-                    }
-                    break;
-                case 4:
-                    if (8 * sizeof(unsigned int) > 3 * PyLong_SHIFT) {
-                        if (8 * sizeof(unsigned long) > 4 * PyLong_SHIFT) {
-                            __PYX_VERIFY_RETURN_INT(unsigned int, unsigned long, (((((((((unsigned long)digits[3]) << PyLong_SHIFT) | (unsigned long)digits[2]) << PyLong_SHIFT) | (unsigned long)digits[1]) << PyLong_SHIFT) | (unsigned long)digits[0])))
-                        } else if (8 * sizeof(unsigned int) - 1 > 4 * PyLong_SHIFT) {
-                            return (unsigned int) ((((((((((unsigned int)digits[3]) << PyLong_SHIFT) | (unsigned int)digits[2]) << PyLong_SHIFT) | (unsigned int)digits[1]) << PyLong_SHIFT) | (unsigned int)digits[0])));
-                        }
-                    }
-                    break;
-            }
-#endif
-            if (sizeof(unsigned int) <= sizeof(long)) {
-                __PYX_VERIFY_RETURN_INT_EXC(unsigned int, long, PyLong_AsLong(x))
-#ifdef HAVE_LONG_LONG
-            } else if (sizeof(unsigned int) <= sizeof(PY_LONG_LONG)) {
-                __PYX_VERIFY_RETURN_INT_EXC(unsigned int, PY_LONG_LONG, PyLong_AsLongLong(x))
-#endif
-            }
-        }
-        {
-#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
-            PyErr_SetString(PyExc_RuntimeError,
-                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
-#else
-            unsigned int val;
-            PyObject *v = __Pyx_PyNumber_IntOrLong(x);
- #if PY_MAJOR_VERSION < 3
-            if (likely(v) && !PyLong_Check(v)) {
-                PyObject *tmp = v;
-                v = PyNumber_Long(tmp);
-                Py_DECREF(tmp);
-            }
- #endif
-            if (likely(v)) {
-                int one = 1; int is_little = (int)*(unsigned char *)&one;
-                unsigned char *bytes = (unsigned char *)&val;
-                int ret = _PyLong_AsByteArray((PyLongObject *)v,
-                                              bytes, sizeof(val),
-                                              is_little, !is_unsigned);
-                Py_DECREF(v);
-                if (likely(!ret))
-                    return val;
-            }
-#endif
-            return (unsigned int) -1;
-        }
-    } else {
-        unsigned int val;
-        PyObject *tmp = __Pyx_PyNumber_IntOrLong(x);
-        if (!tmp) return (unsigned int) -1;
-        val = __Pyx_PyInt_As_unsigned_int(tmp);
-        Py_DECREF(tmp);
-        return val;
-    }
-raise_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "value too large to convert to unsigned int");
-    return (unsigned int) -1;
-raise_neg_overflow:
-    PyErr_SetString(PyExc_OverflowError,
-        "can't convert negative value to unsigned int");
-    return (unsigned int) -1;
-}
-
-/* PrintOne */
-  #if !CYTHON_COMPILING_IN_PYPY && PY_MAJOR_VERSION < 3
-static int __Pyx_PrintOne(PyObject* f, PyObject *o) {
-    if (!f) {
-        if (!(f = __Pyx_GetStdout()))
-            return -1;
-    }
-    Py_INCREF(f);
-    if (PyFile_SoftSpace(f, 0)) {
-        if (PyFile_WriteString(" ", f) < 0)
-            goto error;
-    }
-    if (PyFile_WriteObject(o, f, Py_PRINT_RAW) < 0)
-        goto error;
-    if (PyFile_WriteString("\n", f) < 0)
-        goto error;
-    Py_DECREF(f);
-    return 0;
-error:
-    Py_DECREF(f);
-    return -1;
-    /* the line below is just to avoid C compiler
-     * warnings about unused functions */
-    return __Pyx_Print(f, NULL, 0);
-}
-#else
-static int __Pyx_PrintOne(PyObject* stream, PyObject *o) {
-    int res;
-    PyObject* arg_tuple = PyTuple_Pack(1, o);
-    if (unlikely(!arg_tuple))
-        return -1;
-    res = __Pyx_Print(stream, arg_tuple, 1);
-    Py_DECREF(arg_tuple);
-    return res;
-}
-#endif
 
 /* CIntToPy */
   static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
