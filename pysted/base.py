@@ -80,7 +80,7 @@ import scipy.constants
 import scipy.signal
 
 # from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
-from pysted import utils, bleach_functions, cUtils, raster
+from pysted import utils, bleach_functions, cUtils, raster, bleach_funcs
 # import cUtils
 
 # import mis par BT pour des tests
@@ -848,7 +848,8 @@ class Microscope:
         return laser_received, sampled
 
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
-                              pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False):
+                              pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
+                              bleach_func=bleach_funcs.default_bleach):
         """
         This function acquires the signal and bleaches simultaneously. It makes a call to compiled C code for speed,
         so make sure the raster.pyx file is compiled!
@@ -925,7 +926,7 @@ class Microscope:
         raster_func = raster.test_var_bleach
         raster_func(self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32), ratio, rows_pad,
                     cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleach, bleached_sub_datamaps_dict,
-                    seed)
+                    seed, bleach_func)
 
         # Bleaching is done, the rest is for intensity calculation
         photons = self.fluo.get_photons(acquired_intensity)
@@ -1275,3 +1276,12 @@ class TemporalDatamap(Datamap):
         :param flash_idx: The index of the most recent acquisition.
         """
         self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
+
+    def update_dicts(self, indices):
+        """
+        Method used to update the dicts of the temporal datamap
+        :param indices: A dict containing the indices of the time step for the different temporal sub datamaps (so far
+                        only flashes).
+        """
+        self.sub_datamaps_idx_dict = indices
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]

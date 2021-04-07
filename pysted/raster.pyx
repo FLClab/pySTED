@@ -143,7 +143,8 @@ def test_var_bleach(
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_sted_roi,
         bint bleach,   # bint is a bool
         dict bleached_sub_datamaps_dict,
-        int seed
+        int seed,
+        object bleach_func   # uncertain of the type for a cfunc, but this seems to be working so ???
 ):
     cdef int row, col
     cdef int sprime, tprime
@@ -171,7 +172,7 @@ def test_var_bleach(
     components of the datamap are bleached separately).
     """
 
-    print("test func xD")
+    print("wow!")
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -183,13 +184,13 @@ def test_var_bleach(
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
 
-    # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape)
-
     for (row, col) in pixel_list:
         pdt = pdt_roi[row, col]
         p_ex = p_ex_roi[row, col]
         p_sted = p_sted_roi[row, col]
         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
+        # i think resetting each time ensures that we are acquiring on the dmap while it is
+        # being bleached. Either way, it doesn't affect speed, so I will keep it here
         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
         for key in bleached_sub_datamaps_dict:
             bleached_datamap += bleached_sub_datamaps_dict[key]
@@ -205,5 +206,7 @@ def test_var_bleach(
         acquired_intensity[int(row / ratio), int(col / ratio)] = value
 
         if bleach:
-            bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
-                                        w, prob_ex, prob_sted)
+            # bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
+            #                             w, prob_ex, prob_sted)
+            bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
+                        prob_sted)
