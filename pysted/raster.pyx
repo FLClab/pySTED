@@ -160,7 +160,7 @@ def test_var_bleach(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex, i_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
-    cdef numpy.ndarray[INTDTYPE_t, ndim=2] bleached_datamap
+    cdef numpy.ndarray[int, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
 
     """
@@ -172,7 +172,7 @@ def test_var_bleach(
     components of the datamap are bleached separately).
     """
 
-    print("wow!")
+    print("okok")
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
