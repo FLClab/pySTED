@@ -60,7 +60,7 @@ def raster_func_c_self_bleach_split_g(
     Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
     components of the datamap are bleached separately).
     """
-    print("haha! lol!")
+    print("xD!")
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -107,12 +107,12 @@ def raster_func_c_self_bleach_split_g(
                     for t in range(col, col + w):
                         # Updates probabilites
                         # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
-                        # prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
-                        # prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
+                        prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
+                        prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
 
                         # TESTING FIX FOR ALBERT
-                        prob_ex[s, t] = 0
-                        prob_sted[s, t] = 0
+                        # prob_ex[s, t] = 0
+                        # prob_sted[s, t] = 0
 
                         # only need to compute bleaching (resampling) if the pixel is not empty
                         current = bleached_sub_datamaps_dict[key][s, t]
