@@ -48,7 +48,7 @@ def raster_func_c_self_bleach_split_g(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex, i_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
-    cdef numpy.ndarray[INTDTYPE_t, ndim=2] bleached_datamap
+    cdef numpy.ndarray[int, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
 
     """
@@ -59,7 +59,7 @@ def raster_func_c_self_bleach_split_g(
     Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
     components of the datamap are bleached separately).
     """
-    print("other func")
+    print("yoyoyo")
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -77,7 +77,7 @@ def raster_func_c_self_bleach_split_g(
         p_ex = p_ex_roi[row, col]
         p_sted = p_sted_roi[row, col]
         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
-        bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=int)
+        bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=numpy.int32)
         for key in bleached_sub_datamaps_dict:
             bleached_datamap += bleached_sub_datamaps_dict[key]
 
