@@ -1,6 +1,7 @@
 
 import time
 import numpy
+from matplotlib import pyplot as plt
 import bleach_funcs
 cimport numpy
 cimport cython
@@ -59,7 +60,7 @@ def raster_func_c_self_bleach_split_g(
     Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
     components of the datamap are bleached separately).
     """
-    print("yoyoyo")
+    print("jaja!")
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -92,6 +93,7 @@ def raster_func_c_self_bleach_split_g(
         acquired_intensity[int(row / ratio), int(col / ratio)] = value
 
         if bleach:
+            # print("bleaching!")
             photons_ex = self.fluo.get_photons(i_ex * p_ex)
             k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
             duty_cycle = self.sted.tau * self.sted.rate
@@ -123,6 +125,8 @@ def raster_func_c_self_bleach_split_g(
 
                         tprime += 1
                     sprime += 1
+    plt.imshow(bleached_datamap[datamap.roi])
+    plt.show()
 
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
