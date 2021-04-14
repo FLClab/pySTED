@@ -172,7 +172,7 @@ def test_var_bleach(
     components of the datamap are bleached separately).
     """
 
-    print("top5")
+    print("yo")
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -206,6 +206,7 @@ def test_var_bleach(
         acquired_intensity[int(row / ratio), int(col / ratio)] = value
 
         if bleach:
+            print("bleaching!")
             # bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
             #                             w, prob_ex, prob_sted)
             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,

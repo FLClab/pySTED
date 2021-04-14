@@ -1799,6 +1799,7 @@ static const char __pyx_k_s[] = "s";
 static const char __pyx_k_t[] = "t";
 static const char __pyx_k_w[] = "w";
 static const char __pyx_k__4[] = "_";
+static const char __pyx_k_yo[] = "yo";
 static const char __pyx_k_col[] = "col";
 static const char __pyx_k_end[] = "end";
 static const char __pyx_k_key[] = "key";
@@ -1820,7 +1821,6 @@ static const char __pyx_k_self[] = "self";
 static const char __pyx_k_sted[] = "sted";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_time[] = "time";
-static const char __pyx_k_top5[] = "top5";
 static const char __pyx_k_cache[] = "cache";
 static const char __pyx_k_dtype[] = "dtype";
 static const char __pyx_k_int32[] = "int32";
@@ -1851,6 +1851,7 @@ static const char __pyx_k_INTDTYPE[] = "INTDTYPE";
 static const char __pyx_k_cols_pad[] = "cols_pad";
 static const char __pyx_k_p_ex_roi[] = "p_ex_roi";
 static const char __pyx_k_rows_pad[] = "rows_pad";
+static const char __pyx_k_bleaching[] = "bleaching!";
 static const char __pyx_k_effective[] = "effective";
 static const char __pyx_k_laser_pad[] = "laser_pad";
 static const char __pyx_k_pixelsize[] = "pixelsize";
@@ -1892,6 +1893,7 @@ static PyObject *__pyx_n_s_bleach_func;
 static PyObject *__pyx_n_s_bleach_funcs;
 static PyObject *__pyx_n_s_bleached_datamap;
 static PyObject *__pyx_n_s_bleached_sub_datamaps_dict;
+static PyObject *__pyx_kp_s_bleaching;
 static PyObject *__pyx_n_s_cache;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_col;
@@ -1962,10 +1964,10 @@ static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_test_var_bleach;
 static PyObject *__pyx_n_s_time;
 static PyObject *__pyx_n_s_time_ns;
-static PyObject *__pyx_n_s_top5;
 static PyObject *__pyx_n_s_tprime;
 static PyObject *__pyx_n_s_value;
 static PyObject *__pyx_n_s_w;
+static PyObject *__pyx_n_s_yo;
 static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed); /* proto */
 static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed, PyObject *__pyx_v_bleach_func); /* proto */
@@ -4359,14 +4361,14 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
   /* "pysted/raster.pyx":175
  *     """
  * 
- *     print("top5")             # <<<<<<<<<<<<<<
+ *     print("yo")             # <<<<<<<<<<<<<<
  * 
  *     if seed == 0:
  */
-  if (__Pyx_PrintOne(0, __pyx_n_s_top5) < 0) __PYX_ERR(0, 175, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_n_s_yo) < 0) __PYX_ERR(0, 175, __pyx_L1_error)
 
   /* "pysted/raster.pyx":177
- *     print("top5")
+ *     print("yo")
  * 
  *     if seed == 0:             # <<<<<<<<<<<<<<
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -4416,7 +4418,7 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
     srand(__pyx_t_6);
 
     /* "pysted/raster.pyx":177
- *     print("top5")
+ *     print("yo")
  * 
  *     if seed == 0:             # <<<<<<<<<<<<<<
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -5160,34 +5162,43 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
  *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
  * 
  *         if bleach:             # <<<<<<<<<<<<<<
+ *             print("bleaching!")
  *             # bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
- *             #                             w, prob_ex, prob_sted)
  */
     __pyx_t_2 = (__pyx_v_bleach != 0);
     if (__pyx_t_2) {
 
-      /* "pysted/raster.pyx":211
+      /* "pysted/raster.pyx":209
+ * 
+ *         if bleach:
+ *             print("bleaching!")             # <<<<<<<<<<<<<<
+ *             # bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
+ *             #                             w, prob_ex, prob_sted)
+ */
+      if (__Pyx_PrintOne(0, __pyx_kp_s_bleaching) < 0) __PYX_ERR(0, 209, __pyx_L1_error)
+
+      /* "pysted/raster.pyx":212
  *             # bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
  *             #                             w, prob_ex, prob_sted)
  *             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,             # <<<<<<<<<<<<<<
  *                         prob_sted)
  */
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_p_ex); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 211, __pyx_L1_error)
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_v_p_ex); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_p_sted); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 211, __pyx_L1_error)
+      __pyx_t_8 = PyFloat_FromDouble(__pyx_v_p_sted); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_24 = PyFloat_FromDouble(__pyx_v_pdt); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 211, __pyx_L1_error)
+      __pyx_t_24 = PyFloat_FromDouble(__pyx_v_pdt); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_24);
-      __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_row); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 211, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_row); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_18 = __Pyx_PyInt_From_int(__pyx_v_col); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 211, __pyx_L1_error)
+      __pyx_t_18 = __Pyx_PyInt_From_int(__pyx_v_col); if (unlikely(!__pyx_t_18)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_18);
-      __pyx_t_17 = __Pyx_PyInt_From_int(__pyx_v_h); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 211, __pyx_L1_error)
+      __pyx_t_17 = __Pyx_PyInt_From_int(__pyx_v_h); if (unlikely(!__pyx_t_17)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_17);
-      __pyx_t_34 = __Pyx_PyInt_From_int(__pyx_v_w); if (unlikely(!__pyx_t_34)) __PYX_ERR(0, 211, __pyx_L1_error)
+      __pyx_t_34 = __Pyx_PyInt_From_int(__pyx_v_w); if (unlikely(!__pyx_t_34)) __PYX_ERR(0, 212, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_34);
 
-      /* "pysted/raster.pyx":212
+      /* "pysted/raster.pyx":213
  *             #                             w, prob_ex, prob_sted)
  *             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
  *                         prob_sted)             # <<<<<<<<<<<<<<
@@ -5208,7 +5219,7 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_35)) {
         PyObject *__pyx_temp[14] = {__pyx_t_36, __pyx_v_self, ((PyObject *)__pyx_v_i_ex), ((PyObject *)__pyx_v_i_sted), __pyx_t_7, __pyx_t_8, __pyx_t_24, __pyx_v_bleached_sub_datamaps_dict, __pyx_t_4, __pyx_t_18, __pyx_t_17, __pyx_t_34, ((PyObject *)__pyx_v_prob_ex), ((PyObject *)__pyx_v_prob_sted)};
-        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_35, __pyx_temp+1-__pyx_t_23, 13+__pyx_t_23); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_35, __pyx_temp+1-__pyx_t_23, 13+__pyx_t_23); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_36); __pyx_t_36 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -5223,7 +5234,7 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_35)) {
         PyObject *__pyx_temp[14] = {__pyx_t_36, __pyx_v_self, ((PyObject *)__pyx_v_i_ex), ((PyObject *)__pyx_v_i_sted), __pyx_t_7, __pyx_t_8, __pyx_t_24, __pyx_v_bleached_sub_datamaps_dict, __pyx_t_4, __pyx_t_18, __pyx_t_17, __pyx_t_34, ((PyObject *)__pyx_v_prob_ex), ((PyObject *)__pyx_v_prob_sted)};
-        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_35, __pyx_temp+1-__pyx_t_23, 13+__pyx_t_23); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_35, __pyx_temp+1-__pyx_t_23, 13+__pyx_t_23); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_36); __pyx_t_36 = 0;
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -5236,7 +5247,7 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
       } else
       #endif
       {
-        __pyx_t_37 = PyTuple_New(13+__pyx_t_23); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 211, __pyx_L1_error)
+        __pyx_t_37 = PyTuple_New(13+__pyx_t_23); if (unlikely(!__pyx_t_37)) __PYX_ERR(0, 212, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_37);
         if (__pyx_t_36) {
           __Pyx_GIVEREF(__pyx_t_36); PyTuple_SET_ITEM(__pyx_t_37, 0, __pyx_t_36); __pyx_t_36 = NULL;
@@ -5280,7 +5291,7 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
         __pyx_t_18 = 0;
         __pyx_t_17 = 0;
         __pyx_t_34 = 0;
-        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_35, __pyx_t_37, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+        __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_35, __pyx_t_37, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 212, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_DECREF(__pyx_t_37); __pyx_t_37 = 0;
       }
@@ -5291,8 +5302,8 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
  *         acquired_intensity[int(row / ratio), int(col / ratio)] = value
  * 
  *         if bleach:             # <<<<<<<<<<<<<<
+ *             print("bleaching!")
  *             # bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
- *             #                             w, prob_ex, prob_sted)
  */
     }
 
@@ -6277,6 +6288,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_bleach_funcs, __pyx_k_bleach_funcs, sizeof(__pyx_k_bleach_funcs), 0, 0, 1, 1},
   {&__pyx_n_s_bleached_datamap, __pyx_k_bleached_datamap, sizeof(__pyx_k_bleached_datamap), 0, 0, 1, 1},
   {&__pyx_n_s_bleached_sub_datamaps_dict, __pyx_k_bleached_sub_datamaps_dict, sizeof(__pyx_k_bleached_sub_datamaps_dict), 0, 0, 1, 1},
+  {&__pyx_kp_s_bleaching, __pyx_k_bleaching, sizeof(__pyx_k_bleaching), 0, 0, 1, 0},
   {&__pyx_n_s_cache, __pyx_k_cache, sizeof(__pyx_k_cache), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_col, __pyx_k_col, sizeof(__pyx_k_col), 0, 0, 1, 1},
@@ -6347,10 +6359,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_test_var_bleach, __pyx_k_test_var_bleach, sizeof(__pyx_k_test_var_bleach), 0, 0, 1, 1},
   {&__pyx_n_s_time, __pyx_k_time, sizeof(__pyx_k_time), 0, 0, 1, 1},
   {&__pyx_n_s_time_ns, __pyx_k_time_ns, sizeof(__pyx_k_time_ns), 0, 0, 1, 1},
-  {&__pyx_n_s_top5, __pyx_k_top5, sizeof(__pyx_k_top5), 0, 0, 1, 1},
   {&__pyx_n_s_tprime, __pyx_k_tprime, sizeof(__pyx_k_tprime), 0, 0, 1, 1},
   {&__pyx_n_s_value, __pyx_k_value, sizeof(__pyx_k_value), 0, 0, 1, 1},
   {&__pyx_n_s_w, __pyx_k_w, sizeof(__pyx_k_w), 0, 0, 1, 1},
+  {&__pyx_n_s_yo, __pyx_k_yo, sizeof(__pyx_k_yo), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
