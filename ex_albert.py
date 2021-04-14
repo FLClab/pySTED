@@ -3,10 +3,10 @@ from pysted import base, utils
 from matplotlib import pyplot as plt
 
 
-# molecules_disposition = np.zeros((64, 64))
-# molecules_disposition[30:40, 30:40] = 10
-molecules_disposition = np.zeros((3, 3))
-molecules_disposition[1, 1] = 10
+molecules_disposition = np.zeros((64, 64))
+molecules_disposition[30:40, 30:40] = 10
+# molecules_disposition = np.zeros((3, 3))
+# molecules_disposition[1, 1] = 10
 
 print("Setting up the microscope ...")
 # Microscope stuff
@@ -21,8 +21,8 @@ egfp = {"lambda_": 535e-9,
         "tau": 3e-09,
         "tau_vib": 1.0e-12,
         "tau_tri": 5e-6,
-        "phy_react": {488: 1e-4,   # 1e-4
-                      575: 1e-8},   # 1e-8
+        "phy_react": {488: 1e-12,   # 1e-4
+                      575: 1e-16},   # 1e-8
         "k_isc": 0.26e6}
 pixelsize = 10e-9
 bleach = True
