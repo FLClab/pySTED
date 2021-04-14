@@ -1839,7 +1839,6 @@ static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_value[] = "value";
 static const char __pyx_k_zeros[] = "zeros";
 static const char __pyx_k_bleach[] = "bleach";
-static const char __pyx_k_huehue[] = "huehue";
 static const char __pyx_k_i_sted[] = "i_sted";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_imshow[] = "imshow";
@@ -1858,6 +1857,7 @@ static const char __pyx_k_prob_ex[] = "prob_ex";
 static const char __pyx_k_time_ns[] = "time_ns";
 static const char __pyx_k_INTDTYPE[] = "INTDTYPE";
 static const char __pyx_k_cols_pad[] = "cols_pad";
+static const char __pyx_k_haha_lol[] = "haha! lol!";
 static const char __pyx_k_p_ex_roi[] = "p_ex_roi";
 static const char __pyx_k_rows_pad[] = "rows_pad";
 static const char __pyx_k_bleaching[] = "bleaching!";
@@ -1922,7 +1922,7 @@ static PyObject *__pyx_n_s_get_effective;
 static PyObject *__pyx_n_s_get_k_bleach;
 static PyObject *__pyx_n_s_get_photons;
 static PyObject *__pyx_n_s_h;
-static PyObject *__pyx_n_s_huehue;
+static PyObject *__pyx_kp_s_haha_lol;
 static PyObject *__pyx_n_s_i_ex;
 static PyObject *__pyx_n_s_i_sted;
 static PyObject *__pyx_n_s_import;
@@ -2460,15 +2460,15 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
   /* "pysted/raster.pyx":63
  *     components of the datamap are bleached separately).
  *     """
- *     print("huehue")             # <<<<<<<<<<<<<<
+ *     print("haha! lol!")             # <<<<<<<<<<<<<<
  *     if seed == 0:
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
  */
-  if (__Pyx_PrintOne(0, __pyx_n_s_huehue) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_haha_lol) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
 
   /* "pysted/raster.pyx":64
  *     """
- *     print("huehue")
+ *     print("haha! lol!")
  *     if seed == 0:             # <<<<<<<<<<<<<<
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
  *         srand(int(str(time.time_ns())[-5:-1]))
@@ -2518,7 +2518,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
 
     /* "pysted/raster.pyx":64
  *     """
- *     print("huehue")
+ *     print("haha! lol!")
  *     if seed == 0:             # <<<<<<<<<<<<<<
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
  *         srand(int(str(time.time_ns())[-5:-1]))
@@ -6393,7 +6393,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_get_k_bleach, __pyx_k_get_k_bleach, sizeof(__pyx_k_get_k_bleach), 0, 0, 1, 1},
   {&__pyx_n_s_get_photons, __pyx_k_get_photons, sizeof(__pyx_k_get_photons), 0, 0, 1, 1},
   {&__pyx_n_s_h, __pyx_k_h, sizeof(__pyx_k_h), 0, 0, 1, 1},
-  {&__pyx_n_s_huehue, __pyx_k_huehue, sizeof(__pyx_k_huehue), 0, 0, 1, 1},
+  {&__pyx_kp_s_haha_lol, __pyx_k_haha_lol, sizeof(__pyx_k_haha_lol), 0, 0, 1, 0},
   {&__pyx_n_s_i_ex, __pyx_k_i_ex, sizeof(__pyx_k_i_ex), 0, 0, 1, 1},
   {&__pyx_n_s_i_sted, __pyx_k_i_sted, sizeof(__pyx_k_i_sted), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
