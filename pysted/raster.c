@@ -1860,6 +1860,7 @@ static const char __pyx_k_p_sted[] = "p_sted";
 static const char __pyx_k_pyplot[] = "pyplot";
 static const char __pyx_k_sprime[] = "sprime";
 static const char __pyx_k_tprime[] = "tprime";
+static const char __pyx_k_yoyoyo[] = "yoyoyo";
 static const char __pyx_k_current[] = "current";
 static const char __pyx_k_datamap[] = "datamap";
 static const char __pyx_k_float64[] = "float64";
@@ -1872,7 +1873,6 @@ static const char __pyx_k_RAND_MAX[] = "RAND_MAX = ";
 static const char __pyx_k_cols_pad[] = "cols_pad";
 static const char __pyx_k_p_ex_roi[] = "p_ex_roi";
 static const char __pyx_k_rows_pad[] = "rows_pad";
-static const char __pyx_k_xdxdxdxd[] = "xdxdxdxd";
 static const char __pyx_k_bleaching[] = "bleaching!";
 static const char __pyx_k_effective[] = "effective";
 static const char __pyx_k_laser_pad[] = "laser_pad";
@@ -1994,8 +1994,8 @@ static PyObject *__pyx_n_s_time_ns;
 static PyObject *__pyx_n_s_tprime;
 static PyObject *__pyx_n_s_value;
 static PyObject *__pyx_n_s_w;
-static PyObject *__pyx_n_s_xdxdxdxd;
 static PyObject *__pyx_n_s_yo;
+static PyObject *__pyx_n_s_yoyoyo;
 static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed); /* proto */
 static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed, PyObject *__pyx_v_bleach_func); /* proto */
@@ -2475,15 +2475,15 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
   /* "pysted/raster.pyx":63
  *     components of the datamap are bleached separately).
  *     """
- *     print("xdxdxdxd")             # <<<<<<<<<<<<<<
+ *     print("yoyoyo")             # <<<<<<<<<<<<<<
  *     print(f"RAND_MAX = {RAND_MAX}")
  *     if seed == 0:
  */
-  if (__Pyx_PrintOne(0, __pyx_n_s_xdxdxdxd) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_n_s_yoyoyo) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
 
   /* "pysted/raster.pyx":64
  *     """
- *     print("xdxdxdxd")
+ *     print("yoyoyo")
  *     print(f"RAND_MAX = {RAND_MAX}")             # <<<<<<<<<<<<<<
  *     if seed == 0:
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -2497,7 +2497,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "pysted/raster.pyx":65
- *     print("xdxdxdxd")
+ *     print("yoyoyo")
  *     print(f"RAND_MAX = {RAND_MAX}")
  *     if seed == 0:             # <<<<<<<<<<<<<<
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -2547,7 +2547,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
     srand(__pyx_t_6);
 
     /* "pysted/raster.pyx":65
- *     print("xdxdxdxd")
+ *     print("yoyoyo")
  *     print(f"RAND_MAX = {RAND_MAX}")
  *     if seed == 0:             # <<<<<<<<<<<<<<
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -3759,14 +3759,14 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
  *                             # Calculates the binomial sampling
  *                             sampled_value = 0             # <<<<<<<<<<<<<<
  *                             # prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
- *                             prob = int(prob_ex[s, t] * prob_sted[s, t] * 32767)
+ *                             prob = int(prob_ex[s, t] * prob_sted[s, t] * 10000)
  */
               __pyx_v_sampled_value = 0;
 
               /* "pysted/raster.pyx":124
  *                             sampled_value = 0
  *                             # prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
- *                             prob = int(prob_ex[s, t] * prob_sted[s, t] * 32767)             # <<<<<<<<<<<<<<
+ *                             prob = int(prob_ex[s, t] * prob_sted[s, t] * 10000)             # <<<<<<<<<<<<<<
  *                             # For each count we sample a random variable
  *                             for o in range(current):
  */
@@ -3774,14 +3774,14 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
               __pyx_t_32 = __pyx_v_t;
               __pyx_t_15 = __pyx_v_s;
               __pyx_t_16 = __pyx_v_t;
-              __pyx_v_prob = ((int)(((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_prob_ex.diminfo[0].strides, __pyx_t_32, __pyx_pybuffernd_prob_ex.diminfo[1].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_prob_sted.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_prob_sted.diminfo[1].strides))) * 32767.0));
+              __pyx_v_prob = ((int)(((*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_ex.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_prob_ex.diminfo[0].strides, __pyx_t_32, __pyx_pybuffernd_prob_ex.diminfo[1].strides)) * (*__Pyx_BufPtrStrided2d(__pyx_t_6pysted_6raster_FLOATDTYPE_t *, __pyx_pybuffernd_prob_sted.rcbuffer->pybuffer.buf, __pyx_t_15, __pyx_pybuffernd_prob_sted.diminfo[0].strides, __pyx_t_16, __pyx_pybuffernd_prob_sted.diminfo[1].strides))) * 10000.0));
 
               /* "pysted/raster.pyx":126
- *                             prob = int(prob_ex[s, t] * prob_sted[s, t] * 32767)
+ *                             prob = int(prob_ex[s, t] * prob_sted[s, t] * 10000)
  *                             # For each count we sample a random variable
  *                             for o in range(current):             # <<<<<<<<<<<<<<
  *                                 # rsamp = rand()
- *                                 rsamp = 0 + int(rand() / RAND_MAX * 32767)
+ *                                 rsamp = 0 + int((rand() / RAND_MAX) * 10000)
  */
               __pyx_t_40 = __pyx_v_current;
               __pyx_t_41 = __pyx_t_40;
@@ -3791,7 +3791,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
                 /* "pysted/raster.pyx":128
  *                             for o in range(current):
  *                                 # rsamp = rand()
- *                                 rsamp = 0 + int(rand() / RAND_MAX * 32767)             # <<<<<<<<<<<<<<
+ *                                 rsamp = 0 + int((rand() / RAND_MAX) * 10000)             # <<<<<<<<<<<<<<
  *                                 if rsamp <= prob:
  *                                     sampled_value += 1
  */
@@ -3804,7 +3804,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
                   PyErr_SetString(PyExc_OverflowError, "value too large to perform division");
                   __PYX_ERR(0, 128, __pyx_L1_error)
                 }
-                __pyx_t_2 = __Pyx_PyInt_From_long((__Pyx_div_int(__pyx_t_43, RAND_MAX) * 0x7FFF)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
+                __pyx_t_2 = __Pyx_PyInt_From_long((__Pyx_div_int(__pyx_t_43, RAND_MAX) * 0x2710)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
                 __Pyx_GOTREF(__pyx_t_2);
                 __pyx_t_24 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyInt_Type)), __pyx_t_2); if (unlikely(!__pyx_t_24)) __PYX_ERR(0, 128, __pyx_L1_error)
                 __Pyx_GOTREF(__pyx_t_24);
@@ -3818,7 +3818,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
 
                 /* "pysted/raster.pyx":129
  *                                 # rsamp = rand()
- *                                 rsamp = 0 + int(rand() / RAND_MAX * 32767)
+ *                                 rsamp = 0 + int((rand() / RAND_MAX) * 10000)
  *                                 if rsamp <= prob:             # <<<<<<<<<<<<<<
  *                                     sampled_value += 1
  *                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
@@ -3827,7 +3827,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
                 if (__pyx_t_4) {
 
                   /* "pysted/raster.pyx":130
- *                                 rsamp = 0 + int(rand() / RAND_MAX * 32767)
+ *                                 rsamp = 0 + int((rand() / RAND_MAX) * 10000)
  *                                 if rsamp <= prob:
  *                                     sampled_value += 1             # <<<<<<<<<<<<<<
  *                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
@@ -3837,7 +3837,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
 
                   /* "pysted/raster.pyx":129
  *                                 # rsamp = rand()
- *                                 rsamp = 0 + int(rand() / RAND_MAX * 32767)
+ *                                 rsamp = 0 + int((rand() / RAND_MAX) * 10000)
  *                                 if rsamp <= prob:             # <<<<<<<<<<<<<<
  *                                     sampled_value += 1
  *                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
@@ -6445,8 +6445,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_tprime, __pyx_k_tprime, sizeof(__pyx_k_tprime), 0, 0, 1, 1},
   {&__pyx_n_s_value, __pyx_k_value, sizeof(__pyx_k_value), 0, 0, 1, 1},
   {&__pyx_n_s_w, __pyx_k_w, sizeof(__pyx_k_w), 0, 0, 1, 1},
-  {&__pyx_n_s_xdxdxdxd, __pyx_k_xdxdxdxd, sizeof(__pyx_k_xdxdxdxd), 0, 0, 1, 1},
   {&__pyx_n_s_yo, __pyx_k_yo, sizeof(__pyx_k_yo), 0, 0, 1, 1},
+  {&__pyx_n_s_yoyoyo, __pyx_k_yoyoyo, sizeof(__pyx_k_yoyoyo), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
