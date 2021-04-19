@@ -42,8 +42,10 @@ def raster_func_c_self_bleach_split_g(
     cdef int max_len = len(pixel_list)
     cdef FLOATDTYPE_t value
     cdef int sampled_value
-    cdef int prob
-    cdef int rsamp
+    cdef float prob
+    cdef float rsamp
+    cdef float maxval
+    cdef float sampled_prob
     cdef FLOATDTYPE_t pdt, p_ex, p_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] pre_effective, effective
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
@@ -51,7 +53,6 @@ def raster_func_c_self_bleach_split_g(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef numpy.ndarray[int, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
-    cdef int cte
 
     """
     raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the 
@@ -61,8 +62,8 @@ def raster_func_c_self_bleach_split_g(
     Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
     components of the datamap are bleached separately).
     """
-    print("ahaha lololo")
-    cte = 10000
+    print("lolXD")
+    maxval = float(RAND_MAX)
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -122,13 +123,13 @@ def raster_func_c_self_bleach_split_g(
                             # Calculates the binomial sampling
                             sampled_value = 0
                             # prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
-                            prob = int(prob_ex[s, t] * prob_sted[s, t] * cte)
+                            prob = prob_ex[s, t] * prob_sted[s, t]
                             # For each count we sample a random variable
                             for o in range(current):
-                                # rsamp = rand()
+                                rsamp = rand()
+                                sampled_prob = rsamp / maxval
                                 # rsamp = 0 + int((rand() / RAND_MAX) * 10000)
-                                rsamp = numpy.random.randint(cte)
-                                if rsamp <= prob:
+                                if sampled_prob <= prob:
                                     sampled_value += 1
                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
 
