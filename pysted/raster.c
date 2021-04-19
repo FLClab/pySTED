@@ -1802,6 +1802,7 @@ static const char __pyx_k_s[] = "s";
 static const char __pyx_k_t[] = "t";
 static const char __pyx_k_w[] = "w";
 static const char __pyx_k__4[] = "_";
+static const char __pyx_k_xd[] = "xd";
 static const char __pyx_k_yo[] = "yo";
 static const char __pyx_k_col[] = "col";
 static const char __pyx_k_cte[] = "cte";
@@ -1842,6 +1843,7 @@ static const char __pyx_k_i_sted[] = "i_sted";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_k_sted[] = "k_sted";
 static const char __pyx_k_lambda[] = "lambda_";
+static const char __pyx_k_maxval[] = "maxval";
 static const char __pyx_k_p_sted[] = "p_sted";
 static const char __pyx_k_pyplot[] = "pyplot";
 static const char __pyx_k_random[] = "random";
@@ -1864,6 +1866,7 @@ static const char __pyx_k_effective[] = "effective";
 static const char __pyx_k_laser_pad[] = "laser_pad";
 static const char __pyx_k_pixelsize[] = "pixelsize";
 static const char __pyx_k_prob_sted[] = "prob_sted";
+static const char __pyx_k_test_rand[] = "test_rand";
 static const char __pyx_k_FLOATDTYPE[] = "FLOATDTYPE";
 static const char __pyx_k_duty_cycle[] = "duty_cycle";
 static const char __pyx_k_excitation[] = "excitation";
@@ -1936,6 +1939,7 @@ static PyObject *__pyx_n_s_laser_pad;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_matplotlib;
 static PyObject *__pyx_n_s_max_len;
+static PyObject *__pyx_n_s_maxval;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_numpy;
 static PyObject *__pyx_kp_s_numpy_core_multiarray_failed_to;
@@ -1978,16 +1982,19 @@ static PyObject *__pyx_n_s_sted;
 static PyObject *__pyx_n_s_t;
 static PyObject *__pyx_n_s_tau;
 static PyObject *__pyx_n_s_test;
+static PyObject *__pyx_n_s_test_rand;
 static PyObject *__pyx_n_s_test_var_bleach;
 static PyObject *__pyx_n_s_time;
 static PyObject *__pyx_n_s_time_ns;
 static PyObject *__pyx_n_s_tprime;
 static PyObject *__pyx_n_s_value;
 static PyObject *__pyx_n_s_w;
+static PyObject *__pyx_n_s_xd;
 static PyObject *__pyx_n_s_yo;
 static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed); /* proto */
 static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed, PyObject *__pyx_v_bleach_func); /* proto */
+static PyObject *__pyx_pf_6pysted_6raster_4test_rand(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
 static PyObject *__pyx_int_neg_1;
 static PyObject *__pyx_int_neg_5;
 static PyObject *__pyx_slice_;
@@ -1995,8 +2002,10 @@ static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__5;
 static PyObject *__pyx_tuple__7;
+static PyObject *__pyx_tuple__9;
 static PyObject *__pyx_codeobj__6;
 static PyObject *__pyx_codeobj__8;
+static PyObject *__pyx_codeobj__10;
 /* Late includes */
 
 /* "pysted/raster.pyx":20
@@ -5253,6 +5262,7 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
  *             #                             w, prob_ex, prob_sted)
  *             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,             # <<<<<<<<<<<<<<
  *                         prob_sted)
+ * 
  */
       __pyx_t_7 = PyFloat_FromDouble(__pyx_v_p_ex); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 223, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
@@ -5273,6 +5283,8 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
  *             #                             w, prob_ex, prob_sted)
  *             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
  *                         prob_sted)             # <<<<<<<<<<<<<<
+ * 
+ * 
  */
       __Pyx_INCREF(__pyx_v_bleach_func);
       __pyx_t_35 = __pyx_v_bleach_func; __pyx_t_36 = NULL;
@@ -5453,6 +5465,101 @@ static PyObject *__pyx_pf_6pysted_6raster_2test_var_bleach(CYTHON_UNUSED PyObjec
   __Pyx_XDECREF((PyObject *)__pyx_v_bleached_datamap);
   __Pyx_XDECREF(__pyx_v__);
   __Pyx_XDECREF(__pyx_v_key);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pysted/raster.pyx":229
+ * @cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * @cython.wraparound(False)  # turn off negative index wrapping for entire function
+ * def test_rand():             # <<<<<<<<<<<<<<
+ *     cdef float xd
+ *     cdef float rsamp
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_6pysted_6raster_5test_rand(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyMethodDef __pyx_mdef_6pysted_6raster_5test_rand = {"test_rand", (PyCFunction)__pyx_pw_6pysted_6raster_5test_rand, METH_NOARGS, 0};
+static PyObject *__pyx_pw_6pysted_6raster_5test_rand(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("test_rand (wrapper)", 0);
+  __pyx_r = __pyx_pf_6pysted_6raster_4test_rand(__pyx_self);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_6pysted_6raster_4test_rand(CYTHON_UNUSED PyObject *__pyx_self) {
+  float __pyx_v_xd;
+  float __pyx_v_rsamp;
+  float __pyx_v_maxval;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("test_rand", 0);
+
+  /* "pysted/raster.pyx":234
+ *     cdef float maxval
+ * 
+ *     rsamp = rand()             # <<<<<<<<<<<<<<
+ *     maxval = float(RAND_MAX)
+ *     xd = rsamp / maxval
+ */
+  __pyx_v_rsamp = rand();
+
+  /* "pysted/raster.pyx":235
+ * 
+ *     rsamp = rand()
+ *     maxval = float(RAND_MAX)             # <<<<<<<<<<<<<<
+ *     xd = rsamp / maxval
+ *     print(xd)
+ */
+  __pyx_v_maxval = ((double)RAND_MAX);
+
+  /* "pysted/raster.pyx":236
+ *     rsamp = rand()
+ *     maxval = float(RAND_MAX)
+ *     xd = rsamp / maxval             # <<<<<<<<<<<<<<
+ *     print(xd)
+ */
+  if (unlikely(__pyx_v_maxval == 0)) {
+    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+    __PYX_ERR(0, 236, __pyx_L1_error)
+  }
+  __pyx_v_xd = (__pyx_v_rsamp / __pyx_v_maxval);
+
+  /* "pysted/raster.pyx":237
+ *     maxval = float(RAND_MAX)
+ *     xd = rsamp / maxval
+ *     print(xd)             # <<<<<<<<<<<<<<
+ */
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_xd); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 237, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (__Pyx_PrintOne(0, __pyx_t_1) < 0) __PYX_ERR(0, 237, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "pysted/raster.pyx":229
+ * @cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * @cython.wraparound(False)  # turn off negative index wrapping for entire function
+ * def test_rand():             # <<<<<<<<<<<<<<
+ *     cdef float xd
+ *     cdef float rsamp
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pysted.raster.test_rand", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -6392,6 +6499,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_matplotlib, __pyx_k_matplotlib, sizeof(__pyx_k_matplotlib), 0, 0, 1, 1},
   {&__pyx_n_s_max_len, __pyx_k_max_len, sizeof(__pyx_k_max_len), 0, 0, 1, 1},
+  {&__pyx_n_s_maxval, __pyx_k_maxval, sizeof(__pyx_k_maxval), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
   {&__pyx_kp_s_numpy_core_multiarray_failed_to, __pyx_k_numpy_core_multiarray_failed_to, sizeof(__pyx_k_numpy_core_multiarray_failed_to), 0, 0, 1, 0},
@@ -6434,12 +6542,14 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_t, __pyx_k_t, sizeof(__pyx_k_t), 0, 0, 1, 1},
   {&__pyx_n_s_tau, __pyx_k_tau, sizeof(__pyx_k_tau), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
+  {&__pyx_n_s_test_rand, __pyx_k_test_rand, sizeof(__pyx_k_test_rand), 0, 0, 1, 1},
   {&__pyx_n_s_test_var_bleach, __pyx_k_test_var_bleach, sizeof(__pyx_k_test_var_bleach), 0, 0, 1, 1},
   {&__pyx_n_s_time, __pyx_k_time, sizeof(__pyx_k_time), 0, 0, 1, 1},
   {&__pyx_n_s_time_ns, __pyx_k_time_ns, sizeof(__pyx_k_time_ns), 0, 0, 1, 1},
   {&__pyx_n_s_tprime, __pyx_k_tprime, sizeof(__pyx_k_tprime), 0, 0, 1, 1},
   {&__pyx_n_s_value, __pyx_k_value, sizeof(__pyx_k_value), 0, 0, 1, 1},
   {&__pyx_n_s_w, __pyx_k_w, sizeof(__pyx_k_w), 0, 0, 1, 1},
+  {&__pyx_n_s_xd, __pyx_k_xd, sizeof(__pyx_k_xd), 0, 0, 1, 1},
   {&__pyx_n_s_yo, __pyx_k_yo, sizeof(__pyx_k_yo), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
@@ -6512,6 +6622,18 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
   __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(17, 0, 46, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_audurand_pysted_pysted_raster_py, __pyx_n_s_test_var_bleach, 141, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 141, __pyx_L1_error)
+
+  /* "pysted/raster.pyx":229
+ * @cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * @cython.wraparound(False)  # turn off negative index wrapping for entire function
+ * def test_rand():             # <<<<<<<<<<<<<<
+ *     cdef float xd
+ *     cdef float rsamp
+ */
+  __pyx_tuple__9 = PyTuple_Pack(3, __pyx_n_s_xd, __pyx_n_s_rsamp, __pyx_n_s_maxval); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 229, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(0, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_audurand_pysted_pysted_raster_py, __pyx_n_s_test_rand, 229, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 229, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -6935,6 +7057,18 @@ if (!__Pyx_RefNanny) {
   __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6pysted_6raster_3test_var_bleach, NULL, __pyx_n_s_pysted_raster); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 141, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_test_var_bleach, __pyx_t_2) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "pysted/raster.pyx":229
+ * @cython.boundscheck(False)  # turn off bounds-checking for entire function
+ * @cython.wraparound(False)  # turn off negative index wrapping for entire function
+ * def test_rand():             # <<<<<<<<<<<<<<
+ *     cdef float xd
+ *     cdef float rsamp
+ */
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_6pysted_6raster_5test_rand, NULL, __pyx_n_s_pysted_raster); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 229, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test_rand, __pyx_t_2) < 0) __PYX_ERR(0, 229, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "pysted/raster.pyx":2

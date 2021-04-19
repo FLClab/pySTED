@@ -222,3 +222,16 @@ def test_var_bleach(
             #                             w, prob_ex, prob_sted)
             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
                         prob_sted)
+
+
+@cython.boundscheck(False)  # turn off bounds-checking for entire function
+@cython.wraparound(False)  # turn off negative index wrapping for entire function
+def test_rand():
+    cdef float xd
+    cdef float rsamp
+    cdef float maxval
+
+    rsamp = rand()
+    maxval = float(RAND_MAX)
+    xd = rsamp / maxval
+    print(xd)
