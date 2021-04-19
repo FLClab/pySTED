@@ -34,13 +34,15 @@ def default_bleach(object self,
     cdef int s, sprime, t, tprime
     cdef FLOATDTYPE_t value
     cdef int sampled_value
-    cdef int prob
-    cdef int rsamp
+    cdef float prob
+    cdef float rsamp
+    cdef float maxval
+    cdef float sampled_prob
     cdef int current
     cdef str key
     cdef float duty_cycle
 
-    # print("CUMaroonie")
+    maxval = float(RAND_MAX)
 
     photons_ex = self.fluo.get_photons(i_ex * p_ex)
     k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
@@ -63,11 +65,12 @@ def default_bleach(object self,
                 if current > 0:
                     # Calculates the binomial sampling
                     sampled_value = 0
-                    prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
+                    prob = prob_ex[s, t] * prob_sted[s, t]
                     # For each count we sample a random variable
                     for o in range(current):
                         rsamp = rand()
-                        if rsamp <= prob:
+                        sampled_prob = rsamp / maxval
+                        if sampled_prob <= prob:
                             sampled_value += 1
                     bleached_sub_datamaps_dict[key][s, t] = sampled_value
 

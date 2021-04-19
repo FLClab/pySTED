@@ -113,22 +113,16 @@ def raster_func_c_self_bleach_split_g(
                         prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * pdt)
                         prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * pdt)
 
-                        # TESTING FIX FOR ALBERT
-                        # prob_ex[s, t] = 0
-                        # prob_sted[s, t] = 0
-
                         # only need to compute bleaching (resampling) if the pixel is not empty
                         current = bleached_sub_datamaps_dict[key][s, t]
                         if current > 0:
                             # Calculates the binomial sampling
                             sampled_value = 0
-                            # prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
                             prob = prob_ex[s, t] * prob_sted[s, t]
                             # For each count we sample a random variable
                             for o in range(current):
                                 rsamp = rand()
                                 sampled_prob = rsamp / maxval
-                                # rsamp = 0 + int((rand() / RAND_MAX) * 10000)
                                 if sampled_prob <= prob:
                                     sampled_value += 1
                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
@@ -184,8 +178,6 @@ def test_var_bleach(
     components of the datamap are bleached separately).
     """
 
-    print("yo")
-
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -218,21 +210,7 @@ def test_var_bleach(
         acquired_intensity[int(row / ratio), int(col / ratio)] = value
 
         if bleach:
-            print("bleaching!")
             # bleach_funcs.default_bleach(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h,
             #                             w, prob_ex, prob_sted)
             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
                         prob_sted)
-
-
-@cython.boundscheck(False)  # turn off bounds-checking for entire function
-@cython.wraparound(False)  # turn off negative index wrapping for entire function
-def test_rand():
-    cdef float xd
-    cdef float rsamp
-    cdef float maxval
-
-    rsamp = rand()
-    maxval = float(RAND_MAX)
-    xd = rsamp / maxval
-    return xd
