@@ -1802,7 +1802,6 @@ static const char __pyx_k_s[] = "s";
 static const char __pyx_k_t[] = "t";
 static const char __pyx_k_w[] = "w";
 static const char __pyx_k__4[] = "_";
-static const char __pyx_k_xD[] = "xD!";
 static const char __pyx_k_yo[] = "yo";
 static const char __pyx_k_col[] = "col";
 static const char __pyx_k_end[] = "end";
@@ -1879,6 +1878,7 @@ static const char __pyx_k_bleach_funcs[] = "bleach_funcs";
 static const char __pyx_k_get_k_bleach[] = "get_k_bleach";
 static const char __pyx_k_photons_sted[] = "photons_sted";
 static const char __pyx_k_get_effective[] = "get_effective";
+static const char __pyx_k_is_this_right[] = "is this right?";
 static const char __pyx_k_pre_effective[] = "pre_effective";
 static const char __pyx_k_pysted_raster[] = "pysted.raster";
 static const char __pyx_k_sampled_value[] = "sampled_value";
@@ -1927,6 +1927,7 @@ static PyObject *__pyx_n_s_i_sted;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_imshow;
 static PyObject *__pyx_n_s_int32;
+static PyObject *__pyx_kp_s_is_this_right;
 static PyObject *__pyx_n_s_k_ex;
 static PyObject *__pyx_n_s_k_sted;
 static PyObject *__pyx_n_s_key;
@@ -1983,7 +1984,6 @@ static PyObject *__pyx_n_s_time_ns;
 static PyObject *__pyx_n_s_tprime;
 static PyObject *__pyx_n_s_value;
 static PyObject *__pyx_n_s_w;
-static PyObject *__pyx_kp_s_xD;
 static PyObject *__pyx_n_s_yo;
 static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_datamap, PyArrayObject *__pyx_v_acquired_intensity, PyArrayObject *__pyx_v_pixel_list, int __pyx_v_ratio, CYTHON_UNUSED int __pyx_v_rows_pad, CYTHON_UNUSED int __pyx_v_cols_pad, CYTHON_UNUSED int __pyx_v_laser_pad, PyArrayObject *__pyx_v_prob_ex, PyArrayObject *__pyx_v_prob_sted, PyArrayObject *__pyx_v_pdt_roi, PyArrayObject *__pyx_v_p_ex_roi, PyArrayObject *__pyx_v_p_sted_roi, int __pyx_v_bleach, PyObject *__pyx_v_bleached_sub_datamaps_dict, int __pyx_v_seed); /* proto */
@@ -2462,15 +2462,15 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
   /* "pysted/raster.pyx":63
  *     components of the datamap are bleached separately).
  *     """
- *     print("xD!")             # <<<<<<<<<<<<<<
+ *     print("is this right?")             # <<<<<<<<<<<<<<
  *     if seed == 0:
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
  */
-  if (__Pyx_PrintOne(0, __pyx_kp_s_xD) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (__Pyx_PrintOne(0, __pyx_kp_s_is_this_right) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
 
   /* "pysted/raster.pyx":64
  *     """
- *     print("xD!")
+ *     print("is this right?")
  *     if seed == 0:             # <<<<<<<<<<<<<<
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
  *         srand(int(str(time.time_ns())[-5:-1]))
@@ -2520,7 +2520,7 @@ static PyObject *__pyx_pf_6pysted_6raster_raster_func_c_self_bleach_split_g(CYTH
 
     /* "pysted/raster.pyx":64
  *     """
- *     print("xD!")
+ *     print("is this right?")
  *     if seed == 0:             # <<<<<<<<<<<<<<
  *         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
  *         srand(int(str(time.time_ns())[-5:-1]))
@@ -6408,6 +6408,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_imshow, __pyx_k_imshow, sizeof(__pyx_k_imshow), 0, 0, 1, 1},
   {&__pyx_n_s_int32, __pyx_k_int32, sizeof(__pyx_k_int32), 0, 0, 1, 1},
+  {&__pyx_kp_s_is_this_right, __pyx_k_is_this_right, sizeof(__pyx_k_is_this_right), 0, 0, 1, 0},
   {&__pyx_n_s_k_ex, __pyx_k_k_ex, sizeof(__pyx_k_k_ex), 0, 0, 1, 1},
   {&__pyx_n_s_k_sted, __pyx_k_k_sted, sizeof(__pyx_k_k_sted), 0, 0, 1, 1},
   {&__pyx_n_s_key, __pyx_k_key, sizeof(__pyx_k_key), 0, 0, 1, 1},
@@ -6464,7 +6465,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_tprime, __pyx_k_tprime, sizeof(__pyx_k_tprime), 0, 0, 1, 1},
   {&__pyx_n_s_value, __pyx_k_value, sizeof(__pyx_k_value), 0, 0, 1, 1},
   {&__pyx_n_s_w, __pyx_k_w, sizeof(__pyx_k_w), 0, 0, 1, 1},
-  {&__pyx_kp_s_xD, __pyx_k_xD, sizeof(__pyx_k_xD), 0, 0, 1, 0},
   {&__pyx_n_s_yo, __pyx_k_yo, sizeof(__pyx_k_yo), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}

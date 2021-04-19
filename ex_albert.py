@@ -21,8 +21,8 @@ egfp = {"lambda_": 535e-9,
         "tau": 3e-09,
         "tau_vib": 1.0e-12,
         "tau_tri": 5e-6,
-        "phy_react": {488: 1e-12,   # 1e-4
-                      575: 1e-16},   # 1e-8
+        "phy_react": {488: 1e-7,   # 1e-4
+                      575: 1e-11},   # 1e-8
         "k_isc": 0.26e6}
 pixelsize = 10e-9
 bleach = True
@@ -45,6 +45,8 @@ datamap = base.Datamap(molecules_disposition, pixelsize)
 microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, bleach_func="default_bleach")
 i_ex, _, _ = microscope.cache(datamap.pixelsize)
 datamap.set_roi(i_ex, roi)
+
+print(f'starting acq with phy_react = {egfp["phy_react"]}')
 
 acquisition, bleached, intensity = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
                                                                     bleach=True, update=False)
