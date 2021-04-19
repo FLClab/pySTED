@@ -1,6 +1,7 @@
 import numpy as np
 from pysted import base, utils
 from matplotlib import pyplot as plt
+import time
 
 
 molecules_disposition = np.zeros((64, 64))
@@ -47,13 +48,14 @@ i_ex, _, _ = microscope.cache(datamap.pixelsize)
 datamap.set_roi(i_ex, roi)
 
 print(f'starting acq with phy_react = {egfp["phy_react"]}')
-
+time_start = time.time()
 acquisition, bleached, intensity = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
                                                                     bleach=True, update=False, seed=420)
-
+print(f"ran in {time.time() - time_start} s")
 print(utils.mse_calculator(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi]))
 survival = utils.molecules_survival(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi])
 print(survival)
+
 
 fig, axes = plt.subplots(1, 3)
 

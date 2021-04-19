@@ -51,6 +51,7 @@ def raster_func_c_self_bleach_split_g(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef numpy.ndarray[int, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
+    cdef int cte
 
     """
     raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the 
@@ -60,8 +61,8 @@ def raster_func_c_self_bleach_split_g(
     Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
     components of the datamap are bleached separately).
     """
-    print("yoyoyo")
-    print(f"RAND_MAX = {RAND_MAX}")
+    print("ahaha lololo")
+    cte = 10000
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -121,11 +122,12 @@ def raster_func_c_self_bleach_split_g(
                             # Calculates the binomial sampling
                             sampled_value = 0
                             # prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
-                            prob = int(prob_ex[s, t] * prob_sted[s, t] * 10000)
+                            prob = int(prob_ex[s, t] * prob_sted[s, t] * cte)
                             # For each count we sample a random variable
                             for o in range(current):
                                 # rsamp = rand()
-                                rsamp = 0 + int((rand() / RAND_MAX) * 10000)
+                                # rsamp = 0 + int((rand() / RAND_MAX) * 10000)
+                                rsamp = numpy.random.randint(cte)
                                 if rsamp <= prob:
                                     sampled_value += 1
                             bleached_sub_datamaps_dict[key][s, t] = sampled_value
