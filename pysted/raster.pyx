@@ -120,7 +120,8 @@ def raster_func_c_self_bleach_split_g(
                         if current > 0:
                             # Calculates the binomial sampling
                             sampled_value = 0
-                            prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
+                            # prob = int(prob_ex[s, t] * prob_sted[s, t] * RAND_MAX)
+                            prob = int(prob_ex[s, t] * prob_sted[s, t] * 32767)
                             # For each count we sample a random variable
                             for o in range(current):
                                 # rsamp = rand()
