@@ -5499,7 +5499,7 @@ static PyObject *__pyx_pf_6pysted_6raster_4test_rand(CYTHON_UNUSED PyObject *__p
  *     rsamp = rand()
  *     maxval = float(RAND_MAX)             # <<<<<<<<<<<<<<
  *     xd = rsamp / maxval
- *     print(xd)
+ *     return xd
  */
   __pyx_v_maxval = ((double)RAND_MAX);
 
@@ -5507,7 +5507,7 @@ static PyObject *__pyx_pf_6pysted_6raster_4test_rand(CYTHON_UNUSED PyObject *__p
  *     rsamp = rand()
  *     maxval = float(RAND_MAX)
  *     xd = rsamp / maxval             # <<<<<<<<<<<<<<
- *     print(xd)
+ *     return xd
  */
   if (unlikely(__pyx_v_maxval == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
@@ -5518,12 +5518,14 @@ static PyObject *__pyx_pf_6pysted_6raster_4test_rand(CYTHON_UNUSED PyObject *__p
   /* "pysted/raster.pyx":238
  *     maxval = float(RAND_MAX)
  *     xd = rsamp / maxval
- *     print(xd)             # <<<<<<<<<<<<<<
+ *     return xd             # <<<<<<<<<<<<<<
  */
+  __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = PyFloat_FromDouble(__pyx_v_xd); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 238, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PrintOne(0, __pyx_t_1) < 0) __PYX_ERR(0, 238, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
 
   /* "pysted/raster.pyx":230
  * @cython.boundscheck(False)  # turn off bounds-checking for entire function
@@ -5534,8 +5536,6 @@ static PyObject *__pyx_pf_6pysted_6raster_4test_rand(CYTHON_UNUSED PyObject *__p
  */
 
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_AddTraceback("pysted.raster.test_rand", __pyx_clineno, __pyx_lineno, __pyx_filename);

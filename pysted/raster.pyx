@@ -235,4 +235,4 @@ def test_rand():
     rsamp = rand()
     maxval = float(RAND_MAX)
     xd = rsamp / maxval
-    print(xd)
+    return xd

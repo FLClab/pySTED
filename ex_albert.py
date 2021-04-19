@@ -22,8 +22,8 @@ egfp = {"lambda_": 535e-9,
         "tau": 3e-09,
         "tau_vib": 1.0e-12,
         "tau_tri": 5e-6,
-        "phy_react": {488: 1e-7,   # 1e-4
-                      575: 1e-11},   # 1e-8
+        "phy_react": {488: 1e-6,   # 1e-4
+                      575: 1e-10},   # 1e-8
         "k_isc": 0.26e6}
 pixelsize = 10e-9
 bleach = True
@@ -50,7 +50,7 @@ datamap.set_roi(i_ex, roi)
 print(f'starting acq with phy_react = {egfp["phy_react"]}')
 time_start = time.time()
 acquisition, bleached, intensity = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
-                                                                    bleach=True, update=False, seed=420)
+                                                                    bleach=True, update=False)
 print(f"ran in {time.time() - time_start} s")
 print(utils.mse_calculator(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi]))
 survival = utils.molecules_survival(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi])
