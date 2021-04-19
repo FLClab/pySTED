@@ -61,6 +61,7 @@ def raster_func_c_self_bleach_split_g(
     Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
     components of the datamap are bleached separately).
     """
+    print("lolxd!")
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns

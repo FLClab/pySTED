@@ -80,7 +80,7 @@ import scipy.constants
 import scipy.signal
 
 # from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
-from pysted import utils, bleach_functions, cUtils, raster, bleach_funcs
+from pysted import utils, cUtils, raster, bleach_funcs
 # import cUtils
 
 # import mis par BT pour des tests
@@ -695,7 +695,7 @@ class Microscope:
                  fluorescence molecules to be used.
     '''
     
-    def __init__(self, excitation, sted, detector, objective, fluo, bleach_func="default_bleach"):
+    def __init__(self, excitation, sted, detector, objective, fluo):
         self.excitation = excitation
         self.sted = sted
         self.detector = detector
@@ -704,11 +704,6 @@ class Microscope:
                 
         # caching system
         self.__cache = {}
-
-        if bleach_func not in bleach_functions.functions_dict:
-            raise ValueError("Not a valid bleaching function")
-        else:
-            self.bleach_func = bleach_functions.functions_dict[bleach_func]
 
         # This will be used during the acquisition routine to make a better correspondance
         # between the microscope acquisition time steps and the Ca2+ flash time steps

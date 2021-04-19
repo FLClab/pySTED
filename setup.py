@@ -7,10 +7,15 @@ import numpy
 
 import pysted
 
+# ext_modules = [Extension("pysted.cUtils", ["pysted/cUtils.c"]),
+#                Extension("pysted._draw", ["pysted/_draw.c"]),
+#                Extension("pysted.raster", ["pysted/raster.c"]),
+#                Extension("pysted.bleach_funcs", ["pysted/bleach_funcs.c"])]
+
 ext_modules = [Extension("pysted.cUtils", ["pysted/cUtils.c"]),
-               Extension("pysted._draw", ["pysted/_draw.c"]),
-               Extension("pysted.raster", ["pysted/raster.c"]),
-               Extension("pysted.bleach_funcs", ["pysted/bleach_funcs.c"])]
+               Extension("pysted._draw", ["pysted/_draw.pyx"]),
+               Extension("pysted.raster", ["pysted/raster.pyx"]),
+               Extension("pysted.bleach_funcs", ["pysted/bleach_funcs.pyx"])]
 
 setup(name="pysted",
       version=pysted.__revision__,
@@ -19,7 +24,7 @@ setup(name="pysted",
       packages=["pysted"],
       platforms=["any"],
       license="LGPL",
-      ext_modules = ext_modules,
+      ext_modules = cythonize(ext_modules),
       cmdclass = {"build_py": build_py},
       include_dirs=[numpy.get_include()]
 )

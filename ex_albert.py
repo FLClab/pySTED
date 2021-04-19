@@ -43,7 +43,7 @@ detector = base.Detector(noise=True, background=0)
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
 datamap = base.Datamap(molecules_disposition, pixelsize)
-microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, bleach_func="default_bleach")
+microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
 i_ex, _, _ = microscope.cache(datamap.pixelsize)
 datamap.set_roi(i_ex, roi)
 
