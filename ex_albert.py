@@ -21,8 +21,8 @@ egfp = {"lambda_": 535e-9,
         "tau": 3e-09,
         "tau_vib": 1.0e-12,
         "tau_tri": 5e-6,
-        "phy_react": {488: 1e-7,   # 1e-4
-                      575: 1e-11},   # 1e-8
+        "phy_react": {488: 1e-4,   # 1e-4
+                      575: 1e-8},   # 1e-8
         "k_isc": 0.26e6}
 pixelsize = 10e-9
 bleach = True
