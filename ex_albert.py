@@ -49,9 +49,11 @@ datamap.set_roi(i_ex, roi)
 print(f'starting acq with phy_react = {egfp["phy_react"]}')
 
 acquisition, bleached, intensity = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
-                                                                    bleach=True, update=False)
+                                                                    bleach=True, update=False, seed=420)
 
 print(utils.mse_calculator(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi]))
+survival = utils.molecules_survival(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi])
+print(survival)
 
 fig, axes = plt.subplots(1, 3)
 

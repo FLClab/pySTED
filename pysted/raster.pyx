@@ -60,7 +60,7 @@ def raster_func_c_self_bleach_split_g(
     Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
     components of the datamap are bleached separately).
     """
-    print("is this right?")
+    print("lul")
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -129,8 +129,6 @@ def raster_func_c_self_bleach_split_g(
 
                         tprime += 1
                     sprime += 1
-    plt.imshow(bleached_datamap[datamap.roi])
-    plt.show()
 
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
