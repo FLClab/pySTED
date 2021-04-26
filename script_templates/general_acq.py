@@ -22,7 +22,7 @@ parser.add_argument("--save_path", type=str, default="", help="Where to save the
 parser.add_argument("--bleach", type=str2bool, default=False, help="Whether or not bleaching is on or not")
 parser.add_argument("--dmap_seed", type=int, default=None, help="Whether or not the dmap is created using a seed")
 parser.add_argument("--flash_seed", type=int, default=None, help="Whether or not the flashes are controlled by a seed")
-parser.add_argument("--acq_time", type=int, default=5, help="Acquisition time (in seconds)")
+parser.add_argument("--acq_time", type=int, default=1, help="Acquisition time (in seconds)")
 args = parser.parse_args()
 
 
@@ -44,6 +44,10 @@ ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (9, 5
 flat_synapses_list = [item for sublist in synapses_list for item in sublist]
 
 poils_frame = ensemble_func.return_frame().astype(int)
+
+# plt.imshow(poils_frame)
+# plt.show()
+# exit()
 
 print("Setting up the microscope ...")
 # Microscope stuff
@@ -85,7 +89,7 @@ detector = base.Detector(noise=True, background=0)
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
 temporal_datamap = base.TemporalDatamap(poils_frame, dpxsz, flat_synapses_list)
-microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, bleach_func="default_bleach")
+microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
 i_ex, _, _ = microscope.cache(temporal_datamap.pixelsize)
 temporal_datamap = base.TemporalDatamap(poils_frame, dpxsz, flat_synapses_list)
 temporal_datamap.set_roi(i_ex, roi)
