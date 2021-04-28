@@ -4,25 +4,25 @@ assembling an excitation beam, a STED beam, a detector, and fluorescence
 molecules, to obtain a microscope setup. The following code gives an example of
 how to create such setup and use it to measure and plot the detected signal
 given some ``data_model``.
-    
+
 .. code-block:: python
-    
+
     laser_ex = base.GaussianBeam(488e-9)
     laser_sted = base.DonutBeam(575e-9, zero_residual=0.04)
     detector = base.Detector(def=0.02)
     objective = base.Objective()
     fluo = base.Fluorescence(535e-9)
     microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
-    
+
     data_map = io.read_data_map(data_model, 1)
-    
+
     # imaging parameters
     pdt = 10e-6
     p_ex = 1e-6
     p_sted = 30e-3
 
     signal, _ = microscope.get_signal(data_map, 10e-9, pdt, p_ex, p_sted)
-    
+
     from matplotlib import pyplot
     pyplot.imshow(signal)
     pyplot.colorbar()
@@ -51,7 +51,7 @@ For use by FLClab (@CERVO) authorized people
 .. [Jerker1999] Jerker, W., Ülo, M., & Rudolf, R. (1999).
    Photodynamic properties of green fluorescent proteins investigated by
    fluorescence correlation spectroscopy. Chemical Physics, 250(2), 171-186.
-   
+
 .. [Leutenegger2010] Leutenegger, M., Eggeling, C., & Hell, S. W. (2010).
     Analytical description of STED microscopy performance.
     Optics Express, 18(25), 26417–26429.
@@ -68,7 +68,7 @@ For use by FLClab (@CERVO) authorized people
 .. [Willig2006] Willig, K. I., Keller, J., Bossi, M., & Hell, S. W. (2006).
    STED microscopy resolves nanoparticle assemblies.
    New Journal of Physics, 8(6), 106.
-   
+
 .. [Xie2013] Xie, H., Liu, Y., Jin, D., Santangelo, P. J., & Xi, P. (2013).
    Analytical description of high-aperture STED resolution with 0–2pi
    vortex phase modulation.
@@ -91,15 +91,16 @@ import warnings
 from matplotlib import pyplot
 import time
 from functools import partial
+import pickle
 
 
 class GaussianBeam:
     '''This class implements a Gaussian beam (excitation).
-    
+
     :param lambda_: The wavelength of the beam (m).
     :param kwargs: One or more parameters as described in the following table,
                    optional.
-    
+
     +------------------+--------------+----------------------------------------+
     | Parameter        | Default      | Details                                |
     +==================+==============+========================================+
@@ -109,25 +110,25 @@ class GaussianBeam:
     | ``beta``         | ``pi/4``     | The beam incident angle, in            |
     |                  |              | :math:`[0, \pi/2]` (rad).              |
     +------------------+--------------+----------------------------------------+
-    
+
     Polarization :
         * :math:`\pi/2` is left-circular
         * :math:`0` is linear
         * :math:`-\pi/2` is right-circular
     '''
-    
+
     def __init__(self, lambda_, **kwargs):
         self.lambda_ = lambda_
         self.polarization = kwargs.get("polarization", numpy.pi/2)
         self.beta = kwargs.get("beta", numpy.pi/4)
-    
+
     # FIXME: pass Objective object instead of f, n, na, transmission
     def get_intensity(self, power, f, n, na, transmission, datamap_pixelsize):
         '''Compute the transmitted excitation intensity field (W/m²). The
         technique essentially follows the method described in [Xie2013]_,
         where :math:`z = 0`, along with some equations from [Deng2010]_, and
         [RPPhoto2015]_.
-        
+
         :param power: The power of the beam (W).
         :param f: The focal length of the objective (m).
         :param n: The refractive index of the objective.
@@ -147,16 +148,16 @@ class GaussianBeam:
         def fun3(theta, kr):
             return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta) *\
                    scipy.special.jv(2, kr * numpy.sin(theta)) * (1 - numpy.cos(theta))
-        
+
         alpha = numpy.arcsin(na / n)
-        
+
         diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
         center = int(n_pixels / 2)
-        
+
         # [Deng2010]
         k = 2 * numpy.pi * n / self.lambda_
-        
+
         # compute the focal plane integrations i1 to i3 [Xie2013]
         i1 = numpy.empty((n_pixels, n_pixels))
         i2 = numpy.empty((n_pixels, n_pixels))
@@ -168,13 +169,13 @@ class GaussianBeam:
                 w_rel = (x - center)
 
                 angle, radius = utils.cart2pol(w_rel, h_rel)
-                
+
                 kr = k * radius * datamap_pixelsize
                 i1[y, x] = scipy.integrate.quad(fun1, 0, alpha, (kr,))[0]
                 i2[y, x] = scipy.integrate.quad(fun2, 0, alpha, (kr,))[0]
                 i3[y, x] = scipy.integrate.quad(fun3, 0, alpha, (kr,))[0]
                 phi[y, x] = angle
-        
+
         ax = numpy.sin(self.beta)
         ay = numpy.cos(self.beta) * numpy.exp(1j * self.polarization)
 
@@ -190,12 +191,12 @@ class GaussianBeam:
         electromagfieldx = exdx - eydy
         electromagfieldy = eydx + exdy
         electromagfieldz = ezdx + ezdy
-        
+
         # [Xie2013] I = E_x E_x* + E_y E_y* + E_z E_z* (p. 1642)
         intensity = electromagfieldx * numpy.conj(electromagfieldx) +\
                     electromagfieldy * numpy.conj(electromagfieldy) +\
                     electromagfieldz * numpy.conj(electromagfieldz)
-        
+
         # keep it real
         intensity = numpy.real_if_close(intensity)
         # normalize
@@ -211,7 +212,7 @@ class GaussianBeam:
         intensity_flipped[0: n_pixels // 2 + 1, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr, 1)
         intensity_flipped[n_pixels // 2:, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr)
         intensity_flipped[n_pixels // 2:, n_pixels // 2:] = numpy.flip(intensity_tr, 0)
-        
+
         idx_mid = int((intensity.shape[0]-1) / 2)
         r = utils.fwhm(intensity[idx_mid])
         area_fwhm = numpy.pi * (r * datamap_pixelsize) ** 2 / 2
@@ -221,11 +222,11 @@ class GaussianBeam:
 
 class DonutBeam:
     '''This class implements a donut beam (STED).
-    
+
     :param lambda_: The wavelength of the beam (m).
     :param parameters: One or more parameters as described in the following
                        table, optional.
-    
+
     +------------------+--------------+----------------------------------------+
     | Parameter        | Default      | Details                                |
     +==================+==============+========================================+
@@ -242,13 +243,13 @@ class DonutBeam:
     | ``zero_residual``| ``0``        | The ratio between minimum and maximum  |
     |                  |              | intensity (ratio).                     |
     +------------------+--------------+----------------------------------------+
-    
+
     Polarization :
         * :math:`\pi/2` is left-circular
         * :math:`0` is linear
         * :math:`-\pi/2` is right-circular
     '''
-    
+
     def __init__(self, lambda_, **kwargs):
         self.lambda_ = lambda_
         self.polarization = kwargs.get("polarization", numpy.pi/2)
@@ -256,14 +257,14 @@ class DonutBeam:
         self.tau = kwargs.get("tau", 200e-12)
         self.rate = kwargs.get("rate", 80e6)
         self.zero_residual = kwargs.get("zero_residual", 0)
-    
+
     # FIXME: pass Objective object instead of f, n, na, transmission
     def get_intensity(self, power, f, n, na, transmission, datamap_pixelsize):
         '''Compute the transmitted STED intensity field (W/m²). The technique
         essentially follows the method described in [Xie2013]_, where
         :math:`z = 0`, along with some equations from [Deng2010]_, and
         [RPPhoto2015]_.
-        
+
         :param power: The power of the beam (W).
         :param f: The focal length of the objective (m).
         :param n: The refractive index of the objective.
@@ -288,16 +289,16 @@ class DonutBeam:
         def fun5(theta, kr):
             return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta)**2 *\
                    scipy.special.jv(2, kr * numpy.sin(theta))
-        
+
         alpha = numpy.arcsin(na / n)
-        
+
         diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
         center = int(n_pixels / 2)
-        
+
         # [Deng2010]
         k = 2 * numpy.pi * n / self.lambda_
-        
+
         # compute the angular integrations i1 to i5 [Xie2013]
         i1 = numpy.zeros((n_pixels, n_pixels))
         i2 = numpy.zeros((n_pixels, n_pixels))
@@ -309,21 +310,21 @@ class DonutBeam:
             h_rel = (center - y)
             for x in range(n_pixels):
                 w_rel = (x - center)
-                
+
                 angle, radius = utils.cart2pol(w_rel, h_rel)
-                
+
                 kr = k * radius * datamap_pixelsize
-                
+
                 i1[y, x] = scipy.integrate.quad(fun1, 0, alpha, (kr,))[0]
                 i2[y, x] = scipy.integrate.quad(fun2, 0, alpha, (kr,))[0]
                 i3[y, x] = scipy.integrate.quad(fun3, 0, alpha, (kr,))[0]
                 i4[y, x] = scipy.integrate.quad(fun4, 0, alpha, (kr,))[0]
                 i5[y, x] = scipy.integrate.quad(fun5, 0, alpha, (kr,))[0]
                 phi[y, x] = angle
-        
+
         ax = numpy.sin(self.beta)
         ay = numpy.cos(self.beta) * numpy.exp(1j * self.polarization)
-        
+
         # [Xie2013] eq. 2, where exdx = e_x, eydx = e_y, and ezdx = e_z
         exdx = ax * (i1 * numpy.exp(1j * phi) -\
                      i2 / 2 * numpy.exp(-1j * phi) +\
@@ -331,7 +332,7 @@ class DonutBeam:
         eydx = -ax * 1j / 2 * (i2 * numpy.exp(-1j * phi) +\
                                i3 * numpy.exp(3j * phi))
         ezdx = ax * 1j * (i4 - i5 * numpy.exp(2j * phi))
-        
+
         # [Xie2013] annexe A, where exdy = e'_{2x'}, eydy = e'_{2y'}, and ezdy = e'_{2z'}
         exdy = ay * (i1 * numpy.exp(1j * phi) +\
                      i2 / 2 * numpy.exp(-1j * phi) -\
@@ -339,20 +340,20 @@ class DonutBeam:
         eydy = ay * 1j / 2 * (i2 * numpy.exp(-1j * phi) +\
                               i3 * numpy.exp(3j * phi))
         ezdy = -ay * (i4 + i5 * numpy.exp(2j * phi))
-        
+
         # [Xie2013] eq. 3
         electromagfieldx = exdx - eydy
         electromagfieldy = eydx + exdy
         electromagfieldz = ezdx + ezdy
-        
+
         # [Xie2013] I = E_x E_x* + E_y E_y* + E_z E_z* (p. 1642)
         intensity = electromagfieldx * numpy.conj(electromagfieldx) +\
                     electromagfieldy * numpy.conj(electromagfieldy) +\
                     electromagfieldz * numpy.conj(electromagfieldz)
-        
+
         # keep it real
         intensity = numpy.real_if_close(intensity)
-        
+
         # normalize
         intensity /= numpy.max(intensity)
 
@@ -367,20 +368,20 @@ class DonutBeam:
         intensity_flipped[n_pixels // 2:, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr)
         intensity_flipped[n_pixels // 2:, n_pixels // 2:] = numpy.flip(intensity_tr, 0)
         intensity = intensity_flipped
-        
+
         # for peak intensity
         duty_cycle = self.tau * self.rate
         intensity /= duty_cycle
-        
+
         idx_mid = int((intensity.shape[0]-1) / 2)
         r_out, r_in = utils.fwhm_donut(intensity[idx_mid])
         big_area = numpy.pi * (r_out * datamap_pixelsize) ** 2 / 2
         small_area = numpy.pi * (r_in * datamap_pixelsize) ** 2 / 2
         area_fwhm = big_area - small_area
-        
+
         # [RPPhoto2015]
         intensity *= 2 * transmission * power / area_fwhm
-        
+
         if power > 0:
             # zero_residual ~= min(intensity) / max(intensity)
             old_max = numpy.max(intensity)
@@ -393,10 +394,10 @@ class DonutBeam:
 
 class Detector:
     '''This class implements the photon detector component.
-    
+
     :param parameters: One or more parameters as described in the following
                        table, optional.
-    
+
     +------------------+--------------+----------------------------------------+
     | Parameter        | Default      | Details                                |
     +==================+==============+========================================+
@@ -421,32 +422,32 @@ class Detector:
     |                  |              | is the ratio of collected photons that |
     |                  |              | are perceived by the detector (ratio). |
     +------------------+--------------+----------------------------------------+
-    
+
     .. [#] The actual number is sampled from a poisson distribution with given
        mean.
-    
+
     .. [#] Excelitas Technologies. (2011). Photon Detection Solutions.
     '''
-    
+
     def __init__(self, **kwargs):
         # detection pinhole
         self.n_airy = kwargs.get("n_airy", 0.7)
-        
+
         # detection noise
         self.noise = kwargs.get("noise", False)
         self.background = kwargs.get("background", 0)
         self.darkcount = kwargs.get("darkcount", 0)
-        
+
         # photon detection
         self.pcef = kwargs.get("pcef", 0.1)
         self.pdef = kwargs.get("pdef", 0.5)
-    
+
     def get_detection_psf(self, lambda_, psf, na, transmission, datamap_pixelsize):
         '''Compute the detection PSF as a convolution between the fluorscence
         PSF and a pinhole, as described by the equation from [Willig2006]_. The
         pinhole raidus is determined using the :attr:`n_airy`, the fluorescence
         wavelength, and the numerical aperture of the objective.
-        
+
         :param lambda_: The fluorescence wavelength (m).
         :param psf: The fluorescence PSF that can the obtained using
                     :meth:`~pysted.base.Fluorescence.get_psf`.
@@ -477,11 +478,11 @@ class Detector:
         ra_flipped[returned_array.shape[0] // 2:, returned_array.shape[1] // 2:] = numpy.flip(intensity_tr, 0)
 
         return ra_flipped
-    
+
     def get_signal(self, photons, dwelltime):
         '''Compute the detected signal (in photons) given the number of emitted
         photons and the time spent by the detector.
-        
+
         :param photons: An array of number of emitted photons.
         :param dwelltime: The time spent to detect the emitted photons (s). It is
                           either a scalar or an array shaped like *nb_photons*.
@@ -520,10 +521,10 @@ class Detector:
 class Objective:
     '''
     This class implements the microscope objective component.
-    
+
     :param parameters: One or more parameters as described in the following
                        table, optional.
-    
+
     +------------------+-------------------+-----------------------------------+
     | Parameter        | Default [#]_      | Details                           |
     +==================+===================+===================================+
@@ -539,10 +540,10 @@ class Objective:
     |                  | ``585: 0.85,``    |                                   |
     |                  | ``575: 0.85``     |                                   |
     +------------------+-------------------+-----------------------------------+
-    
+
     .. [#] Leica 100x tube lense
     '''
-    
+
     def __init__(self, **kwargs):
         self.f = kwargs.get("f", 2e-3)
         self.n = kwargs.get("n", 1.5)
@@ -552,18 +553,18 @@ class Objective:
                                                         550: 0.86,
                                                         585: 0.85,
                                                         575: 0.85})
-    
+
     def get_transmission(self, lambda_):
         return self.transmission[int(lambda_ * 1e9)]
 
 
 class Fluorescence:
     '''This class implements a fluorescence molecule.
-    
+
     :param lambda_: The fluorescence wavelength (m).
     :param parameters: One or more parameters as described in the following
                        table, optional.
-    
+
     +------------------+--------------+----------------------------------------+
     | Parameter        | Default [#]_ | Details                                |
     +==================+==============+========================================+
@@ -593,13 +594,13 @@ class Fluorescence:
     +------------------+--------------+----------------------------------------+
     | ``k_isc``        | ``1e6``      | The intersystem crossing rate (s⁻¹).   |
     +------------------+--------------+----------------------------------------+
-    
+
     .. [#] EGFP
     '''
     def __init__(self, lambda_, **kwargs):
         # psf parameters
         self.lambda_ = lambda_
-        
+
         self.sigma_ste = kwargs.get("sigma_ste", {575: 1e-21})
         self.sigma_abs = kwargs.get("sigma_abs", {488: 3e-20})
         self.sigma_tri = kwargs.get("sigma_tri", 1e-21)
@@ -609,37 +610,37 @@ class Fluorescence:
         self.qy = kwargs.get("qy", 0.6)
         self.phy_react = kwargs.get("phy_react", {488: 1e-3, 575: 1e-5})
         self.k_isc = kwargs.get("k_isc", 0.26e6)
-    
+
     def get_sigma_ste(self, lambda_):
         '''Return the stimulated emission cross-section of the fluorescence
         molecule given the wavelength.
-        
+
         :param lambda_: The STED wavelength (m).
         :returns: The stimulated emission cross-section (m²).
         '''
         return self.sigma_ste[int(lambda_ * 1e9)]
-        
+
     def get_sigma_abs(self, lambda_):
         '''Return the absorption cross-section of the fluorescence molecule
         given the wavelength.
-        
+
         :param lambda_: The STED wavelength (m).
         :returns: The absorption cross-section (m²).
         '''
         return self.sigma_abs[int(lambda_ * 1e9)]
-    
+
     def get_phy_react(self, lambda_):
         '''Return the reaction probability of the fluorescence molecule once it
         is in triplet state T_1 given the wavelength.
-        
+
         :param lambda_: The STED wavelength (m).
         :returns: The probability of reaction (ratio).
         '''
         return self.phy_react[int(lambda_ * 1e9)]
-    
+
     def get_psf(self, na, datamap_pixelsize):
         '''Compute the Gaussian-shaped fluorescence PSF.
-        
+
         :param na: The numerical aperture of the objective.
         :param datamap_pixelsize: The size of an element in the intensity matrix (m).
         :returns: A 2D array.
@@ -647,9 +648,9 @@ class Fluorescence:
         diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
         center = int(n_pixels / 2)
-        
+
         fwhm = self.lambda_ / (2 * na)
-        
+
         half_pixelsize = datamap_pixelsize / 2
         gauss = numpy.zeros((n_pixels, n_pixels))
         for y in range(n_pixels):
@@ -664,11 +665,11 @@ class Fluorescence:
                                                     ((h_lb, h_ub), (w_lb, w_ub)),
                                                     (fwhm,))[0]
         return numpy.real_if_close(gauss / numpy.max(gauss))
-    
+
     def get_photons(self, intensity):
         e_photon = scipy.constants.c * scipy.constants.h / self.lambda_
         return intensity // e_photon
-    
+
     def get_k_bleach(self, lambda_, photons):
         sigma_abs = self.get_sigma_abs(lambda_)
         phy_react = self.get_phy_react(lambda_)
@@ -682,7 +683,7 @@ class Microscope:
     '''This class implements a microscopy setup described by an excitation beam,
     a STED (depletion) beam, a detector, some fluorescence molecules, and the
     parameters of the objective.
-    
+
     :param excitation: A :class:`~pysted.base.GaussianBeam` object
                        representing the excitation laser beam.
     :param sted: A :class:`~pysted.base.DonutBeam` object representing the
@@ -694,44 +695,49 @@ class Microscope:
     :param fluo: A :class:`~pysted.base.Fluorescence` object describing the
                  fluorescence molecules to be used.
     '''
-    
+
     def __init__(self, excitation, sted, detector, objective, fluo):
         self.excitation = excitation
         self.sted = sted
         self.detector = detector
         self.objective = objective
         self.fluo = fluo
-                
+
         # caching system
         self.__cache = {}
+        try:
+            # Tries loading the previous cached file
+            self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
+        except FileNotFoundError:
+            pass
 
         # This will be used during the acquisition routine to make a better correspondance
         # between the microscope acquisition time steps and the Ca2+ flash time steps
         self.pixel_bank = 0
         self.time_bank = 0
-    
+
     def __str__(self):
         return str(self.__cache.keys())
-    
+
     def is_cached(self, datamap_pixelsize):
         '''Indicate the presence of a cache entry for the given pixel size.
-        
+
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
         :returns: A boolean.
         '''
 
         datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
         return datamap_pixelsize_nm in self.__cache
-    
-    def cache(self, datamap_pixelsize):
+
+    def cache(self, datamap_pixelsize, save_cache=False):
         '''Compute and cache the excitation and STED intensities, and the
         fluorescence PSF. These intensities are computed with a power of 1 W
         such that they can serve as a basis to compute intensities with any
         power.
-        
+
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
         :returns: A tuple containing:
-        
+
                   * A 2D array of the excitation intensity for a power of 1 W;
                   * A 2D array of the STED intensity for a a power of 1 W;
                   * A 2D array of the detection PSF.
@@ -740,15 +746,15 @@ class Microscope:
         datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
         if datamap_pixelsize_nm not in self.__cache:
             f, n, na = self.objective.f, self.objective.n, self.objective.na
-            
+
             transmission = self.objective.get_transmission(self.excitation.lambda_)
             i_ex = self.excitation.get_intensity(1, f, n, na,
                                                  transmission, datamap_pixelsize)
-            
+
             transmission = self.objective.get_transmission(self.sted.lambda_)
             i_sted = self.sted.get_intensity(1, f, n, na,
                                              transmission, datamap_pixelsize)
-            
+
             transmission = self.objective.get_transmission(self.fluo.lambda_)
             psf = self.fluo.get_psf(na, datamap_pixelsize)
             # should take data_pixelsize instead of pixelsize, right? same for psf above?
@@ -757,11 +763,13 @@ class Microscope:
                                                       datamap_pixelsize)
             self.__cache[datamap_pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
 
+        if save_cache:
+            pickle.dump(self.__cache, open(".microscope_cache.pkl", "wb"))
         return self.__cache[datamap_pixelsize_nm]
-    
+
     def clear_cache(self):
         '''Empty the cache.
-        
+
         .. important::
            It is important to empty the cache if any of the components
            :attr:`excitation`, :attr:`sted`, :attr:`detector`,
@@ -769,31 +777,31 @@ class Microscope:
            or replaced.
         '''
         self.__cache = {}
-    
+
     def get_effective(self, datamap_pixelsize, p_ex, p_sted):
         '''Compute the detected signal given some molecules disposition.
-        
+
         :param datamap_pixelsize: The size of one pixel of the simulated image (m).
         :param p_ex: The power of the depletion beam (W).
         :param p_sted: The power of the STED beam (W).
         :param data_pixelsize: The size of one pixel of the raw data (m).
         :returns: A 2D array of the effective intensity (W) of a single molecule.
-        
+
         The technique follows the method and equations described in
         [Willig2006]_, [Leutenegger2010]_ and [Holler2011]_.
         '''
 
         h, c = scipy.constants.h, scipy.constants.c
         f, n, na = self.objective.f, self.objective.n, self.objective.na
-        
+
         __i_ex, __i_sted, psf_det = self.cache(datamap_pixelsize)
         i_ex = __i_ex * p_ex
         i_sted = __i_sted * p_sted
-        
+
         # saturation intensity (W/m²) [Leutenegger2010] p. 26419
         sigma_ste = self.fluo.get_sigma_ste(self.sted.lambda_)
         i_s = (h * c) / (self.fluo.tau * self.sted.lambda_ * sigma_ste)
-        
+
         # [Leutenegger2010] eq. 3
         zeta = i_sted / i_s
         k_vib = 1 / self.fluo.tau_vib
@@ -803,7 +811,7 @@ class Microscope:
         # probability of fluorescence given the donut
         eta = (((1 + gamma * numpy.exp(-k_s1 * self.sted.tau * (1 + gamma))) / (1 + gamma)) -
               numpy.exp(-k_s1 * (gamma * self.sted.tau + T))) / (1 - numpy.exp(-k_s1 * T))
-        
+
         # molecular brigthness [Holler2011]
         sigma_abs = self.fluo.get_sigma_abs(self.excitation.lambda_)
         excitation_probability = sigma_abs * i_ex * self.fluo.qy
