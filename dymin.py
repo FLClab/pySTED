@@ -6,8 +6,18 @@ import random
 from pysted import base, utils, raster, bleach_funcs
 
 class DyMINMicroscope(base.Microscope):
-    def __init__(self, *args, **kwargs):
-        super(DyMINMicroscope, self).__init__(*args, **kwargs)
+    def __init__(self, excitation, sted, detector, objective, fluo, opts=None):
+        super(DyMINMicroscope, self).__init__(excitation, sted, detector, objective, fluo)
+
+        if isinstance(opts, type(None)):
+            opts = {
+                "scale_power" : [0., 0.25, 1.],
+                "decision_time" : [10e-6, 10e-6, None],
+                "threshold_count" : [10, 5, 0]
+            }
+        required_keys = ["scale_power", "decision_time", "threshold_count"]
+        assert all(k in opts for k in required_keys), "Missing keys in opts. {}".format(required_keys)
+        self.opts = opts
 
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                                   pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
@@ -47,8 +57,10 @@ class DyMINMicroscope(base.Microscope):
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
 
-            for scale_power, decision_time in zip([0., 0.25, 1.], [10e-6, 10e-6, pdt[row, col]]):
-
+            for scale_power, decision_time, threshold_count in zip(self.opts["scale_power"], self.opts["decision_time"], self.opts["threshold_count"]):
+                if isinstance(decision_time, type(None)):
+                    decision_time = pdt[row, col]
+                
                 effective = self.get_effective(datamap_pixelsize, p_ex[row, col], scale_power * p_sted[row, col])
                 h, w = effective.shape
                 pixel_intensity = numpy.sum(effective * datamap.whole_datamap[row_slice, col_slice])
@@ -61,7 +73,7 @@ class DyMINMicroscope(base.Microscope):
 
                 # If no signal is acquired then skip pixel
                 scaled_power[row, col] = scale_power
-                if pixel_photons < 1:
+                if pixel_photons < threshold_count:
                     break
 
                 # Update the photon counts only on the last pixel power scale

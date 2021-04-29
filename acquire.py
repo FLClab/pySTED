@@ -4,10 +4,13 @@ import time
 import random
 
 from pysted import base, utils, raster, bleach_funcs
+from dymin import DyMINMicroscope
 from matplotlib import pyplot
 
 numpy.random.seed(42)
 random.seed(42)
+
+START = time.time()
 
 # molecules_disposition = (numpy.random.rand(40, 40) > 0.9).astype(int) * 10
 delta = 2
@@ -33,7 +36,7 @@ egfp = {"lambda_": 535e-9,
                       575: 1e-11},   # 1e-8
         "k_isc": 0.26e6}
 pixelsize = 10e-9
-bleach = False
+bleach = True
 p_ex = 1e-6
 p_ex_array = numpy.ones(molecules_disposition.shape) * p_ex
 p_sted = 30e-3
@@ -54,7 +57,6 @@ start = time.time()
 i_ex, _, _ = microscope.cache(datamap.pixelsize, save_cache=True)
 datamap.set_roi(i_ex, roi)
 
-print(f'starting acq with phy_react = {egfp["phy_react"]}')
 time_start = time.time()
 acquisition, bleached, scaled_power = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
                                                                     bleach=bleach, update=False)
@@ -74,5 +76,7 @@ axes[2].set_title(f"Acquired signal (photons)")
 
 axes[3].imshow(scaled_power)
 axes[3].set_title(f"Scaled power")
+
+print("Total run time : {}".format(time.time() - START))
 
 pyplot.show()
