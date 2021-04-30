@@ -31,7 +31,6 @@ class DyMINMicroscope(base.Microscope):
         datamap_pixelsize = datamap.pixelsize
         i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
         if datamap.roi is None:
-            # demander au dude de setter une roi
             datamap.set_roi(i_ex)
 
         datamap_roi = datamap.whole_datamap[datamap.roi]
@@ -60,10 +59,16 @@ class DyMINMicroscope(base.Microscope):
             for scale_power, decision_time, threshold_count in zip(self.opts["scale_power"], self.opts["decision_time"], self.opts["threshold_count"]):
                 if isinstance(decision_time, type(None)):
                     decision_time = pdt[row, col]
-                
+
                 effective = self.get_effective(datamap_pixelsize, p_ex[row, col], scale_power * p_sted[row, col])
                 h, w = effective.shape
-                pixel_intensity = numpy.sum(effective * datamap.whole_datamap[row_slice, col_slice])
+
+                # Uses the bleached datamap
+                bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=numpy.int32)
+                for key in bleached_sub_datamaps_dict:
+                    bleached_datamap += bleached_sub_datamaps_dict[key]
+
+                pixel_intensity = numpy.sum(effective * bleached_datamap[row_slice, col_slice])
                 pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time)
 
                 if bleach:
@@ -71,7 +76,7 @@ class DyMINMicroscope(base.Microscope):
                                 decision_time, bleached_sub_datamaps_dict,
                                 row, col, h, w, prob_ex, prob_sted)
 
-                # If no signal is acquired then skip pixel
+                # If signal is less than threshold count then skip pixel
                 scaled_power[row, col] = scale_power
                 if pixel_photons < threshold_count:
                     break
