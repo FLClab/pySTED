@@ -19,7 +19,7 @@ def str2bool(v):
 
 parser = argparse.ArgumentParser(description="Video making script")
 parser.add_argument("--pdt", type=float, default=1e-6, help="Pixel dwell time used for the experiment (in s)")
-parser.add_argument("--files_path", type=str, default="", help="Path to the saved npy and ffconcant files")
+parser.add_argument("--save_path", type=str, default="", help="Path to the saved npy and ffconcant files")
 parser.add_argument("--delete_after", type=str2bool, default=True, help="Wether or not the figures are deleted after")
 args = parser.parse_args()
 
@@ -27,7 +27,7 @@ args = parser.parse_args()
 delete_figures_after = args.delete_after
 # These lines are the only ones that should be changed when we want to make new videos
 # files_path = r"D:\SCHOOL\Maitrise\H2021\Recherche\data_generation\split\test_1"
-files_path = args.files_path
+files_path = args.save_path
 pdt = args.pdt   # is there a way to get this value directly from the exp script?
 
 # for ffmpeg, I think I don't have a choice but to save the figures on my computer
