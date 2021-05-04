@@ -11,7 +11,7 @@ from pysted import base, utils, temporal
 event_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1_events.txt"
 video_file_path = "D:/SCHOOL/Maitrise/H2021/Recherche/Data/Ca2+/stream1.tif"
 
-sampled_curve = utils.flash_generator(event_file_path, video_file_path)
+sampled_curve = utils.flash_generator_old(event_file_path, video_file_path)
 
 # Generate a datamap
 ensemble_func, synapses_list = utils.generate_synaptic_fibers((256, 256), (100, 255), (3, 10), (2, 5))

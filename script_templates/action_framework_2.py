@@ -168,7 +168,7 @@ for pixel_idx in tqdm.trange(n_time_steps):
                 # can start the flash
                 synpase_flashing_dict[idx_syn] = True
                 synapse_flash_idx_dict[idx_syn] = 1
-                sampled_curve = utils.flash_generator(event_file_path, video_file_path)
+                sampled_curve = utils.flash_generator_old(event_file_path, video_file_path)
                 synapse_flash_curve_dict[idx_syn] = utils.rescale_data(sampled_curve, to_int=True, divider=3)
 
             if synpase_flashing_dict[idx_syn]:

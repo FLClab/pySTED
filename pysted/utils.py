@@ -869,24 +869,18 @@ def sample_light_curve(light_curves):
     return smoothed_sampled
 
 
-def flash_generator(events_path, video_path):
+def flash_generator(events_curves_path):
     """
-    This function uses information from some identified flash events in a video in order to generate a random
-    flash event
-    :param events_path: path to the txt file containing the dict of flash event ROIs
-    :param video_path: path to the video file from which we extract flash event information
+    xd
+    :param events_curves_path:
     :return:
     """
-    events = event_reader(events_path)
+    events_curves = numpy.load(events_curves_path)
 
-    curves = []
-    for event in events:
-        light_curve = get_light_curve(video_path, event)
-        curves.append(light_curve)
-
-    sampled_light_curve = sample_light_curve(curves)
+    sampled_light_curve = sample_light_curve(events_curves)
 
     return sampled_light_curve
+
 
 
 def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses, min_dist, polygon_scale=(5, 10)):
