@@ -32,8 +32,9 @@ if not os.path.exists(save_path):
 
 print("Setting up the datamap and its flashes ...")
 # Get light curves stuff to generate the flashes later
-event_file_path = "flash_files/stream1_events.txt"
-video_file_path = "flash_files/stream1.tif"
+# event_file_path = "flash_files/stream1_events.txt"
+# video_file_path = "flash_files/stream1.tif"
+curves_path = "flash_files/events_curves.npy"
 
 # Generate a datamap
 frame_shape = (64, 64)
@@ -93,7 +94,7 @@ microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
 i_ex, _, _ = microscope.cache(temporal_datamap.pixelsize)
 temporal_datamap = base.TemporalDatamap(poils_frame, dpxsz, flat_synapses_list)
 temporal_datamap.set_roi(i_ex, roi)
-temporal_datamap.create_t_stack_dmap(acquisition_time, min_pdt, (10, 1.5), event_file_path, video_file_path, flash_prob)
+temporal_datamap.create_t_stack_dmap(acquisition_time, min_pdt, (10, 1.5), curves_path, flash_prob)
 
 # set up variables for acquisition loop
 t_stack_idx = 0

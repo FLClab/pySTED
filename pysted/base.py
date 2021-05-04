@@ -1200,7 +1200,7 @@ class TemporalDatamap(Datamap):
         # self.sub_datamaps_dict = {}
         self.sub_datamaps_idx_dict = {}
 
-    def create_t_stack_dmap(self, acq_time, pixel_dwelltime, fwhm_step_sec_correspondance, event_path, video_path,
+    def create_t_stack_dmap(self, acq_time, pixel_dwelltime, fwhm_step_sec_correspondance, curves_path,
                             probability):
         """
         Generates the flashes for the TemporalDatamap. Updates the dictionnaries to confirm that flash subdatamaps exist
@@ -1229,8 +1229,7 @@ class TemporalDatamap(Datamap):
         for i in range(n_flash_updates):
             synapse_flashing_dict, synapse_flash_idx_dict, \
             synapse_flash_curve_dict, temp_dmap = utils.flash_routine(self.synapses, probability, synapse_flashing_dict,
-                                                                      synapse_flash_idx_dict, {"event": event_path,
-                                                                                               "video": video_path},
+                                                                      synapse_flash_idx_dict, curves_path,
                                                                       synapse_flash_curve_dict,
                                                                       isolated_synapses_frames,
                                                                       copy.deepcopy(self))   # si je copie pas ça chie

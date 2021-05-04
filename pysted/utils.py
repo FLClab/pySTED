@@ -1195,7 +1195,7 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
         return n_time_steps, x_pixels_for_flash_ts
 
 
-def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_idx_dict, paths,
+def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_idx_dict, curves_path,
                   synapse_flash_curve_dict, isolated_synapses_frames, datamap):
     """
     This function makes 1 step in a flash routine. It loops through all the synapses in a frame to determine whether
@@ -1216,7 +1216,7 @@ def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_id
             # can start the flash
             synapse_flashing_dict[idx_syn] = True
             synapse_flash_idx_dict[idx_syn] = 1
-            sampled_curve = flash_generator(paths["event"], paths["video"])
+            sampled_curve = flash_generator(curves_path)
             synapse_flash_curve_dict[idx_syn] = rescale_data(sampled_curve, to_int=True, divider=3)
 
         if synapse_flashing_dict[idx_syn]:
