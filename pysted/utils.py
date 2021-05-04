@@ -13,10 +13,13 @@ import scipy, scipy.constants, scipy.integrate
 import math
 import random
 import warnings
+import tifffile
 
 # import mis par BT pour des tests :)
 from matplotlib import pyplot
 import time
+from pysted import temporal, raster
+from scipy.spatial.distance import cdist
 
 
 def approx_binomial(n, p, size=None):
@@ -298,7 +301,7 @@ def pixel_sampling(datamap, mode="all"):
         # TODO: ajouter checker_size comme param au lieu de hard codé ici
         # TODO: regarder s'il y a une manière plus efficace de faire ça
         checkers = numpy.zeros((datamap.shape[0], datamap.shape[1]))
-        cell_size = 100
+        cell_size = 8
 
         even_row = True
         cell_white = False
@@ -433,13 +436,14 @@ def mse_calculator(array1, array2):
     return mean_squared_error
 
 
-def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize):
+def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize, output_empty=False):
     """
     Function to pre-filter a pixel list. Depending on the ratio between the data_pixelsize and acquisition pixelsize,
     a certain number of pixels must be skipped between laser applications.
     :param pixel_list: The list of pixels passed to the acquisition function, which needs to be filtered
     :param img_pixelsize: The acquisition pixelsize (m)
     :param data_pixelsize: The data pixelsize (m)
+    :param output_empty: Bool to allow (or not) this function to return an empty pixel list
     :returns: A filtered version of the input pixel_list, from which the pixels which can't be iterated over due to the
               pixel sizes have been removed
     """
@@ -458,15 +462,18 @@ def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize):
             valid_pixels_grid_matrix[row, col] = 1
             nb_valid_pixels += 1
         pixel_list_matrix = numpy.zeros(datamap.shape)
-        order = 1
-        for (row, col) in pixel_list:
-            pixel_list_matrix[row, col] = order
-            order += 1
+        for idx, (row, col) in enumerate(pixel_list):
+            pixel_list_matrix[row, col] += idx + 1
+            if row == datamap.shape[0] - 1 and col == datamap.shape[1] - 1:
+                break
         final_valid_pixels_matrix = pixel_list_matrix * valid_pixels_grid_matrix
         if numpy.array_equal(final_valid_pixels_matrix, numpy.zeros(datamap.shape)):
-            warnings.warn(" \nNo pixels in the list passed is valid given the ratio between pixel sizes, \n"
-                          "Iterating on valid pixels in a raster scan instead.")
-            pixel_list = valid_pixels_grid  # itérer sur les pixels valides seulement
+            if output_empty:
+                return pixel_list
+            else:
+                warnings.warn(" \nNo pixels in the list passed is valid given the ratio between pixel sizes, \n"
+                              "Iterating on valid pixels in a raster scan instead.")
+                pixel_list = valid_pixels_grid  # itérer sur les pixels valides seulement
         else:
             pixel_list_interim = numpy.argsort(final_valid_pixels_matrix, axis=None)
             pixel_list_interim = numpy.unravel_index(pixel_list_interim, datamap.shape)
@@ -588,6 +595,7 @@ def datamap_generator(shape, sources, molecules, random_state=None):
     :param sources: Number of molecule sources to be randomly placed on the datamap.
     :param molecules: Average number of molecules contained on each source. The actual number of molecules will be
                       determined by poisson sampling.
+    :param random_state: Sets the seed of the random number generator.
     :returns: A datamap containing the randomly placed molecules
     """
     numpy.random.seed(random_state)
@@ -655,3 +663,738 @@ def float_to_array_verifier(float_or_array, shape):
     else:
         raise TypeError("Has to be either a float or an array of same shape as the ROI")
     return returned_array
+
+
+def dict_write_func(file, dictio):
+    """
+    Write a dict to a text file in a good way :)
+    :param file: path of the file to write to
+    :param dictio: the dictionnary we wish to write to a txt file
+    """
+    f = open(file, 'a')
+    f.write(str(dictio))
+    f.write("\n")
+    f.close()
+
+
+def event_reader(file):
+    """
+    Read events from a file containing event dictionaries and return the dicts to a listé
+    :param file: Path to the txt file containing the dict for the events
+    :return: A list containing the dicts of every identified event in a video
+    """
+    events_list = []
+    f = open(file, 'r')
+    lines = f.readlines()
+    for line_idx, line in enumerate(lines):
+        events_list.append(eval(line.strip()))
+    return events_list
+
+
+def add_event(file, start_frame, end_frame, start_row, end_row, start_col, end_col):
+    """
+    Function that allows a user to easily store an event in a file, which can later be read with the event_reader func.
+    :param file: File to write the dict to. The goal is to use 1 text file to which we will write all the vents for
+                 1 video.
+    :param start_frame: Frame number for the start of the event
+    :param start_row: Frame number for the end of the event
+    :param start_col: Starting column for the left of the event
+    :param end_frame: Ending column for the right of the event
+    :param end_row: Starting row for the top of the event
+    :param end_col: Ending row for the bottom of the event
+    """
+    event = {"start frame": start_frame,
+             "end frame": end_frame,
+             "start col": start_col,
+             "end col": end_col,
+             "start row": start_row,
+             "end row": end_row}
+    dict_write_func(file, event)
+
+
+def get_light_curve(video_path, event):
+    """
+    Use a tif video of Ca2+ flashes along with a ROI (spatial and temporal) to convert the data to an intensity/photon
+    count curve.
+    :param video_path: The path to the video file from which we want to extract an event light curve (str)
+    :param event: A dictionary containing the start and end info for frames, rows, columns of an event (dict)
+    :return: A vector representing the mean intensity accros the frames of the event
+    """
+    data_vid = tifffile.imread(video_path)
+    event_data = data_vid[event["start frame"]: event["end frame"],
+                          event["start row"]: event["end row"],
+                          event["start col"]: event["end col"]]
+    mean_photons = numpy.mean(event_data, axis=(1, 2))
+
+    return mean_photons
+
+
+def rescale_data(data, to_int=True, divider=1):
+    """
+    Function to rescale the data (made for light curves, might be of use elsewhere) between 1 and max-min
+    :param data: data to rescale.
+    :param to_int: Determines whether the data is truncated to ints after being normalized. Useful for using the
+                   fast acquisition function.
+    :return: The data rescaled between 1 and max(data) - min(data)
+    """
+    b, a = numpy.max(data) - numpy.min(data), 1
+    normalized = ((b - a)/divider) * ((data - numpy.min(data)) / (numpy.max(data) - numpy.min(data))) + a
+    if to_int:
+        normalized = normalized.astype(int)
+    return normalized
+
+
+def shift_data(data, peak_idx=5):
+    """
+    Function to shift the data (made for light curves, might be of use elsewhere) so the peak is on idx 5
+    :param data: data to shift
+    :param peak_idx: idx at which we want the peak to be
+    :return: The shifted data
+    """
+    peak_arg = numpy.argmax(data)
+    if peak_arg >= peak_idx:
+        shifted_curve = data[peak_arg - peak_idx:]
+        while len(shifted_curve) != 40:
+            shifted_curve = numpy.append(shifted_curve, shifted_curve[-1])
+    else:
+        shifted_curve = numpy.zeros(data.shape)
+        shifted_curve[:peak_idx - peak_arg] = data[0]
+        shifted_curve[peak_idx - peak_arg: peak_idx] = data[:peak_arg]
+        shifted_curve[peak_idx:] = data[peak_arg: - (peak_idx - peak_arg)]
+    return shifted_curve
+
+
+def get_avg_lightcurve(light_curves):
+    """
+    This function takes as input a list of light curves and processes them so they are rescaled and shifted to align
+    their peaks. It then return the avg light curve as well as its standard deviation, so we can sample a light curve
+    for event simulation.
+    :param light_curves: list of light curves of Ca2+ flash events
+    :return: the avg light curve and std of the light curve
+    """
+    shifted_curves = []
+    for curve in light_curves:
+        rescaled_curve = rescale_data(curve, to_int=False, divider=1)
+        shifted_curve = shift_data(rescaled_curve, peak_idx=5)
+        shifted_curves.append(shifted_curve)
+
+    avg_shifted_curves = numpy.mean(shifted_curves, axis=0)
+    std_shifted_curves = numpy.std(shifted_curves, axis=0)
+    return avg_shifted_curves, std_shifted_curves
+
+
+def savitzky_golay(y, window_size, order, deriv=0, rate=1):
+    r"""Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
+    The Savitzky-Golay filter removes high frequency noise from data.
+    It has the advantage of preserving the original shape and
+    features of the signal better than other types of filtering
+    approaches, such as moving averages techniques.
+    Parameters
+    ----------
+    y : array_like, shape (N,)
+        the values of the time history of the signal.
+    window_size : int
+        the length of the window. Must be an odd integer number.
+    order : int
+        the order of the polynomial used in the filtering.
+        Must be less then `window_size` - 1.
+    deriv: int
+        the order of the derivative to compute (default = 0 means only smoothing)
+    Returns
+    -------
+    ys : ndarray, shape (N)
+        the smoothed signal (or it's n-th derivative).
+    Notes
+    -----
+    The Savitzky-Golay is a type of low-pass filter, particularly
+    suited for smoothing noisy data. The main idea behind this
+    approach is to make for each point a least-square fit with a
+    polynomial of high order over a odd-sized window centered at
+    the point.
+    Examples
+    --------
+    t = np.linspace(-4, 4, 500)
+    y = np.exp( -t**2 ) + np.random.normal(0, 0.05, t.shape)
+    ysg = savitzky_golay(y, window_size=31, order=4)
+    import matplotlib.pyplot as plt
+    plt.plot(t, y, label='Noisy signal')
+    plt.plot(t, np.exp(-t**2), 'k', lw=1.5, label='Original signal')
+    plt.plot(t, ysg, 'r', label='Filtered signal')
+    plt.legend()
+    plt.show()
+    References
+    ----------
+    .. [1] A. Savitzky, M. J. E. Golay, Smoothing and Differentiation of
+       Data by Simplified Least Squares Procedures. Analytical
+       Chemistry, 1964, 36 (8), pp 1627-1639.
+    .. [2] Numerical Recipes 3rd Edition: The Art of Scientific Computing
+       W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
+       Cambridge University Press ISBN-13: 9780521880688
+    ----------
+    ça parait tu que j'ai copy pasta cette fonction de stack overflow ou non
+    """
+
+    # try:
+    #     window_size = numpy.abs(numpy.int(window_size))
+    #     order = numpy.abs(numpy.int(order))
+    # except ValueError, msg:
+    #     raise ValueError("window_size and order have to be of type int")
+    if window_size % 2 != 1 or window_size < 1:
+        raise TypeError("window_size size must be a positive odd number")
+    if window_size < order + 2:
+        raise TypeError("window_size is too small for the polynomials order")
+    order_range = range(order+1)
+    half_window = (window_size -1) // 2
+    # precompute coefficients
+    b = numpy.mat([[k**i for i in order_range] for k in range(-half_window, half_window+1)])
+    m = numpy.linalg.pinv(b).A[deriv] * rate**deriv * math.factorial(deriv)
+    # pad the signal at the extremes with
+    # values taken from the signal itself
+    firstvals = y[0] - numpy.abs( y[1:half_window+1][::-1] - y[0] )
+    lastvals = y[-1] + numpy.abs(y[-half_window-1:-1][::-1] - y[-1])
+    y = numpy.concatenate((firstvals, y, lastvals))
+    return numpy.convolve( m[::-1], y, mode='valid')
+
+
+def sample_light_curve(light_curves):
+    """
+    This function allows to sample from a distribution of light curves and handles the smoothing and correcting values.
+    :param light_curves: list containing the light curves we wish to do stats and sample from
+    :return: A smoothed curve sampled from the distribution
+    """
+    avg_curve, std_curve = get_avg_lightcurve(light_curves)
+    sampled_curve = numpy.random.normal(avg_curve, std_curve)
+    sampled_curve = numpy.where(sampled_curve >= 1, sampled_curve, 1)
+    smoothed_sampled = savitzky_golay(sampled_curve, 5, 2)   # These params give nice curves :)
+    return smoothed_sampled
+
+
+def flash_generator(events_path, video_path):
+    """
+    This function uses information from some identified flash events in a video in order to generate a random
+    flash event
+    :param events_path: path to the txt file containing the dict of flash event ROIs
+    :param video_path: path to the video file from which we extract flash event information
+    :return:
+    """
+    events = event_reader(events_path)
+
+    curves = []
+    for event in events:
+        light_curve = get_light_curve(video_path, event)
+        curves.append(light_curve)
+
+    sampled_light_curve = sample_light_curve(curves)
+
+    return sampled_light_curve
+
+
+def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses, min_dist, polygon_scale=(5, 10)):
+    """
+    This func allows a user to generate a fiber object and synapses attached to it.
+    :param datamap_shape: shape of the image to which we will add the fiber and synapses
+    :param fibre_min: min position for the fibre to start at
+    :param fibre_max: max position for the fibre to start at
+    :param n_synapses: number of synapses to put on the fiber
+    :param min_dist: min distance we want to have between the synapses. this is to make sure we don't have overlapping
+                     synapses
+    :param polygon_scale: values from which the polygon size will be sampled
+    :return: the fiber object and the polygon objects representing the synapses
+    """
+    min_array, max_array = numpy.asarray((fibre_min, fibre_min)), numpy.asarray((fibre_max, fibre_max))
+    # jpense jpeux controller l'angle aussi
+    fibre = temporal.Fiber(random_params={"num_points": (fibre_min, fibre_max),
+                                                    "pos": [numpy.zeros((1, 2)) + min_array,
+                                                            datamap_shape - max_array],
+                                                    "scale": (1, 5)})
+    n_added = 0
+    synapse_positions = numpy.empty((0, 2))
+    while n_added != n_synapses:
+        sampled_node = numpy.asarray(random.sample(list(fibre.nodes_position), 1)[0].astype(int))
+        if numpy.less_equal(sampled_node, 0).any() or \
+                numpy.greater_equal(sampled_node, datamap_shape - numpy.ones((1, 1))).any():
+            continue
+        if n_added == 0:
+            synapse_positions = numpy.append(synapse_positions, sampled_node)
+            synapse_positions = numpy.expand_dims(synapse_positions, 0).astype(int)
+            n_added += 1
+            continue
+        # comparer la distance du point samplé à tous les points dans la liste
+        # vérifier qu'elle est plus grande que min_distance pour tous les points déjà présents,
+        # si c'est le cas, l'ajouter à la liste, sinon continuer le while :)
+        else:
+            sample_to_verify = numpy.expand_dims(numpy.copy(sampled_node), axis=0).astype(int)
+            synapse_positions = numpy.append(synapse_positions, sample_to_verify, axis=0).astype(int)
+            distances = cdist(synapse_positions, synapse_positions)
+            distances[n_added, n_added] = min_dist + 1
+            if numpy.less_equal(distances[n_added, :], min_dist).any():
+                # at least 1 elt is closer than 10 pixels to an already present elt so remove it :)
+                synapse_positions = numpy.delete(synapse_positions, n_added, axis=0)
+            else:
+                # good to add to the list
+                n_added += 1
+
+    polygon_list = []
+    for node in synapse_positions:
+        polygon = temporal.Polygon(random_params={"pos": [node, node],
+                                                  "scale": polygon_scale})
+        polygon_list.append(polygon)
+
+    return fibre, polygon_list
+
+
+def generate_secondary_fibers(datamap_shape, main_fiber, n_sec, min_dist=10, sec_len=(2, 6), seed=None):
+    """
+    This function allows to spawn secondary fibers branching from a main fiber
+    :param datamap_shape: The shape of the datamap in which the main fiber resides
+    :param main_fiber: The main fiber object to which we will add secondary fiber branches
+    :param n_sec: The interval for the number of secondary branches we wish to spawn (tuple)
+    :param min_dist: The min distance between spawned secondary fiber, to ensure they are not all clumped
+    :param sec_len: The interval for the length of the secondary fibers (tuple)
+    :param seed: Random number generator seed
+    :return: a list containing the secondary fiber objects
+    """
+    n_added = 0
+    sec_fiber_positions = numpy.empty((0, 2))
+    angle_at_position = []
+    n_secondary = int(random.uniform(*n_sec))
+    n_loops = 0
+    while n_added != n_secondary:
+        n_loops += 1
+        if n_loops >= 100 * n_secondary:
+            break
+        # sampled_node = numpy.asarray(random.sample(list(main_fiber.nodes_position), 1)[0].astype(int))
+        sample_idx = numpy.random.randint(len(main_fiber.nodes_position))
+        sampled_node = main_fiber.nodes_position[sample_idx, :].astype(int)
+        if numpy.less_equal(sampled_node, 0).any() or \
+                numpy.greater_equal(sampled_node, datamap_shape - numpy.ones((1, 1))).any():
+            continue
+        if n_added == 0:
+            sec_fiber_positions = numpy.append(sec_fiber_positions, sampled_node)
+            sec_fiber_positions = numpy.expand_dims(sec_fiber_positions, 0).astype(int)
+            angle_at_position.append(main_fiber.angles[sample_idx])
+            n_added += 1
+            continue
+        else:
+            sample_to_verify = numpy.expand_dims(numpy.copy(sampled_node), axis=0).astype(int)
+            sec_fiber_positions = numpy.append(sec_fiber_positions, sample_to_verify, axis=0).astype(int)
+            distances = cdist(sec_fiber_positions, sec_fiber_positions)
+            distances[n_added, n_added] = min_dist + 1
+            if numpy.less_equal(distances[n_added, :], min_dist).any():
+                # at least 1 elt is closer than 10 pixels to an already present elt so remove it :)
+                sec_fiber_positions = numpy.delete(sec_fiber_positions, n_added, axis=0)
+            else:
+                # good to add to the list
+                angle_at_position.append(main_fiber.angles[sample_idx])
+                n_added += 1
+
+    sec_fibers_list = []
+    for node in sec_fiber_positions:
+        sec_fiber = temporal.Fiber(random_params={"num_points": sec_len,
+                                                  "pos": [node, node],
+                                                  "scale": (1, 3),
+                                                  "angle": (- 0.25, 0.25)}, seed=seed)
+        sec_fibers_list.append(sec_fiber)
+
+    return sec_fibers_list
+
+
+def generate_synapses_on_fiber(datamap_shape, main_fiber, n_syn, min_dist, synapse_scale=(5, 10)):
+    """
+    Generates polygon objects (representing synapses) on the main fiber
+    *** add a seed? ***
+    :param datamap_shape: The shape of the datamap on which the main_fiber lies
+    :param main_fiber: Fiber object representing the main branch
+    :param n_syn: The interval from which we will sample the number of synapses to spawn (tuple)
+    :param min_dist: The minimal distance between 2 synapses, to prevent clumping
+    :param synapse_scale: The interval form which we will sample each synapses' size
+    :return: A list containing all the synapses on the main fiber
+    """
+    n_added = 0
+    synapse_positions = numpy.empty((0, 2))
+    n_synapses = int(random.uniform(*n_syn))
+    n_loops = 0
+    while n_added != n_synapses:
+        n_loops += 1
+        if n_loops >= 100 * n_synapses:
+            break
+        sampled_node = numpy.asarray(random.sample(list(main_fiber.nodes_position), 1)[0].astype(int))
+        if numpy.less_equal(sampled_node, 0).any() or \
+                numpy.greater_equal(sampled_node, datamap_shape - numpy.ones((1, 1))).any():
+            continue
+        if n_added == 0:
+            synapse_positions = numpy.append(synapse_positions, sampled_node)
+            synapse_positions = numpy.expand_dims(synapse_positions, 0).astype(int)
+            n_added += 1
+            continue
+        # comparer la distance du point samplé à tous les points dans la liste
+        # vérifier qu'elle est plus grande que min_distance pour tous les points déjà présents,
+        # si c'est le cas, l'ajouter à la liste, sinon continuer le while :)
+        else:
+            sample_to_verify = numpy.expand_dims(numpy.copy(sampled_node), axis=0).astype(int)
+            synapse_positions = numpy.append(synapse_positions, sample_to_verify, axis=0).astype(int)
+            distances = cdist(synapse_positions, synapse_positions)
+            distances[n_added, n_added] = min_dist + 1
+            if numpy.less_equal(distances[n_added, :], min_dist).any():
+                # at least 1 elt is closer than 10 pixels to an already present elt so remove it :)
+                synapse_positions = numpy.delete(synapse_positions, n_added, axis=0)
+            else:
+                # good to add to the list
+                n_added += 1
+
+    synapse_list = []
+    for node in synapse_positions:
+        polygon = temporal.Polygon(random_params={"pos": [node, node],
+                                                  "scale": synapse_scale})
+        synapse_list.append(polygon)
+
+    return synapse_list
+
+
+def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, min_fiber_dist=3, min_synapse_dist=1,
+                             sec_fiber_len=(10, 20), synapse_scale=(5, 5), seed=None):
+    """
+    This function wraps up the generation of fibers with secondary branches and synapses in a neat little package :)
+    - Add variable number of synapses, distances, ?
+    - Add "position identifiers" to the synapses so I can easily make them flash after
+    - ??
+    :param image_shape: The shape of the ROI in which we want to spawn stuff
+    :param main_nodes: ???
+    :param n_sec_fibers: The interval for the number of secondary fibers branching from the main fiber (tuple)
+    :param n_synapses: The interval for the number of synapses (tuple)
+    :param min_fiber_dist: The minimum distance separating the secondary fibers
+    :param min_synapse_dist: The minimum distance separating the synapses
+    :param sec_fiber_len: The interval for the lengths of the secondary fibers
+    :param synapse_scale: The interval for the size of the synapses
+    :param seed: Random number generator seed
+    :return: An array containing the disposition of molecules corresponding to the generated shape and a list
+             containing all the synapses (Polygon objects)
+    """
+    # generate an empty image
+    image = numpy.zeros(image_shape)
+
+    # generate the main fiber
+    min_nodes, max_nodes = main_nodes[0], main_nodes[1]
+    min_array, max_array = numpy.asarray((min_nodes, min_nodes)), numpy.asarray((max_nodes, max_nodes))
+    fibre_rand = temporal.Fiber(random_params={"num_points": (min_nodes, max_nodes),
+                                               "pos": [numpy.zeros((1, 2)) + min_array,
+                                                       image.shape - max_array],
+                                               "scale": (1, 5)}, seed=seed)
+
+    # generate secondary fibers
+    # ces params là devraient être ajustables
+    sec_fibers = generate_secondary_fibers(image_shape, fibre_rand, n_sec_fibers, min_fiber_dist,
+                                           sec_len=sec_fiber_len, seed=seed)
+
+    # generate synapses attached to the secondary fibers
+    synapses_lists = []
+    for secondary_fiber in sec_fibers:
+        ith_fiber_synapses = generate_synapses_on_fiber(image_shape, secondary_fiber, n_synapses, min_synapse_dist,
+                                                        synapse_scale=synapse_scale)
+        synapses_lists.append(ith_fiber_synapses)
+
+    roi = ((0, 0), image_shape)  # jtrouve que la façon de gérer la shape de l'ensemble est weird
+    ensemble_test = temporal.Ensemble(roi=roi)
+    ensemble_test.append(fibre_rand)
+    for idx, sec_fiber in enumerate(sec_fibers):
+        ensemble_test.append(sec_fiber)
+        for synapse in synapses_lists[idx]:
+            ensemble_test.append(synapse)
+
+    # frame = ensemble_test.return_frame()
+
+    return ensemble_test, synapses_lists
+
+
+def generate_synapse_flash_dicts(synapses_list, roi_shape):
+    """
+    This function is used to generate the dictionnaries needed to keep track of which synapses are flashing and where
+    they are situatied in the flash and such
+    :param synapses_list: The list of all the synapses in the frame (flattenened)
+    :param roi_shape: The shape of the frame
+    :return: synapse_flashing_dict, a dict corresponding the synapses to whether they are currently flashing or not,
+             synapse_flash_idx_dict, a dict corresponding each flash to where in the light curve they are at,
+             synapse_flash_curve_dict, a dict containing the light curve sampled for the flash of this synapse,
+             isolated_synapses_frames, a dict containing a frame for each synapse in which only it appears and the rest
+                                       is 0
+    """
+    synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = {}, {}, {}, {}
+
+    for idx_syn in range(len(synapses_list)):
+        synpase_flashing_dict[idx_syn] = False
+        synapse_flash_idx_dict[idx_syn] = 0
+        rr, cc = synapses_list[idx_syn].return_shape(shape=roi_shape)
+        isolated_synapses_frames[idx_syn] = numpy.zeros(roi_shape).astype(int)
+        isolated_synapses_frames[idx_syn][rr.astype(int), cc.astype(int)] += 5
+
+    return synpase_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames
+
+
+def generate_raster_pixel_list(n_pixels_to_add, starting_pixel, img):
+    """
+    Generates a pixel list of a raster scan of n_pixels_to_add pixels starting from starting_pixel
+    :param n_pixels_to_add: The number of pixels for which we want to image
+    :param starting_pixel: The starting point of our raster scan
+    :param img: the img in which the raster scan occurs
+    :return: A pixel list for the raster scan starting at starting_pixel
+    """
+    if starting_pixel[0] >= img.shape[0] or starting_pixel[1] >= img.shape[1]:
+        raise ValueError(f"starting pixel {starting_pixel} must be within img bounds (of shape {img.shape})")
+    return_list = []
+    current_idx = starting_pixel
+    for i in range(n_pixels_to_add):
+        return_list.append(tuple(current_idx))
+        current_idx[1] += 1
+        if current_idx[1] >= img.shape[1]:
+            current_idx[1] = 0
+            current_idx[0] += 1
+        if current_idx[0] >= img.shape[0]:
+            current_idx[0] = 0
+
+    return return_list
+
+
+def set_starting_pixel(previous_pixel, image_shape, ratio=1):
+    """
+    Returns a value 1 pixel further from the last pixel of an acquisition list in an normal raster scan fashion.
+    :param previous_pixel: The pixel on which the previous raster scan stopped
+    :param image_shape: the shape of the ROI on which the raster scan is occuring
+    :return: The pixel on which the next raster scan should start
+    """
+    starting_pixel = list(previous_pixel)
+    starting_pixel[1] += ratio
+    if starting_pixel[1] >= image_shape[1]:
+        starting_pixel[1] = 0
+        starting_pixel[0] += ratio
+    if starting_pixel[0] >= image_shape[0]:
+        starting_pixel[0] = 0
+
+    return starting_pixel
+
+
+def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_sec, pixel_dwelltime, mode="flash"):
+    """
+    This function computes how many loop steps will occur and how many pixels can be imaged for each loop step.
+    So far this only works for static pixel_dwelltime, need to figure out how to make it work for varying dwell times
+    per pixel or varying dwell times as in RESCue.
+    :param fwhm_step_sec_correspondance: a tuple containing how large in time steps the FWHM of the mean flash is at
+                                         index 0 and how large in seconds we want the FWHM to be at index 1
+    :param acquisition_time_sec: How long we want to acquire on the same datamap, in seconds. This will be used to
+                                 determine how many loops we need to do (float? int?)
+    :param pixel_dwelltime: The pixel dwell time used by the microscope (float)
+    :return: The number of pixels that can be imaged per loop and the number of loop iterations
+    """
+
+    legal_modes = ["flash", "pdt"]
+    if mode.lower() not in legal_modes:
+        raise ValueError(f"Mode '{mode}' is not valid")
+
+    fwhm_time_steps, fwhm_time_secs = fwhm_step_sec_correspondance[0], fwhm_step_sec_correspondance[1]
+    sec_per_time_step = fwhm_time_secs / fwhm_time_steps
+    if mode == "flash":
+        n_time_steps = int(acquisition_time_sec / sec_per_time_step)
+        n_pixels_per_tstep = sec_per_time_step / pixel_dwelltime
+        return n_time_steps, n_pixels_per_tstep
+    elif mode == "pdt":
+        n_time_steps = int(acquisition_time_sec / pixel_dwelltime)   # fait chier que les ordis savent pas comment math
+        x_pixels_for_flash_ts = round(sec_per_time_step / pixel_dwelltime)
+        return n_time_steps, x_pixels_for_flash_ts
+
+
+def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_idx_dict, paths,
+                  synapse_flash_curve_dict, isolated_synapses_frames, datamap):
+    """
+    This function makes 1 step in a flash routine. It loops through all the synapses in a frame to determine whether
+    they will start flashing (if they aren't already), or move the flash forward 1 time step if they are flashing, or
+    reset the synapse if its flash is over.
+    :param synapses: A list of all the synapses in the datamap
+    :param probability: The probability with which a synapse will start flashing
+    :param synapse_flashing_dict: The dict listing whether each synapse is flashing or not
+    :param synapse_flash_idx_dict: The dict listing where in their flash each synapse is
+    :param paths: paths to the events txt file and corresponding video for random light curve samlping
+    :param synapse_flash_curve_dict: The dict listing the sampled flash curve for every synapse
+    :param isolated_synapses_frames: The dict listing the isolated synapse frames
+    :param datamap: The datamap on which the synapses lie
+    :return: The updated dicts and datamap
+    """
+    for idx_syn in range(len(synapses)):
+        if numpy.random.binomial(1, probability) and synapse_flashing_dict[idx_syn] is False:
+            # can start the flash
+            synapse_flashing_dict[idx_syn] = True
+            synapse_flash_idx_dict[idx_syn] = 1
+            sampled_curve = flash_generator(paths["event"], paths["video"])
+            synapse_flash_curve_dict[idx_syn] = rescale_data(sampled_curve, to_int=True, divider=3)
+
+        if synapse_flashing_dict[idx_syn]:
+            datamap.whole_datamap[datamap.roi] -= isolated_synapses_frames[idx_syn]
+            datamap.whole_datamap[datamap.roi] += isolated_synapses_frames[idx_syn] * \
+                                                  synapse_flash_curve_dict[idx_syn][synapse_flash_idx_dict[idx_syn]]
+            synapse_flash_idx_dict[idx_syn] += 1
+            if synapse_flash_idx_dict[idx_syn] >= 40:
+                synapse_flash_idx_dict[idx_syn] = 0
+                synapse_flashing_dict[idx_syn] = False
+
+    return synapse_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, datamap.whole_datamap
+
+
+def action_execution(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope, pdt,
+                     p_ex, p_sted, intensity_map, bleach):
+    """
+    Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
+    Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
+    by a flash, for example.
+    :param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full
+                            sted scan).
+    :param frame_shape: The shape of the ROI
+    :param starting_pixel: The pixel at which the scan starts
+    :param pxsize: The acquisition pixel size
+    :param datamap: The datamap being imaged
+    :param frozen_datamap: A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS
+    :param microscope: The microscope imageing the datamap
+    :param pdt: The pixel dwelltime (either scalar or array of size frame_shape)
+    :param p_ex: The excitation power (either scalar or array of size frame_shape)
+    :param p_sted: The STED power (either scalar or array of size frame_shape)
+    :param intensity_map: The intensity map for the previous acquisition, in case it was interrupted
+    :param bleach: Bool determining whether bleaching occurs or not
+    :return: acq, the acquisition (photons),
+             bleached, the bleached datamap,
+             datamap, the updated datamap,
+             pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next
+             acquisition should start
+    """
+    valid_actions = ["confocal", "sted"]
+    # vérifier si action_selected est dans valid_actions, sinon lancer une erreur
+
+    if action_selected == "confocal":
+        pixel_list = generate_raster_pixel_list(frame_shape[0] * frame_shape[1], starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, pxsize, datamap.pixelsize, output_empty=True)
+
+        # Cut elements before the starting pixel from the list
+        start_idx = pixel_list.index(tuple(starting_pixel))
+        pixel_list = pixel_list[start_idx:]
+        pixel_list = pixel_list[:microscope.pixel_bank]
+
+    elif action_selected == "sted":
+        pixel_list = generate_raster_pixel_list(microscope.pixel_bank, starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
+                                       output_empty=True)
+
+    acq, bleached, intensity_map = microscope.get_signal_and_bleach_fast(datamap, pxsize, pdt, p_ex, p_sted,
+                                                                         acquired_intensity=intensity_map,
+                                                                         pixel_list=pixel_list,  bleach=bleach,
+                                                                         update=False, filter_bypass=True)
+
+    if bleach:
+        datamap.whole_datamap = numpy.copy(bleached)
+
+    return acq, intensity_map, datamap, pixel_list
+
+
+def action_execution_2(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope,
+                       pdt, p_ex, p_sted, intensity_map, bleach, t_stack_idx):
+    """
+    *** This version exists because I am dumb ***
+    *** This version is here to manage the sub_datamaps because the other doesn't. I need to resolve this :) ***
+    Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
+    Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
+    by a flash, for example.
+    :param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full
+                            sted scan).
+    :param frame_shape: The shape of the ROI
+    :param starting_pixel: The pixel at which the scan starts
+    :param pxsize: The acquisition pixel size
+    :param datamap: The datamap being imaged
+    :param frozen_datamap: A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS
+    :param microscope: The microscope imageing the datamap
+    :param pdt: The pixel dwelltime (either scalar or array of size frame_shape)
+    :param p_ex: The excitation power (either scalar or array of size frame_shape)
+    :param p_sted: The STED power (either scalar or array of size frame_shape)
+    :param intensity_map: The intensity map for the previous acquisition, in case it was interrupted
+    :param bleach: Bool determining whether bleaching occurs or not
+    :param t_stack_idx: The time step at which we are in our experiment
+    :return: acq, the acquisition (photons),
+             bleached, the bleached datamap,
+             datamap, the updated datamap,
+             pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next
+             acquisition should start
+    """
+    valid_actions = ["confocal", "sted"]
+    # vérifier si action_selected est dans valid_actions, sinon lancer une erreur
+
+    if action_selected == "confocal":
+        pixel_list = generate_raster_pixel_list(frame_shape[0] * frame_shape[1], starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, pxsize, datamap.pixelsize, output_empty=True)
+
+        # Cut elements before the starting pixel from the list
+        start_idx = pixel_list.index(tuple(starting_pixel))
+        pixel_list = pixel_list[start_idx:]
+        pixel_list = pixel_list[:microscope.pixel_bank]
+
+    elif action_selected == "sted":
+        pixel_list = generate_raster_pixel_list(microscope.pixel_bank, starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
+                                       output_empty=True)
+
+    acq, bleached_dict, intensity_map = microscope.get_signal_and_bleach_fast_2(datamap, pxsize, pdt, p_ex, p_sted,
+                                                                                acquired_intensity=intensity_map,
+                                                                                pixel_list=pixel_list, bleach=bleach,
+                                                                                update=True, filter_bypass=True,
+                                                                                indices=t_stack_idx,
+                                                                                raster_func=raster.raster_func_c_self_bleach_split)
+
+    return acq, intensity_map, datamap, pixel_list
+
+
+def action_execution_g(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope,
+                       pdt, p_ex, p_sted, intensity_map, bleach, t_stack_idx):
+    """
+    *** This version exists because I am dumb ***
+    *** This version is here to manage the sub_datamaps because the other doesn't. I need to resolve this :) ***
+    Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
+    Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
+    by a flash, for example.
+    :param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full
+                            sted scan).
+    :param frame_shape: The shape of the ROI
+    :param starting_pixel: The pixel at which the scan starts
+    :param pxsize: The acquisition pixel size
+    :param datamap: The datamap being imaged
+    :param frozen_datamap: A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS
+    :param microscope: The microscope imageing the datamap
+    :param pdt: The pixel dwelltime (either scalar or array of size frame_shape)
+    :param p_ex: The excitation power (either scalar or array of size frame_shape)
+    :param p_sted: The STED power (either scalar or array of size frame_shape)
+    :param intensity_map: The intensity map for the previous acquisition, in case it was interrupted
+    :param bleach: Bool determining whether bleaching occurs or not
+    :param t_stack_idx: The time step at which we are in our experiment
+    :return: acq, the acquisition (photons),
+             bleached, the bleached datamap,
+             datamap, the updated datamap,
+             pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next
+             acquisition should start
+    """
+    valid_actions = ["confocal", "sted"]
+    # vérifier si action_selected est dans valid_actions, sinon lancer une erreur
+
+    if action_selected == "confocal":
+        pixel_list = generate_raster_pixel_list(frame_shape[0] * frame_shape[1], starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, pxsize, datamap.pixelsize, output_empty=True)
+
+        # Cut elements before the starting pixel from the list
+        start_idx = pixel_list.index(tuple(starting_pixel))
+        pixel_list = pixel_list[start_idx:]
+        pixel_list = pixel_list[:microscope.pixel_bank]
+
+    elif action_selected == "sted":
+        pixel_list = generate_raster_pixel_list(microscope.pixel_bank, starting_pixel, frozen_datamap)
+        pixel_list = pixel_list_filter(frozen_datamap, pixel_list, datamap.pixelsize, datamap.pixelsize,
+                                       output_empty=True)
+
+    acq, bleached_dict, intensity_map = microscope.get_signal_and_bleach(datamap, pxsize, pdt, p_ex, p_sted,
+                                                                         acquired_intensity=intensity_map,
+                                                                         pixel_list=pixel_list, bleach=bleach,
+                                                                         update=True, filter_bypass=True,
+                                                                         indices=t_stack_idx)
+
+    return acq, intensity_map, datamap, pixel_list
+

@@ -1,0 +1,8 @@
+{'start frame': 450, 'end frame': 490, 'start col': 140, 'end col': 160, 'start row': 100, 'end row': 125}
+{'start frame': 40, 'end frame': 80, 'start col': 485, 'end col': 520, 'start row': 250, 'end row': 300}
+{'start frame': 45, 'end frame': 85, 'start col': 0, 'end col': 30, 'start row': 84, 'end row': 120}
+{'start frame': 35, 'end frame': 75, 'start col': 30, 'end col': 70, 'start row': 130, 'end row': 160}
+{'start frame': 40, 'end frame': 80, 'start col': 170, 'end col': 195, 'start row': 330, 'end row': 350}
+{'start frame': 115, 'end frame': 155, 'start col': 170, 'end col': 190, 'start row': 140, 'end row': 160}
+{'start frame': 100, 'end frame': 140, 'start col': 560, 'end col': 590, 'start row': 290, 'end row': 310}
+{'start frame': 110, 'end frame': 150, 'start col': 310, 'end col': 345, 'start row': 340, 'end row': 370}
