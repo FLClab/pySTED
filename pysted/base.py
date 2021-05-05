@@ -78,6 +78,7 @@ For use by FLClab (@CERVO) authorized people
 import numpy
 import scipy.constants
 import scipy.signal
+import pickle
 
 # from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
 from pysted import utils, cUtils, raster, bleach_funcs
@@ -695,7 +696,7 @@ class Microscope:
                  fluorescence molecules to be used.
     '''
     
-    def __init__(self, excitation, sted, detector, objective, fluo):
+    def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False):
         self.excitation = excitation
         self.sted = sted
         self.detector = detector
@@ -704,6 +705,11 @@ class Microscope:
                 
         # caching system
         self.__cache = {}
+        if load_cache:
+            try:
+                self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
+            except FileNotFoundError:
+                pass
 
         # This will be used during the acquisition routine to make a better correspondance
         # between the microscope acquisition time steps and the Ca2+ flash time steps
@@ -723,7 +729,7 @@ class Microscope:
         datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
         return datamap_pixelsize_nm in self.__cache
     
-    def cache(self, datamap_pixelsize):
+    def cache(self, datamap_pixelsize, save_cache=False):
         '''Compute and cache the excitation and STED intensities, and the
         fluorescence PSF. These intensities are computed with a power of 1 W
         such that they can serve as a basis to compute intensities with any
@@ -757,6 +763,8 @@ class Microscope:
                                                       datamap_pixelsize)
             self.__cache[datamap_pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
 
+        if save_cache:
+            pickle.dump(self.__cache, open(".microscope_cache.pkl", "wb"))
         return self.__cache[datamap_pixelsize_nm]
     
     def clear_cache(self):

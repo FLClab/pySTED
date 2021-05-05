@@ -37,15 +37,17 @@ roi = 'max'
 
 
 # Generating objects necessary for acquisition simulation
+microscope_time_start = time.time()
 laser_ex = base.GaussianBeam(488e-9)
 laser_sted = base.DonutBeam(575e-9, zero_residual=0)
 detector = base.Detector(noise=True, background=0)
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
 datamap = base.Datamap(molecules_disposition, pixelsize)
-microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
-i_ex, _, _ = microscope.cache(datamap.pixelsize)
+microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, load_cache=True)
+i_ex, _, _ = microscope.cache(datamap.pixelsize, save_cache=True)
 datamap.set_roi(i_ex, roi)
+microscope_time = time.time() - microscope_time_start
 
 print(f'starting acq with phy_react = {egfp["phy_react"]}')
 time_start = time.time()
@@ -55,7 +57,6 @@ print(f"ran in {time.time() - time_start} s")
 print(utils.mse_calculator(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi]))
 survival = utils.molecules_survival(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi])
 print(survival)
-
 
 fig, axes = plt.subplots(1, 3)
 
@@ -69,6 +70,3 @@ axes[2].imshow(acquisition)
 axes[2].set_title(f"Acquired signal (photons)")
 
 plt.show()
-
-# for i in range(10):
-#     raster.test_rand()
