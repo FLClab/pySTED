@@ -77,9 +77,9 @@ fluo = base.Fluorescence(**egfp)
 datamap = base.Datamap(molecules_disposition, pixelsize)
 
 opts = {
-    "scale_power" : [0., 0., 0.],
+    "scale_power" : [0., 0.25, 1.],
     "decision_time" : [10e-6, 10e-6, -1],
-    "threshold_count" : [10, 10, 0]
+    "threshold_count" : [10, 5, 0]
 }
 microscope = DyMINMicroscope(laser_ex, laser_sted, detector, objective, fluo, opts=opts)
 # microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)

@@ -22,7 +22,7 @@ class DyMINMicroscope(base.Microscope):
 
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                                   pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
-                                  bleach_func=bleach_funcs.default_bleach):
+                                  bleach_func=bleach_funcs.default_bleach_multisteps):
 
         datamap_roi = datamap.whole_datamap[datamap.roi]
         pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
@@ -57,7 +57,8 @@ class DyMINMicroscope(base.Microscope):
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
 
-            for scale_power, decision_time, threshold_count in zip(self.opts["scale_power"], self.opts["decision_time"], self.opts["threshold_count"]):
+            pdts, p_exs, p_steds = numpy.zeros(len(self.opts["scale_power"])), numpy.zeros(len(self.opts["scale_power"])), numpy.zeros(len(self.opts["scale_power"]))
+            for i, (scale_power, decision_time, threshold_count) in enumerate(zip(self.opts["scale_power"], self.opts["decision_time"], self.opts["threshold_count"])):
                 if decision_time < 0.:
                     decision_time = pdt[row, col]
 
@@ -72,10 +73,10 @@ class DyMINMicroscope(base.Microscope):
                 pixel_intensity = numpy.sum(effective * bleached_datamap[row_slice, col_slice])
                 pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time)
 
-                if bleach:
-                    bleach_func(self, i_ex, i_sted, p_ex[row, col], scale_power * p_sted[row, col],
-                                decision_time, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted)
+                # Stores the action taken for futures bleaching
+                pdts[i] = decision_time
+                p_exs[i] = p_ex[row, col]
+                p_steds[i] = scale_power * p_sted[row, col]
 
                 # If signal is less than threshold count then skip pixel
                 scaled_power[row, col] = scale_power
@@ -86,159 +87,11 @@ class DyMINMicroscope(base.Microscope):
                 if scale_power > 0.:
                     returned_photons[row, col] += pixel_photons
 
-        if update and bleach:
-            datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
-            datamap.base_datamap = datamap.sub_datamaps_dict["base"]
-            datamap.whole_datamap = numpy.copy(datamap.base_datamap)
-
-        return returned_photons, bleached_sub_datamaps_dict, scaled_power
-
-    def get_signal_and_bleach_test1(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
-                                  pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
-                                  bleach_func=bleach_funcs.default_bleach):
-
-        datamap_roi = datamap.whole_datamap[datamap.roi]
-        pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
-        p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
-        p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
-
-        datamap_pixelsize = datamap.pixelsize
-        i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
-        if datamap.roi is None:
-            datamap.set_roi(i_ex)
-
-        datamap_roi = datamap.whole_datamap[datamap.roi]
-        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
-
-        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-        rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
-        laser_pad = i_ex.shape[0] // 2
-
-        prob_ex = numpy.ones(datamap.whole_datamap.shape)
-        prob_sted = numpy.ones(datamap.whole_datamap.shape)
-        bleached_datamap = numpy.copy(datamap.whole_datamap)
-        returned_photons = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
-        scaled_power = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
-
-        bleached_sub_datamaps_dict = {}
-        if isinstance(indices, type(None)):
-            indices = 0   # VÉRIF À QUOI INDICES SERT?
-        for key in datamap.sub_datamaps_dict:
-            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key])
-
-        for (row, col) in tqdm(pixel_list, desc="Pixels", leave=False):
-            row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
-            col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
-
-            scale_power, threshold_count, steps = 0., 0., 10
-            for _ in range(0, int(pdt[row, col] * 1e+6), steps):
-
-                decision_time = steps * 1e-6
-
-                effective = self.get_effective(datamap_pixelsize, p_ex[row, col], scale_power * p_sted[row, col])
-                h, w = effective.shape
-
-                # Uses the bleached datamap
-                bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=numpy.int32)
-                for key in bleached_sub_datamaps_dict:
-                    bleached_datamap += bleached_sub_datamaps_dict[key]
-
-                pixel_intensity = numpy.sum(effective * bleached_datamap[row_slice, col_slice])
-                pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time)
-
-                if bleach:
-                    bleach_func(self, i_ex, i_sted, p_ex[row, col], scale_power * p_sted[row, col],
-                                decision_time, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted)
-
-                # If signal is less than threshold count then skip pixel
-                scaled_power[row, col] = scale_power
-                if pixel_photons < threshold_count:
-                    break
-
-                # Update the photon counts only on the last pixel power scale
-                if scale_power > 0.:
-                    returned_photons[row, col] += pixel_photons
-
-        if update and bleach:
-            datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
-            datamap.base_datamap = datamap.sub_datamaps_dict["base"]
-            datamap.whole_datamap = numpy.copy(datamap.base_datamap)
-
-        return returned_photons, bleached_sub_datamaps_dict, scaled_power
-
-    def get_signal_and_bleach_test2(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
-                                  pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
-                                  bleach_func=bleach_funcs.default_bleach_multisteps):
-
-        datamap_roi = datamap.whole_datamap[datamap.roi]
-        pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
-        p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
-        p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
-
-        datamap_pixelsize = datamap.pixelsize
-        i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
-        if datamap.roi is None:
-            datamap.set_roi(i_ex)
-
-        datamap_roi = datamap.whole_datamap[datamap.roi]
-        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
-
-        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-        rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
-        laser_pad = i_ex.shape[0] // 2
-
-        prob_ex = numpy.ones(datamap.whole_datamap.shape)
-        prob_sted = numpy.ones(datamap.whole_datamap.shape)
-        bleached_datamap = numpy.copy(datamap.whole_datamap)
-        returned_photons = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
-        scaled_power = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
-
-        bleached_sub_datamaps_dict = {}
-        if isinstance(indices, type(None)):
-            indices = 0   # VÉRIF À QUOI INDICES SERT?
-        for key in datamap.sub_datamaps_dict:
-            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key])
-
-        for (row, col) in tqdm(pixel_list, desc="Pixels", leave=False):
-            row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
-            col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
-
-            scale_power, threshold_count, steps = 0., 0., 10
-            pdts, p_exs, p_steds = [], [], []
-            for _ in range(0, int(pdt[row, col] * 1e+6), steps):
-
-                decision_time = steps * 1e-6
-
-                effective = self.get_effective(datamap_pixelsize, p_ex[row, col], scale_power * p_sted[row, col])
-                h, w = effective.shape
-
-                # Uses the bleached datamap
-                bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=numpy.int32)
-                for key in bleached_sub_datamaps_dict:
-                    bleached_datamap += bleached_sub_datamaps_dict[key]
-
-                pixel_intensity = numpy.sum(effective * bleached_datamap[row_slice, col_slice])
-                pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time)
-
-                # If signal is less than threshold count then skip pixel
-                scaled_power[row, col] = scale_power
-                if pixel_photons < threshold_count:
-                    break
-
-                # Update the photon counts only on the last pixel power scale
-                if scale_power > 0.:
-                    returned_photons[row, col] += pixel_photons
-
-                pdts.append(decision_time)
-                p_exs.append(p_ex[row, col])
-                p_steds.append(scale_power * p_sted[row, col])
-
-            pdts, p_exs, p_steds = map(numpy.array, (pdts, p_exs, p_steds))
             if bleach:
                 bleach_func(self, i_ex, i_sted, p_exs, p_steds,
                             pdts, bleached_sub_datamaps_dict,
                             row, col, h, w, prob_ex, prob_sted)
+
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
             datamap.base_datamap = datamap.sub_datamaps_dict["base"]
@@ -248,7 +101,7 @@ class DyMINMicroscope(base.Microscope):
 
     # def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
     #                               pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
-    #                               bleach_func=bleach_funcs.default_bleach):
+    #                               bleach_func=bleach_funcs.default_bleach_multisteps):
     #
     #     if seed is not None:
     #         numpy.random.seed(seed)

@@ -4,6 +4,7 @@ import numpy
 from matplotlib import pyplot as plt
 import bleach_funcs
 cimport numpy
+import scipy
 cimport cython
 
 from libc.math cimport exp
@@ -133,6 +134,7 @@ def raster_func_c_self_bleach_dymin(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex, i_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=1] pdts, p_exs, p_steds
     cdef numpy.ndarray[int, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
 
@@ -159,7 +161,8 @@ def raster_func_c_self_bleach_dymin(
     threshold_counts = self.opts["threshold_count"]
 
     for (row, col) in (pixel_list):
-        for i in range(3):
+        pdts, p_exs, p_steds = numpy.zeros(len(scale_powers)), numpy.zeros(len(scale_powers)), numpy.zeros(len(scale_powers))
+        for i in range(len(scale_powers)):
             pdt = decision_times[i]
             scale_power = scale_powers[i]
             threshold_count = threshold_counts[i]
@@ -185,9 +188,9 @@ def raster_func_c_self_bleach_dymin(
                 sprime += 1
             acquired_intensity[int(row / ratio), int(col / ratio)] = value
 
-            if bleach:
-                bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict,
-                            row, col, h, w, prob_ex, prob_sted)
+            pdts[i] = pdt
+            p_exs[i] = p_ex
+            p_steds[i] = p_sted
 
             scaled_power[row, col] = scale_power
             photons = numpy.array(self.fluo.get_photons(value))
@@ -195,3 +198,8 @@ def raster_func_c_self_bleach_dymin(
             if photons < threshold_count:
                 acquired_intensity[int(row / ratio), int(col / ratio)] = 0
                 break
+
+        if bleach:
+            bleach_func(self, i_ex, i_sted, p_exs, p_steds, pdts,
+                        bleached_sub_datamaps_dict, row, col, h, w,
+                        prob_ex, prob_sted)
