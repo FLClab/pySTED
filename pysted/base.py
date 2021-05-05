@@ -819,7 +819,9 @@ class Microscope:
         # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
 
-    def laser_dans_face(self, pixelsize, pixel_list=None):
+    def laser_dans_face(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
+                              pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
+                              bleach_func=bleach_funcs.default_bleach):
         """
         Test function to visualize how much laser each pixel receives
         :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
@@ -828,21 +830,41 @@ class Microscope:
         :returns: laser_received, an array containing the quantity of laser received per pixel,
                   sampled, an array containing the number of times each pixel has been covered by the laser array
         """
-        datamap_roi = self.datamap.whole_datamap[self.datamap.roi]
-        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, self.datamap.pixelsize)
+        datamap_pixelsize = datamap.pixelsize
+        i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
 
-        i_ex, i_sted, psf_det = self.cache(self.datamap.pixelsize)
+        # maybe I should just throw an error here instead
+        if datamap.roi is None:
+            # demander au dude de setter une roi
+            datamap.set_roi(i_ex)
 
-        laser_received = numpy.zeros(self.datamap.whole_datamap.shape)
-        sampled = numpy.zeros(self.datamap.whole_datamap.shape)
-        rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
-        laser_pad = self.datamap.laser.shape[0] // 2
-        pdt_roi = self.datamap.pdt[self.datamap.roi]
-        p_ex_roi = self.datamap.p_ex[self.datamap.roi]
-        p_sted_roi = self.datamap.p_sted[self.datamap.roi]
+        datamap_roi = datamap.whole_datamap[datamap.roi]
 
+        # convert scalar values to arrays if they aren't already arrays
+        # C funcs need pre defined types, so in order to only have 1 general case C func, I convert scalars to arrays
+        pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
+        p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
+        p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
+
+        if not filter_bypass:
+            pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
+
+        # *** VÉRIFIER SI CE TO DO LÀ EST FAIT ***
+        # TODO: make sure I handle passing an acq matrix correctly / verifying its shape and shit
+        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
+        if acquired_intensity is None:
+            acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
+                                              int(numpy.ceil(datamap_roi.shape[1] / ratio))))
+        else:
+            # verify the shape and shit
+            pass
+        rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
+        laser_pad = i_ex.shape[0] // 2
+
+        sampled = numpy.zeros_like(datamap.whole_datamap, dtype=numpy.int32)
+        laser_received = numpy.zeros_like(datamap.whole_datamap, dtype=numpy.float64)
         for (row, col) in pixel_list:
-            laser_applied = (i_ex * p_ex_roi[row, col] + i_sted * p_sted_roi[row, col]) * pdt_roi[row, col]
+            laser_applied = (i_ex * p_ex[row, col] + i_sted * p_sted[row, col]) * pdt[row, col]
             sampled[row + rows_pad - laser_pad: row + rows_pad + laser_pad + 1,
                     col + cols_pad - laser_pad: col + cols_pad + laser_pad + 1] += 1
             laser_received[row + rows_pad - laser_pad: row + rows_pad + laser_pad + 1,
