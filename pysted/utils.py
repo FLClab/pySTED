@@ -903,7 +903,11 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
                                                     "scale": (1, 5)})
     n_added = 0
     synapse_positions = numpy.empty((0, 2))
+    n_loops = 0
     while n_added != n_synapses:
+        # sometimes we get infinite loops if we cant place the synapses far enough appart
+        if n_loops > n_synapses * 100:
+            break
         sampled_node = numpy.asarray(random.sample(list(fibre.nodes_position), 1)[0].astype(int))
         if numpy.less_equal(sampled_node, 0).any() or \
                 numpy.greater_equal(sampled_node, datamap_shape - numpy.ones((1, 1))).any():
@@ -927,6 +931,7 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
             else:
                 # good to add to the list
                 n_added += 1
+        n_loops += 1
 
     polygon_list = []
     for node in synapse_positions:
