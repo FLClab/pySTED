@@ -1429,13 +1429,10 @@ class Experiment():
         :returns : A `str` of the name of the microscope
                    A `dict` of the history
         """
-        # This is a weird bug fix
-        from pysted import dymin
-
         history = {
             "acquisition" : numpy.zeros((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape)),
             "datamap" : numpy.zeros((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape)),
-            "scaled_power" : numpy.ones((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape))
+            "other" : numpy.ones((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape))
         }
         if verbose: print("[----] Acquisition started! {}".format(name))
         for i in trange(num_acquisition, leave=False):
@@ -1443,9 +1440,6 @@ class Experiment():
             acquisition, bleached, other = self.microscopes[name].get_signal_and_bleach(self.datamaps[name], self.datamaps[name].pixelsize, **self.params[name],
                                                                                 bleach=bleach, update=True)
             history["acquisition"][i] = acquisition
-            if isinstance(self.microscopes[name], dymin.DyMINMicroscope):
-                history["scaled_power"][i] = other
-            else:
-                history["scaled_power"][i] = numpy.ones_like(history["scaled_power"][i])
+            history["other"][i] = other
         if verbose: print("[----] Acquisition done! {}".format(name))
         return name, history
