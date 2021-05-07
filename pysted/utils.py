@@ -14,6 +14,7 @@ import math
 import random
 import warnings
 import tifffile
+import multiprocessing
 
 # import mis par BT pour des tests :)
 from matplotlib import pyplot
@@ -1400,6 +1401,14 @@ def action_execution_g(action_selected, frame_shape, starting_pixel, pxsize, dat
     return acq, intensity_map, datamap, pixel_list
 
 class Experiment():
+    """
+    Implements an `Experiment` object that allows to store `Microscope` configurations,
+    their respective `Datamap`, and their respective acquisition parameters.
+
+    The `Experiment` object implements `acquire` and `acquire_all` methods. The
+    `acquire_all` method allows multiprocessing. The `acquire_all` method should
+    called within a `if __name__ == "__main__"` if multiprocessing is desired.
+    """
     def __init__(self):
         self.microscopes = {}
         self.datamaps = {}
@@ -1443,3 +1452,31 @@ class Experiment():
             history["other"][i] = other
         if verbose: print("[----] Acquisition done! {}".format(name))
         return name, history
+
+    def acquire_all(self, num_acquisition, bleach=True, processes=0):
+        """
+        Acquires from all microsopes. This
+
+        :param experiment: An `Experiment` object from which to acquire all
+        :param num_acquisition: An `int` of the number of acquired frames
+        :param bleach: A `bool` whether to bleach the sample
+        :param processes: An `int` of the number of processes to use in `multiprocessing`
+
+        :returns : A `dict` of the history for each microscope
+        """
+        history = {}
+        if processes:
+            def log_callback(data):
+                name, hist = data
+                history[name] = hist
+            pool = multiprocessing.Pool(processes=processes)
+            calls = [pool.apply_async(self.acquire, kwds={"name":name, "num_acquisition":num_acquisition, "bleach":bleach, "verbose":True}, callback=log_callback)
+                        for name in self.microscopes.keys()]
+            pool.close()
+            pool.join()
+            for c in calls: c.get()
+        else:
+            for name in self.microscopes.keys():
+                name, out = experiment.acquire(name=name, num_acquisition=num_acquisition, bleach=bleach)
+                history[name] = out
+        return history
