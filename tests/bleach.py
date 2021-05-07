@@ -39,7 +39,7 @@ egfp = {"lambda_": 535e-9,
         "phy_react": {488: 1e-7,   # 1e-4
                       575: 1e-11},   # 1e-8
         "k_isc": 0.26e6}
-pixelsize = 10e-9
+pixelsize = 20e-9
 bleach = True
 p_ex = 2e-6
 p_ex_array = numpy.ones(molecules_disposition.shape) * p_ex

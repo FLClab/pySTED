@@ -212,7 +212,7 @@ egfp = {"lambda_": 535e-9,
         "phy_react": {488: 0.25e-7,   # 1e-4
                       575: 0.25e-11},   # 1e-8
         "k_isc": 0.26e6}
-pixelsize = 10e-9
+pixelsize = 20e-9
 bleach = True
 p_ex = 2e-6
 p_ex_array = numpy.ones(molecules_disposition.shape) * p_ex
@@ -330,9 +330,9 @@ for i, key in enumerate(keys):
     data = out[key]
     mean, std = numpy.mean(data), numpy.std(data)
     ax.bar(i, mean, yerr=std, label=key)
-ax.legend()
+ax.legend(loc="lower right")
 ax.set(
     ylabel="Average Mol. Left (ratio)"
 )
-fig.savefig("./panels/bleachMultipleSteps.pdf", bbox_inches="tight", transparent=True)
+fig.savefig(f"./panels/bleachMultipleSteps_{num_mol}.pdf", bbox_inches="tight", transparent=True)
 pyplot.show()

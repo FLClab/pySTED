@@ -13,19 +13,19 @@ random.seed(42)
 START = time.time()
 
 delta = 1
-molecules_disposition = numpy.zeros((50, 50))
-# molecules_disposition[
-#     molecules_disposition.shape[0]//2 - delta : molecules_disposition.shape[0]//2+delta,
-#     molecules_disposition.shape[1]//2 - delta : molecules_disposition.shape[1]//2+delta] = 8
 num_mol = 2
-for j in range(1,4):
-    for i in range(1,4):
+molecules_disposition = numpy.zeros((50, 50))
+molecules_disposition[
+    molecules_disposition.shape[0]//2 - delta : molecules_disposition.shape[0]//2+delta+1,
+    molecules_disposition.shape[1]//2 - delta : molecules_disposition.shape[1]//2+delta+1] = num_mol
+# for j in range(1,4):
+#     for i in range(1,4):
+# #         molecules_disposition[
+# #             i * molecules_disposition.shape[0]//4,
+# #             j * molecules_disposition.shape[1]//4] = num_mol
 #         molecules_disposition[
-#             i * molecules_disposition.shape[0]//4,
-#             j * molecules_disposition.shape[1]//4] = num_mol
-        molecules_disposition[
-            j * molecules_disposition.shape[0]//4 - delta : j * molecules_disposition.shape[0]//4 + delta + 1,
-            i * molecules_disposition.shape[1]//4 - delta : i * molecules_disposition.shape[1]//4 + delta + 1] = num_mol
+#             j * molecules_disposition.shape[0]//4 - delta : j * molecules_disposition.shape[0]//4 + delta + 1,
+#             i * molecules_disposition.shape[1]//4 - delta : i * molecules_disposition.shape[1]//4 + delta + 1] = num_mol
 
 print("Setting up the microscope ...")
 # Microscope stuff
@@ -62,7 +62,6 @@ bleach = True
 p_ex = 2e-6
 p_ex_array = numpy.ones(molecules_disposition.shape) * p_ex
 p_sted = 2.5e-3
-p_sted = 0.
 p_sted_array = numpy.ones(molecules_disposition.shape) * p_sted
 pdt = 100e-6
 pdt_array = numpy.ones(molecules_disposition.shape) * pdt
@@ -79,12 +78,13 @@ datamap = base.Datamap(molecules_disposition, pixelsize)
 opts = {
     "scale_power" : [0., 0.25, 1.],
     "decision_time" : [10e-6, 10e-6, -1],
-    "threshold_count" : [10, 5, 0]
+    "threshold_count" : [10, 8, 0]
 }
 microscope = DyMINMicroscope(laser_ex, laser_sted, detector, objective, fluo, opts=opts)
 # microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
 start = time.time()
-i_ex, _, _ = microscope.cache(datamap.pixelsize, save_cache=True)
+i_ex, i_sted, _ = microscope.cache(datamap.pixelsize, save_cache=True)
+
 datamap.set_roi(i_ex, roi)
 print("Setup done...")
 

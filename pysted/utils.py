@@ -20,11 +20,12 @@ from matplotlib import pyplot
 import time
 from pysted import temporal, raster
 from scipy.spatial.distance import cdist
+from tqdm.auto import tqdm, trange
 
 
 def approx_binomial(n, p, size=None):
     '''Sample (64-bit) from a binomial distribution using the normal approximation.
-    
+
     :param n: The number of trials (int or array of ints).
     :param p: The probability of success (float).
     :param size: The shape of the output (int or tuple of ints, optional).
@@ -48,7 +49,7 @@ def approx_binomial(n, p, size=None):
 def cart2pol(x, y):
     '''Convert the polar coordinates corresponding to the given cartesian
     coordinates.
-    
+
     :param x: The :math:`x` cartesian coordinate.
     :param y: The :math:`y` cartesian coordinate.
     :returns: A tuple of the angle :math:`\\theta` and the lenght :math:`rho`.
@@ -60,7 +61,7 @@ def cart2pol(x, y):
 
 def complex_quadrature(func, a, b, args):
     '''Integrate a complex integrand using the Gauss-Kronrod quadrature.
-    
+
     :param func: The function to integrate.
     :param a: The lower bound of the integration.
     :param b: The upper bound of the integration.
@@ -78,7 +79,7 @@ def complex_quadrature(func, a, b, args):
 
 def fwhm(values):
     '''Compute the full width at half maximum of the Gaussian-shaped values.
-    
+
     :param values: An array of values describing a Gaussian shape.
     :returns: The full width at half maximum.
     '''
@@ -92,7 +93,7 @@ def fwhm(values):
 
 def fwhm_donut(values):
     '''Compute the full width at half maximum of the donut-shaped values.
-    
+
     :param values: An array of values describing a donut shape.
     :returns: A tuple of the outer and inner width at half maximum.
     '''
@@ -108,7 +109,7 @@ def fwhm_donut(values):
 
 def pinhole(radius, pixelsize, n_pixels=None):
     '''Return a pinhole mask.
-    
+
     :param radius: The radius of the pinhole (m).
     :param pixelsize: The size of a pixel (m).
     :param n_pixels: The (optional) number of pixels (default: size of the
@@ -127,10 +128,10 @@ def pinhole(radius, pixelsize, n_pixels=None):
 def rescale(data, factor):
     '''Rescale the *data* container (and content) given the ratio between the
     current container unit size and the new container unit size.
-    
-    
+
+
     Example::
-    
+
         >>> data_10nm = numpy.array([[1, 0, 0, 0],
                                      [0, 1, 0, 0],
                                      [0, 0, 0, 0],
@@ -138,7 +139,7 @@ def rescale(data, factor):
         >>> rescale(data_10nm, 2) # rescale to 20 nm size
         numpy.array([[2, 0],
                      [0, 0]])
-    
+
     :param data: A 2D array.
     :param factor: The ratio between the original container units and the new
                    container units.
@@ -150,7 +151,7 @@ def rescale(data, factor):
     new_data = numpy.zeros((new_data_h, new_data_w), dtype=data.dtype)
     for y in range(new_data_h):
         y_old_start = int(y * factor)
-        y_old_end = int(y_old_start + factor) 
+        y_old_end = int(y_old_start + factor)
         for x in range(new_data_w):
             x_old_start = int(x * factor)
             x_old_end = int(x_old_start + factor)
@@ -161,7 +162,7 @@ def rescale(data, factor):
 
 def resize(*images):
     '''Resize images to the shape of the largest (pad with zeros).
-    
+
     :param images: Square shaped images.
     :returns: A tuple of copies of the given *images* resized to the size of the
               largest input image.
@@ -174,7 +175,7 @@ def resize(*images):
         half_large = int(large_image.shape[0] / 2)
         pad = half_large - half_small
         return numpy.pad(small_image, ((pad, pad), (pad, pad)), "constant")
-    
+
     sizes = [image.shape[0] for image in images]
     idx = numpy.argmax(sizes)
     largest_image = images[idx]
@@ -185,7 +186,7 @@ def resize(*images):
 
 def inverse(x, a=1):
     '''Evaluate the inverse function :math:`1 / (a x + 1)`.
-    
+
     :param x: An integer or array.
     :param a: The scale of *x*.
     :returns: The result of the function, same shape as *x*.
@@ -195,7 +196,7 @@ def inverse(x, a=1):
 
 def inverse_exponential(x, a=1):
     '''Evaluate the inverse function :math:`1 / e^{ax}`.
-    
+
     :param x: An integer or array.
     :param a: The scale of *x*.
     :returns: The result of the function, same shape as *x*.
@@ -211,9 +212,9 @@ def stack(datamap, data):
     '''Compute a new frame consisting in a replication of the given *data*
     centered at every positions and multiplied by the factors given in the
     *datamap*.
-    
+
     Example::
-    
+
         >>> datamap = numpy.array([[2, 0, 0, 0],
                                    [0, 0, 0, 0],
                                    [0, 0, 0, 0],
@@ -226,7 +227,7 @@ def stack(datamap, data):
                      [4, 2, 0, 0],
                      [0, 0, 0, 0],
                      [0, 0, 0, 0]])
-    
+
     :param datamap: A 2D array indicating how many data are positioned in every
     :param data: A 2D array containing the data to replicate.
     :returns: A 2D array shaped like *datamap*.
@@ -1398,3 +1399,53 @@ def action_execution_g(action_selected, frame_shape, starting_pixel, pxsize, dat
 
     return acq, intensity_map, datamap, pixel_list
 
+class Experiment():
+    def __init__(self):
+        self.microscopes = {}
+        self.datamaps = {}
+        self.params = {}
+
+    def add(self, name, microscope, datamap, params):
+        """
+        Adds a microscope and its corresponding datamap to the experiment
+
+        :param name: A `str` of the name of the microscope
+        :param microscope: A `Microscope` object
+        :param datamap: A `Datamap` object
+        :param datamap: A `dict` of the parameters
+        """
+        self.microscopes[name] = microscope
+        self.datamaps[name] = datamap
+        self.params[name] = params
+
+    def acquire(self, name, num_acquisition, bleach=True, verbose=False):
+        """
+        Acquires from a specific microscope
+
+        :param name: A `str` of the name of the microscope
+        :param num_acquisition: An `int` of the number of acquired frames
+        :param bleach: A `bool` whether to bleach the sample
+
+        :returns : A `str` of the name of the microscope
+                   A `dict` of the history
+        """
+        # This is a weird bug fix
+        from pysted import dymin
+
+        history = {
+            "acquisition" : numpy.zeros((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape)),
+            "datamap" : numpy.zeros((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape)),
+            "scaled_power" : numpy.ones((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape))
+        }
+        if verbose: print("[----] Acquisition started! {}".format(name))
+        for i in trange(num_acquisition, leave=False):
+            history["datamap"][i] = self.datamaps[name].whole_datamap[self.datamaps[name].roi]
+            acquisition, bleached, other = self.microscopes[name].get_signal_and_bleach(self.datamaps[name], self.datamaps[name].pixelsize, **self.params[name],
+                                                                                bleach=bleach, update=True)
+            history["acquisition"][i] = acquisition
+            if isinstance(self.microscopes[name], dymin.DyMINMicroscope):
+                history["scaled_power"][i] = other
+            else:
+                history["scaled_power"][i] = numpy.ones_like(history["scaled_power"][i])
+        if verbose: print("[----] Acquisition done! {}".format(name))
+        return name, history
