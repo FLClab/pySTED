@@ -852,7 +852,7 @@ class Microscope:
 
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                               pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
-                              bleach_func=bleach_funcs.default_bleach):
+                              bleach_func=bleach_funcs.default_update_survival_probabilities, steps=None):
         """
         This function acquires the signal and bleaches simultaneously. It makes a call to compiled C code for speed,
         so make sure the raster.pyx file is compiled!
@@ -874,6 +874,10 @@ class Microscope:
         :param seed: Sets a seed for the random number generator.
         :param filter_bypass: Whether or not to filter the pixel list. Honestly uncertain about this param?? If
                               pixel_list is none, this must be True then.
+        :param bleach_func: The bleaching function to be applied.
+        :param steps: list containing the pixeldwelltimes for the sub steps of an acquisition. Is none by default.
+                      Should be used if trying to implement a DyMin type acquisition, where decisions are made
+                      after some time on whether or not to continue the acq.
         :return: returned_acquired_photons, the acquired photon for the acquisition.
                  bleached_sub_datamaps_dict, a dict containing the results of bleaching on the subdatamaps
                  acquired_intensity, the intensity of the acquisition, used for interrupted acquisitions
@@ -925,10 +929,17 @@ class Microscope:
         if seed is None:
             seed = 0
 
+        if steps is None:
+            steps = [pdt]   # what will happen if i input an array for pdt originally ???
+        else:
+            for idx, step in enumerate(steps):
+                steps[idx] = utils.float_to_array_verifier(step, datamap_roi.shape)
+
         raster_func = raster.raster_func_c_self_bleach_split_g
+        sample_func = bleach_funcs.sample_molecules
         raster_func(self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32), ratio, rows_pad,
                     cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleach, bleached_sub_datamaps_dict,
-                    seed, bleach_func)
+                    seed, bleach_func, sample_func, steps)
 
         # Bleaching is done, the rest is for intensity calculation
         photons = self.fluo.get_photons(acquired_intensity)
