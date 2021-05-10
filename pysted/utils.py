@@ -1441,6 +1441,7 @@ class Experiment():
         history = {
             "acquisition" : numpy.zeros((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape)),
             "datamap" : numpy.zeros((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape)),
+            "bleached" : numpy.zeros((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape)),
             "other" : numpy.ones((num_acquisition, *self.datamaps[name].sub_datamaps_dict["base"][self.datamaps[name].roi].shape))
         }
         if verbose: print("[----] Acquisition started! {}".format(name))
@@ -1449,6 +1450,7 @@ class Experiment():
             acquisition, bleached, other = self.microscopes[name].get_signal_and_bleach(self.datamaps[name], self.datamaps[name].pixelsize, **self.params[name],
                                                                                 bleach=bleach, update=True)
             history["acquisition"][i] = acquisition
+            history["bleached"][i] = bleached["base"][self.datamaps[name].roi]
             history["other"][i] = other
         if verbose: print("[----] Acquisition done! {}".format(name))
         return name, history
