@@ -1,5 +1,5 @@
 import numpy as np
-from pysted import base, utils, raster
+from pysted import base, utils, raster, bleach_funcs
 from matplotlib import pyplot as plt
 import time
 
@@ -34,7 +34,7 @@ p_sted_array = np.ones(molecules_disposition.shape) * p_sted
 pdt = 10e-6
 pdt_array = np.ones(molecules_disposition.shape) * pdt
 roi = 'max'
-
+bleach_func = bleach_funcs.default_update_survival_probabilities
 
 # Generating objects necessary for acquisition simulation
 laser_ex = base.GaussianBeam(488e-9)
@@ -43,19 +43,19 @@ detector = base.Detector(noise=True, background=0)
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
 datamap = base.Datamap(molecules_disposition, pixelsize)
-microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
-i_ex, _, _ = microscope.cache(datamap.pixelsize)
+microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, load_cache=True)
+i_ex, _, _ = microscope.cache(datamap.pixelsize, save_cache=True)
 datamap.set_roi(i_ex, roi)
 
 print(f'starting acq with phy_react = {egfp["phy_react"]}')
 time_start = time.time()
 acquisition, bleached, intensity = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
-                                                                    bleach=True, update=False)
+                                                                    bleach=True, update=False,
+                                                                    bleach_func=bleach_func)
 print(f"ran in {time.time() - time_start} s")
 print(utils.mse_calculator(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi]))
 survival = utils.molecules_survival(datamap.whole_datamap[datamap.roi], bleached["base"][datamap.roi])
 print(survival)
-
 
 fig, axes = plt.subplots(1, 3)
 
@@ -69,6 +69,3 @@ axes[2].imshow(acquisition)
 axes[2].set_title(f"Acquired signal (photons)")
 
 plt.show()
-
-# for i in range(10):
-#     raster.test_rand()

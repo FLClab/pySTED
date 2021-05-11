@@ -32,8 +32,9 @@ if not os.path.exists(save_path):
 
 print("Setting up the datamap and its flashes ...")
 # Get light curves stuff to generate the flashes later
-event_file_path = "flash_files/stream1_events.txt"
-video_file_path = "flash_files/stream1.tif"
+# event_file_path = "flash_files/stream1_events.txt"
+# video_file_path = "flash_files/stream1.tif"
+curves_path = "flash_files/events_curves.npy"
 
 # Generate a datamap
 frame_shape = (64, 64)
@@ -93,7 +94,7 @@ microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
 i_ex, _, _ = microscope.cache(temporal_datamap.pixelsize)
 temporal_datamap = base.TemporalDatamap(poils_frame, dpxsz, flat_synapses_list)
 temporal_datamap.set_roi(i_ex, roi)
-temporal_datamap.create_t_stack_dmap(acquisition_time, min_pdt, (10, 1.5), event_file_path, video_file_path, flash_prob)
+temporal_datamap.create_t_stack_dmap(acquisition_time, min_pdt, (10, 1.5), curves_path, flash_prob)
 
 # set up variables for acquisition loop
 t_stack_idx = 0
@@ -201,12 +202,14 @@ for t_step_idx in tqdm.trange(n_time_steps):
         t_stack_idx += 1
         if t_stack_idx >= temporal_datamap.flash_tstack.shape[0]:
             t_stack_idx = temporal_datamap.flash_tstack.shape[0] - 1
-        indices = {"flashes": t_stack_idx}
-        temporal_datamap.sub_datamaps_idx_dict = indices
+        # indices = {"flashes": t_stack_idx}
+        indices["flashes"] = t_stack_idx
+        temporal_datamap["flashes"] = indices["flashes"]
+        # temporal_datamap.sub_datamaps_idx_dict = indices
         # temporal_datamap.whole_datamap = temporal_datamap.base_datamap + temporal_datamap.flash_tstack[
         #     indices["flashes"]]
-        temporal_datamap.sub_datamaps_dict["flashes"] = temporal_datamap.flash_tstack[
-            temporal_datamap.sub_datamaps_idx_dict["flashes"]]
+        # temporal_datamap.sub_datamaps_dict["flashes"] = temporal_datamap.flash_tstack[
+        #     temporal_datamap.sub_datamaps_idx_dict["flashes"]]
         roi_save_copy = np.copy(temporal_datamap.whole_datamap[temporal_datamap.roi])
         list_datamaps.append(roi_save_copy)
         idx_type[t_step_idx] = "datamap"

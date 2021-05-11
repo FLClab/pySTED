@@ -15,6 +15,7 @@ FLOATDTYPE = numpy.float64
 ctypedef numpy.int32_t INTDTYPE_t
 ctypedef numpy.float64_t FLOATDTYPE_t
 
+
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 def raster_func_c_self_bleach_split_g(
@@ -34,7 +35,9 @@ def raster_func_c_self_bleach_split_g(
         bint bleach,   # bint is a bool
         dict bleached_sub_datamaps_dict,
         int seed,
-        object bleach_func   # uncertain of the type for a cfunc, but this seems to be working so ???
+        object bleach_func,   # uncertain of the type for a cfunc, but this seems to be working so ???
+        object sample_func,
+        list steps
 ):
     cdef int row, col
     cdef int sprime, tprime
@@ -52,6 +55,7 @@ def raster_func_c_self_bleach_split_g(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef numpy.ndarray[int, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] step
 
     """
     raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the 
@@ -61,7 +65,6 @@ def raster_func_c_self_bleach_split_g(
     Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
     components of the datamap are bleached separately).
     """
-
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
         srand(int(str(time.time_ns())[-5:-1]))
@@ -94,5 +97,8 @@ def raster_func_c_self_bleach_split_g(
         acquired_intensity[int(row / ratio), int(col / ratio)] = value
 
         if bleach:
-            bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
-                        prob_sted)
+            #
+            for step in steps:
+                bleach_func(self, i_ex, i_sted, p_ex, p_sted, step[row, col], bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
+                            prob_sted)
+            sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
