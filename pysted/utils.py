@@ -1210,7 +1210,7 @@ def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_id
     :param probability: The probability with which a synapse will start flashing
     :param synapse_flashing_dict: The dict listing whether each synapse is flashing or not
     :param synapse_flash_idx_dict: The dict listing where in their flash each synapse is
-    :param paths: paths to the events txt file and corresponding video for random light curve samlping
+    :param curves_path: Path to the .npy file of the light curves being sampled
     :param synapse_flash_curve_dict: The dict listing the sampled flash curve for every synapse
     :param isolated_synapses_frames: The dict listing the isolated synapse frames
     :param datamap: The datamap on which the synapses lie
@@ -1223,6 +1223,9 @@ def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_id
             synapse_flash_idx_dict[idx_syn] = 1
             sampled_curve = flash_generator(curves_path)
             synapse_flash_curve_dict[idx_syn] = rescale_data(sampled_curve, to_int=True, divider=3)
+            # pyplot.plot(synapse_flash_curve_dict[idx_syn])
+            # pyplot.show()
+            # exit()
 
         if synapse_flashing_dict[idx_syn]:
             datamap.whole_datamap[datamap.roi] -= isolated_synapses_frames[idx_syn]

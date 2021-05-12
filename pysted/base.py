@@ -1240,10 +1240,8 @@ class TemporalDatamap(Datamap):
         :param fwhm_step_sec_correspondance: Tuple containing the correspondance between the width of the FWHM of a
                                              a flash in arbitrary time step units, and how long we want that FWHM to
                                              last. Usually (10, 1.5) is used. MODIFY THIS SO THIS IS A DEFAULT VALUE.
-        :param event_path: Path to the file containing the dicts describing the flahses in order to generate random
-                           flashes.
-        :param video_path: Path to the video file from which the flashes were extracted. MODIFY THIS SO I HAVE SOME
-                           NUMPY ARRAYS I CAN USE DIRECTLY AND CARRY IN THE PYSTED MODULE INSTEAD OF CARRYING A
+        :param curves_path: Path to the .npy file of the light curves being sampled in order to generate random
+                            flashes.
                            HUGE .tif FILE WHICH I WILL ONLY USE FOR EXTRACTING SMALL ROIs.
         :param probability: The probability of a flash starting on a synapse.
         """
