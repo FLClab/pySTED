@@ -22,7 +22,7 @@ parser.add_argument("--save_path", type=str, default="", help="Where to save the
 parser.add_argument("--bleach", type=str2bool, default=False, help="Whether or not bleaching is on or not")
 parser.add_argument("--dmap_seed", type=int, default=None, help="Whether or not the dmap is created using a seed")
 parser.add_argument("--flash_seed", type=int, default=None, help="Whether or not the flashes are controlled by a seed")
-parser.add_argument("--acq_time", type=int, default=5, help="Acquisition time (in seconds)")
+parser.add_argument("--acq_time", type=int, default=1, help="Acquisition time (in seconds)")
 args = parser.parse_args()
 
 
@@ -32,8 +32,9 @@ if not os.path.exists(save_path):
 
 print("Setting up the datamap and its flashes ...")
 # Get light curves stuff to generate the flashes later
-event_file_path = "flash_files/stream1_events.txt"
-video_file_path = "flash_files/stream1.tif"
+# event_file_path = "flash_files/stream1_events.txt"
+# video_file_path = "flash_files/stream1.tif"
+curves_path = "flash_files/events_curves.npy"
 
 # Generate a datamap
 frame_shape = (64, 64)
@@ -44,6 +45,10 @@ ensemble_func, synapses_list = utils.generate_synaptic_fibers(frame_shape, (9, 5
 flat_synapses_list = [item for sublist in synapses_list for item in sublist]
 
 poils_frame = ensemble_func.return_frame().astype(int)
+
+# plt.imshow(poils_frame)
+# plt.show()
+# exit()
 
 print("Setting up the microscope ...")
 # Microscope stuff
@@ -85,11 +90,11 @@ detector = base.Detector(noise=True, background=0)
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
 temporal_datamap = base.TemporalDatamap(poils_frame, dpxsz, flat_synapses_list)
-microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, bleach_func="default_bleach")
+microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
 i_ex, _, _ = microscope.cache(temporal_datamap.pixelsize)
 temporal_datamap = base.TemporalDatamap(poils_frame, dpxsz, flat_synapses_list)
 temporal_datamap.set_roi(i_ex, roi)
-temporal_datamap.create_t_stack_dmap(acquisition_time, min_pdt, (10, 1.5), event_file_path, video_file_path, flash_prob)
+temporal_datamap.create_t_stack_dmap(acquisition_time, min_pdt, (10, 1.5), curves_path, flash_prob)
 
 # set up variables for acquisition loop
 t_stack_idx = 0
@@ -197,12 +202,9 @@ for t_step_idx in tqdm.trange(n_time_steps):
         t_stack_idx += 1
         if t_stack_idx >= temporal_datamap.flash_tstack.shape[0]:
             t_stack_idx = temporal_datamap.flash_tstack.shape[0] - 1
-        indices = {"flashes": t_stack_idx}
-        temporal_datamap.sub_datamaps_idx_dict = indices
-        # temporal_datamap.whole_datamap = temporal_datamap.base_datamap + temporal_datamap.flash_tstack[
-        #     indices["flashes"]]
-        temporal_datamap.sub_datamaps_dict["flashes"] = temporal_datamap.flash_tstack[
-            temporal_datamap.sub_datamaps_idx_dict["flashes"]]
+        indices["flashes"] = t_stack_idx
+        temporal_datamap["flashes"] = indices["flashes"]
+        temporal_datamap.whole_datamap = temporal_datamap["base"] + temporal_datamap["flashes"]
         roi_save_copy = np.copy(temporal_datamap.whole_datamap[temporal_datamap.roi])
         list_datamaps.append(roi_save_copy)
         idx_type[t_step_idx] = "datamap"

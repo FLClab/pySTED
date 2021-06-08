@@ -658,7 +658,7 @@ def float_to_array_verifier(float_or_array, shape):
     :param shape: The shape we want for our array (tuple)
     :returns: An array of the appropriate shape
     """
-    if type(float_or_array) is float:
+    if isinstance(float_or_array, (float, numpy.floating)):
         returned_array = numpy.ones(shape) * float_or_array
     elif type(float_or_array) is numpy.ndarray and shape == float_or_array.shape:
         returned_array = numpy.copy(float_or_array)
@@ -871,24 +871,18 @@ def sample_light_curve(light_curves):
     return smoothed_sampled
 
 
-def flash_generator(events_path, video_path):
+def flash_generator(events_curves_path):
     """
-    This function uses information from some identified flash events in a video in order to generate a random
-    flash event
-    :param events_path: path to the txt file containing the dict of flash event ROIs
-    :param video_path: path to the video file from which we extract flash event information
+    xd
+    :param events_curves_path:
     :return:
     """
-    events = event_reader(events_path)
+    events_curves = numpy.load(events_curves_path)
 
-    curves = []
-    for event in events:
-        light_curve = get_light_curve(video_path, event)
-        curves.append(light_curve)
-
-    sampled_light_curve = sample_light_curve(curves)
+    sampled_light_curve = sample_light_curve(events_curves)
 
     return sampled_light_curve
+
 
 
 def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses, min_dist, polygon_scale=(5, 10)):
@@ -911,7 +905,11 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
                                                     "scale": (1, 5)})
     n_added = 0
     synapse_positions = numpy.empty((0, 2))
+    n_loops = 0
     while n_added != n_synapses:
+        # sometimes we get infinite loops if we cant place the synapses far enough appart
+        if n_loops > n_synapses * 100:
+            break
         sampled_node = numpy.asarray(random.sample(list(fibre.nodes_position), 1)[0].astype(int))
         if numpy.less_equal(sampled_node, 0).any() or \
                 numpy.greater_equal(sampled_node, datamap_shape - numpy.ones((1, 1))).any():
@@ -935,6 +933,7 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
             else:
                 # good to add to the list
                 n_added += 1
+        n_loops += 1
 
     polygon_list = []
     for node in synapse_positions:
@@ -1203,7 +1202,7 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
         return n_time_steps, x_pixels_for_flash_ts
 
 
-def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_idx_dict, paths,
+def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_idx_dict, curves_path,
                   synapse_flash_curve_dict, isolated_synapses_frames, datamap):
     """
     This function makes 1 step in a flash routine. It loops through all the synapses in a frame to determine whether
@@ -1213,7 +1212,7 @@ def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_id
     :param probability: The probability with which a synapse will start flashing
     :param synapse_flashing_dict: The dict listing whether each synapse is flashing or not
     :param synapse_flash_idx_dict: The dict listing where in their flash each synapse is
-    :param paths: paths to the events txt file and corresponding video for random light curve samlping
+    :param curves_path: Path to the .npy file of the light curves being sampled
     :param synapse_flash_curve_dict: The dict listing the sampled flash curve for every synapse
     :param isolated_synapses_frames: The dict listing the isolated synapse frames
     :param datamap: The datamap on which the synapses lie
@@ -1224,8 +1223,11 @@ def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_id
             # can start the flash
             synapse_flashing_dict[idx_syn] = True
             synapse_flash_idx_dict[idx_syn] = 1
-            sampled_curve = flash_generator(paths["event"], paths["video"])
+            sampled_curve = flash_generator(curves_path)
             synapse_flash_curve_dict[idx_syn] = rescale_data(sampled_curve, to_int=True, divider=3)
+            # pyplot.plot(synapse_flash_curve_dict[idx_syn])
+            # pyplot.show()
+            # exit()
 
         if synapse_flashing_dict[idx_syn]:
             datamap.whole_datamap[datamap.roi] -= isolated_synapses_frames[idx_syn]

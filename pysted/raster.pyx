@@ -16,6 +16,7 @@ FLOATDTYPE = numpy.float64
 ctypedef numpy.int32_t INTDTYPE_t
 ctypedef numpy.float64_t FLOATDTYPE_t
 
+
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 def raster_func_c_self_bleach_split_g(
@@ -35,7 +36,9 @@ def raster_func_c_self_bleach_split_g(
         bint bleach,   # bint is a bool
         dict bleached_sub_datamaps_dict,
         int seed,
-        object bleach_func   # uncertain of the type for a cfunc, but this seems to be working so ???
+        object bleach_func,   # uncertain of the type for a cfunc, but this seems to be working so ???
+        object sample_func,
+        list steps
 ):
     cdef int row, col
     cdef int sprime, tprime
@@ -53,6 +56,7 @@ def raster_func_c_self_bleach_split_g(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef numpy.ndarray[int, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] step
 
     """
     raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
