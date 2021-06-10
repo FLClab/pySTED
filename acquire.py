@@ -2,15 +2,21 @@
 import numpy
 import time
 import random
+import argparse
 
 from pysted import base, utils, raster, bleach_funcs
-from pysted.microscopes import DyMINMicroscope
+from pysted.microscopes import DyMINMicroscope, RESCueMicroscope
 from matplotlib import pyplot
 
 numpy.random.seed(42)
 random.seed(42)
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--microscope", type=str, default="STED",
+                        help="Choose which microscope to acquire from")
+    args = parser.parse_args()
 
     START = time.time()
 
@@ -59,8 +65,8 @@ if __name__ == "__main__":
             "phy_react": {488: 0.25e-7,   # 1e-4
                           575: 0.25e-11},   # 1e-8
             "k_isc": 0.26e6}
-    pixelsize = 10e-9
-    bleach = True
+    pixelsize = 20e-9
+    bleach = False
     p_ex = 2e-6
     p_ex_array = numpy.ones(molecules_disposition.shape) * p_ex
     p_sted = 2.5e-3
@@ -71,19 +77,36 @@ if __name__ == "__main__":
 
     # Generating objects necessary for acquisition simulation
     laser_ex = base.GaussianBeam(488e-9)
-    laser_sted = base.DonutBeam(575e-9, zero_residual=0)
+    laser_sted = base.DonutBeam(575e-9, zero_residual=0.1)
     detector = base.Detector(noise=False, background=0, pcef=0.1)
     objective = base.Objective()
     fluo = base.Fluorescence(**egfp)
     datamap = base.Datamap(molecules_disposition, pixelsize)
 
-    opts = {
-        "scale_power" : [0., 0.25, 1.],
-        "decision_time" : [10e-6, 10e-6, -1],
-        "threshold_count" : [10, 8, 0]
-    }
-    microscope = DyMINMicroscope(laser_ex, laser_sted, detector, objective, fluo, opts=opts)
-    # microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
+    if args.microscope == "DyMIN":
+        # DyMIN microscope
+        opts = {
+            "scale_power" : [0., 0.25, 1.],
+            "decision_time" : [10e-6, 10e-6, -1],
+            "threshold_count" : [10, 8, 0]
+        }
+        microscope = DyMINMicroscope(laser_ex, laser_sted, detector, objective, fluo, opts=opts)
+    elif args.microscope == "RESCue":
+        # RESCue microscope
+        opts = {
+            "lower_threshold" : [5, -1],
+            "upper_threshold" : [25, -1],
+            "decision_time" : [10e-6, -1]
+        }
+        microscope = RESCueMicroscope(laser_ex, laser_sted, detector, objective, fluo, opts=opts)
+    elif args.microscope == "STED":
+        # STED microscope
+        microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
+    else:
+        print("Microscope <{}> does not exist...".format(args.microscope))
+        print("Please try again...".format(args.microscope))
+        exit()
+
     start = time.time()
     i_ex, i_sted, _ = microscope.cache(datamap.pixelsize, save_cache=True)
 
@@ -95,9 +118,9 @@ if __name__ == "__main__":
     #                                                                     bleach=bleach, update=False, seed=42)
 
     experiment = utils.Experiment()
-    experiment.add("DyMIN", microscope, datamap, params={"pdt":pdt, "p_ex":p_ex, "p_sted":p_sted})
-    histories = experiment.acquire_all(1, bleach=bleach, processes=1)
-    history = histories["DyMIN"]
+    experiment.add("microscope", microscope, datamap, params={"pdt":pdt, "p_ex":p_ex, "p_sted":p_sted})
+    histories = experiment.acquire_all(1, bleach=bleach, processes=0)
+    history = histories["microscope"]
 
     acquisition, bleached, scaled_power = history["acquisition"], history["datamap"], history["other"]
 

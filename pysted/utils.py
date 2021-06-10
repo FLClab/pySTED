@@ -1481,6 +1481,6 @@ class Experiment():
             for c in calls: c.get()
         else:
             for name in self.microscopes.keys():
-                name, out = experiment.acquire(name=name, num_acquisition=num_acquisition, bleach=bleach)
+                name, out = self.acquire(name=name, num_acquisition=num_acquisition, bleach=bleach)
                 history[name] = out
         return history
