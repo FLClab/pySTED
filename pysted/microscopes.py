@@ -137,7 +137,7 @@ class RESCueMicroscope(base.Microscope):
         prob_sted = numpy.ones(datamap.whole_datamap.shape)
         bleached_datamap = numpy.copy(datamap.whole_datamap)
         returned_photons = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
-        scaled_power = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
+        thresholds = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
 
         bleached_sub_datamaps_dict = {}
         if isinstance(indices, type(None)):
@@ -181,13 +181,16 @@ class RESCueMicroscope(base.Microscope):
                 # We continue to the next step
                 # At the final step we assign the number of acquired photons
 
-                # If signal is less than threshold count then skip pixel
-                scaled_power[row, col] = scale_power
-                if pixel_photons < threshold_count:
+                if (lower_threshold > 0) and (pixel_photons < lower_threshold):
+                    thresholds[row, col] = 0
+                    # returned_photons[row, col] += (pixel_photons * pdt[row, col] / decision_time).astype(int)
                     break
-
-                # Update the photon counts only on the last pixel power scale
-                if scale_power > 0.:
+                elif (upper_threshold > 0) and (pixel_photons > upper_threshold):
+                    thresholds[row, col] = 2
+                    returned_photons[row, col] += (pixel_photons * pdt[row, col] / decision_time).astype(int)
+                    break
+                else:
+                    thresholds[row, col] = 1
                     returned_photons[row, col] += pixel_photons
 
             if bleach:
@@ -200,4 +203,4 @@ class RESCueMicroscope(base.Microscope):
             datamap.base_datamap = datamap.sub_datamaps_dict["base"]
             datamap.whole_datamap = numpy.copy(datamap.base_datamap)
 
-        return returned_photons, bleached_sub_datamaps_dict, scaled_power
+        return returned_photons, bleached_sub_datamaps_dict, thresholds
