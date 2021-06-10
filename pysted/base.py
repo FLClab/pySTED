@@ -822,7 +822,7 @@ class Microscope:
 
     def laser_dans_face(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                               pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
-                              bleach_func=bleach_funcs.default_bleach):
+                              bleach_func=bleach_funcs.default_bleach_multisteps):
         """
         Test function to visualize how much laser each pixel receives
         :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)

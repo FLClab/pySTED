@@ -101,6 +101,7 @@ def raster_func_c_self_bleach_split_g(
         if bleach:
             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
                         prob_sted)
+            sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
