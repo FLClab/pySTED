@@ -1204,15 +1204,15 @@ class Datamap:
 
 class TemporalDatamap(Datamap):
     """
-    This class inherits from Datamap, adding the t dimension to it for managing Ca2+ flashes
+    This class inherits from Datamap, adding the t dimension to it for managing Ca2+ flashes and diffusion.
     The TemporalDatamap object is split into subdatamaps. In the simplest case, the only subdatamap is the base, which
     does not change with time (unless being acquired on with bleaching). In the case of Ca2+ flashes, we can add a
     subdatamap containing the flashes separately from the base datamap. Thus, for a certain time step t, the
     whole_datamap is the sum of the base and the flash at idx t.
 
-    Currently, as there is only the Ca2+ flash dynamics implemented, the TemporalDatamap is initialized bt passing
+    Currently, as there is only the Ca2+ flash dynamics implemented, the TemporalDatamap is initialized by passing
     the whole molecule disposition and the pixelsize, as for Datamap, with the addition of a list containing all of
-    the synapse objects in the Datamap. This implemention is prone to change in the future as more stuff will be added.
+    the synapse objects in the Datamap.
 
     :param whole_datamap: The disposition of the molecules in the sample. This represents the whole sample, from which
                           only a region will be imaged (roi). (numpy array)
@@ -1236,14 +1236,16 @@ class TemporalDatamap(Datamap):
         elif key == "base":
             pass
 
-    def create_t_stack_dmap(self, acq_time, pixel_dwelltime, fwhm_step_sec_correspondance, curves_path,
+    def create_t_stack_dmap(self, acq_time, min_timestep, fwhm_step_sec_correspondance, curves_path,
                             probability):
         """
         Generates the flashes for the TemporalDatamap. Updates the dictionnaries to confirm that flash subdatamaps exist
         and to initialize the flash time step at 0. Generates a flash_tstack, a 3D array containing the evolution
         of the flashes for every time step. For time step t, the whole_datamap is thus base + flash_tstack[t]
         :param acq_time: The time for which the acquisition will last, determines how many flash steps will occur. (s)
-        :param pixel_dwelltime: VERIFY IF I SHOULD BE USING THE MIN_PDT OR THE ACQ PDT. PROB THE MIN PDT RIGHT?
+        :param min_timestep: The smallest discrete time steps on which the experiment will be run. For instance, if we
+                             want an experiment to last 10 seconds, we need to define a loop that will iterate through
+                             minimal time increments, which could be 1s, 0.1s, ...
         :param fwhm_step_sec_correspondance: Tuple containing the correspondance between the width of the FWHM of a
                                              a flash in arbitrary time step units, and how long we want that FWHM to
                                              last. Usually (10, 1.5) is used. MODIFY THIS SO THIS IS A DEFAULT VALUE.
@@ -1256,7 +1258,7 @@ class TemporalDatamap(Datamap):
             utils.generate_synapse_flash_dicts(self.synapses, self.whole_datamap[self.roi].shape)
         n_flash_updates, _ = utils.compute_time_correspondances((fwhm_step_sec_correspondance[0],
                                                                 fwhm_step_sec_correspondance[1]), acq_time,
-                                                                pixel_dwelltime, mode="flash")
+                                                                min_timestep, mode="flash")
         # la base_datamap n'est pas créée tant que set_roi n'a pas été call
         self.sub_datamaps_dict["base"] = self.base_datamap
         self.flash_tstack = numpy.zeros((n_flash_updates + 1, *self.whole_datamap.shape), dtype=numpy.int32)
@@ -1276,8 +1278,12 @@ class TemporalDatamap(Datamap):
 
     def bleach_future(self, indices, bleached_sub_datamaps_dict):
         """
-        Takes a bleached datamp and its unbleached counterpart to apply the bleaching to future datamaps
-        :param flash_idx: The index of the most recent acquisition, to determine from which point forward we bleach.
+        Applies bleaching to the future flash subdatamaps according to the bleaching that occured to the current flash
+        subdatamap
+        :param indices: A dictionary containing the indices of the time steps we are currently at for the subdatamaps.
+                        For now, as there is only the flash subdatamap implemented, the dictionary will simply be
+                        indices = {"flashes": idx}, with idx being an >=0 integer.
+        :param bleached_sub_datamaps_dict: A dictionary containing the bleached subdatamaps (base, flashes)
         """
         what_bleached = self.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
         self.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
@@ -1300,7 +1306,7 @@ class TemporalDatamap(Datamap):
         """
         This method will be used to update de whole datamap using the indices of the sub datamaps.
         Whole datamap is the base datamap + all the sub datamaps (for flashes, diffusion, etc).
-        :param flash_idx: The index of the most recent acquisition.
+        :param flash_idx: The index of the flash for the most recent acquisition.
         """
         self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
 
