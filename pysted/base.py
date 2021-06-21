@@ -1091,10 +1091,18 @@ class Microscope:
 class Datamap:
     """
     This class implements a datamap, containing a disposition of molecules and a ROI to image.
+    The Datamap can be a composition of multiple parts, for instance, a 'base', which is static, a 'flashes' part,
+    which represents only the flashes occuring in the Datamap, or a 'diffusing' part, which would represent only
+    the moving molecules in the Datamap.
+    The ROI represents the portion of the Datamap that will be imaged. Since the microscope's lasers are represented by
+    arrays, we must ensure that the laser array's edges are contained within the whole Datamap array for every pixel
+    of the ROI. To facilitated this, the ROI can be set to 'max', which will simply 0 pad the passed whole_datamap so
+    the laser stays confined when scanning over the pixels of the whole_datamap.
 
     :param whole_datamap: The disposition of the molecules in the sample. This represents the whole sample, from which
                           only a region will be imaged (roi). (numpy array)
     :param datamap_pixelsize: The size of a pixel of the datamap. (m)
+
     """
 
     def __init__(self, whole_datamap, datamap_pixelsize):
@@ -1120,8 +1128,6 @@ class Datamap:
         """
         rows_min, cols_min = laser.shape[0] // 2, laser.shape[1] // 2
         rows_max, cols_max = self.whole_datamap.shape[0] - rows_min - 1, self.whole_datamap.shape[1] - cols_min - 1
-        # il faut que je gère le cas où la datamap est trop petite et que je n'ai pas le choix de padder de 0
-        # assumer qu'il voudra itérer sur tout la datamap alors
 
         if intervals is None:
             # l'utilisateur n'a pas définit de ROI, on lui demande de la définir ici
@@ -1185,7 +1191,8 @@ class Datamap:
     def set_bleached_datamap(self, bleached_datamap):
         """
         This functions updates the datamap.whole_datamap attribute to the bleached version. I put this in case the user
-        does not want to update the datamap after bleaching it in order to do multiple experiments on the same setting.
+        does not want to update the datamap after bleaching it directly through the microscope's get_signal_and_bleach
+        method, in order to do multiple experiments on the same setting.
         :param bleached_datamap: An array of the datamap after the lasers have passed over it (after it has bleached).
                                  Has to be of the same shape as self.whole_datamap
         """
