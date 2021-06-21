@@ -694,6 +694,13 @@ class Microscope:
                       microscope objective.
     :param fluo: A :class:`~pysted.base.Fluorescence` object describing the
                  fluorescence molecules to be used.
+    :param load_cache: A bool which determines whether or not the microscope's lasers will be generated from scratch
+                       (load_cache=False) or if they will be loaded from the previous save (load_cache=True). Generating
+                       the lasers from scratch can take a long time (takes longer as the pixel_size decreases), so
+                       loading the cache can save time when doing multiple experiments using the same pixel_size.
+                       It is
+                       important to use load_cache=True only if we know that the previously cached lasers were generated
+                       with the same pixel_size as the pixel_size which will be used in the current experiment.
     '''
     
     def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False):
@@ -736,6 +743,8 @@ class Microscope:
         power.
         
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
+        :param save_cache: A bool which determines whether or not the lasers will be saved to allow for faster load
+                           times for future experiments
         :returns: A tuple containing:
         
                   * A 2D array of the excitation intensity for a power of 1 W;
@@ -819,37 +828,6 @@ class Microscope:
         # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
 
-    def laser_dans_face(self, pixelsize, pixel_list=None):
-        """
-        Test function to visualize how much laser each pixel receives
-        :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
-        :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
-                           pixel will be done.
-        :returns: laser_received, an array containing the quantity of laser received per pixel,
-                  sampled, an array containing the number of times each pixel has been covered by the laser array
-        """
-        datamap_roi = self.datamap.whole_datamap[self.datamap.roi]
-        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, self.datamap.pixelsize)
-
-        i_ex, i_sted, psf_det = self.cache(self.datamap.pixelsize)
-
-        laser_received = numpy.zeros(self.datamap.whole_datamap.shape)
-        sampled = numpy.zeros(self.datamap.whole_datamap.shape)
-        rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
-        laser_pad = self.datamap.laser.shape[0] // 2
-        pdt_roi = self.datamap.pdt[self.datamap.roi]
-        p_ex_roi = self.datamap.p_ex[self.datamap.roi]
-        p_sted_roi = self.datamap.p_sted[self.datamap.roi]
-
-        for (row, col) in pixel_list:
-            laser_applied = (i_ex * p_ex_roi[row, col] + i_sted * p_sted_roi[row, col]) * pdt_roi[row, col]
-            sampled[row + rows_pad - laser_pad: row + rows_pad + laser_pad + 1,
-                    col + cols_pad - laser_pad: col + cols_pad + laser_pad + 1] += 1
-            laser_received[row + rows_pad - laser_pad: row + rows_pad + laser_pad + 1,
-                           col + cols_pad - laser_pad: col + cols_pad + laser_pad + 1] += laser_applied
-
-        return laser_received, sampled
-
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                               pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
                               bleach_func=bleach_funcs.default_update_survival_probabilities, steps=None):
@@ -864,6 +842,8 @@ class Microscope:
                      ROI being imaged. (W)
         :param p_sted: The depletion beam power. Can be either a single float value or an array of the same size as the
                        ROI being imaged. (W)
+        :param indices: A dictionary containing the indices of the subdatamaps used. This is used to apply bleaching to
+                        the future subdatamaps. If acquiring on a static Datamap, leave as None.
         :param acquired_intensity: The result of the last incomplete acquisition. This is useful in a time routine where
                                    flashes can occur mid acquisition. Leave as None if it is not the case. (array)
         :param pixel_list: The list of pixels to be iterated on. If none, a pixel_list of a raster scan will be
@@ -872,8 +852,11 @@ class Microscope:
         :param update: Determines whether the datamap is updated in place. If set to false, the datamap can still be
                        updated later with the returned bleached datamap. (Bool)
         :param seed: Sets a seed for the random number generator.
-        :param filter_bypass: Whether or not to filter the pixel list. Honestly uncertain about this param?? If
-                              pixel_list is none, this must be True then.
+        :param filter_bypass: Whether or not to filter the pixel list.
+                              This is useful if you know your pixel list is adequate and ordered differently from a
+                              raster scan (i.e. a left to right, row by row scan), as filtering the list returns it
+                              in raster order.
+                              If pixel_list is none, this must be True then.
         :param bleach_func: The bleaching function to be applied.
         :param steps: list containing the pixeldwelltimes for the sub steps of an acquisition. Is none by default.
                       Should be used if trying to implement a DyMin type acquisition, where decisions are made
@@ -922,7 +905,7 @@ class Microscope:
         # bleached_sub_datamaps_dict = copy.copy(datamap.sub_datamaps_dict)
         bleached_sub_datamaps_dict = {}
         if isinstance(indices, type(None)):
-            indices = 0   # VÉRIF À QUOI INDICES SERT?
+            indices = {"flashes": 0}
         for key in datamap.sub_datamaps_dict:
             bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key])
 
@@ -959,7 +942,6 @@ class Microscope:
             datamap.base_datamap = datamap.sub_datamaps_dict["base"]
             datamap.whole_datamap = numpy.copy(datamap.base_datamap)
             # BLEACHER LES FLASHS FUTURS
-            # pt que je dois ajouter un if indices < flash_tstack.shape[0] aussi
             if datamap.contains_sub_datamaps["flashes"] and indices["flashes"] < datamap.flash_tstack.shape[0]:
                 datamap.bleach_future(indices, bleached_sub_datamaps_dict)
 
