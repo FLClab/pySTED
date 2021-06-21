@@ -694,6 +694,13 @@ class Microscope:
                       microscope objective.
     :param fluo: A :class:`~pysted.base.Fluorescence` object describing the
                  fluorescence molecules to be used.
+    :param load_cache: A bool which determines whether or not the microscope's lasers will be generated from scratch
+                       (load_cache=False) or if they will be loaded from the previous save (load_cache=True). Generating
+                       the lasers from scratch can take a long time (takes longer as the pixel_size decreases), so
+                       loading the cache can save time when doing multiple experiments using the same pixel_size.
+                       It is
+                       important to use load_cache=True only if we know that the previously cached lasers were generated
+                       with the same pixel_size as the pixel_size which will be used in the current experiment.
     '''
     
     def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False):
@@ -736,6 +743,8 @@ class Microscope:
         power.
         
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
+        :param save_cache: A bool which determines whether or not the lasers will be saved to allow for faster load
+                           times for future experiments
         :returns: A tuple containing:
         
                   * A 2D array of the excitation intensity for a power of 1 W;
@@ -819,37 +828,6 @@ class Microscope:
         # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
 
-    def laser_dans_face(self, pixelsize, pixel_list=None):
-        """
-        Test function to visualize how much laser each pixel receives
-        :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap_obj.datamap_pixelsize. (m)
-        :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
-                           pixel will be done.
-        :returns: laser_received, an array containing the quantity of laser received per pixel,
-                  sampled, an array containing the number of times each pixel has been covered by the laser array
-        """
-        datamap_roi = self.datamap.whole_datamap[self.datamap.roi]
-        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, self.datamap.pixelsize)
-
-        i_ex, i_sted, psf_det = self.cache(self.datamap.pixelsize)
-
-        laser_received = numpy.zeros(self.datamap.whole_datamap.shape)
-        sampled = numpy.zeros(self.datamap.whole_datamap.shape)
-        rows_pad, cols_pad = self.datamap.roi_corners['tl'][0], self.datamap.roi_corners['tl'][1]
-        laser_pad = self.datamap.laser.shape[0] // 2
-        pdt_roi = self.datamap.pdt[self.datamap.roi]
-        p_ex_roi = self.datamap.p_ex[self.datamap.roi]
-        p_sted_roi = self.datamap.p_sted[self.datamap.roi]
-
-        for (row, col) in pixel_list:
-            laser_applied = (i_ex * p_ex_roi[row, col] + i_sted * p_sted_roi[row, col]) * pdt_roi[row, col]
-            sampled[row + rows_pad - laser_pad: row + rows_pad + laser_pad + 1,
-                    col + cols_pad - laser_pad: col + cols_pad + laser_pad + 1] += 1
-            laser_received[row + rows_pad - laser_pad: row + rows_pad + laser_pad + 1,
-                           col + cols_pad - laser_pad: col + cols_pad + laser_pad + 1] += laser_applied
-
-        return laser_received, sampled
-
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                               pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
                               bleach_func=bleach_funcs.default_update_survival_probabilities, steps=None):
@@ -864,6 +842,8 @@ class Microscope:
                      ROI being imaged. (W)
         :param p_sted: The depletion beam power. Can be either a single float value or an array of the same size as the
                        ROI being imaged. (W)
+        :param indices: A dictionary containing the indices of the subdatamaps used. This is used to apply bleaching to
+                        the future subdatamaps. If acquiring on a static Datamap, leave as None.
         :param acquired_intensity: The result of the last incomplete acquisition. This is useful in a time routine where
                                    flashes can occur mid acquisition. Leave as None if it is not the case. (array)
         :param pixel_list: The list of pixels to be iterated on. If none, a pixel_list of a raster scan will be
@@ -872,8 +852,11 @@ class Microscope:
         :param update: Determines whether the datamap is updated in place. If set to false, the datamap can still be
                        updated later with the returned bleached datamap. (Bool)
         :param seed: Sets a seed for the random number generator.
-        :param filter_bypass: Whether or not to filter the pixel list. Honestly uncertain about this param?? If
-                              pixel_list is none, this must be True then.
+        :param filter_bypass: Whether or not to filter the pixel list.
+                              This is useful if you know your pixel list is adequate and ordered differently from a
+                              raster scan (i.e. a left to right, row by row scan), as filtering the list returns it
+                              in raster order.
+                              If pixel_list is none, this must be True then.
         :param bleach_func: The bleaching function to be applied.
         :param steps: list containing the pixeldwelltimes for the sub steps of an acquisition. Is none by default.
                       Should be used if trying to implement a DyMin type acquisition, where decisions are made
@@ -922,7 +905,7 @@ class Microscope:
         # bleached_sub_datamaps_dict = copy.copy(datamap.sub_datamaps_dict)
         bleached_sub_datamaps_dict = {}
         if isinstance(indices, type(None)):
-            indices = 0   # VÉRIF À QUOI INDICES SERT?
+            indices = {"flashes": 0}
         for key in datamap.sub_datamaps_dict:
             bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key])
 
@@ -959,7 +942,6 @@ class Microscope:
             datamap.base_datamap = datamap.sub_datamaps_dict["base"]
             datamap.whole_datamap = numpy.copy(datamap.base_datamap)
             # BLEACHER LES FLASHS FUTURS
-            # pt que je dois ajouter un if indices < flash_tstack.shape[0] aussi
             if datamap.contains_sub_datamaps["flashes"] and indices["flashes"] < datamap.flash_tstack.shape[0]:
                 datamap.bleach_future(indices, bleached_sub_datamaps_dict)
 
@@ -1091,10 +1073,18 @@ class Microscope:
 class Datamap:
     """
     This class implements a datamap, containing a disposition of molecules and a ROI to image.
+    The Datamap can be a composition of multiple parts, for instance, a 'base', which is static, a 'flashes' part,
+    which represents only the flashes occuring in the Datamap, or a 'diffusing' part, which would represent only
+    the moving molecules in the Datamap.
+    The ROI represents the portion of the Datamap that will be imaged. Since the microscope's lasers are represented by
+    arrays, we must ensure that the laser array's edges are contained within the whole Datamap array for every pixel
+    of the ROI. To facilitated this, the ROI can be set to 'max', which will simply 0 pad the passed whole_datamap so
+    the laser stays confined when scanning over the pixels of the whole_datamap.
 
     :param whole_datamap: The disposition of the molecules in the sample. This represents the whole sample, from which
                           only a region will be imaged (roi). (numpy array)
     :param datamap_pixelsize: The size of a pixel of the datamap. (m)
+
     """
 
     def __init__(self, whole_datamap, datamap_pixelsize):
@@ -1120,8 +1110,6 @@ class Datamap:
         """
         rows_min, cols_min = laser.shape[0] // 2, laser.shape[1] // 2
         rows_max, cols_max = self.whole_datamap.shape[0] - rows_min - 1, self.whole_datamap.shape[1] - cols_min - 1
-        # il faut que je gère le cas où la datamap est trop petite et que je n'ai pas le choix de padder de 0
-        # assumer qu'il voudra itérer sur tout la datamap alors
 
         if intervals is None:
             # l'utilisateur n'a pas définit de ROI, on lui demande de la définir ici
@@ -1185,7 +1173,8 @@ class Datamap:
     def set_bleached_datamap(self, bleached_datamap):
         """
         This functions updates the datamap.whole_datamap attribute to the bleached version. I put this in case the user
-        does not want to update the datamap after bleaching it in order to do multiple experiments on the same setting.
+        does not want to update the datamap after bleaching it directly through the microscope's get_signal_and_bleach
+        method, in order to do multiple experiments on the same setting.
         :param bleached_datamap: An array of the datamap after the lasers have passed over it (after it has bleached).
                                  Has to be of the same shape as self.whole_datamap
         """
@@ -1197,15 +1186,15 @@ class Datamap:
 
 class TemporalDatamap(Datamap):
     """
-    This class inherits from Datamap, adding the t dimension to it for managing Ca2+ flashes
+    This class inherits from Datamap, adding the t dimension to it for managing Ca2+ flashes and diffusion.
     The TemporalDatamap object is split into subdatamaps. In the simplest case, the only subdatamap is the base, which
     does not change with time (unless being acquired on with bleaching). In the case of Ca2+ flashes, we can add a
     subdatamap containing the flashes separately from the base datamap. Thus, for a certain time step t, the
     whole_datamap is the sum of the base and the flash at idx t.
 
-    Currently, as there is only the Ca2+ flash dynamics implemented, the TemporalDatamap is initialized bt passing
+    Currently, as there is only the Ca2+ flash dynamics implemented, the TemporalDatamap is initialized by passing
     the whole molecule disposition and the pixelsize, as for Datamap, with the addition of a list containing all of
-    the synapse objects in the Datamap. This implemention is prone to change in the future as more stuff will be added.
+    the synapse objects in the Datamap.
 
     :param whole_datamap: The disposition of the molecules in the sample. This represents the whole sample, from which
                           only a region will be imaged (roi). (numpy array)
@@ -1229,21 +1218,21 @@ class TemporalDatamap(Datamap):
         elif key == "base":
             pass
 
-    def create_t_stack_dmap(self, acq_time, pixel_dwelltime, fwhm_step_sec_correspondance, curves_path,
+    def create_t_stack_dmap(self, acq_time, min_timestep, fwhm_step_sec_correspondance, curves_path,
                             probability):
         """
         Generates the flashes for the TemporalDatamap. Updates the dictionnaries to confirm that flash subdatamaps exist
         and to initialize the flash time step at 0. Generates a flash_tstack, a 3D array containing the evolution
         of the flashes for every time step. For time step t, the whole_datamap is thus base + flash_tstack[t]
         :param acq_time: The time for which the acquisition will last, determines how many flash steps will occur. (s)
-        :param pixel_dwelltime: VERIFY IF I SHOULD BE USING THE MIN_PDT OR THE ACQ PDT. PROB THE MIN PDT RIGHT?
+        :param min_timestep: The smallest discrete time steps on which the experiment will be run. For instance, if we
+                             want an experiment to last 10 seconds, we need to define a loop that will iterate through
+                             minimal time increments, which could be 1s, 0.1s, ...
         :param fwhm_step_sec_correspondance: Tuple containing the correspondance between the width of the FWHM of a
                                              a flash in arbitrary time step units, and how long we want that FWHM to
                                              last. Usually (10, 1.5) is used. MODIFY THIS SO THIS IS A DEFAULT VALUE.
-        :param event_path: Path to the file containing the dicts describing the flahses in order to generate random
-                           flashes.
-        :param video_path: Path to the video file from which the flashes were extracted. MODIFY THIS SO I HAVE SOME
-                           NUMPY ARRAYS I CAN USE DIRECTLY AND CARRY IN THE PYSTED MODULE INSTEAD OF CARRYING A
+        :param curves_path: Path to the .npy file of the light curves being sampled in order to generate random
+                            flashes.
                            HUGE .tif FILE WHICH I WILL ONLY USE FOR EXTRACTING SMALL ROIs.
         :param probability: The probability of a flash starting on a synapse.
         """
@@ -1251,7 +1240,7 @@ class TemporalDatamap(Datamap):
             utils.generate_synapse_flash_dicts(self.synapses, self.whole_datamap[self.roi].shape)
         n_flash_updates, _ = utils.compute_time_correspondances((fwhm_step_sec_correspondance[0],
                                                                 fwhm_step_sec_correspondance[1]), acq_time,
-                                                                pixel_dwelltime, mode="flash")
+                                                                min_timestep, mode="flash")
         # la base_datamap n'est pas créée tant que set_roi n'a pas été call
         self.sub_datamaps_dict["base"] = self.base_datamap
         self.flash_tstack = numpy.zeros((n_flash_updates + 1, *self.whole_datamap.shape), dtype=numpy.int32)
@@ -1271,8 +1260,12 @@ class TemporalDatamap(Datamap):
 
     def bleach_future(self, indices, bleached_sub_datamaps_dict):
         """
-        Takes a bleached datamp and its unbleached counterpart to apply the bleaching to future datamaps
-        :param flash_idx: The index of the most recent acquisition, to determine from which point forward we bleach.
+        Applies bleaching to the future flash subdatamaps according to the bleaching that occured to the current flash
+        subdatamap
+        :param indices: A dictionary containing the indices of the time steps we are currently at for the subdatamaps.
+                        For now, as there is only the flash subdatamap implemented, the dictionary will simply be
+                        indices = {"flashes": idx}, with idx being an >=0 integer.
+        :param bleached_sub_datamaps_dict: A dictionary containing the bleached subdatamaps (base, flashes)
         """
         what_bleached = self.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
         self.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
@@ -1295,7 +1288,7 @@ class TemporalDatamap(Datamap):
         """
         This method will be used to update de whole datamap using the indices of the sub datamaps.
         Whole datamap is the base datamap + all the sub datamaps (for flashes, diffusion, etc).
-        :param flash_idx: The index of the most recent acquisition.
+        :param flash_idx: The index of the flash for the most recent acquisition.
         """
         self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
 
