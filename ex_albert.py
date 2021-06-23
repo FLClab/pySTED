@@ -9,6 +9,7 @@ molecules_disposition[30:40, 30:40] = 10
 # molecules_disposition = np.zeros((3, 3))
 # molecules_disposition[1, 1] = 10
 
+print("test")
 print("Setting up the microscope ...")
 # Microscope stuff
 egfp = {"lambda_": 535e-9,
