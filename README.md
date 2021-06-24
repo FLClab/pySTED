@@ -10,11 +10,16 @@ Open a terminal and cd into the audurand_pysted directory. Then call
 
 <code> python -m venv ./my_venv </code>
 
-This should create a folder named my_venv inside the audurand_pysted folder. Then run
+This should create a folder named my_venv inside the audurand_pysted folder. The next step will depend on your operating
+system. If you are running Windows, run
 
 <code> my_venv\Scripts\activate.bat </code>
 
-To activate the virtual environment. To install the necessary public libraries, run
+If you are running a Linux system (MAC TOO ??? NEED TO VERIFY :) ), run
+
+<code> source ./my_venv/bin/activate </code>
+
+This activates the virtual environment. To install the necessary public libraries, run
 
 <code> python -m pip install -r requirements.txt </code>
 
