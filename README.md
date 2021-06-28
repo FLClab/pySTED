@@ -31,6 +31,21 @@ and run
 
 <code>python -m pip install -e audurand_pysted </code>
 
+<p>To allow your jupyter notebook to use this venv as a kernel, run
+
+<code>ipython kernel install --name "my_venv" --user</code>
+
+Then once you launch the jupyter notebook
+
+<code>jupter notebook</code>
+
+and head into the <code>pySTED_tutorial.ipynb</code> file, you should see a kernel named my_venv in the 
+kernels drop-down menu
+
+![yo](/examples/kernel.png)
+
+</p>
+
 <p> Once the C functions are compiled, try running the <code>ex_albert.py</code> script. It can take a while to 
 execute, but you should get a figure that looks like </p>
 
