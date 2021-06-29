@@ -11,6 +11,20 @@ class Synapse():
     Implemented with the intent of using a datamap_pixelsize of 20nm, to generate synapses with width of 500nm and
     height of 200nm inside a 64px by 64px datamap (1080nm x 1080nm).
     The synapse will have nanodomains along its upper edge
+    :param n_molecs: The number of molecules that will be placed in every pixel of the synapse
+    :param datamap_pixelsize_nm: The pixelsize (in nm) of the datamap
+    :param width_nm: Interval for the desired width (in nm) of the synapse. The width will be sampled from this interval
+    :param height_nm: Interval for the desired height (in nm) of the synapse. The height will be sampled from this
+                      interval
+    :param img_shape: The shape of the image (tuple)
+    :param dendrite_thickness: Interval for the desired thickness of the dendrite (in pixels) to which the synapse is
+                               connected. The height will be sampled from this interval. Basically, this just determines
+                               how much of the dendrite we see in the ROI, drawn as a line on the bottom of the image.
+    :param mode: The mode used for the random synapse generation. 'mushroom' will produce a mushroom-like synapse
+                 (i.e., an ellipse connected to the dendrite by a recangular-ish neck). 'bump' will produce a bump-like
+                 synapse (i.e., a have ellipse protruding from the dendrite). 'rand' will randomly select one of these
+                 2 modes.
+    :param seed: Sets the seed for the randomness
     """
     def __init__(self, n_molecs, datamap_pixelsize_nm=20, width_nm=(500, 1000), height_nm=(300, 500),
                  img_shape=(64, 64), dendrite_thickness=(1, 10), mode='rand', seed=None):
