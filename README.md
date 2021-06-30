@@ -37,7 +37,7 @@ and run
 
 Then once you launch the jupyter notebook
 
-<code>jupter notebook</code>
+<code>jupyter notebook</code>
 
 and head into the <code>pySTED_tutorial.ipynb</code> file, you should see a kernel named my_venv in the 
 kernels drop-down menu
