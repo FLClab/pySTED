@@ -32,6 +32,7 @@ class Synapse():
         np.random.seed(seed)
         self.img_shape = img_shape
         self.datamap_pixelsize_nm = datamap_pixelsize_nm
+        self.n_molecs_base = n_molecs
 
         modes = {0: 'mushroom', 1: 'bump', 2: 'rand'}
         if mode not in modes.values():
@@ -121,7 +122,7 @@ class Synapse():
         return valid_nanodomains_pos
 
 
-    def add_nanodomains(self, n_nanodmains, min_dist_nm=200, molecs_in_domain=5):
+    def add_nanodomains(self, n_nanodmains, min_dist_nm=200, n_molecs_in_domain=5, seed=None):
         """
         Adds nanodomains on the periphery of the synapse.
         :param n_nanodmains: The number of nanodomains that will be attempted to be added. If n_nanodomains is too
@@ -129,8 +130,9 @@ class Synapse():
                              in which case a warning will be raised to tell the user not all nanodomains have been
                              placed
         :param min_dist: The minimum distance (in nm) separating the nanodomains.
-        :param molecs_in_domain: The number of molecules to be added at the nanodomain positions
+        :param n_molecs_in_domain: The number of molecules to be added at the nanodomain positions
         """
+        np.random.seed(seed)
         self.nanodomains = []
         self.nanodomains_coords = []
         n_nanodmains_placed = 0
@@ -149,7 +151,28 @@ class Synapse():
             self.valid_nanodomains_pos = np.delete(self.valid_nanodomains_pos, invalid_positions_idx, axis=0)
 
         for row, col in self.nanodomains_coords:
-            self.frame[row, col] += molecs_in_domain
+            self.frame[row, col] += n_molecs_in_domain
+        self.n_molecs_in_domains = n_molecs_in_domain
+
+    def fatten_nanodomains(self):
+        """
+        Fattens the nanodomains by 1 pixel on each side (if the side is within the synapse)
+        """
+        nanodomains_px = np.argwhere(self.frame == self.n_molecs_base + self.n_molecs_in_domains)
+        for i in range(nanodomains_px.shape[0]):
+            # look on all sides of the pixel, if it is within the synapse and not already part of a nanodomain,
+            # add molecules to make it part of the nanodomain
+            row, col = nanodomains_px[i, :]
+            if (self.frame[row - 1, col] == self.n_molecs_base):   # look on top
+                self.frame[row - 1, col] += self.n_molecs_in_domains
+            if (self.frame[row + 1, col] == self.n_molecs_base):   # look on bot
+                self.frame[row + 1, col] += self.n_molecs_in_domains
+            if (self.frame[row, col - 1] == self.n_molecs_base):   # look right
+                self.frame[row, col - 1] += self.n_molecs_in_domains
+            if (self.frame[row, col + 1] == self.n_molecs_base):   # look left
+                self.frame[row, col + 1] += self.n_molecs_in_domains
+
+
 
 
 class Nanodomain():
