@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 from matplotlib import pyplot as plt
 from skimage import draw
 from scipy.ndimage.morphology import binary_fill_holes
@@ -105,7 +106,7 @@ class Synapse():
         """
         Returns a list of the valid nanodomain positions. The valid positions are on the upper half of the perimeter
         of the synapse
-        :return:
+        :return: list of the valid positions for the nanodomains.
         """
         # row_too_low_perimeter = np.argwhere(self.ellipse_perimeter[:, 0] >= self.img_shape[0])
         # self.ellipse_perimeter = np.delete(self.ellipse_perimeter, row_too_low_perimeter, axis=0)
@@ -122,23 +123,30 @@ class Synapse():
 
     def add_nanodomains(self, n_nanodmains, min_dist_nm=200, molecs_in_domain=5):
         """
-
-        :param n_nanodmains:
-        :param min_dist:
-        :return:
+        Adds nanodomains on the periphery of the synapse.
+        :param n_nanodmains: The number of nanodomains that will be attempted to be added. If n_nanodomains is too
+                             high and the min_dist_nm is too high, it may not be able to place all the nanodomains,
+                             in which case a warning will be raised to tell the user not all nanodomains have been
+                             placed
+        :param min_dist: The minimum distance (in nm) separating the nanodomains.
         """
         self.nanodomains = []
         self.nanodomains_coords = []
+        n_nanodmains_placed = 0
         for i in range(n_nanodmains):
             if self.valid_nanodomains_pos.shape[0] == 0:
                 # no more valid positions, simply stop
+                warnings.warn(f"Attempted to place {n_nanodmains} nanodomains, but only {n_nanodmains_placed} could"
+                              f"be placed due to the minimum distance of {min_dist_nm} separating them")
                 break
             self.nanodomains.append(Nanodomain(self.img_shape, self.valid_nanodomains_pos))
             self.nanodomains_coords.append(self.nanodomains[i].coords)
+            n_nanodmains_placed += 1
             distances = cdist(np.array(self.nanodomains_coords), self.valid_nanodomains_pos)
             distances *= self.datamap_pixelsize_nm
             invalid_positions_idx = np.argwhere(distances < min_dist_nm)[:, 1]
             self.valid_nanodomains_pos = np.delete(self.valid_nanodomains_pos, invalid_positions_idx, axis=0)
+
         for row, col in self.nanodomains_coords:
             self.frame[row, col] += 5
 
@@ -148,6 +156,8 @@ class Nanodomain():
     Nanodomain class
     For now I don't think this will do much other than say where the nanodomains are situated. For later exps, we will
     add flash routines and such to this class :)
+    :param img_shape: The shape of the image in which the nanodomains will be placed
+    :param valid_positions: A list of the valid positions from which to randomly sample a nanodomain position.
     """
     def __init__(self, img_shape, valid_positions=None):
         """
