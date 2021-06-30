@@ -129,6 +129,7 @@ class Synapse():
                              in which case a warning will be raised to tell the user not all nanodomains have been
                              placed
         :param min_dist: The minimum distance (in nm) separating the nanodomains.
+        :param molecs_in_domain: The number of molecules to be added at the nanodomain positions
         """
         self.nanodomains = []
         self.nanodomains_coords = []
@@ -148,7 +149,7 @@ class Synapse():
             self.valid_nanodomains_pos = np.delete(self.valid_nanodomains_pos, invalid_positions_idx, axis=0)
 
         for row, col in self.nanodomains_coords:
-            self.frame[row, col] += 5
+            self.frame[row, col] += molecs_in_domain
 
 
 class Nanodomain():
