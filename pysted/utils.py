@@ -7,6 +7,7 @@ For use by FLClab (@CERVO) authorized people
 '''
 
 import numpy
+import numpy as np
 import scipy, scipy.constants, scipy.integrate
 
 # import mis par BT
@@ -869,18 +870,36 @@ def sample_light_curve(light_curves):
     return smoothed_sampled
 
 
-def flash_generator(events_curves_path):
+def flash_generator(events_curves_path, seed=None):
     """
-    xd
-    :param events_curves_path:
-    :return:
+    Generates a flash by sampling from statistics built from save light curves
+    :param events_curves_path: Path to the .npy file containing the light curves
+    :param seed: Sets the seed for random sampling :)
+    :return: A sampled light curve
     """
+    numpy.random.seed(seed)
     events_curves = numpy.load(events_curves_path)
 
     sampled_light_curve = sample_light_curve(events_curves)
 
     return sampled_light_curve
 
+
+def hand_crafted_light_curve(delay=10, n_decay_steps=10, n_molecules_multiplier=14):
+    """
+    Hand crafted light curve that looks more like a peak :)
+    """
+    # why is it so hard for me to plot an exponential decay
+    tau = 3
+    tmax = 10
+    t = np.linspace(0, tmax, n_decay_steps)
+    y = n_molecules_multiplier * np.exp(-t / tau)
+
+    light_curve = np.ones(20)
+    light_curve[delay:delay + y.shape[0]] *= y
+    light_curve = numpy.where(light_curve < 1, 1, light_curve)
+
+    return light_curve
 
 
 def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses, min_dist, polygon_scale=(5, 10)):
@@ -1198,6 +1217,24 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
         n_time_steps = int(acquisition_time_sec / pixel_dwelltime)   # fait chier que les ordis savent pas comment math
         x_pixels_for_flash_ts = round(sec_per_time_step / pixel_dwelltime)
         return n_time_steps, x_pixels_for_flash_ts
+
+
+def time_quantum_to_flash_tstep_correspondance(fwhm_step_sec_corresnpondance, time_quantum_us):
+    """
+    Computes the correspondance between the time quantum value (in us) and the flash time steps
+    :param fwhm_step_sec_corresnpondance: A tuple containing how large in time steps the FWHM of the mean flash is at
+                                          index 0 and how large in useconds we want the FWHM to be at index 1
+    :param time_quantum_us: Value of the time quantum used by the master clock (in us)
+    :return:
+    """
+    fwhm_time_usecs, fwhm_time_steps = fwhm_step_sec_corresnpondance[1], fwhm_step_sec_corresnpondance[0]
+    usec_per_time_step = fwhm_time_usecs / fwhm_time_steps
+    # I think in most cases, the time_quantum will be 1 us
+    # I also need to make sure the fwhm_time_usecs is in usecs and is a multiple of the time_quantum_us ?
+    n_time_quantums_per_flash_ts = int(usec_per_time_step / time_quantum_us)
+    return n_time_quantums_per_flash_ts
+
+
 
 
 def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_idx_dict, curves_path,
