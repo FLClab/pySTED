@@ -27,7 +27,7 @@ class Synapse():
                  2 modes.
     :param seed: Sets the seed for the randomness
     """
-    def __init__(self, n_molecs, datamap_pixelsize_nm=20, width_nm=(500, 1000), height_nm=(300, 500),
+    def __init__(self, n_molecs, datamap_pixelsize_nm=20, width_nm=(400, 800), height_nm=(300, 600),
                  img_shape=(64, 64), dendrite_thickness=(1, 10), mode='rand', seed=None):
         np.random.seed(seed)
         self.img_shape = img_shape

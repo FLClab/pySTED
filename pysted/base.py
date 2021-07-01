@@ -1304,7 +1304,29 @@ class TemporalDatamap(Datamap):
 
 class Clock():
     """
-    tik tok on the clock
+    Clock class to keep track of time in experiments involving time
+    :param time_quantum_us: The minimal time increment on which the experiment loop will happen. All other time
+                            increments in the experiment should be a multiple of this value (in micro seconds (us))
+                            (int)
+
+    Note : The time_quantum_us is an int and so is the current_time attribute. This means the longest time an experiment
+           can last is determined by the size of the biggest int, which means it is 9223372036854775807 us, or
+           9223372036854.775807 s, which I think should be ample time :)
     """
-    def __init__(self):
-        pass
+    def __init__(self, time_quantum_us):
+        if type(time_quantum_us) is not int:
+            raise TypeError(f"The time_quantum_us value should be an int, but a {type(time_quantum_us)} was passed !")
+        self.time_quantum_us = time_quantum_us
+        self.current_time = 0
+
+    def update_time(self):
+        """
+        Updates the current_time by 1 time_quantum_us
+        """
+        self.current_time += self.time_quantum_us
+
+    def reset(self):
+        """
+        Resets the current_time to 0
+        """
+        self.current_time = 0
