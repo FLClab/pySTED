@@ -1300,3 +1300,11 @@ class TemporalDatamap(Datamap):
         """
         self.sub_datamaps_idx_dict = indices
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
+
+
+class Clock():
+    """
+    tik tok on the clock
+    """
+    def __init__(self):
+        pass
