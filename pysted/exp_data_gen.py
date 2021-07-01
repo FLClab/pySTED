@@ -103,39 +103,48 @@ class Synapse():
 
         self.frame = np.where(img, n_molecs, 0)
 
-    def filter_valid_nanodomain_pos(self):
+    def filter_valid_nanodomain_pos(self, thickness=0):
         """
         Returns a list of the valid nanodomain positions. The valid positions are on the upper half of the perimeter
         of the synapse
+        :param thickness: The thickness of the valid region for the nanodomains. This value is 0 by default, meaning the
+                          nanodomains will only be placed on the upper perimeter of the synapse
         :return: list of the valid positions for the nanodomains.
         """
-        # row_too_low_perimeter = np.argwhere(self.ellipse_perimeter[:, 0] >= self.img_shape[0])
-        # self.ellipse_perimeter = np.delete(self.ellipse_perimeter, row_too_low_perimeter, axis=0)
         ellipsis_min_row = np.min(self.ellipse_perimeter[:, 0])
         ellipsis_max_row = np.max(self.ellipse_perimeter[:, 0])
         ellipsis_height = ellipsis_max_row - ellipsis_min_row
 
         lower_half_perimeter = np.argwhere(self.ellipse_perimeter[:, 0] >= ellipsis_min_row + int(ellipsis_height / 2))
-        valid_nanodomains_pos = np.delete(self.ellipse_perimeter, lower_half_perimeter, axis=0)
-        self.valid_nanodomains_pos = valid_nanodomains_pos
+        pixels_in_top_half_perimeter = np.delete(self.ellipse_perimeter, lower_half_perimeter, axis=0)
 
-        return valid_nanodomains_pos
+        synapse_pixels = np.argwhere(self.frame > 0)
+        distances = cdist(synapse_pixels, pixels_in_top_half_perimeter)
+        valid_pixels_idx = np.argwhere(distances <= thickness)[:, 0]
+        valid_pixels = synapse_pixels[valid_pixels_idx]
+        self.valid_nanodomains_pos = valid_pixels
+
+        return valid_pixels
 
 
-    def add_nanodomains(self, n_nanodmains, min_dist_nm=200, n_molecs_in_domain=5, seed=None):
+    def add_nanodomains(self, n_nanodmains, min_dist_nm=200, n_molecs_in_domain=5, seed=None, valid_thickness=0):
         """
         Adds nanodomains on the periphery of the synapse.
         :param n_nanodmains: The number of nanodomains that will be attempted to be added. If n_nanodomains is too
                              high and the min_dist_nm is too high, it may not be able to place all the nanodomains,
                              in which case a warning will be raised to tell the user not all nanodomains have been
                              placed
-        :param min_dist: The minimum distance (in nm) separating the nanodomains.
+        :param min_dist_nm: The minimum distance (in nm) separating the nanodomains.
         :param n_molecs_in_domain: The number of molecules to be added at the nanodomain positions
+        :param seed: Sets the seed for the random placement of nanodomains
+        :param valid_thickness: The thickness of the valid region for the nanodomains. This value is 0 by default,
+                                meaning the nanodomains will only be placed on the upper perimeter of the synapse
         """
         np.random.seed(seed)
         self.nanodomains = []
         self.nanodomains_coords = []
         n_nanodmains_placed = 0
+        self.filter_valid_nanodomain_pos(thickness=valid_thickness)
         for i in range(n_nanodmains):
             if self.valid_nanodomains_pos.shape[0] == 0:
                 # no more valid positions, simply stop
