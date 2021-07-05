@@ -885,9 +885,15 @@ def flash_generator(events_curves_path, seed=None):
     return sampled_light_curve
 
 
-def hand_crafted_light_curve(delay=10, n_decay_steps=10, n_molecules_multiplier=14):
+def hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
     """
-    Hand crafted light curve that looks more like a peak :)
+    Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.
+    :param delay: The number of steps before the peak of the light curve.
+    :param n_decay_steps: The number of steps for the light curve to return to 1
+    :param n_molecules_multiplier: The value of the light curve at it's peak
+    :param end_pad: The number of steps where the curve stays flat at 1 after the end of the exponential decay.
+    :returns: The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
+              then decays back to 1 over t = n_decay_steps steps, and stays flat at 1 for end_pad + 1 steps
     """
     # why is it so hard for me to plot an exponential decay
     tau = 3
@@ -895,7 +901,8 @@ def hand_crafted_light_curve(delay=10, n_decay_steps=10, n_molecules_multiplier=
     t = np.linspace(0, tmax, n_decay_steps)
     y = n_molecules_multiplier * np.exp(-t / tau)
 
-    light_curve = np.ones(20)
+    # light_curve = np.ones(20)
+    light_curve = np.ones(delay + n_decay_steps + end_pad)
     light_curve[delay:delay + y.shape[0]] *= y
     light_curve = numpy.where(light_curve < 1, 1, light_curve)
 

@@ -9,9 +9,10 @@ import sys
 
 # save_path = os.path.join(os.path.expanduser('~'), "Documents", "research", "NeurIPS", "exp_runtimes")
 
-hand_crafted_light_curve = utils.hand_crafted_light_curve(delay=2, n_decay_steps=5, n_molecules_multiplier=14)
+hand_crafted_light_curve = utils.hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=14)
 
 plt.plot(hand_crafted_light_curve)
+plt.title(f"shape = {hand_crafted_light_curve.shape}")
 plt.show()
 exit()
 
