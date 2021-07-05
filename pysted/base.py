@@ -1326,7 +1326,7 @@ class TemporalSynapseDmap(Datamap):
 
         flash_curve = utils.hand_crafted_light_curve(delay=delay, n_decay_steps=n_decay_steps,
                                                      n_molecules_multiplier=n_molecules_multiplier, end_pad=end_pad)
-        print(self.roi)
+
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
         for t, nanodomains_multiplier in enumerate(flash_curve):
             nd_mult = int(numpy.round(nanodomains_multiplier))
