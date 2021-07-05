@@ -190,6 +190,8 @@ class Synapse():
         l'idée du delay est que je ne veux pas nécessairement commencer la routine de flash au début de l'exp, je ne
         suis pas certain de comment je veux l'implem encore :)
 
+        *** ??? I DON'T THINK THIS IS HOW I WANT TO HANDLE IT ??? ***
+
         :param current_time: The current_time of the clock
         """
         n_time_quantums_us_per_flash_step = utils.time_quantum_to_flash_tstep_correspondance(

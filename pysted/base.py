@@ -1302,6 +1302,90 @@ class TemporalDatamap(Datamap):
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
 
 
+class TemporalSynapseDmap(Datamap):
+    """
+    Temporal Datamap of a Synaptic region with nanodomains for NeurIPS exps
+    """
+    def __init__(self, whole_datamap, datamap_pixelsize, synapse_obj):
+        super().__init__(whole_datamap, datamap_pixelsize)
+        # faudrait que j'ajoute un attribut qui est l'objet synapse
+        self.synapse = synapse_obj
+        self.contains_sub_datamaps = {"base": True,
+                                      "flashes": False}
+        self.sub_datamaps_idx_dict = {}
+
+    def create_t_stack_dmap(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
+        """
+        Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
+        Assumes the roi is set
+        """
+        self.decay_time_us = decay_time_us
+        self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
+        self.sub_datamaps_dict["base"] = self.base_datamap
+
+        flash_curve = utils.hand_crafted_light_curve(delay=delay, n_decay_steps=n_decay_steps,
+                                                     n_molecules_multiplier=n_molecules_multiplier, end_pad=end_pad)
+        print(self.roi)
+        self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
+        for t, nanodomains_multiplier in enumerate(flash_curve):
+            nd_mult = int(numpy.round(nanodomains_multiplier))
+            for nanodomain in self.synapse.nanodomains:
+                self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
+                    self.synapse.n_molecs_base * nd_mult - self.synapse.n_molecs_base
+
+        self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+
+    def bleach_future(self, indices, bleached_sub_datamaps_dict):
+        """
+        Applies bleaching to the future flash subdatamaps according to the bleaching that occured to the current flash
+        subdatamap
+        :param indices: A dictionary containing the indices of the time steps we are currently at for the subdatamaps.
+                        For now, as there is only the flash subdatamap implemented, the dictionary will simply be
+                        indices = {"flashes": idx}, with idx being an >=0 integer.
+        :param bleached_sub_datamaps_dict: A dictionary containing the bleached subdatamaps (base, flashes)
+        """
+        what_bleached = self.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
+        self.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
+        # UPDATE THE FUTURE
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            flash_survival = bleached_sub_datamaps_dict["flashes"] / self.flash_tstack[indices["flashes"]]
+        flash_survival[numpy.isnan(flash_survival)] = 1
+        self.flash_tstack[indices["flashes"] + 1:] -= what_bleached
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.multiply(
+            self.flash_tstack[indices["flashes"] + 1:],
+            flash_survival)
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.rint(
+            self.flash_tstack[indices["flashes"] + 1:])
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.where(
+            self.flash_tstack[indices["flashes"] + 1:] < 0,
+            0, self.flash_tstack[indices["flashes"] + 1:])
+        self.whole_datamap += self.flash_tstack[indices["flashes"]]
+
+    def update_whole_datamap(self, flash_idx):
+        """
+        This method will be used to update de whole datamap using the indices of the sub datamaps.
+        Whole datamap is the base datamap + all the sub datamaps (for flashes, diffusion, etc).
+        :param flash_idx: The index of the flash for the most recent acquisition.
+        """
+        # If the experiment runs longer than the generated flash curve, just keep extending the final value of the curve
+        if flash_idx >= self.flash_tstack.shape[0]:
+            flash_idx = self.flash_tstack.shape[0] - 1
+        self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
+
+
+    def update_dicts(self, indices):
+        """
+        Method used to update the dicts of the temporal datamap
+        :param indices: A dict containing the indices of the time step for the different temporal sub datamaps (so far
+                        only flashes).
+        """
+        self.sub_datamaps_idx_dict = indices
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
+
+
 class Clock():
     """
     Clock class to keep track of time in experiments involving time
