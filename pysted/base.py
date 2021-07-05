@@ -907,7 +907,8 @@ class Microscope:
         if isinstance(indices, type(None)):
             indices = {"flashes": 0}
         for key in datamap.sub_datamaps_dict:
-            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key])
+            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key].astype(int))
+            # print(bleached_sub_datamaps_dict[key].dtype)
 
         if seed is None:
             seed = 0

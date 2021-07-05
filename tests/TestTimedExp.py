@@ -21,6 +21,7 @@ shroom = exp_data_gen.Synapse(5, mode="mushroom", seed=42)
 n_molecs_in_domain = 0
 min_dist = 100
 shroom.add_nanodomains(40, min_dist_nm=min_dist, n_molecs_in_domain=n_molecs_in_domain, seed=42, valid_thickness=3)
+shroom.frame = shroom.frame.astype(int)
 
 print("Setting up the microscope ...")
 # Microscope stuff
@@ -43,7 +44,7 @@ dpxsz = 10e-9
 bleach = False
 p_ex = 1e-6
 p_sted = 30e-3
-pdt = 10e-6
+pdt = np.ones(shroom.frame.shape) * 10e-6
 
 # Generating objects necessary for acquisition simulation
 laser_ex = base.GaussianBeam(488e-9)
@@ -59,12 +60,72 @@ temporal_synapse_dmap.set_roi(i_ex, intervals='max')
 decay_time_us = 1000000   # 1 seconde
 temporal_synapse_dmap.create_t_stack_dmap(decay_time_us)
 
+# for now I will only code this acquisition loop in which the agent spams confocal acquisitions
+selected_action = "confocal"
+pixel_list = []
+pixel_list_idx = 0
 flash_step = 0
+indices = {"flashes": flash_step}
+confocal_acquisitions = []
+intensity = np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi].shape).astype(float)
 for i in tqdm.trange(exp_time):
     master_clock.update_time()
+    microscope.time_bank += master_clock.time_quantum_us * 1e-6   # add time to the time_bank in seconds
+
+    # verify how many pixels we can image in the list
+    if len(pixel_list) == 0:
+        # refill the pixel list (with all pixels in a raster scan for now)
+        pixel_list = utils.pixel_sampling(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi])
+        pixel_list_idx = 0
+    next_pixel_time_to_img = pdt[tuple(pixel_list[pixel_list_idx])]
+    if microscope.time_bank >= next_pixel_time_to_img:
+        pixel_list_idx += 1
+        microscope.time_bank -= next_pixel_time_to_img
+
+
+    # if the nanodomains flashing are updated, do a partial acquisition
     if master_clock.current_time % temporal_synapse_dmap.time_usec_between_flash_updates == 0:
+
+        # faire l'acquisition de la confocale jusqu'où on a assez de temps
+        confocal_acq, _, intensity = microscope.get_signal_and_bleach(temporal_synapse_dmap,
+                                                                      temporal_synapse_dmap.pixelsize,
+                                                                      pdt, p_ex, p_sted, indices=indices,
+                                                                      acquired_intensity=intensity,
+                                                                      pixel_list=pixel_list[:pixel_list_idx + 1],
+                                                                      bleach=False, update=False)
+        # remove the imaged pixels from the pixel_list and reset the idx
+        pixel_list = pixel_list[pixel_list_idx + 1:]
+        pixel_list_idx = 0
+
+        # if this completed the acquisition, add the acquisition to the list, reset the intensity map
+        if len(pixel_list) == 0:
+            confocal_acquisitions.append(np.copy(confocal_acq))
+            intensity = np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi].shape).astype(float)
+
+
+        # update the flash
         flash_step += 1
+        indices["flashes"] = flash_step
         temporal_synapse_dmap.update_whole_datamap(flash_step)
-        plt.imshow(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi])
-        plt.title(f"current_time = {master_clock.current_time}, flash_step = {flash_step}")
-        plt.show()
+        # plt.imshow(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi])
+        # plt.title(f"current_time = {master_clock.current_time}, flash_step = {flash_step}")
+        # plt.show()
+
+    elif pixel_list_idx == len(pixel_list) - 1:   # or else complete the acquisition if we are in measure of
+        confocal_acq, _, intensity = microscope.get_signal_and_bleach(temporal_synapse_dmap,
+                                                                      temporal_synapse_dmap.pixelsize, pdt, p_ex,
+                                                                      p_sted, indices=indices,
+                                                                      acquired_intensity=intensity,
+                                                                      pixel_list=pixel_list[:pixel_list_idx + 1],
+                                                                      bleach=False, update=False)
+        # remove the imaged pixels from the pixel_list and reset the idx
+        pixel_list = pixel_list[pixel_list_idx + 1:]
+        pixel_list_idx = 0
+
+        confocal_acquisitions.append(np.copy(confocal_acq))
+        intensity = np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi].shape).astype(float)
+
+        if len(pixel_list) != 0:
+            print("uh oh something's wrong")
+
+print(len(confocal_acquisitions))
