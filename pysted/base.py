@@ -908,7 +908,6 @@ class Microscope:
             indices = {"flashes": 0}
         for key in datamap.sub_datamaps_dict:
             bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key].astype(int))
-            # print(bleached_sub_datamaps_dict[key].dtype)
 
         if seed is None:
             seed = 0
@@ -1314,6 +1313,13 @@ class TemporalSynapseDmap(Datamap):
         self.contains_sub_datamaps = {"base": True,
                                       "flashes": False}
         self.sub_datamaps_idx_dict = {}
+
+    def __setitem__(self, key, value):
+        if key == "flashes":
+            self.sub_datamaps_idx_dict[key] = value
+            self.sub_datamaps_dict[key] = self.flash_tstack[value]
+        elif key == "base":
+            pass
 
     def create_t_stack_dmap(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
         """
