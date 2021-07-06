@@ -1369,6 +1369,7 @@ class TemporalSynapseDmap(Datamap):
         self.flash_tstack[indices["flashes"] + 1:] = numpy.where(
             self.flash_tstack[indices["flashes"] + 1:] < 0,
             0, self.flash_tstack[indices["flashes"] + 1:])
+        self.flash_tstack = self.flash_tstack.astype('int64')
         self.whole_datamap += self.flash_tstack[indices["flashes"]]
 
     def update_whole_datamap(self, flash_idx):
