@@ -41,10 +41,9 @@ egfp = {"lambda_": 535e-9,
                       575: 1e-10},   # 1e-8
         "k_isc": 0.26e6}
 pixelsize = 20e-9
-dpxsz = 10e-9
 bleach = False
-p_ex = 1e-6
-p_sted = 30e-3
+# p_ex = 1e-6
+# p_sted = 30e-3
 pdt = np.ones(shroom.frame.shape) * 10e-6
 
 # Generating objects necessary for acquisition simulation
@@ -61,19 +60,39 @@ temporal_synapse_dmap.set_roi(i_ex, intervals='max')
 decay_time_us = 1000000   # 1 seconde
 temporal_synapse_dmap.create_t_stack_dmap(decay_time_us)
 
-# for now I will only code this acquisition loop in which the agent spams confocal acquisitions
-selected_action = "confocal"
+# changing it for random action selection
+actions = {0: "confocal", 1: "sted", 2: "wait"}
+action_selected, action_completed = None, False
+selected_actions = []
 pixel_list = []
 pixel_list_idx = 0
 flash_step = 0
 indices = {"flashes": flash_step}
-confocal_acquisitions = []
+acquisitions = []
 dmaps_during_acqs = []
 bleached_dmaps = []
 intensity = np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi].shape).astype(float)
 for i in tqdm.trange(exp_time):
     master_clock.update_time()
     microscope.time_bank += master_clock.time_quantum_us * 1e-6   # add time to the time_bank in seconds
+
+    # ajouter la sélection d'Action :)))))))))))))))))))))))
+    if (action_selected is None) or (action_completed):
+        action_selected = actions[np.random.randint(0, 3)]
+        if action_selected == "confocal":
+            p_ex, p_sted = 1e-6, 0.0
+            selected_actions.append("confocal")
+        elif action_selected == "sted":
+            p_ex, p_sted = 1e-6, 30e-3
+            selected_actions.append("sted")
+        elif action_selected == "wait":
+            p_ex, p_sted = 0.0, 0.0
+            selected_actions.append("wait")
+        else:
+            print("this shouldn't be possible!!")
+            p_ex, p_sted = 0.0, 30e-3
+        action_completed = False
+
 
     # verify how many pixels we can image in the list
     if len(pixel_list) == 0:
@@ -90,13 +109,13 @@ for i in tqdm.trange(exp_time):
     if master_clock.current_time % temporal_synapse_dmap.time_usec_between_flash_updates == 0:
 
         # faire l'acquisition de la confocale jusqu'où on a assez de temps
-        confocal_acq, bleached, intensity = microscope.get_signal_and_bleach(temporal_synapse_dmap,
-                                                                      temporal_synapse_dmap.pixelsize,
-                                                                      pdt, p_ex, p_sted, indices=indices,
-                                                                      acquired_intensity=intensity,
-                                                                      pixel_list=pixel_list[:pixel_list_idx + 1],
-                                                                      bleach=True, update=True,
-                                                                      filter_bypass=True)
+        acq, bleached, intensity = microscope.get_signal_and_bleach(temporal_synapse_dmap,
+                                                                    temporal_synapse_dmap.pixelsize,
+                                                                    pdt, p_ex, p_sted, indices=indices,
+                                                                    acquired_intensity=intensity,
+                                                                    pixel_list=pixel_list[:pixel_list_idx + 1],
+                                                                    bleach=True, update=True,
+                                                                    filter_bypass=True)
         # remove the imaged pixels from the pixel_list and reset the idx
         pixel_list = pixel_list[pixel_list_idx + 1:]
         pixel_list_idx = 0
@@ -104,7 +123,8 @@ for i in tqdm.trange(exp_time):
         # if this completed the acquisition, add the acquisition to the list, reset the intensity map
         if len(pixel_list) == 0:
             print("do I ever go in here?")
-            confocal_acquisitions.append(np.copy(confocal_acq))
+            action_completed = True
+            acquisitions.append(np.copy(acq))
             dmaps_during_acqs.append(np.copy(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi]))
             bleached_whole = bleached["base"] + bleached["flashes"]
             bleached_dmaps.append(bleached_whole[temporal_synapse_dmap.roi])
@@ -121,19 +141,20 @@ for i in tqdm.trange(exp_time):
         # plt.show()
 
     elif pixel_list_idx == len(pixel_list) - 1:   # or else complete the acquisition if we are in measure of
-        confocal_acq, bleached, intensity = microscope.get_signal_and_bleach(temporal_synapse_dmap,
-                                                                      temporal_synapse_dmap.pixelsize, pdt, p_ex,
-                                                                      p_sted, indices=indices,
-                                                                      acquired_intensity=intensity,
-                                                                      pixel_list=pixel_list[:pixel_list_idx + 1],
-                                                                      bleach=True, update=True,
-                                                                      filter_bypass=True)
+        acq, bleached, intensity = microscope.get_signal_and_bleach(temporal_synapse_dmap,
+                                                                    temporal_synapse_dmap.pixelsize, pdt, p_ex,
+                                                                    p_sted, indices=indices,
+                                                                    acquired_intensity=intensity,
+                                                                    pixel_list=pixel_list[:pixel_list_idx + 1],
+                                                                    bleach=True, update=True,
+                                                                    filter_bypass=True)
 
         # remove the imaged pixels from the pixel_list and reset the idx
         pixel_list = pixel_list[pixel_list_idx + 1:]
         pixel_list_idx = 0
 
-        confocal_acquisitions.append(np.copy(confocal_acq))
+        action_completed = True
+        acquisitions.append(np.copy(acq))
         dmaps_during_acqs.append(np.copy(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi]))
         bleached_whole = bleached["base"] + bleached["flashes"]
         bleached_dmaps.append(bleached_whole[temporal_synapse_dmap.roi])
@@ -143,12 +164,18 @@ for i in tqdm.trange(exp_time):
             print("uh oh something's wrong")
 
 dmaps_during_acqs = np.array(dmaps_during_acqs)
-confocal_acquisitions = np.array(confocal_acquisitions)
+acquisitions = np.array(acquisitions)
 bleached_dmaps = np.array(bleached_dmaps)
 print(f"dmaps_array.shape = {dmaps_during_acqs.shape}")
-print(f"confocal_acquisitions.shape = {confocal_acquisitions.shape}")
+print(f"confocal_acquisitions.shape = {acquisitions.shape}")
 save_path = os.path.join(os.path.expanduser('~'), "Documents", "research", "NeurIPS", "data_generation",
-                         "confocals_spam_w_bleach")
-np.save(save_path + "/test1_confocals", confocal_acquisitions)
+                         "random_actions_w_bleach")
+np.save(save_path + "/test1_acqs", acquisitions)
 np.save(save_path + "/test1_dmaps", dmaps_during_acqs)
 np.save(save_path + "/test1_bleached", bleached_dmaps)
+
+print(len(selected_actions))
+textfile = open(save_path + "/selected_actions.txt", "w")
+for action in selected_actions:
+    textfile.write(action + "\n")
+textfile.close()
