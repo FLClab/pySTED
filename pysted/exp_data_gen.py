@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from skimage import draw
 from scipy.ndimage.morphology import binary_fill_holes
 from scipy.spatial.distance import cdist
+from pysted import utils
 
 
 class Synapse():
@@ -27,12 +28,13 @@ class Synapse():
                  2 modes.
     :param seed: Sets the seed for the randomness
     """
-    def __init__(self, n_molecs, datamap_pixelsize_nm=20, width_nm=(500, 1000), height_nm=(300, 500),
+    def __init__(self, n_molecs, datamap_pixelsize_nm=20, width_nm=(400, 800), height_nm=(300, 600),
                  img_shape=(64, 64), dendrite_thickness=(1, 10), mode='rand', seed=None):
         np.random.seed(seed)
         self.img_shape = img_shape
         self.datamap_pixelsize_nm = datamap_pixelsize_nm
         self.n_molecs_base = n_molecs
+        self.flash_tstep = 0
 
         modes = {0: 'mushroom', 1: 'bump', 2: 'rand'}
         if mode not in modes.values():
@@ -181,6 +183,35 @@ class Synapse():
             if (self.frame[row, col + 1] == self.n_molecs_base):   # look left
                 self.frame[row, col + 1] += self.n_molecs_in_domains
 
+    def flash_nanodomains(self, current_time, time_quantum_us, delay=0, fwhm_step_usec_correspondance=(10, 1500000)):
+        """
+        Verifies if the nanodomains need to be updated for the flash, updates them if it is the case
+
+        l'idée du delay est que je ne veux pas nécessairement commencer la routine de flash au début de l'exp, je ne
+        suis pas certain de comment je veux l'implem encore :)
+
+        *** ??? I DON'T THINK THIS IS HOW I WANT TO HANDLE IT ??? ***
+
+        :param current_time: The current_time of the clock
+        """
+        n_time_quantums_us_per_flash_step = utils.time_quantum_to_flash_tstep_correspondance(
+            fwhm_step_usec_correspondance,
+            time_quantum_us)
+        if (current_time % n_time_quantums_us_per_flash_step == 0):
+            self.flash_tstep += 1
+            for nanodomain in self.nanodomains:
+                if self.flash_tstep >= nanodomain.flash_curve.shape[0]:
+                    # if the flash is done, return the nanodomains to their initial value
+                    self.flash_tstep = nanodomain.flash_curve.shape[0]
+                self.frame[nanodomain.coords[0], nanodomain.coords[1]] = int(nanodomain.flash_curve[self.flash_tstep] *
+                                                                             self.n_molecs_in_domains)
+            self.frame = self.frame.astype(int)
+            plt.imshow(self.frame)
+            plt.title(f"flash_tstep = {self.flash_tstep} \n"
+                      f"current_time = {current_time} \n"
+                      f"flash value = {np.max(self.frame)}")
+            plt.show()
+
 
 
 
@@ -203,3 +234,17 @@ class Nanodomain():
         else:
             self.coords = np.array([np.random.randint(0, img_shape[0]), np.random.randint(0, img_shape[1])])
 
+    def add_flash_curve(self, events_curves_path, seed=None):
+        """
+        Adds a list of molecule values for a certain number of frames
+        """
+        sampled_light_curve = utils.flash_generator(events_curves_path, seed=seed)
+        normalized_light_curve = utils.rescale_data(sampled_light_curve, to_int=False, divider=2)
+        # smoothed_light_curve = utils.savitzky_golay(normalized_light_curve, 11, 5)
+        # plt.plot(normalized_light_curve, label="unsmoothed")
+        # plt.plot(smoothed_light_curve, label="smoothed")
+        # plt.legend()
+        # plt.show()
+        # exit()
+
+        self.flash_curve = np.append(normalized_light_curve, [0])
