@@ -15,6 +15,7 @@ import math
 import random
 import warnings
 import tifffile
+import os
 
 # import mis par BT pour des tests :)
 from matplotlib import pyplot
@@ -1443,3 +1444,16 @@ def action_execution_g(action_selected, frame_shape, starting_pixel, pxsize, dat
                                                                          indices=t_stack_idx)
 
     return acq, intensity_map, datamap, pixel_list
+
+
+def make_path_sane(p):
+    """Function to uniformly return a real, absolute filesystem path."""
+    # ~/directory -> /home/user/directory
+    p = os.path.expanduser(p)
+    # A/.//B -> A/B
+    p = os.path.normpath(p)
+    # Resolve symbolic links
+    p = os.path.realpath(p)
+    # Ensure path is absolute
+    p = os.path.abspath(p)
+    return p

@@ -6,8 +6,15 @@ import os
 import argparse
 from matplotlib import pyplot as plt
 import sys
+import argparse
 
-# save_path = os.path.join(os.path.expanduser('~'), "Documents", "research", "NeurIPS", "exp_runtimes")
+parser = argparse.ArgumentParser(description="Example of experiment script")
+parser.add_argument("--save_path", type=str, default="", help="Where to save the files")
+args = parser.parse_args()
+
+save_path = utils.make_path_sane(args.save_path)
+if not os.path.exists(save_path):
+    os.mkdir(save_path)
 
 hand_crafted_light_curve = utils.hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=14)
 
@@ -68,15 +75,16 @@ pixel_list = []
 pixel_list_idx = 0
 flash_step = 0
 indices = {"flashes": flash_step}
-acquisitions = []
-dmaps_during_acqs = []
-bleached_dmaps = []
+# I will save the datamap and the acquisition result after every acquisition
+# add empty acq so I have the same number of acquisitions as datamaps
+acquisitions = [np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi].shape)]
+# add datamap before acquisitions
+dmaps_list = [np.copy(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi])]
 intensity = np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi].shape).astype(float)
 for i in tqdm.trange(exp_time):
     master_clock.update_time()
     microscope.time_bank += master_clock.time_quantum_us * 1e-6   # add time to the time_bank in seconds
 
-    # ajouter la sélection d'Action :)))))))))))))))))))))))
     if (action_selected is None) or (action_completed):
         action_selected = actions[np.random.randint(0, 3)]
         if action_selected == "confocal":
@@ -93,7 +101,6 @@ for i in tqdm.trange(exp_time):
             p_ex, p_sted = 0.0, 30e-3
         action_completed = False
 
-
     # verify how many pixels we can image in the list
     if len(pixel_list) == 0:
         # refill the pixel list (with all pixels in a raster scan for now)
@@ -108,7 +115,7 @@ for i in tqdm.trange(exp_time):
     # if the nanodomains flashing are updated, do a partial acquisition
     if master_clock.current_time % temporal_synapse_dmap.time_usec_between_flash_updates == 0:
 
-        # faire l'acquisition de la confocale jusqu'où on a assez de temps
+        # Do acquisition for the time acquired until the flash update
         acq, bleached, intensity = microscope.get_signal_and_bleach(temporal_synapse_dmap,
                                                                     temporal_synapse_dmap.pixelsize,
                                                                     pdt, p_ex, p_sted, indices=indices,
@@ -125,20 +132,14 @@ for i in tqdm.trange(exp_time):
             print("do I ever go in here?")
             action_completed = True
             acquisitions.append(np.copy(acq))
-            dmaps_during_acqs.append(np.copy(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi]))
-            bleached_whole = bleached["base"] + bleached["flashes"]
-            bleached_dmaps.append(bleached_whole[temporal_synapse_dmap.roi])
+            dmaps_list.append(np.copy(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi]))
             intensity = np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi].shape).astype(float)
-
 
         # update the flash
         flash_step += 1
         indices["flashes"] = flash_step
         temporal_synapse_dmap.update_whole_datamap(flash_step)
         temporal_synapse_dmap.update_dicts(indices)
-        # plt.imshow(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi])
-        # plt.title(f"current_time = {master_clock.current_time}, flash_step = {flash_step}")
-        # plt.show()
 
     elif pixel_list_idx == len(pixel_list) - 1:   # or else complete the acquisition if we are in measure of
         acq, bleached, intensity = microscope.get_signal_and_bleach(temporal_synapse_dmap,
@@ -155,26 +156,21 @@ for i in tqdm.trange(exp_time):
 
         action_completed = True
         acquisitions.append(np.copy(acq))
-        dmaps_during_acqs.append(np.copy(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi]))
-        bleached_whole = bleached["base"] + bleached["flashes"]
-        bleached_dmaps.append(bleached_whole[temporal_synapse_dmap.roi])
+        dmaps_list.append(np.copy(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi]))
         intensity = np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi].shape).astype(float)
 
         if len(pixel_list) != 0:
             print("uh oh something's wrong")
 
-dmaps_during_acqs = np.array(dmaps_during_acqs)
+dmaps_list = np.array(dmaps_list)
 acquisitions = np.array(acquisitions)
-bleached_dmaps = np.array(bleached_dmaps)
-print(f"dmaps_array.shape = {dmaps_during_acqs.shape}")
+print(f"dmaps_array.shape = {dmaps_list.shape}")
 print(f"confocal_acquisitions.shape = {acquisitions.shape}")
-save_path = os.path.join(os.path.expanduser('~'), "Documents", "research", "NeurIPS", "data_generation",
-                         "random_actions_w_bleach")
-np.save(save_path + "/test1_acqs", acquisitions)
-np.save(save_path + "/test1_dmaps", dmaps_during_acqs)
-np.save(save_path + "/test1_bleached", bleached_dmaps)
 
-print(len(selected_actions))
+np.save(save_path + "/acqs", acquisitions)
+np.save(save_path + "/datamaps", dmaps_list)
+
+print(f"len(selected_actions) = {len(selected_actions)}")
 textfile = open(save_path + "/selected_actions.txt", "w")
 for action in selected_actions:
     textfile.write(action + "\n")
