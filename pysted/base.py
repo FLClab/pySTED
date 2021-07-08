@@ -81,6 +81,8 @@ import scipy.signal
 import pickle
 
 # from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
+import tqdm
+
 from pysted import utils, cUtils, raster, bleach_funcs
 # import cUtils
 
@@ -1489,6 +1491,23 @@ class TemporalExperiment():
 
     def launch_experiment(self, exp_runtime, action_selection_policy):
         """
-        yo
+        Launches an experiment loop, during which a datamap will update and continuous acquisitions will be made on the
+        datamap
+        :param exp_runtime: How long the experiment will last, in useconds. This value should be a multiple of the
+                            clock.time_quantum_us (which is also in useconds)
+        :param action_selection_policy: The action selector.
         """
-        pass
+        flash_step = 0
+        selected_actions = []
+        indices = {"flashes": flash_step}
+        current_action_required_time = 0
+        roi_shape = self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape
+        for i in tqdm.trange(exp_runtime):
+            self.clock.update_time()
+            self.microscope.time_bank += self.clock.time_quantum_us * 1e-6   # add time to the time_bank in seconds
+
+            if action_selection_policy.selected_action is None or action_selection_policy.action_completed:
+                action_selection_policy.selected_action()
+                # This assumes the whole ROI will be scanned in a normal raster fashion
+                current_action_required_time = roi_shape[0] * roi_shape[1] * action_selection_policy.current_action_pdt
+
