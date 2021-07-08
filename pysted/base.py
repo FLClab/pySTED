@@ -1422,3 +1422,73 @@ class Clock():
         Resets the current_time to 0
         """
         self.current_time = 0
+
+
+class RandomActionSelector():
+    """
+    Class which selects a random action from :
+    0 - Confocal acquisition
+    1 - STED acquisition
+    2 - Wait (for the time of 1 acquisition)
+
+    *** NOTE ***
+    For now we have are pre setting the pdt, p_ex and p_sted that will be used for the actions.
+    A real agent would select the powers / dwellit me individually
+    ************
+
+    :param pdt: The pixel dwell time that will be used in the acquisitions
+    :param p_ex: The excitation beam power that will be used when the selected action is confocal or sted
+    :param p_sted: The STED beam power that will be used when the selected action is sted
+    """
+
+    def __init__(self, pdt, p_ex, p_sted):
+        self.pdt = pdt
+        self.p_ex = p_ex
+        self.p_sted = p_sted
+        self.selected_action = None
+        self.action_completed = False
+        self.valid_actions = {0: "confocal", 1: "sted", 2: "wait"}
+        self.n_actions = 3
+        self.current_action_pdt = None
+        self.current_action_p_ex = None
+        self.current_action_p_sted = None
+
+    def select_action(self):
+        """
+        selects a random action from the current actions
+        """
+        self.action_selected = self.valid_actions[numpy.random.randint(0, self.n_actions)]
+        if self.action_selected == "confocal":
+            self.current_action_p_ex = self.p_ex
+            self.current_action_p_sted = 0
+            self.current_action_pdt = self.pdt
+        elif self.action_selected == "sted":
+            self.current_action_p_ex = self.p_ex
+            self.current_action_p_sted = self.p_sted
+            self.current_action_pdt = self.pdt
+        elif self.action_selected == "wait":
+            self.current_action_p_ex = 0
+            self.current_action_p_sted = 0
+            self.current_action_pdt = self.pdt
+        else:
+            raise ValueError("Impossible action selected :)")
+        self.action_completed = False
+
+
+class TemporalExperiment():
+    """
+    This class manages timed experiments :)
+    By timed experiments, we mean experiments where continuous acquisitions are done on a datamap. This handles updating
+    the datamap if it were to update mid acquisition and stuff :)
+    """
+
+    def __init__(self, clock, microscope, temporal_datamap):
+        self.clock = clock
+        self.microscope = microscope
+        self.temporal_datamap = temporal_datamap
+
+    def launch_experiment(self, exp_runtime, action_selection_policy):
+        """
+        yo
+        """
+        pass
