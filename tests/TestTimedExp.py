@@ -81,6 +81,7 @@ acquisitions = [np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dm
 # add datamap before acquisitions
 dmaps_list = [np.copy(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi])]
 intensity = np.zeros(temporal_synapse_dmap.whole_datamap[temporal_synapse_dmap.roi].shape).astype(float)
+print(f"dmap updates every {temporal_synapse_dmap.time_usec_between_flash_updates} step")
 for i in tqdm.trange(exp_time):
     master_clock.update_time()
     microscope.time_bank += master_clock.time_quantum_us * 1e-6   # add time to the time_bank in seconds

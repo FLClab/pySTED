@@ -1447,7 +1447,7 @@ class RandomActionSelector():
         self.pdt = pdt
         self.p_ex = p_ex
         self.p_sted = p_sted
-        self.selected_action = None
+        self.action_selected = None
         self.action_completed = False
         self.valid_actions = {0: "confocal", 1: "sted", 2: "wait"}
         self.n_actions = 3
@@ -1462,15 +1462,15 @@ class RandomActionSelector():
         self.action_selected = self.valid_actions[numpy.random.randint(0, self.n_actions)]
         if self.action_selected == "confocal":
             self.current_action_p_ex = self.p_ex
-            self.current_action_p_sted = 0
+            self.current_action_p_sted = 0.0
             self.current_action_pdt = self.pdt
         elif self.action_selected == "sted":
             self.current_action_p_ex = self.p_ex
             self.current_action_p_sted = self.p_sted
             self.current_action_pdt = self.pdt
         elif self.action_selected == "wait":
-            self.current_action_p_ex = 0
-            self.current_action_p_sted = 0
+            self.current_action_p_ex = 0.0
+            self.current_action_p_sted = 0.0
             self.current_action_pdt = self.pdt
         else:
             raise ValueError("Impossible action selected :)")
@@ -1498,16 +1498,84 @@ class TemporalExperiment():
         :param action_selection_policy: The action selector.
         """
         flash_step = 0
-        selected_actions = []
         indices = {"flashes": flash_step}
-        current_action_required_time = 0
+        current_action_required_time_usec = 0
         roi_shape = self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape
-        for i in tqdm.trange(exp_runtime):
+        current_action_required_time = 0
+        acquisitions, dmaps_acquired_on, actions = [], [], []
+        i_ex, _, _ = self.microscope.cache(self.temporal_datamap.pixelsize)
+        for i in tqdm.trange(exp_runtime):   # faire ça comme ça assume que mon time_quantum_us est 1, fine for now
             self.clock.update_time()
             self.microscope.time_bank += self.clock.time_quantum_us * 1e-6   # add time to the time_bank in seconds
 
-            if action_selection_policy.selected_action is None or action_selection_policy.action_completed:
-                action_selection_policy.selected_action()
-                # This assumes the whole ROI will be scanned in a normal raster fashion
-                current_action_required_time = roi_shape[0] * roi_shape[1] * action_selection_policy.current_action_pdt
+            if action_selection_policy.action_selected is None or action_selection_policy.action_completed:
+                action_selection_policy.select_action()
+                # This assumes the whole ROI will be scanned in a normal raster fashion, with same pdt for every pixel
+                # compute this time in usec since the clock runs in usec
+                current_action_required_time = roi_shape[0] * roi_shape[1] * \
+                                                    action_selection_policy.current_action_pdt
+                current_action_required_time_usec = roi_shape[0] * roi_shape[1] * \
+                                                    action_selection_policy.current_action_pdt * 1e6
+                time_steps_covered_by_acq = numpy.arange(self.clock.current_time,
+                                                         self.clock.current_time + current_action_required_time_usec)
+                dmap_times = []   #[self.clock.current_time]
+                for t in time_steps_covered_by_acq:
+                    if t % self.temporal_datamap.time_usec_between_flash_updates == 0:
+                        dmap_times.append(t)
+                dmap_times.append(self.clock.current_time + current_action_required_time_usec)
 
+                # epic, how do I stitch my datamap now?
+                stitched_dmap_array = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape)
+                raster_pixel_list = utils.pixel_sampling(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi])
+                current_pixel_idx = 0
+                stitching_time = self.clock.current_time
+                for t in range(len(dmap_times)):
+                    time_for_current_dmap_idx = dmap_times[t] - stitching_time
+                    # not sure if doing int(round()) is legit or not
+                    n_pixels_current_dmap_idx = int(numpy.round(time_for_current_dmap_idx /
+                                                                (action_selection_policy.current_action_pdt * 1e6)))
+
+                    for n in range(n_pixels_current_dmap_idx):
+                        stitched_dmap_array[raster_pixel_list[current_pixel_idx]] = \
+                            self.temporal_datamap.whole_datamap[self.temporal_datamap.roi][raster_pixel_list[current_pixel_idx]]
+                        current_pixel_idx += 1
+                    # ??????????????????????????????????????????????????66
+                    if time_for_current_dmap_idx > self.temporal_datamap.time_usec_between_flash_updates:
+                        flash_step += 1
+                    # if flash_step < self.temporal_datamap.flash_tstack.shape[0] - 1:
+                    #     flash_step += 1
+                    # else:
+                    #     print("uh oh va dans le else")
+                    #     flash_step = self.temporal_datamap.flash_tstack.shape[0] - 1
+                    indices = {"flashes": flash_step}
+                    stitching_time = dmap_times[t]
+                    self.temporal_datamap.update_whole_datamap(flash_step)
+                    self.temporal_datamap.update_dicts(indices)
+
+            stitched_dmap = Datamap(stitched_dmap_array, self.temporal_datamap.pixelsize)
+            stitched_dmap.set_roi(i_ex, intervals='max')
+
+            # k ebic la datamap est prête, now what
+            # 1. attendre que j'ai assez de temps dans le microscope pour faire l'acq
+            # 2. faire l'acq sur la stitched datamap
+            #       ... le bleaching tho ...
+
+            if self.microscope.time_bank >= current_action_required_time:
+                # setting update to False cause I think I might need it
+                acq, bleached, _ = self.microscope.get_signal_and_bleach(stitched_dmap, stitched_dmap.pixelsize,
+                                                                         action_selection_policy.current_action_pdt,
+                                                                         action_selection_policy.current_action_p_ex,
+                                                                         action_selection_policy.current_action_p_sted,
+                                                                         bleach=True, update=False,
+                                                                         pixel_list=raster_pixel_list,
+                                                                         filter_bypass=True)
+                self.microscope.time_bank -= current_action_required_time
+                acquisitions.append(acq)
+                dmaps_acquired_on.append(numpy.copy(bleached["base"][stitched_dmap.roi]))
+                actions.append(action_selection_policy.action_selected)
+                action_selection_policy.action_completed = True
+
+        acquisitions = numpy.array(acquisitions)
+        dmaps_acquired_on = numpy.array(dmaps_acquired_on)
+
+        return acquisitions, dmaps_acquired_on, actions
