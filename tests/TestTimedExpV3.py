@@ -20,6 +20,7 @@ hand_crafted_light_curve = utils.hand_crafted_light_curve(delay=2, n_decay_steps
 
 time_quantum_us = 1
 exp_time = 500000   # testing with bleach is much longer :)
+# exp_time = 819200   # 819200 est le temps de 2 flashs
 
 print("Setting up the microscope ...")
 # Microscope stuff
@@ -68,7 +69,6 @@ temporal_dmap.create_t_stack_dmap(decay_time_us)
 dmap_update_times = np.arange(temporal_dmap.time_usec_between_flash_updates, exp_time + 1,
                               temporal_dmap.time_usec_between_flash_updates)
 # this here will be my experiment loop
-
 t = 0
 flash_tstep = 0
 indices = {"flashes": flash_tstep}
@@ -78,12 +78,13 @@ valid_actions = {0: "confocal", 1: "sted", 2: "wait"}
 intensity = np.zeros(temporal_dmap.whole_datamap[temporal_dmap.roi].shape).astype(float)
 acquisitions, selected_actions = [], []
 while t < exp_time:
+    print(t)
     # t += 1   # REMOVE THIS, only here so I don't loop forever :)
     # for the first test I just want to sample actions, not the params
     # once this works, I will randomly sample a pixel dwell time from a certain interval
     if action_selected is None or action_completed:
         # action_selected = valid_actions[np.random.randint(0, n_actions)]
-        action_selected = valid_actions[1]
+        action_selected = valid_actions[0]
         if action_selected == "confocal":
             pdt = np.ones(temporal_dmap.whole_datamap[temporal_dmap.roi].shape) * pdt_val
             p_ex = p_ex_val
@@ -130,36 +131,42 @@ while t < exp_time:
         pixel_list = utils.pixel_sampling(intensity, mode="all")
         flash_t_step_pixel_idx_dict = {}
         n_keys = 0
-        pdt_flat = pdt.flatten() * 1e6
+        first_key = flash_tstep
         for i in range(len(dmap_times) + 1):
             pdt_cumsum = np.cumsum(pdt * 1e6)
             if i < len(dmap_times):   # mid update split
                 update_pixel_idx = np.argwhere(pdt_cumsum + t > dmap_update_times[flash_tstep])[0, 0]
                 flash_t_step_pixel_idx_dict[flash_tstep] = update_pixel_idx
+                if flash_tstep > first_key:
+                    flash_t_step_pixel_idx_dict[flash_tstep] += flash_t_step_pixel_idx_dict[flash_tstep - 1]
                 n_keys += 1
                 flash_tstep += 1
+                t += pdt_cumsum[update_pixel_idx - 1]
             else:   # from last update to the end of acq
+                # faudrait que je mette un if il n'a pas assez de temps pour finir la dernière acq
                 update_pixel_idx = pdt_cumsum.shape[0] - 1
                 flash_t_step_pixel_idx_dict[flash_tstep] = update_pixel_idx
-            # t += np.sum(pdt_flat[update_pixel_idx - 1])
-            t += np.sum(pdt_flat[:update_pixel_idx])
-            pdt_flat[:update_pixel_idx] = 0
-        # print(t)
+                t += pdt_cumsum[update_pixel_idx] - pdt_cumsum[flash_t_step_pixel_idx_dict[flash_tstep - 1] - 1]
         key_counter = 0
         for key in flash_t_step_pixel_idx_dict:
             if key_counter == 0:
                 acq_pixel_list = pixel_list[0:flash_t_step_pixel_idx_dict[key]]
             elif key_counter == n_keys:
-                acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key]:]
+                acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key] + 1]
             else:
-                acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key]:flash_t_step_pixel_idx_dict[key + 1]]
+                acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key]:flash_t_step_pixel_idx_dict[key + 1] + 1]
             indices = {"flashes": key}
+            # plt.imshow(temporal_dmap.flash_tstack[indices["flashes"]])
+            # plt.show()
+            temporal_dmap.update_whole_datamap(key)
+            temporal_dmap.update_dicts(indices)
             acq, bleached, intensity = microscope.get_signal_and_bleach(temporal_dmap, temporal_dmap.pixelsize,
                                                                         pdt, p_ex, p_sted, indices=indices,
                                                                         acquired_intensity=intensity, bleach=False,
                                                                         update=True, pixel_list=acq_pixel_list)
             key_counter += 1
-        # print("acq with flash mid acq added, there should be a total of 4 of this print!")
+        plt.imshow(acq)
+        plt.show()
         acquisitions.append(np.copy(acq))
         action_completed = True
         intensity = np.zeros(temporal_dmap.whole_datamap[temporal_dmap.roi].shape).astype(float)
