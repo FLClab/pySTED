@@ -1396,6 +1396,62 @@ class TemporalSynapseDmap(Datamap):
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
 
 
+class TestTemporalDmap(Datamap):
+    """
+    This is a test class of a simple temporal Datamap of a cube flashing to verify if the stitching of temporal dmaps
+    works correctly
+    """
+    def __init__(self, whole_datamap, datamap_pixelsize):
+        super().__init__(whole_datamap, datamap_pixelsize)
+        self.contains_sub_datamaps = {"base": True,
+                                      "flashes": False}
+        self.sub_datamaps_idx_dict = {}
+
+    def __setitem__(self, key, value):
+        if key == "flashes":
+            self.sub_datamaps_idx_dict[key] = value
+            self.sub_datamaps_dict[key] = self.flash_tstack[value]
+        elif key == "base":
+            pass
+
+    def create_t_stack_dmap(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
+        """
+        Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
+        Assumes the roi is set
+        """
+        self.decay_time_us = decay_time_us
+        self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
+        self.sub_datamaps_dict["base"] = self.base_datamap
+
+        flash_curve = utils.hand_crafted_light_curve(delay=delay, n_decay_steps=n_decay_steps,
+                                                     n_molecules_multiplier=n_molecules_multiplier, end_pad=end_pad)
+
+        self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
+        for t, nanodomains_multiplier in enumerate(flash_curve):
+            nd_mult = int(numpy.round(nanodomains_multiplier))
+            self.flash_tstack[t][self.roi] = numpy.max(self.whole_datamap) * nd_mult
+
+        self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+
+    def bleach_future(self, indices, bleached_sub_datamaps_dict):
+        """
+        pass for now
+        """
+        pass
+
+    def update_whole_datamap(self, flash_idx):
+        if flash_idx >= self.flash_tstack.shape[0]:
+            flash_idx = self.flash_tstack.shape[0] - 1
+        self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
+
+    def update_dicts(self, indices):
+        self.sub_datamaps_idx_dict = indices
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
+
+
 class Clock():
     """
     Clock class to keep track of time in experiments involving time

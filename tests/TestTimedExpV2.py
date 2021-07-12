@@ -25,11 +25,12 @@ master_clock = base.Clock(time_quantum_us)
 exp_time = 500000   # testing with bleach is much longer :)
 
 light_curves_path = f"flash_files/events_curves.npy"
-shroom = exp_data_gen.Synapse(5, mode="mushroom", seed=42)
-n_molecs_in_domain = 0
-min_dist = 100
-shroom.add_nanodomains(40, min_dist_nm=min_dist, n_molecs_in_domain=n_molecs_in_domain, seed=42, valid_thickness=3)
-shroom.frame = shroom.frame.astype(int)
+# shroom = exp_data_gen.Synapse(5, mode="mushroom", seed=42)
+# n_molecs_in_domain = 0
+# min_dist = 100
+# shroom.add_nanodomains(40, min_dist_nm=min_dist, n_molecs_in_domain=n_molecs_in_domain, seed=42, valid_thickness=3)
+# shroom.frame = shroom.frame.astype(int)
+molecs_disp = np.ones((64, 64))
 
 print("Setting up the microscope ...")
 # Microscope stuff
@@ -61,17 +62,31 @@ objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
 microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, load_cache=True)
 i_ex, _, _ = microscope.cache(pixelsize, save_cache=True)
-temporal_synapse_dmap = base.TemporalSynapseDmap(shroom.frame, datamap_pixelsize=20e-9, synapse_obj=shroom)
-temporal_synapse_dmap.set_roi(i_ex, intervals='max')
+# temporal_synapse_dmap = base.TemporalSynapseDmap(shroom.frame, datamap_pixelsize=20e-9, synapse_obj=shroom)
+# temporal_synapse_dmap.set_roi(i_ex, intervals='max')
+temporal_dmap = base.TestTemporalDmap(molecs_disp, datamap_pixelsize=20e-9)
+temporal_dmap.set_roi(i_ex, intervals='max')
 
 decay_time_us = 1000000   # 1 seconde
-temporal_synapse_dmap.create_t_stack_dmap(decay_time_us)
+# temporal_synapse_dmap.create_t_stack_dmap(decay_time_us)
+temporal_dmap.create_t_stack_dmap(decay_time_us)
 
 action_selector = base.RandomActionSelector(pdt, p_ex, p_sted)
-temporal_exp = base.TemporalExperiment(master_clock, microscope, temporal_synapse_dmap)
+# temporal_exp = base.TemporalExperiment(master_clock, microscope, temporal_synapse_dmap)
+temporal_exp = base.TemporalExperiment(master_clock, microscope, temporal_dmap)
 
 acqs, dmaps, actions = temporal_exp.launch_experiment(exp_time, action_selector)
 print(f"dmaps_array.shape = {dmaps.shape}")
 print(f"confocal_acquisitions.shape = {acqs.shape}")
 print(f"len(selected_actions) = {len(actions)}")
 
+np.save(save_path + "/acqs", acqs)
+np.save(save_path + "/datamaps", dmaps)
+
+print(f"len(selected_actions) = {len(actions)}")
+textfile = open(save_path + "/selected_actions.txt", "w")
+for action in actions:
+    textfile.write(action + "\n")
+textfile.close()
+
+print("Saved successfully :)")
