@@ -1560,6 +1560,9 @@ class TemporalExperiment():
         current_action_required_time = 0
         acquisitions, dmaps_acquired_on, actions = [], [], []
         i_ex, _, _ = self.microscope.cache(self.temporal_datamap.pixelsize)
+        dmap_update_times = numpy.arange(self.temporal_datamap.time_usec_between_flash_updates, exp_runtime + 1,
+                                         self.temporal_datamap.time_usec_between_flash_updates)
+        dmap_update_time_idx = 0
         for i in tqdm.trange(exp_runtime):   # faire ça comme ça assume que mon time_quantum_us est 1, fine for now
             self.clock.update_time()
             self.microscope.time_bank += self.clock.time_quantum_us * 1e-6   # add time to the time_bank in seconds
@@ -1586,30 +1589,34 @@ class TemporalExperiment():
                 current_pixel_idx = 0
                 stitching_time = self.clock.current_time
                 for t in range(len(dmap_times)):
+                    # something's fucky here
                     time_for_current_dmap_idx = dmap_times[t] - stitching_time
                     # not sure if doing int(round()) is legit or not
+                    # but it works for now so we are going with it
                     n_pixels_current_dmap_idx = int(numpy.round(time_for_current_dmap_idx /
                                                                 (action_selection_policy.current_action_pdt * 1e6)))
-
                     for n in range(n_pixels_current_dmap_idx):
                         stitched_dmap_array[raster_pixel_list[current_pixel_idx]] = \
                             self.temporal_datamap.whole_datamap[self.temporal_datamap.roi][raster_pixel_list[current_pixel_idx]]
                         current_pixel_idx += 1
-                    # ??????????????????????????????????????????????????66
-                    if time_for_current_dmap_idx > self.temporal_datamap.time_usec_between_flash_updates:
+
+                    if time_for_current_dmap_idx + stitching_time >= dmap_update_times[dmap_update_time_idx]:
                         flash_step += 1
-                    # if flash_step < self.temporal_datamap.flash_tstack.shape[0] - 1:
-                    #     flash_step += 1
-                    # else:
-                    #     print("uh oh va dans le else")
-                    #     flash_step = self.temporal_datamap.flash_tstack.shape[0] - 1
+                        dmap_update_time_idx += 1
+                        if dmap_update_time_idx >= dmap_update_times.shape[0]:
+                            dmap_update_time_idx = dmap_update_times.shape[0] - 1
+                            flash_step = dmap_update_times.shape[0] - 1
+
                     indices = {"flashes": flash_step}
                     stitching_time = dmap_times[t]
                     self.temporal_datamap.update_whole_datamap(flash_step)
                     self.temporal_datamap.update_dicts(indices)
 
-            stitched_dmap = Datamap(stitched_dmap_array, self.temporal_datamap.pixelsize)
-            stitched_dmap.set_roi(i_ex, intervals='max')
+                stitched_dmap = Datamap(stitched_dmap_array, self.temporal_datamap.pixelsize)
+                stitched_dmap.set_roi(i_ex, intervals='max')
+                # pyplot.imshow(stitched_dmap.whole_datamap)
+                # pyplot.title(f"value = {numpy.max(stitched_dmap.whole_datamap)}")
+                # pyplot.show()
 
             # k ebic la datamap est prête, now what
             # 1. attendre que j'ai assez de temps dans le microscope pour faire l'acq

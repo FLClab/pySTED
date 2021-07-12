@@ -16,7 +16,7 @@ save_path = utils.make_path_sane(args.save_path)
 if not os.path.exists(save_path):
     os.mkdir(save_path)
 
-hand_crafted_light_curve = utils.hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=14)
+hand_crafted_light_curve = utils.hand_crafted_light_curve(delay=0, n_decay_steps=10, n_molecules_multiplier=14)
 
 
 time_quantum_us = 1
@@ -70,6 +70,11 @@ temporal_dmap.set_roi(i_ex, intervals='max')
 decay_time_us = 1000000   # 1 seconde
 # temporal_synapse_dmap.create_t_stack_dmap(decay_time_us)
 temporal_dmap.create_t_stack_dmap(decay_time_us)
+# for t in range(temporal_dmap.flash_tstack.shape[0]):
+#     plt.imshow(temporal_dmap.flash_tstack[t])
+#     plt.title(f"t = {t}, value = {np.max(temporal_dmap.flash_tstack[t])}")
+#     plt.show()
+# exit()
 
 action_selector = base.RandomActionSelector(pdt, p_ex, p_sted)
 # temporal_exp = base.TemporalExperiment(master_clock, microscope, temporal_synapse_dmap)
