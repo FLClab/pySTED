@@ -19,7 +19,8 @@ if not os.path.exists(save_path):
 hand_crafted_light_curve = utils.hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=14)
 
 time_quantum_us = 1
-exp_time = 500000   # testing with bleach is much longer :)
+# exp_time = 819200   # testing with bleach is much longer :)
+exp_time = 500000
 
 print("Setting up the microscope ...")
 # Microscope stuff
@@ -41,7 +42,8 @@ pixelsize = 20e-9
 bleach = False
 p_ex_val = 1e-6
 p_sted_val = 30e-3
-pdt_val = 100e-6
+pdt_val = 10e-6
+# pdt_val = np.random.randint(0, 100, size=(64, 64)) * 1e-6
 
 # Generating objects necessary for acquisition simulation
 laser_ex = base.GaussianBeam(488e-9)
@@ -54,33 +56,41 @@ i_ex, _, _ = microscope.cache(pixelsize, save_cache=True)
 # temporal_synapse_dmap = base.TemporalSynapseDmap(shroom.frame, datamap_pixelsize=20e-9, synapse_obj=shroom)
 # temporal_synapse_dmap.set_roi(i_ex, intervals='max')
 molecs_disp = np.ones((64, 64))
+shroom = exp_data_gen.Synapse(5, mode="mushroom", seed=42)
+n_molecs_in_domain = 0
+min_dist = 100
+shroom.add_nanodomains(40, min_dist_nm=min_dist, n_molecs_in_domain=n_molecs_in_domain, seed=42, valid_thickness=3)
+shroom.frame = shroom.frame.astype(int)
 
 # here I want to make it look like multiple episodes are happening and in each episode an experiment that lasts exp_time
 # is launched
 agent = base.RandomActionSelector(pdt_val, p_ex_val, p_sted_val, roi_shape=molecs_disp.shape)
 n_episodes = 2
 for n in range(n_episodes):
+    action_counter = 0
     # create an experiment object with a new clock and datamap
-    temporal_dmap = base.TestTemporalDmap(molecs_disp, datamap_pixelsize=20e-9)
+    # temporal_dmap = base.TestTemporalDmap(molecs_disp, datamap_pixelsize=20e-9)
+    temporal_dmap = base.TemporalSynapseDmap(shroom.frame, datamap_pixelsize=20e-9, synapse_obj=shroom)
     temporal_dmap.set_roi(i_ex, intervals='max')
 
     decay_time_us = 1000000  # 1 seconde
-    # temporal_synapse_dmap.create_t_stack_dmap(decay_time_us)
     temporal_dmap.create_t_stack_dmap(decay_time_us)
-    flash_tstep = 0
 
     clock = base.Clock(time_quantum_us=time_quantum_us)
 
-    temporal_exp = base.TemporalExperimentV2p1(clock, microscope, temporal_dmap, exp_runtime=exp_time)
+    temporal_exp = base.TemporalExperimentV2p1(clock, microscope, temporal_dmap, exp_runtime=exp_time, bleach=False)
     acquisitions = []
+    actions = []
     while clock.current_time < temporal_exp.exp_runtime:
         agent.select_action()
-        acq = temporal_exp.play_action(agent.current_action_pdt, agent.current_action_p_ex, agent.current_action_p_sted,
-                                       flash_tstep=flash_tstep)
+        actions.append(agent.action_selected)
+        acq = temporal_exp.play_action(agent.current_action_pdt, agent.current_action_p_ex, agent.current_action_p_sted)
         acquisitions.append(np.copy(acq))
+        action_counter += 1
+        print(f"!!!!!!! {action_counter} action(s) completed! !!!!!!!!!!")
 
     for i in range(len(acquisitions)):
         plt.imshow(acquisitions[i])
-        plt.title(f"i = {i}")
+        plt.title(f"i = {i}, action = {actions[i]}")
         plt.show()
 

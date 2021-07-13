@@ -1515,7 +1515,9 @@ class RandomActionSelector():
         """
         selects a random action from the current actions
         """
-        self.action_selected = self.valid_actions[numpy.random.randint(0, self.n_actions)]
+        # self.action_selected = self.valid_actions[numpy.random.randint(0, self.n_actions)]
+        # temporary dont want him to select wait for debuggind prupouses
+        self.action_selected = self.valid_actions[numpy.random.randint(0, 2)]
         if self.action_selected == "confocal":
             self.current_action_p_ex = self.p_ex
             self.current_action_p_sted = 0.0
@@ -1770,13 +1772,15 @@ class TemporalExperimentV2p1():
     This temporal experiment will run on a loop based on the action selections instead of on the time to make it easier
     to integrate the agent/gym stuff :)
     """
-    def __init__(self, clock, microscope, temporal_datamap, exp_runtime):
+    def __init__(self, clock, microscope, temporal_datamap, exp_runtime, bleach=True):
         self.clock = clock
         self.microscope = microscope
         self.temporal_datamap = temporal_datamap
         self.exp_runtime = exp_runtime
+        self.flash_tstep = 0
+        self.bleach = bleach
 
-    def play_action(self, pdt, p_ex, p_sted, flash_tstep):
+    def play_action(self, pdt, p_ex, p_sted):
         """
         l'idée va comme ça
         fait une loop sur X épisodes
@@ -1786,7 +1790,7 @@ class TemporalExperimentV2p1():
                   le cas, finir l'action early si on run out de temps, ...
         *** pdt can be a float value, I will convert it into an array filled with that value if this is the case ***
         """
-        indices = {"flashes": flash_tstep}
+        indices = {"flashes": self.flash_tstep}
         intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
         action_required_time = numpy.sum(pdt) * 1e6   # this assumes a pdt given in sec * 1e-6
         action_completed_time = self.clock.current_time + action_required_time
@@ -1806,40 +1810,38 @@ class TemporalExperimentV2p1():
                                                                              pdt, p_ex, p_sted,
                                                                              indices=indices,
                                                                              acquired_intensity=intensity,
-                                                                             bleach=False, update=True)
-            # acquisitions.append(np.copy(acq))
+                                                                             bleach=self.bleach, update=True)
+
             self.clock.current_time += action_required_time
-            # action_completed = True   # return here since the action is done
-            intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
             return acq
         else:
             # assume raster pixel scan
             pixel_list = utils.pixel_sampling(intensity, mode="all")
             flash_t_step_pixel_idx_dict = {}
             n_keys = 0
-            first_key = flash_tstep
+            first_key = self.flash_tstep
             for i in range(len(dmap_times) + 1):
                 pdt_cumsum = numpy.cumsum(pdt * 1e6)
                 if i < len(dmap_times) and dmap_times[i] >= self.exp_runtime:
                     # the datamap would update, but the experiment will be over before then
                     update_pixel_idx = numpy.argwhere(pdt_cumsum + self.clock.current_time > self.exp_runtime)[0, 0]
-                    flash_t_step_pixel_idx_dict[flash_tstep] = update_pixel_idx
-                    if flash_tstep > first_key:
-                        flash_t_step_pixel_idx_dict[flash_tstep] += flash_t_step_pixel_idx_dict[flash_tstep - 1]
+                    flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
+                    if self.flash_tstep > first_key:
+                        flash_t_step_pixel_idx_dict[self.flash_tstep] += flash_t_step_pixel_idx_dict[self.flash_tstep - 1]
                     self.clock.current_time = self.exp_runtime
                     break
                 elif i < len(dmap_times):  # mid update split
-                    update_pixel_idx = numpy.argwhere(pdt_cumsum + self.clock.current_time > dmap_update_times[flash_tstep])[0, 0]
-                    flash_t_step_pixel_idx_dict[flash_tstep] = update_pixel_idx
-                    if flash_tstep > first_key:
-                        flash_t_step_pixel_idx_dict[flash_tstep] += flash_t_step_pixel_idx_dict[flash_tstep - 1]
+                    update_pixel_idx = numpy.argwhere(pdt_cumsum + self.clock.current_time > dmap_update_times[self.flash_tstep])[0, 0]
+                    flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
+                    if self.flash_tstep > first_key:
+                        flash_t_step_pixel_idx_dict[self.flash_tstep] += flash_t_step_pixel_idx_dict[self.flash_tstep - 1]
                     n_keys += 1
-                    flash_tstep += 1
+                    self.flash_tstep += 1
                     self.clock.current_time += pdt_cumsum[update_pixel_idx - 1]
                 else:  # from last update to the end of acq
                     update_pixel_idx = pdt_cumsum.shape[0] - 1
-                    flash_t_step_pixel_idx_dict[flash_tstep] = update_pixel_idx
-                    self.clock.current_time += pdt_cumsum[update_pixel_idx] - pdt_cumsum[flash_t_step_pixel_idx_dict[flash_tstep - 1] - 1]
+                    flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
+                    self.clock.current_time += pdt_cumsum[update_pixel_idx] - pdt_cumsum[flash_t_step_pixel_idx_dict[self.flash_tstep - 1] - 1]
             key_counter = 0
             for key in flash_t_step_pixel_idx_dict:
                 if key_counter == 0:
@@ -1851,6 +1853,7 @@ class TemporalExperimentV2p1():
                     acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key]]
                 if len(acq_pixel_list) == 0:  # acq is over time to go home
                     break
+                    # pass
                 key_counter += 1
                 indices = {"flashes": key}
                 self.temporal_datamap.update_whole_datamap(key)
@@ -1859,10 +1862,7 @@ class TemporalExperimentV2p1():
                                                                                  self.temporal_datamap.pixelsize,
                                                                                  pdt, p_ex, p_sted, indices=indices,
                                                                                  acquired_intensity=intensity,
-                                                                                 bleach=False, update=True,
+                                                                                 bleach=self.bleach, update=True,
                                                                                  pixel_list=acq_pixel_list)
 
-            # acquisitions.append(np.copy(acq))
-            # action_completed = True
-            intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
             return acq
