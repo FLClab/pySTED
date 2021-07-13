@@ -42,7 +42,7 @@ pixelsize = 20e-9
 bleach = False
 p_ex_val = 1e-6
 p_sted_val = 30e-3
-pdt_val = 10e-6
+pdt_val = 100e-6
 
 # Generating objects necessary for acquisition simulation
 laser_ex = base.GaussianBeam(488e-9)
@@ -150,11 +150,18 @@ while t < exp_time:
         key_counter = 0
         for key in flash_t_step_pixel_idx_dict:
             if key_counter == 0:
+                print("went in if")
                 acq_pixel_list = pixel_list[0:flash_t_step_pixel_idx_dict[key]]
             elif key_counter == n_keys:
+                print("went in elif")
                 acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key] + 1]
             else:
-                acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key]:flash_t_step_pixel_idx_dict[key + 1] + 1]
+                print("went in else")
+                # acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key]:flash_t_step_pixel_idx_dict[key + 1] + 1]
+                acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key]]
+            print(acq_pixel_list[0], acq_pixel_list[-1])
+            # print(key, flash_t_step_pixel_idx_dict[key])
+            key_counter += 1
             indices = {"flashes": key}
             # plt.imshow(temporal_dmap.flash_tstack[indices["flashes"]])
             # plt.show()
@@ -164,7 +171,7 @@ while t < exp_time:
                                                                         pdt, p_ex, p_sted, indices=indices,
                                                                         acquired_intensity=intensity, bleach=False,
                                                                         update=True, pixel_list=acq_pixel_list)
-            key_counter += 1
+
         plt.imshow(acq)
         plt.show()
         acquisitions.append(np.copy(acq))
