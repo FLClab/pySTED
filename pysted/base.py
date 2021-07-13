@@ -1499,8 +1499,8 @@ class RandomActionSelector():
     :param p_sted: The STED beam power that will be used when the selected action is sted
     """
 
-    def __init__(self, pdt, p_ex, p_sted):
-        self.pdt = pdt
+    def __init__(self, pdt, p_ex, p_sted, roi_shape):
+        self.pdt = numpy.ones(roi_shape) * pdt
         self.p_ex = p_ex
         self.p_sted = p_sted
         self.action_selected = None
@@ -1642,3 +1642,124 @@ class TemporalExperiment():
         dmaps_acquired_on = numpy.array(dmaps_acquired_on)
 
         return acquisitions, dmaps_acquired_on, actions
+
+
+class TemporalExperimentV2p0():
+    """
+    2nd version of the TemporalExperiment class which should make agent integration easier (?)
+    """
+
+    def __init__(self, microscope, temporal_datamap):
+        self.microscope = microscope
+        self.temporal_datamap = temporal_datamap
+
+    def launch_experiment(self, exp_runtime, action_selection_policy):
+        """
+        Launches an experiment loop, during which a datamap will update and continuous acquisitions will be made on the
+        datamap
+        :param exp_runtime: How long the experiment will last, in useconds. This value should be a multiple of the
+                            clock.time_quantum_us (which is also in useconds)
+        :param action_selection_policy: The action selector.
+        """
+        dmap_update_times = numpy.arange(self.temporal_datamap.time_usec_between_flash_updates, exp_runtime + 1,
+                                         self.temporal_datamap.time_usec_between_flash_updates)
+        t = 0
+        flash_tstep = 0
+        indices = {"flashes": flash_tstep}
+        intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
+        acquisitions, dmaps_after_acqs, selected_actions = [], [], []
+        while t < exp_runtime:
+            # for the first test I just want to sample actions, not the params
+            # once this works, I will randomly sample a pixel dwell time from a certain interval
+            if action_selection_policy.action_selected is None or action_selection_policy.action_completed:
+                action_selection_policy.select_action()
+                selected_actions.append(action_selection_policy.action_selected)
+
+            # compute the acquisition time for the selected action in usec since the time quantum is 1usec
+            action_required_time = numpy.sum(action_selection_policy.current_action_pdt) * 1e6  # this assumes a pdt_val given in sec * 1e-6
+            action_completed_time = t + action_required_time
+            time_steps_covered_by_acq = numpy.arange(t, action_completed_time)
+            dmap_times = []
+            for i in time_steps_covered_by_acq:
+                if i % self.temporal_datamap.time_usec_between_flash_updates == 0 and i != 0:
+                    dmap_times.append(i)
+
+            # if len(dmap_times) == 0, this means the acquisition is not interupted and we can just do it whole
+            # if not, then we need to split the acquisition
+            if len(dmap_times) == 0:
+                acq, bleached, intensity = self.microscope.get_signal_and_bleach(self.temporal_datamap,
+                                                                                 self.temporal_datamap.pixelsize,
+                                                                                 action_selection_policy.current_action_pdt,
+                                                                                 action_selection_policy.current_action_p_ex,
+                                                                                 action_selection_policy.current_action_p_sted,
+                                                                                 indices=indices,
+                                                                                 acquired_intensity=intensity,
+                                                                                 bleach=True, update=True)
+                acquisitions.append(numpy.copy(acq))
+                dmaps_after_acqs.append(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi])
+                t += action_required_time
+                action_selection_policy.action_completed = True
+                intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
+            else:
+                # assume raster pixel scan
+                pixel_list = utils.pixel_sampling(intensity, mode="all")
+                flash_t_step_pixel_idx_dict = {}
+                n_keys = 0
+                first_key = flash_tstep
+                for i in range(len(dmap_times) + 1):
+                    pdt_cumsum = numpy.cumsum(action_selection_policy.current_action_pdt * 1e6)
+                    if i < len(dmap_times) and dmap_times[i] >= exp_runtime:
+                        # the datamap would update, but the experiment will be over before then
+                        update_pixel_idx = numpy.argwhere(pdt_cumsum + t > exp_runtime)[0, 0]
+                        flash_t_step_pixel_idx_dict[flash_tstep] = update_pixel_idx
+                        if flash_tstep > first_key:
+                            flash_t_step_pixel_idx_dict[flash_tstep] += flash_t_step_pixel_idx_dict[flash_tstep - 1]
+                        t = exp_runtime
+                        break
+                    elif i < len(dmap_times):  # mid update split
+                        update_pixel_idx = numpy.argwhere(pdt_cumsum + t > dmap_update_times[flash_tstep])[0, 0]
+                        flash_t_step_pixel_idx_dict[flash_tstep] = update_pixel_idx
+                        if flash_tstep > first_key:
+                            flash_t_step_pixel_idx_dict[flash_tstep] += flash_t_step_pixel_idx_dict[flash_tstep - 1]
+                        n_keys += 1
+                        flash_tstep += 1
+                        t += pdt_cumsum[update_pixel_idx - 1]
+                    else:  # from last update to the end of acq
+                        update_pixel_idx = pdt_cumsum.shape[0] - 1
+                        flash_t_step_pixel_idx_dict[flash_tstep] = update_pixel_idx
+                        t += pdt_cumsum[update_pixel_idx] - pdt_cumsum[flash_t_step_pixel_idx_dict[flash_tstep - 1] - 1]
+                key_counter = 0
+                for key in flash_t_step_pixel_idx_dict:
+                    if key_counter == 0:
+                        acq_pixel_list = pixel_list[0:flash_t_step_pixel_idx_dict[key]]
+                    elif key_counter == n_keys:
+                        acq_pixel_list = pixel_list[
+                                         flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key] + 1]
+                    else:
+                        acq_pixel_list = pixel_list[
+                                         flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key]]
+                    if len(acq_pixel_list) == 0:  # acq is over time to go home
+                        break
+                    key_counter += 1
+                    indices = {"flashes": key}
+                    self.temporal_datamap.update_whole_datamap(key)
+                    self.temporal_datamap.update_dicts(indices)
+                    acq, bleached, intensity = self.microscope.get_signal_and_bleach(self.temporal_datamap,
+                                                                                     self.temporal_datamap.pixelsize,
+                                                                                     action_selection_policy.current_action_pdt,
+                                                                                     action_selection_policy.current_action_p_ex,
+                                                                                     action_selection_policy.current_action_p_sted,
+                                                                                     indices=indices,
+                                                                                     acquired_intensity=intensity,
+                                                                                     bleach=True, update=True,
+                                                                                     pixel_list=acq_pixel_list)
+
+                acquisitions.append(numpy.copy(acq))
+                dmaps_after_acqs.append(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi])
+                action_selection_policy.action_completed = True
+                intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
+
+        acquisitions = numpy.array(acquisitions)
+        dmaps_after_acqs = numpy.array(dmaps_after_acqs)
+
+        return acquisitions, dmaps_after_acqs, selected_actions
