@@ -81,6 +81,8 @@ import scipy.signal
 import pickle
 
 # from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
+import tqdm
+
 from pysted import utils, cUtils, raster, bleach_funcs
 # import cUtils
 
@@ -1394,6 +1396,78 @@ class TemporalSynapseDmap(Datamap):
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
 
 
+class TestTemporalDmap(Datamap):
+    """
+    This is a test class of a simple temporal Datamap of a cube flashing to verify if the stitching of temporal dmaps
+    works correctly
+    """
+    def __init__(self, whole_datamap, datamap_pixelsize):
+        super().__init__(whole_datamap, datamap_pixelsize)
+        self.contains_sub_datamaps = {"base": True,
+                                      "flashes": False}
+        self.sub_datamaps_idx_dict = {}
+
+    def __setitem__(self, key, value):
+        if key == "flashes":
+            self.sub_datamaps_idx_dict[key] = value
+            self.sub_datamaps_dict[key] = self.flash_tstack[value]
+        elif key == "base":
+            pass
+
+    def create_t_stack_dmap(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
+        """
+        Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
+        Assumes the roi is set
+        """
+        self.decay_time_us = decay_time_us
+        self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
+        self.sub_datamaps_dict["base"] = self.base_datamap
+
+        flash_curve = utils.hand_crafted_light_curve(delay=delay, n_decay_steps=n_decay_steps,
+                                                     n_molecules_multiplier=n_molecules_multiplier, end_pad=end_pad)
+
+        self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
+        for t, nanodomains_multiplier in enumerate(flash_curve):
+            nd_mult = int(numpy.round(nanodomains_multiplier))
+            self.flash_tstack[t][self.roi] = numpy.max(self.whole_datamap) * nd_mult
+
+        self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+
+    def bleach_future(self, indices, bleached_sub_datamaps_dict):
+        """
+        pass for now
+        """
+        what_bleached = self.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
+        self.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
+        # UPDATE THE FUTURE
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            flash_survival = bleached_sub_datamaps_dict["flashes"] / self.flash_tstack[indices["flashes"]]
+        flash_survival[numpy.isnan(flash_survival)] = 1
+        self.flash_tstack[indices["flashes"] + 1:] -= what_bleached
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.multiply(
+            self.flash_tstack[indices["flashes"] + 1:],
+            flash_survival)
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.rint(
+            self.flash_tstack[indices["flashes"] + 1:])
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.where(
+            self.flash_tstack[indices["flashes"] + 1:] < 0,
+            0, self.flash_tstack[indices["flashes"] + 1:])
+        self.flash_tstack = self.flash_tstack.astype('int64')
+        self.whole_datamap += self.flash_tstack[indices["flashes"]]
+
+    def update_whole_datamap(self, flash_idx):
+        if flash_idx >= self.flash_tstack.shape[0]:
+            flash_idx = self.flash_tstack.shape[0] - 1
+        self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
+
+    def update_dicts(self, indices):
+        self.sub_datamaps_idx_dict = indices
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
+
+
 class Clock():
     """
     Clock class to keep track of time in experiments involving time
@@ -1422,3 +1496,157 @@ class Clock():
         Resets the current_time to 0
         """
         self.current_time = 0
+
+
+class RandomActionSelector():
+    """
+    Class which selects a random action from :
+    0 - Confocal acquisition
+    1 - STED acquisition
+    2 - Wait (for the time of 1 acquisition)
+
+    *** NOTE ***
+    For now we have are pre setting the pdt, p_ex and p_sted that will be used for the actions.
+    A real agent would select the powers / dwellit me individually
+    ************
+
+    :param pdt: The pixel dwell time that will be used in the acquisitions
+    :param p_ex: The excitation beam power that will be used when the selected action is confocal or sted
+    :param p_sted: The STED beam power that will be used when the selected action is sted
+    """
+
+    def __init__(self, pdt, p_ex, p_sted, roi_shape):
+        self.pdt = numpy.ones(roi_shape) * pdt
+        self.p_ex = p_ex
+        self.p_sted = p_sted
+        self.action_selected = None
+        self.action_completed = False
+        self.valid_actions = {0: "confocal", 1: "sted", 2: "wait"}
+        self.n_actions = 3
+        self.current_action_pdt = None
+        self.current_action_p_ex = None
+        self.current_action_p_sted = None
+
+    def select_action(self):
+        """
+        selects a random action from the current actions
+        """
+        # self.action_selected = self.valid_actions[numpy.random.randint(0, self.n_actions)]
+        # temporary dont want him to select wait for debuggind prupouses
+        self.action_selected = self.valid_actions[numpy.random.randint(0, 1)]
+        if self.action_selected == "confocal":
+            self.current_action_p_ex = self.p_ex
+            self.current_action_p_sted = 0.0
+            self.current_action_pdt = self.pdt
+        elif self.action_selected == "sted":
+            self.current_action_p_ex = self.p_ex
+            self.current_action_p_sted = self.p_sted
+            self.current_action_pdt = self.pdt
+        elif self.action_selected == "wait":
+            self.current_action_p_ex = 0.0
+            self.current_action_p_sted = 0.0
+            self.current_action_pdt = self.pdt
+        else:
+            raise ValueError("Impossible action selected :)")
+        self.action_completed = False
+
+
+class TemporalExperiment():
+    """
+    This temporal experiment will run on a loop based on the action selections instead of on the time to make it easier
+    to integrate the agent/gym stuff :)
+    """
+    def __init__(self, clock, microscope, temporal_datamap, exp_runtime, bleach=True):
+        self.clock = clock
+        self.microscope = microscope
+        self.temporal_datamap = temporal_datamap
+        self.exp_runtime = exp_runtime
+        self.flash_tstep = 0
+        self.bleach = bleach
+
+    def play_action(self, pdt, p_ex, p_sted):
+        """
+        l'idée va comme ça
+        fait une loop sur X épisodes
+            - quand un épisode commence on crée un objet TemporalExperimentV2p1 avec un certain exp_runtime
+            - l'agent choisit une action et la joue
+                - dans la méthode de jouer l'action (ici) on fait toute la gestion des updates de flash mid acq si c'est
+                  le cas, finir l'action early si on run out de temps, ...
+        *** pdt can be a float value, I will convert it into an array filled with that value if this is the case ***
+        """
+        indices = {"flashes": self.flash_tstep}
+        intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
+        action_required_time = numpy.sum(pdt) * 1e6   # this assumes a pdt given in sec * 1e-6
+        action_completed_time = self.clock.current_time + action_required_time
+        time_steps_covered_by_acq = numpy.arange(self.clock.current_time, action_completed_time)
+        dmap_times = []
+        for i in time_steps_covered_by_acq:
+            if i % self.temporal_datamap.time_usec_between_flash_updates == 0 and i != 0:
+                dmap_times.append(i)
+        dmap_update_times = numpy.arange(self.temporal_datamap.time_usec_between_flash_updates, self.exp_runtime + 1,
+                                         self.temporal_datamap.time_usec_between_flash_updates)
+
+        # if len(dmap_times) == 0, this means the acquisition is not interupted and we can just do it whole
+        # if not, then we need to split the acquisition
+        if len(dmap_times) == 0:
+            acq, bleached, intensity = self.microscope.get_signal_and_bleach(self.temporal_datamap,
+                                                                             self.temporal_datamap.pixelsize,
+                                                                             pdt, p_ex, p_sted,
+                                                                             indices=indices,
+                                                                             acquired_intensity=intensity,
+                                                                             bleach=self.bleach, update=True)
+
+            self.clock.current_time += action_required_time
+            return acq
+        else:
+            # assume raster pixel scan
+            pixel_list = utils.pixel_sampling(intensity, mode="all")
+            flash_t_step_pixel_idx_dict = {}
+            n_keys = 0
+            first_key = self.flash_tstep
+            for i in range(len(dmap_times) + 1):
+                pdt_cumsum = numpy.cumsum(pdt * 1e6)
+                if i < len(dmap_times) and dmap_times[i] >= self.exp_runtime:
+                    # the datamap would update, but the experiment will be over before then
+                    update_pixel_idx = numpy.argwhere(pdt_cumsum + self.clock.current_time > self.exp_runtime)[0, 0]
+                    flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
+                    if self.flash_tstep > first_key:
+                        flash_t_step_pixel_idx_dict[self.flash_tstep] += flash_t_step_pixel_idx_dict[self.flash_tstep - 1]
+                    self.clock.current_time = self.exp_runtime
+                    break
+                elif i < len(dmap_times):  # mid update split
+                    update_pixel_idx = numpy.argwhere(pdt_cumsum + self.clock.current_time > dmap_update_times[self.flash_tstep])[0, 0]
+                    flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
+                    if self.flash_tstep > first_key:
+                        flash_t_step_pixel_idx_dict[self.flash_tstep] += flash_t_step_pixel_idx_dict[self.flash_tstep - 1]
+                    n_keys += 1
+                    self.flash_tstep += 1
+                    self.clock.current_time += pdt_cumsum[update_pixel_idx - 1]
+                else:  # from last update to the end of acq
+                    update_pixel_idx = pdt_cumsum.shape[0] - 1
+                    flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
+                    self.clock.current_time += pdt_cumsum[update_pixel_idx] - pdt_cumsum[flash_t_step_pixel_idx_dict[self.flash_tstep - 1] - 1]
+            key_counter = 0
+            for key in flash_t_step_pixel_idx_dict:
+                if key_counter == 0:
+                    acq_pixel_list = pixel_list[0:flash_t_step_pixel_idx_dict[key]]
+                elif key_counter == n_keys:
+                    acq_pixel_list = pixel_list[
+                                     flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key] + 1]
+                else:
+                    acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key]]
+                if len(acq_pixel_list) == 0:  # acq is over time to go home
+                    break
+                    # pass
+                key_counter += 1
+                indices = {"flashes": key}
+                self.temporal_datamap.update_whole_datamap(key)
+                self.temporal_datamap.update_dicts(indices)
+                acq, bleached, intensity = self.microscope.get_signal_and_bleach(self.temporal_datamap,
+                                                                                 self.temporal_datamap.pixelsize,
+                                                                                 pdt, p_ex, p_sted, indices=indices,
+                                                                                 acquired_intensity=intensity,
+                                                                                 bleach=self.bleach, update=True,
+                                                                                 pixel_list=acq_pixel_list)
+
+            return acq
