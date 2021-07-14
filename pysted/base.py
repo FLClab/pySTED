@@ -1259,6 +1259,7 @@ class TemporalDatamap(Datamap):
         self.contains_sub_datamaps["flashes"] = True
         self.sub_datamaps_idx_dict["flashes"] = 0
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
 
     def bleach_future(self, indices, bleached_sub_datamaps_dict):
         """
@@ -1346,6 +1347,7 @@ class TemporalSynapseDmap(Datamap):
         self.contains_sub_datamaps["flashes"] = True
         self.sub_datamaps_idx_dict["flashes"] = 0
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
 
     def bleach_future(self, indices, bleached_sub_datamaps_dict):
         """
@@ -1435,6 +1437,7 @@ class TestTemporalDmap(Datamap):
         self.contains_sub_datamaps["flashes"] = True
         self.sub_datamaps_idx_dict["flashes"] = 0
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
 
     def bleach_future(self, indices, bleached_sub_datamaps_dict):
         """

@@ -73,7 +73,6 @@ for n in range(n_episodes):
 
     decay_time_us = 1000000  # 1 seconde
     temporal_dmap.create_t_stack_dmap(decay_time_us)
-    temporal_dmap.update_whole_datamap(0)
 
     clock = base.Clock(time_quantum_us=time_quantum_us)
 
