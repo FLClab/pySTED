@@ -20,7 +20,7 @@ hand_crafted_light_curve = utils.hand_crafted_light_curve(delay=2, n_decay_steps
 
 time_quantum_us = 1
 # exp_time = 819200   # testing with bleach is much longer :)
-exp_time = 500000
+exp_time = 300000
 
 print("Setting up the microscope ...")
 # Microscope stuff
@@ -53,8 +53,6 @@ objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
 microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, load_cache=True)
 i_ex, _, _ = microscope.cache(pixelsize, save_cache=True)
-# temporal_synapse_dmap = base.TemporalSynapseDmap(shroom.frame, datamap_pixelsize=20e-9, synapse_obj=shroom)
-# temporal_synapse_dmap.set_roi(i_ex, intervals='max')
 molecs_disp = np.ones((64, 64))
 shroom = exp_data_gen.Synapse(5, mode="mushroom", seed=42)
 n_molecs_in_domain = 0
@@ -65,7 +63,7 @@ shroom.frame = shroom.frame.astype(int)
 # here I want to make it look like multiple episodes are happening and in each episode an experiment that lasts exp_time
 # is launched
 agent = base.RandomActionSelector(pdt_val, p_ex_val, p_sted_val, roi_shape=molecs_disp.shape)
-n_episodes = 2
+n_episodes = 1
 for n in range(n_episodes):
     action_counter = 0
     # create an experiment object with a new clock and datamap
@@ -75,22 +73,32 @@ for n in range(n_episodes):
 
     decay_time_us = 1000000  # 1 seconde
     temporal_dmap.create_t_stack_dmap(decay_time_us)
+    temporal_dmap.update_whole_datamap(0)
 
     clock = base.Clock(time_quantum_us=time_quantum_us)
 
-    temporal_exp = base.TemporalExperimentV2p1(clock, microscope, temporal_dmap, exp_runtime=exp_time, bleach=False)
+    temporal_exp = base.TemporalExperiment(clock, microscope, temporal_dmap, exp_runtime=exp_time, bleach=True)
     acquisitions = []
     actions = []
+    dmaps_after_actions = []
     while clock.current_time < temporal_exp.exp_runtime:
         agent.select_action()
         actions.append(agent.action_selected)
         acq = temporal_exp.play_action(agent.current_action_pdt, agent.current_action_p_ex, agent.current_action_p_sted)
+        dmaps_after_actions.append(np.copy(temporal_dmap.whole_datamap))
         acquisitions.append(np.copy(acq))
         action_counter += 1
-        print(f"!!!!!!! {action_counter} action(s) completed! !!!!!!!!!!")
+        print(f"!!!!!!! {action_counter} action(s) completed !!!!!!!")
 
     for i in range(len(acquisitions)):
-        plt.imshow(acquisitions[i])
-        plt.title(f"i = {i}, action = {actions[i]}")
+        fig, axes = plt.subplots(1, 2)
+
+        axes[0].imshow(acquisitions[i])
+        axes[0].set_title(f"i = {i}, action = {actions[i]}")
+
+        axes[1].imshow(dmaps_after_actions[i])
+        axes[1].set_title(f"dmap after actions")
+
         plt.show()
+        plt.close()
 
