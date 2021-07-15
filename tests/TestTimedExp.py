@@ -87,7 +87,7 @@ for n in range(n_episodes):   # each loop iter would correspond to an env.reset(
                          "p_sted": agent.current_action_p_sted}
         actions.append(agent.action_selected)
         # each temporal_exp.play_action would correspond to a env.step()
-        acq = temporal_exp.play_action(**action_params)
+        acq, bleached = temporal_exp.play_action(**action_params)
         dmaps_after_actions.append(np.copy(temporal_dmap.whole_datamap))
         acquisitions.append(np.copy(acq))
         action_counter += 1
