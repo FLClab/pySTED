@@ -1339,7 +1339,10 @@ class TemporalSynapseDmap(Datamap):
 
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
         for t, nanodomains_multiplier in enumerate(flash_curve):
-            nd_mult = int(numpy.round(nanodomains_multiplier))
+            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
+            nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+            if nd_mult < 0:
+                nd_mult = 0
             for nanodomain in self.synapse.nanodomains:
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
                     self.synapse.n_molecs_base * nd_mult - self.synapse.n_molecs_base
@@ -1431,7 +1434,10 @@ class TestTemporalDmap(Datamap):
 
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
         for t, nanodomains_multiplier in enumerate(flash_curve):
-            nd_mult = int(numpy.round(nanodomains_multiplier))
+            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
+            nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+            if nd_mult < 0:
+                nd_mult = 0
             self.flash_tstack[t][self.roi] = numpy.max(self.whole_datamap) * nd_mult
 
         self.contains_sub_datamaps["flashes"] = True
