@@ -64,7 +64,7 @@ shroom.frame = shroom.frame.astype(int)
 # is launched
 agent = base.RandomActionSelector(pdt_val, p_ex_val, p_sted_val, roi_shape=molecs_disp.shape)
 n_episodes = 1
-for n in range(n_episodes):
+for n in range(n_episodes):   # each loop iter would correspond to an env.reset()
     action_counter = 0
     # create an experiment object with a new clock and datamap
     # temporal_dmap = base.TestTemporalDmap(molecs_disp, datamap_pixelsize=20e-9)
@@ -83,6 +83,7 @@ for n in range(n_episodes):
     while clock.current_time < temporal_exp.exp_runtime:
         agent.select_action()
         actions.append(agent.action_selected)
+        # each temporal_exp.play_action would correspond to a env.step()
         acq = temporal_exp.play_action(agent.current_action_pdt, agent.current_action_p_ex, agent.current_action_p_sted)
         dmaps_after_actions.append(np.copy(temporal_dmap.whole_datamap))
         acquisitions.append(np.copy(acq))
