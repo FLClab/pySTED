@@ -481,7 +481,7 @@ class Detector:
 
         return ra_flipped
     
-    def get_signal(self, photons, dwelltime):
+    def get_signal(self, photons, dwelltime, seed=None):
         '''Compute the detected signal (in photons) given the number of emitted
         photons and the time spent by the detector.
         
@@ -491,6 +491,11 @@ class Detector:
         :returns: An array shaped like *nb_photons*.
         '''
         detection_efficiency = self.pcef * self.pdef # ratio
+        if seed is None:
+            seed = int(str(time.time_ns())[-5:-1])
+            numpy.random.seed(seed)
+        else:
+            numpy.random.seed(seed)
         try:
             signal = numpy.random.binomial(photons.astype(numpy.int64),
                                            detection_efficiency,
@@ -929,15 +934,18 @@ class Microscope:
         # Bleaching is done, the rest is for intensity calculation
         photons = self.fluo.get_photons(acquired_intensity)
 
+        if seed == 0:
+            seed = None
+
         if photons.shape == pdt.shape:
-            returned_acquired_photons = self.detector.get_signal(photons, pdt)
+            returned_acquired_photons = self.detector.get_signal(photons, pdt, seed=seed)
         else:
             pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
                                                    int(numpy.ceil(pdt.shape[1] / ratio))))
             new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
             for (row, col) in new_pdt_plist:
                 pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
-            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped)
+            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped, seed=seed)
 
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
