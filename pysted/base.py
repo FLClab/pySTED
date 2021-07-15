@@ -1614,7 +1614,7 @@ class TemporalExperiment():
                                                                              bleach=self.bleach, update=True)
 
             self.clock.current_time += action_required_time
-            return acq
+            return acq, bleached
         else:
             # assume raster pixel scan
             pixel_list = utils.pixel_sampling(intensity, mode="all")
@@ -1666,4 +1666,4 @@ class TemporalExperiment():
                                                                                  bleach=self.bleach, update=True,
                                                                                  pixel_list=acq_pixel_list)
 
-            return acq
+            return acq, bleached

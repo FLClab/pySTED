@@ -76,29 +76,33 @@ for n in range(n_episodes):   # each loop iter would correspond to an env.reset(
 
     clock = base.Clock(time_quantum_us=time_quantum_us)
 
-    temporal_exp = base.TemporalExperiment(clock, microscope, temporal_dmap, exp_runtime=exp_time, bleach=True)
+    temporal_exp = base.TemporalExperiment(clock, microscope, temporal_dmap, exp_runtime=exp_time, bleach=False)
     acquisitions = []
     actions = []
     dmaps_after_actions = []
     while clock.current_time < temporal_exp.exp_runtime:
         agent.select_action()
+        action_params = {"pdt": agent.current_action_pdt,
+                         "p_ex": agent.current_action_p_ex,
+                         "p_sted": agent.current_action_p_sted}
         actions.append(agent.action_selected)
         # each temporal_exp.play_action would correspond to a env.step()
-        acq = temporal_exp.play_action(agent.current_action_pdt, agent.current_action_p_ex, agent.current_action_p_sted)
+        acq = temporal_exp.play_action(**action_params)
         dmaps_after_actions.append(np.copy(temporal_dmap.whole_datamap))
         acquisitions.append(np.copy(acq))
         action_counter += 1
         print(f"!!!!!!! {action_counter} action(s) completed !!!!!!!")
 
-    for i in range(len(acquisitions)):
-        fig, axes = plt.subplots(1, 2)
+    # for i in range(len(acquisitions)):
+    #     fig, axes = plt.subplots(1, 2)
+    #
+    #     axes[0].imshow(acquisitions[i])
+    #     axes[0].set_title(f"i = {i}, action = {actions[i]}")
+    #
+    #     axes[1].imshow(dmaps_after_actions[i])
+    #     axes[1].set_title(f"dmap after actions")
+    #
+    #     plt.show()
+    #     plt.close()
 
-        axes[0].imshow(acquisitions[i])
-        axes[0].set_title(f"i = {i}, action = {actions[i]}")
-
-        axes[1].imshow(dmaps_after_actions[i])
-        axes[1].set_title(f"dmap after actions")
-
-        plt.show()
-        plt.close()
-
+print("done!")
