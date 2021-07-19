@@ -1595,7 +1595,8 @@ class TemporalExperiment():
         intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
         action_required_time = numpy.sum(pdt) * 1e6   # this assumes a pdt given in sec * 1e-6
         action_completed_time = self.clock.current_time + action_required_time
-        time_steps_covered_by_acq = numpy.arange(self.clock.current_time, action_completed_time)
+        # +1 ensures no weird business if tha last acq completed as the dmap updated
+        time_steps_covered_by_acq = numpy.arange(int(self.clock.current_time) + 1, action_completed_time)
         dmap_times = []
         for i in time_steps_covered_by_acq:
             if i % self.temporal_datamap.time_usec_between_flash_updates == 0 and i != 0:
