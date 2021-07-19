@@ -1595,7 +1595,8 @@ class TemporalExperiment():
         intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
         action_required_time = numpy.sum(pdt) * 1e6   # this assumes a pdt given in sec * 1e-6
         action_completed_time = self.clock.current_time + action_required_time
-        time_steps_covered_by_acq = numpy.arange(self.clock.current_time, action_completed_time)
+        # +1 ensures no weird business if tha last acq completed as the dmap updated
+        time_steps_covered_by_acq = numpy.arange(int(self.clock.current_time) + 1, action_completed_time)
         dmap_times = []
         for i in time_steps_covered_by_acq:
             if i % self.temporal_datamap.time_usec_between_flash_updates == 0 and i != 0:
@@ -1632,7 +1633,10 @@ class TemporalExperiment():
                     self.clock.current_time = self.exp_runtime
                     break
                 elif i < len(dmap_times):  # mid update split
-                    update_pixel_idx = numpy.argwhere(pdt_cumsum + self.clock.current_time > dmap_update_times[self.flash_tstep])[0, 0]
+                    # update_pixel_idx = numpy.argwhere(pdt_cumsum + self.clock.current_time > dmap_update_times[self.flash_tstep])[0, 0]
+                    # not sure if the + 1 is legit but it seems to fix my bug of acqs being 1 pixel short
+                    update_pixel_idx = \
+                    numpy.argwhere(pdt_cumsum + self.clock.current_time > dmap_update_times[self.flash_tstep])[0, 0] + 1
                     flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
                     if self.flash_tstep > first_key:
                         flash_t_step_pixel_idx_dict[self.flash_tstep] += flash_t_step_pixel_idx_dict[self.flash_tstep - 1]
@@ -1647,9 +1651,11 @@ class TemporalExperiment():
             for key in flash_t_step_pixel_idx_dict:
                 if key_counter == 0:
                     acq_pixel_list = pixel_list[0:flash_t_step_pixel_idx_dict[key]]
+                    # print(f"len(acq_pixel_list) = {len(acq_pixel_list)}")
                 elif key_counter == n_keys:
                     acq_pixel_list = pixel_list[
                                      flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key] + 1]
+                    # print(f"len(acq_pixel_list) = {len(acq_pixel_list)}")
                 else:
                     acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key]]
                 if len(acq_pixel_list) == 0:  # acq is over time to go home
