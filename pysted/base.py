@@ -1659,6 +1659,11 @@ class TemporalExperiment():
                 else:
                     acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key]]
                 if len(acq_pixel_list) == 0:  # acq is over time to go home
+                    # should I still update? PogChampionship I should
+                    key_counter += 1
+                    indices = {"flashes": key}
+                    self.temporal_datamap.update_whole_datamap(key)
+                    self.temporal_datamap.update_dicts(indices)
                     break
                     # pass
                 key_counter += 1
