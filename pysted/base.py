@@ -1684,7 +1684,9 @@ class TemporalExperiment():
                                                                                  pdt, p_ex, p_sted, indices=indices,
                                                                                  acquired_intensity=intensity,
                                                                                  bleach=self.bleach, update=True,
-                                                                                 pixel_list=acq_pixel_list)
+                                                                                 pixel_list=acq_pixel_list,
+                                                                                 prob_ex=prob_ex,
+                                                                                 prob_sted=prob_sted)
 
                 intensity = temporal_acq_elts["intensity"]
                 prob_ex = temporal_acq_elts["prob_ex"]
