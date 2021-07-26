@@ -837,7 +837,8 @@ class Microscope:
 
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                               pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
-                              bleach_func=bleach_funcs.default_update_survival_probabilities, steps=None):
+                              bleach_func=bleach_funcs.default_update_survival_probabilities, steps=None,
+                              prob_ex=None, prob_sted=None):
         """
         This function acquires the signal and bleaches simultaneously. It makes a call to compiled C code for speed,
         so make sure the raster.pyx file is compiled!
@@ -906,9 +907,10 @@ class Microscope:
         rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
         laser_pad = i_ex.shape[0] // 2
 
-
-        prob_ex = numpy.ones(datamap.whole_datamap.shape)
-        prob_sted = numpy.ones(datamap.whole_datamap.shape)
+        if prob_ex is None:
+            prob_ex = numpy.ones(datamap.whole_datamap.shape)
+        if prob_sted is None:
+            prob_sted = numpy.ones(datamap.whole_datamap.shape)
         # bleached_sub_datamaps_dict = copy.copy(datamap.sub_datamaps_dict)
         bleached_sub_datamaps_dict = {}
         if isinstance(indices, type(None)):
@@ -955,7 +957,11 @@ class Microscope:
             if datamap.contains_sub_datamaps["flashes"] and indices["flashes"] < datamap.flash_tstack.shape[0]:
                 datamap.bleach_future(indices, bleached_sub_datamaps_dict)
 
-        return returned_acquired_photons, bleached_sub_datamaps_dict, acquired_intensity
+        temporal_acq_elts = {"intensity": acquired_intensity,
+                             "prob_ex": prob_ex,
+                             "prob_sted": prob_sted}
+
+        return returned_acquired_photons, bleached_sub_datamaps_dict, temporal_acq_elts
 
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
                           lower_th=1, ltr=0.1, upper_th=100):
@@ -1593,6 +1599,8 @@ class TemporalExperiment():
         """
         indices = {"flashes": self.flash_tstep}
         intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
+        prob_ex = numpy.ones(self.temporal_datamap.whole_datamap.shape).astype(float)
+        prob_sted = numpy.ones(self.temporal_datamap.whole_datamap.shape).astype(float)
         action_required_time = numpy.sum(pdt) * 1e6   # this assumes a pdt given in sec * 1e-6
         action_completed_time = self.clock.current_time + action_required_time
         # +1 ensures no weird business if tha last acq completed as the dmap updated
@@ -1607,13 +1615,14 @@ class TemporalExperiment():
         # if len(dmap_times) == 0, this means the acquisition is not interupted and we can just do it whole
         # if not, then we need to split the acquisition
         if len(dmap_times) == 0:
-            acq, bleached, intensity = self.microscope.get_signal_and_bleach(self.temporal_datamap,
+            acq, bleached, temporal_acq_elts = self.microscope.get_signal_and_bleach(self.temporal_datamap,
                                                                              self.temporal_datamap.pixelsize,
                                                                              pdt, p_ex, p_sted,
                                                                              indices=indices,
                                                                              acquired_intensity=intensity,
                                                                              bleach=self.bleach, update=True)
 
+            intensity = temporal_acq_elts["intensity"]
             self.clock.current_time += action_required_time
             return acq, bleached
         else:
@@ -1670,11 +1679,15 @@ class TemporalExperiment():
                 indices = {"flashes": key}
                 self.temporal_datamap.update_whole_datamap(key)
                 self.temporal_datamap.update_dicts(indices)
-                acq, bleached, intensity = self.microscope.get_signal_and_bleach(self.temporal_datamap,
+                acq, bleached, temporal_acq_elts = self.microscope.get_signal_and_bleach(self.temporal_datamap,
                                                                                  self.temporal_datamap.pixelsize,
                                                                                  pdt, p_ex, p_sted, indices=indices,
                                                                                  acquired_intensity=intensity,
                                                                                  bleach=self.bleach, update=True,
                                                                                  pixel_list=acq_pixel_list)
+
+                intensity = temporal_acq_elts["intensity"]
+                prob_ex = temporal_acq_elts["prob_ex"]
+                prob_sted = temporal_acq_elts["prob_sted"]
 
             return acq, bleached
