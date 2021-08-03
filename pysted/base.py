@@ -1359,7 +1359,8 @@ class TemporalSynapseDmap(Datamap):
                 nd_mult = 0
             for nanodomain in self.synapse.nanodomains:
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
-                    self.synapse.n_molecs_base * nd_mult - self.synapse.n_molecs_base
+                    self.synapse.n_molecs_base * nd_mult    # - self.synapse.n_molecs_base
+                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
 
         self.contains_sub_datamaps["flashes"] = True
         self.sub_datamaps_idx_dict["flashes"] = 0
