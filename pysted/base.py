@@ -838,7 +838,7 @@ class Microscope:
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                               pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
                               bleach_func=bleach_funcs.default_update_survival_probabilities, steps=None,
-                              prob_ex=None, prob_sted=None):
+                              prob_ex=None, prob_sted=None, bleach_mode="default"):
         """
         This function acquires the signal and bleaches simultaneously. It makes a call to compiled C code for speed,
         so make sure the raster.pyx file is compiled!
@@ -949,13 +949,18 @@ class Microscope:
                 pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
             returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped, seed=seed)
 
+        unbleached_whole_datamap = numpy.copy(datamap.whole_datamap)
+
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
             datamap.base_datamap = datamap.sub_datamaps_dict["base"]
             datamap.whole_datamap = numpy.copy(datamap.base_datamap)
             # BLEACHER LES FLASHS FUTURS
             if datamap.contains_sub_datamaps["flashes"] and indices["flashes"] < datamap.flash_tstack.shape[0]:
-                datamap.bleach_future(indices, bleached_sub_datamaps_dict)
+                if bleach_mode == "default":
+                    datamap.bleach_future(indices, bleached_sub_datamaps_dict)
+                elif bleach_mode == "proportional":
+                    datamap.bleach_future_proportional(indices, bleached_sub_datamaps_dict, unbleached_whole_datamap)
 
         temporal_acq_elts = {"intensity": acquired_intensity,
                              "prob_ex": prob_ex,
@@ -1330,6 +1335,7 @@ class TemporalSynapseDmap(Datamap):
         self.contains_sub_datamaps = {"base": True,
                                       "flashes": False}
         self.sub_datamaps_idx_dict = {}
+        self.init_molecs_ratio = numpy.ones(self.whole_datamap.shape)
 
     def __setitem__(self, key, value):
         if key == "flashes":
@@ -1393,6 +1399,27 @@ class TemporalSynapseDmap(Datamap):
             0, self.flash_tstack[indices["flashes"] + 1:])
         self.flash_tstack = self.flash_tstack.astype('int64')
         self.whole_datamap += self.flash_tstack[indices["flashes"]]
+
+    def bleach_future_proportional(self, indices, bleached_sub_datamaps_dict, unbleached_whole_datamap):
+        """
+        This function will apply bleaching to the future molecules proportional to what has bleached.
+        For instance, if 3/5 molecules are left after bleaching, then the number of molecules in the subsequent
+        flashes will be multiplied by 3/5
+        """
+        # ???
+        bleached_whole_datamap = numpy.zeros(unbleached_whole_datamap.shape)
+        for key in bleached_sub_datamaps_dict:
+            bleached_whole_datamap += bleached_sub_datamaps_dict[key]
+        ratio = bleached_whole_datamap / numpy.where(numpy.logical_and(unbleached_whole_datamap == 0,
+                                                                       bleached_whole_datamap == 0),
+                                                     1, unbleached_whole_datamap)
+        # self.flash_tstack[indices["flashes"]:, :, :] *= ratio
+        # self.flash_tstack = numpy.ceil(self.flash_tstack)
+        # self.flash_tstack = self.flash_tstack.astype('int64')
+        self.flash_tstack[indices["flashes"]:, :, :] = numpy.ceil(self.flash_tstack[indices["flashes"]:, :, :]
+                                                                  * ratio).astype('int64')
+        self.whole_datamap = bleached_sub_datamaps_dict["base"] + self.flash_tstack[indices["flashes"]]
+
 
     def update_whole_datamap(self, flash_idx):
         """
@@ -1580,13 +1607,14 @@ class TemporalExperiment():
     This temporal experiment will run on a loop based on the action selections instead of on the time to make it easier
     to integrate the agent/gym stuff :)
     """
-    def __init__(self, clock, microscope, temporal_datamap, exp_runtime, bleach=True):
+    def __init__(self, clock, microscope, temporal_datamap, exp_runtime, bleach=True, bleach_mode="default"):
         self.clock = clock
         self.microscope = microscope
         self.temporal_datamap = temporal_datamap
         self.exp_runtime = exp_runtime
         self.flash_tstep = 0
         self.bleach = bleach
+        self.bleach_mode = bleach_mode
 
     def play_action(self, pdt, p_ex, p_sted):
         """
@@ -1617,11 +1645,12 @@ class TemporalExperiment():
         # if not, then we need to split the acquisition
         if len(dmap_times) == 0:
             acq, bleached, temporal_acq_elts = self.microscope.get_signal_and_bleach(self.temporal_datamap,
-                                                                             self.temporal_datamap.pixelsize,
-                                                                             pdt, p_ex, p_sted,
-                                                                             indices=indices,
-                                                                             acquired_intensity=intensity,
-                                                                             bleach=self.bleach, update=True)
+                                                                                     self.temporal_datamap.pixelsize,
+                                                                                     pdt, p_ex, p_sted,
+                                                                                     indices=indices,
+                                                                                     acquired_intensity=intensity,
+                                                                                     bleach=self.bleach, update=True,
+                                                                                     bleach_mode=self.bleach_mode)
 
             intensity = temporal_acq_elts["intensity"]
             self.clock.current_time += action_required_time
@@ -1681,13 +1710,16 @@ class TemporalExperiment():
                 self.temporal_datamap.update_whole_datamap(key)
                 self.temporal_datamap.update_dicts(indices)
                 acq, bleached, temporal_acq_elts = self.microscope.get_signal_and_bleach(self.temporal_datamap,
-                                                                                 self.temporal_datamap.pixelsize,
-                                                                                 pdt, p_ex, p_sted, indices=indices,
-                                                                                 acquired_intensity=intensity,
-                                                                                 bleach=self.bleach, update=True,
-                                                                                 pixel_list=acq_pixel_list,
-                                                                                 prob_ex=prob_ex,
-                                                                                 prob_sted=prob_sted)
+                                                                                         self.temporal_datamap.pixelsize,
+                                                                                         pdt, p_ex, p_sted,
+                                                                                         indices=indices,
+                                                                                         acquired_intensity=intensity,
+                                                                                         bleach=self.bleach,
+                                                                                         bleach_mode=self.bleach_mode,
+                                                                                         update=True,
+                                                                                         pixel_list=acq_pixel_list,
+                                                                                         prob_ex=prob_ex,
+                                                                                         prob_sted=prob_sted)
 
                 intensity = temporal_acq_elts["intensity"]
                 prob_ex = temporal_acq_elts["prob_ex"]
