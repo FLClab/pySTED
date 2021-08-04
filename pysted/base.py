@@ -1373,6 +1373,7 @@ class TemporalSynapseDmap(Datamap):
             else:
                 self.nanodomains_active.append(False)
 
+        self.nanodomains_active_currently = self.nanodomains_active[0]
         self.contains_sub_datamaps["flashes"] = True
         self.sub_datamaps_idx_dict["flashes"] = 0
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
@@ -1436,6 +1437,7 @@ class TemporalSynapseDmap(Datamap):
         if flash_idx >= self.flash_tstack.shape[0]:
             flash_idx = self.flash_tstack.shape[0] - 1
         self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
+        self.nanodomains_active_currently = self.nanodomains_active[flash_idx]   # updates whether or not flashing rn
 
 
     def update_dicts(self, indices):
