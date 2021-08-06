@@ -248,3 +248,70 @@ class Nanodomain():
         # exit()
 
         self.flash_curve = np.append(normalized_light_curve, [0])
+
+
+if __name__ == "__main__":
+    from pysted import base
+
+    # generate a synapse with nanodomains
+    # create molecules disposition
+    n_molecs_base = 5
+    min_dist = 100
+    n_molecs_in_domain = 100
+    n_nanodomains = 7
+    valid_thickness = 3
+    shroom = Synapse(n_molecs_base, mode="mushroom", seed=42)
+    shroom.add_nanodomains(n_nanodomains, min_dist, seed=42, n_molecs_in_domain=n_molecs_in_domain, valid_thickness=3)
+
+    # microscope stuff
+    egfp = {
+                "lambda_": 535e-9,
+                "qy": 0.6,
+                "sigma_abs": {488: 1.15e-20,
+                              575: 6e-21},
+                "sigma_ste": {560: 1.2e-20,
+                              575: 6.0e-21,
+                              580: 5.0e-21},
+                "sigma_tri": 1e-21,
+                "tau": 3e-09,
+                "tau_vib": 1.0e-12,
+                "tau_tri": 5e-6,
+                "phy_react": {488: 0.25e-7,   # 1e-4
+                              575: 25.0e-11},   # 1e-8
+                "k_isc": 0.26e+6
+            }
+    pixelsize = 20e-9
+    bleach = False
+    p_ex = 5.0e-6
+    p_sted = 5.0e-3
+    pdt = 100.0e-6
+
+    laser_ex = base.GaussianBeam(488e-9)
+    laser_sted = base.DonutBeam(575e-9, zero_residual=0)
+    detector = base.Detector(noise=True, background=0)
+    objective = base.Objective()
+    fluo = base.Fluorescence(**egfp)
+    microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, load_cache=True)
+    i_ex, _, _ = microscope.cache(pixelsize, save_cache=True)
+
+    datamap = base.Datamap(shroom.frame, pixelsize)
+    datamap.set_roi(i_ex, "max")
+
+    # confocal acquisition
+    confocal_acq, _, _ = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt, p_ex, 0.0,
+                                                          bleach=False, update=False)
+
+    # STED acquisition
+    sted_acq, _, _ = microscope.get_signal_and_bleach(datamap, datamap.pixelsize, pdt, p_ex, p_sted,
+                                                      bleach=False, update=False)
+
+    fig, axes = plt.subplots(1, 3)
+
+    axes[0].imshow(datamap.whole_datamap[datamap.roi])
+    axes[0].set_title(f"Datamap")
+    axes[1].imshow(confocal_acq)
+    axes[1].set_title(f"Confocal")
+    axes[2].imshow(sted_acq)
+    axes[2].set_title(f"STED")
+
+    plt.show()
