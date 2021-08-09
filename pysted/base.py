@@ -1379,6 +1379,51 @@ class TemporalSynapseDmap(Datamap):
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
         self.update_whole_datamap(0)
 
+    def create_t_stack_dmap_smooth(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=28,
+                                   end_pad=0):
+        """
+        Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
+        Assumes the roi is set
+        """
+        self.decay_time_us = decay_time_us
+        self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
+        self.sub_datamaps_dict["base"] = self.base_datamap
+
+        flash_curve = utils.smooth_ramp_hand_crafted_light_curve(
+            delay=delay,
+            n_decay_steps=n_decay_steps,
+            n_molecules_multiplier=n_molecules_multiplier,
+            end_pad=end_pad
+        )
+
+        # print("yo")
+        # pyplot.plot(flash_curve)
+        # pyplot.show()
+        # exit()
+
+        self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
+        self.nanodomains_active = []
+        for t, nanodomains_multiplier in enumerate(flash_curve):
+            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
+            nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+            if nd_mult < 0:
+                nd_mult = 0
+            for nanodomain in self.synapse.nanodomains:
+                self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
+                    self.synapse.n_molecs_base * nd_mult    # - self.synapse.n_molecs_base
+                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
+            if self.flash_tstack[t].max() > 0:
+                self.nanodomains_active.append(True)
+            else:
+                self.nanodomains_active.append(False)
+
+        self.nanodomains_active_currently = self.nanodomains_active[0]
+        self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
+
     def bleach_future(self, indices, bleached_sub_datamaps_dict):
         """
         Applies bleaching to the future flash subdatamaps according to the bleaching that occured to the current flash
