@@ -1400,12 +1400,6 @@ class TemporalSynapseDmap(Datamap):
             end_pad=end_pad
         )
 
-        print("yo")
-        pyplot.plot(flash_curve)
-        pyplot.title(f"delay = {delay}")
-        pyplot.show()
-        exit()
-
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
         self.nanodomains_active = []
         for t, nanodomains_multiplier in enumerate(flash_curve):
