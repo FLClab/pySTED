@@ -1390,6 +1390,9 @@ class TemporalSynapseDmap(Datamap):
         self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
         self.sub_datamaps_dict["base"] = self.base_datamap
 
+        if type(delay) is tuple:
+            delay = numpy.random.randint(delay[0], delay[1])
+
         flash_curve = utils.smooth_ramp_hand_crafted_light_curve(
             delay=delay,
             n_decay_steps=n_decay_steps,
@@ -1397,10 +1400,11 @@ class TemporalSynapseDmap(Datamap):
             end_pad=end_pad
         )
 
-        # print("yo")
-        # pyplot.plot(flash_curve)
-        # pyplot.show()
-        # exit()
+        print("yo")
+        pyplot.plot(flash_curve)
+        pyplot.title(f"delay = {delay}")
+        pyplot.show()
+        exit()
 
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
         self.nanodomains_active = []
