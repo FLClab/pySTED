@@ -142,11 +142,20 @@ class Synapse():
         :param valid_thickness: The thickness of the valid region for the nanodomains. This value is 0 by default,
                                 meaning the nanodomains will only be placed on the upper perimeter of the synapse
         """
+        if type(n_nanodmains) is tuple:
+            n_nanodmains = np.random.randint(n_nanodmains[0], n_nanodmains[1])
+        if type(min_dist_nm) is tuple:
+            min_dist_nm = np.random.randint(min_dist_nm[0], min_dist_nm[1])
+        if type(valid_thickness) is tuple:
+            valid_thickness = np.random.randint(valid_thickness[0], valid_thickness[1])
+        print(f", n_nanodomains = {n_nanodmains}, min_dist = {min_dist_nm}, valid_thickness = {valid_thickness}")
+
         np.random.seed(seed)
         self.nanodomains = []
         self.nanodomains_coords = []
         n_nanodmains_placed = 0
         self.filter_valid_nanodomain_pos(thickness=valid_thickness)
+
         for i in range(n_nanodmains):
             if self.valid_nanodomains_pos.shape[0] == 0:
                 # no more valid positions, simply stop
