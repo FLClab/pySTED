@@ -1422,7 +1422,7 @@ class TemporalSynapseDmap(Datamap):
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
         self.update_whole_datamap(0)
 
-    def create_t_stack_dmap_sampled(self, decay_time_us, delay=0, n_decay_steps=10):
+    def create_t_stack_dmap_sampled(self, decay_time_us, delay=0, n_decay_steps=10, curves_path=None):
         """
         Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
         Very similar implementation to TemporalDatamap's create_t_stack_dmap method
@@ -1437,10 +1437,9 @@ class TemporalSynapseDmap(Datamap):
         if type(delay) is tuple:
             delay = numpy.random.randint(delay[0], delay[1])
 
-        curves_path = "flash_files/events_curves.npy"
+        if curves_path is None:
+            curves_path = "flash_files/events_curves.npy"
         flash_curve = utils.sampled_flash_manipulations(curves_path, delay, rescale=True, seed=None)
-        pyplot.plot(flash_curve)
-        pyplot.show()
 
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
         self.nanodomains_active = []
