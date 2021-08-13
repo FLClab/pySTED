@@ -886,6 +886,39 @@ def flash_generator(events_curves_path, seed=None):
     return sampled_light_curve
 
 
+def sampled_flash_manipulations(events_curves_path, delay, rescale=True, seed=None):
+    """
+    Samples a light curve and modifies it to make it more prettier for training (i.e. more like the hand crafted light
+    curves)
+    - converts the values to ints
+    - add variable delay at the start of the curve to delay the flash
+    - (optional) rescales the values between [1, 28]
+    :param events_curves_path: Path to the .npy file containing the light curves
+    :param delay: Number of steps where the flash value stays ctw at 1 before the flash starts
+    :param rescale: Whether or not the light curve will be rescaled. For now, if true, simply rescales between [1, 28]
+                    because this is the value range for
+    :param seed: Sets the seed for random sampling :)
+    """
+    numpy.random.seed(seed)
+    events_curves = numpy.load(events_curves_path)
+
+    sampled_light_curve = sample_light_curve(events_curves)
+
+    if rescale:
+        sampled_light_curve = (28 - 1) * (sampled_light_curve - sampled_light_curve.min()) / \
+                                       (sampled_light_curve.max() - sampled_light_curve.min()) + 1
+
+    sampled_light_curve = numpy.round(sampled_light_curve).astype(int)
+
+    if type(delay) is tuple:
+        delay = numpy.random.randint(delay[0], delay[1])
+    if delay > 0:
+        delay = numpy.ones(delay)
+        sampled_light_curve = numpy.append(delay, sampled_light_curve)
+
+    return sampled_light_curve
+
+
 def hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
     """
     Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.
