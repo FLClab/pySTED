@@ -148,7 +148,6 @@ class Synapse():
             min_dist_nm = np.random.randint(min_dist_nm[0], min_dist_nm[1])
         if type(valid_thickness) is tuple:
             valid_thickness = np.random.randint(valid_thickness[0], valid_thickness[1])
-        print(f", n_nanodomains = {n_nanodmains}, min_dist = {min_dist_nm}, valid_thickness = {valid_thickness}")
 
         np.random.seed(seed)
         self.nanodomains = []
