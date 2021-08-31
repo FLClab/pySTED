@@ -2,10 +2,33 @@ import numpy as np
 import warnings
 from matplotlib import pyplot as plt
 from skimage import draw
+from skimage import transform as sktr
 from scipy.ndimage.morphology import binary_fill_holes
 from scipy.spatial.distance import cdist
 from pysted import utils
 
+
+def degrees_to_radians(angle_deg):
+    return angle_deg * np.pi / 180
+
+
+def rotate_nds(nd_coords, rot_angle, frame_shape=(64, 64)):
+    """
+    rotates the nanodomain coords
+    :param nd_coords: list or np.array of the nanodomain coords in the unrotated frame
+    :param rot_angle: rotation angle in degrees
+    :param frame_shape: shape of the image in which the NDs reside. Should be (64, 64) in most cases
+    """
+    nd_coords_to_rot = np.asarray(nd_coords) - \
+                       np.array([int(frame_shape[0] / 2) - 0.5, int(frame_shape[1] / 2) - 0.5])   # faut tu jfasse - 0.5
+    angle_rad = degrees_to_radians(rot_angle)
+    rotation_matrix = np.array([[np.cos(angle_rad), -np.sin(angle_rad)],
+                                [np.sin(angle_rad), np.cos(angle_rad)]])
+    rotated_nd_coords = np.asarray(np.rint(nd_coords_to_rot @ rotation_matrix.T), dtype=np.int8) + \
+                        np.array([int(frame_shape[0] / 2) - 0.5, int(frame_shape[1] / 2) - 0.5])
+    rotated_nd_coords = np.rint(rotated_nd_coords).astype(int)
+
+    return rotated_nd_coords
 
 class Synapse():
     """
@@ -35,6 +58,8 @@ class Synapse():
         self.datamap_pixelsize_nm = datamap_pixelsize_nm
         self.n_molecs_base = n_molecs
         self.flash_tstep = 0
+        self.nanodomains = []
+        self.nanodomains_coords = []
 
         modes = {0: 'mushroom', 1: 'bump', 2: 'rand'}
         if mode not in modes.values():
@@ -74,15 +99,17 @@ class Synapse():
 
             img = np.zeros(self.img_shape)
             # fill the bottom of the image as if it was the dendrite
-            img[self.img_shape[0] - np.random.randint(dendrite_thickness[0], dendrite_thickness[1]):
-                self.img_shape[0]] = 1
+            sampled_thickness = np.random.randint(dendrite_thickness[0], dendrite_thickness[1])
+            self.unrotated_dendrite_top = self.img_shape[0] - sampled_thickness
+            img[self.img_shape[0] - sampled_thickness: self.img_shape[0]] = 1
             img[self.ellipse_perimeter[:, 0], self.ellipse_perimeter[:, 1]] = 1
             img = binary_fill_holes(img)
             img[polygon_pixels[:, 0], polygon_pixels[:, 1]] = 1
 
         elif mode == 'bump':
-            dendrite_thickness = np.random.randint(dendrite_thickness[0], dendrite_thickness[1])
-            center = (self.img_shape[0] - dendrite_thickness, int(self.img_shape[1] / 2))
+            sampled_thickness = np.random.randint(dendrite_thickness[0], dendrite_thickness[1])
+            self.unrotated_dendrite_top = self.img_shape[0] - sampled_thickness
+            center = (self.img_shape[0] - sampled_thickness, int(self.img_shape[1] / 2))
 
             ellipse_rows, ellipse_cols = draw.ellipse(center[0], center[1], int(height_px / 2), int(width_px / 2))
             ellipse_pixels = np.stack((ellipse_rows, ellipse_cols), axis=-1)
@@ -98,7 +125,7 @@ class Synapse():
             self.ellipse_perimeter = np.delete(self.ellipse_perimeter, row_too_low_perimeter, axis=0)
 
             img = np.zeros(self.img_shape)
-            img[self.img_shape[0] - dendrite_thickness: self.img_shape[0]] = 1
+            img[self.img_shape[0] - sampled_thickness: self.img_shape[0]] = 1
             # img[ellipse_pixels[:, 0], ellipse_pixels[:, 1]] = n_molecs
             img[self.ellipse_perimeter[:, 0], self.ellipse_perimeter[:, 1]] = 1
             img = binary_fill_holes(img)
@@ -219,6 +246,49 @@ class Synapse():
                       f"current_time = {current_time} \n"
                       f"flash value = {np.max(self.frame)}")
             plt.show()
+
+    def rotate_and_translate(self, rot_angle=None, translate=True):
+        # pad the frame to allow us to lengthen the dendrite and translate and stuff :)
+        pad_width = 100
+        padded_frame = np.pad(self.frame, pad_width)
+
+        # stretch the dendrite
+        padded_frame[pad_width + self.unrotated_dendrite_top: pad_width + self.frame.shape[0]] = self.n_molecs_base
+
+        # rotate around the center, keep the center crop of img shape (64, 64), the rotate the nds
+        if rot_angle is None:
+            rot_angle = np.random.randint(0, 360)
+        rot8_padded = sktr.rotate(padded_frame, rot_angle, resize=False, order=1, preserve_range=True)
+
+        rot8_roi = rot8_padded[pad_width: pad_width + self.frame.shape[0],
+                               pad_width: pad_width + self.frame.shape[1]]
+
+        # set the translation limits to make sure no ND is outside the roi set by the frame
+        if len(self.nanodomains) != 0:
+            rotated_nd_coords = rotate_nds(self.nanodomains_coords, rot_angle, frame_shape=self.frame.shape)
+        else:
+            rotated_nd_coords = np.asarray(self.nanodomains_coords)
+        dist_to_far_edge = np.min((np.min(self.frame.shape) - 1) * np.ones(rotated_nd_coords.shape) - rotated_nd_coords)
+        dist_to_close_edge = np.min(rotated_nd_coords)
+        translate_lim = np.min([dist_to_close_edge, dist_to_far_edge])
+
+        if translate:
+            translate_rows = np.random.randint(-translate_lim, translate_lim)
+            translate_cols = np.random.randint(-translate_lim, translate_lim)
+            rot8_roi = rot8_padded[pad_width + translate_rows: pad_width + translate_rows + self.frame.shape[0],
+                                   pad_width + translate_cols: pad_width + translate_cols + self.frame.shape[1]]
+        else:
+            translate_rows, translate_cols = 0, 0
+            rot8_roi = rot8_padded[pad_width: pad_width + self.frame.shape[0],
+                                   pad_width: pad_width + self.frame.shape[1]]
+
+        if len(self.nanodomains) != 0:
+            rotated_nd_coords[:, 0] -= translate_rows
+            rotated_nd_coords[:, 1] -= translate_cols
+        self.nanodomains_coords = rotated_nd_coords
+        for idx, nd in enumerate(self.nanodomains):
+            nd.coords = self.nanodomains_coords[idx]
+        self.frame = np.rint(rot8_roi).astype(int)
 
 
 
