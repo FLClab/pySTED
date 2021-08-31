@@ -107,9 +107,9 @@ class Synapse():
             img[polygon_pixels[:, 0], polygon_pixels[:, 1]] = 1
 
         elif mode == 'bump':
-            dendrite_thickness = np.random.randint(dendrite_thickness[0], dendrite_thickness[1])
+            sampled_thickness = np.random.randint(dendrite_thickness[0], dendrite_thickness[1])
             self.unrotated_dendrite_top = self.img_shape[0] - sampled_thickness
-            center = (self.img_shape[0] - dendrite_thickness, int(self.img_shape[1] / 2))
+            center = (self.img_shape[0] - sampled_thickness, int(self.img_shape[1] / 2))
 
             ellipse_rows, ellipse_cols = draw.ellipse(center[0], center[1], int(height_px / 2), int(width_px / 2))
             ellipse_pixels = np.stack((ellipse_rows, ellipse_cols), axis=-1)
@@ -125,7 +125,7 @@ class Synapse():
             self.ellipse_perimeter = np.delete(self.ellipse_perimeter, row_too_low_perimeter, axis=0)
 
             img = np.zeros(self.img_shape)
-            img[self.img_shape[0] - dendrite_thickness: self.img_shape[0]] = 1
+            img[self.img_shape[0] - sampled_thickness: self.img_shape[0]] = 1
             # img[ellipse_pixels[:, 0], ellipse_pixels[:, 1]] = n_molecs
             img[self.ellipse_perimeter[:, 0], self.ellipse_perimeter[:, 1]] = 1
             img = binary_fill_holes(img)
