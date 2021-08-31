@@ -514,13 +514,25 @@ class Detector:
             # background counts per second
             cts = numpy.random.poisson(self.background, signal.shape)
             # background counts during dwell time
-            cts = (cts * dwelltime).astype(numpy.int64)
+            # cts = (cts * dwelltime).astype(numpy.int64)
+            """
+            ^^^ old implementation did this, however I don't think this is right ^^^
+            With this implementation, the number of photons simply increases as pdt increases. For example, if 
+            noise is 1000 and pdt is 10e-6, the max photon count for the acq will be around 200, but if I increase pdt
+            to 100e-6 then the max photon count wil be around 2000. So the value simply increases for the whole image.
+            In order to see the noise on the acq, we have to put in ludicrous values for noise of at least 10000000000.
+            
+            By commenting this line, I can put a more moderate noise value, around the photon count I expect to get in
+            the image. Then, as the pdt increases, the signal for the rest of the image increases while the noise stays
+            at the same level, which I think makes more sense.
+            """
+
             signal += cts
         if self.darkcount > 0:
             # dark counts per second
             cts = numpy.random.poisson(self.darkcount, signal.shape)
-            # dark counts during dwell time
-            cts = (cts * dwelltime).astype(numpy.int64)
+            # dark counts during dwell time ***DISABLING THIS LINE, see explanation in "if self.background > 0"
+            # cts = (cts * dwelltime).astype(numpy.int64)
             signal += cts
         return signal
 
