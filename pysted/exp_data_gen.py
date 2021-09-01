@@ -272,7 +272,7 @@ class Synapse():
         dist_to_close_edge = np.min(rotated_nd_coords)
         translate_lim = np.min([dist_to_close_edge, dist_to_far_edge])
 
-        if translate:
+        if translate and (translate_lim > 0):
             translate_rows = np.random.randint(-translate_lim, translate_lim)
             translate_cols = np.random.randint(-translate_lim, translate_lim)
             rot8_roi = rot8_padded[pad_width + translate_rows: pad_width + translate_rows + self.frame.shape[0],
