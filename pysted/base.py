@@ -1445,7 +1445,8 @@ class TemporalSynapseDmap(Datamap):
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
         self.update_whole_datamap(0)
 
-    def create_t_stack_dmap_sampled(self, decay_time_us, delay=0, n_decay_steps=10, curves_path=None):
+    def create_t_stack_dmap_sampled(self, decay_time_us, delay=0, n_decay_steps=10, curves_path=None,
+                                    individual_flashes=False):
         """
         Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
         Very similar implementation to TemporalDatamap's create_t_stack_dmap method
@@ -1464,6 +1465,15 @@ class TemporalSynapseDmap(Datamap):
             curves_path = "flash_files/events_curves.npy"
         flash_curve = utils.sampled_flash_manipulations(curves_path, delay, rescale=True, seed=None)
 
+        if individual_flashes:
+            # faire de quoi pour trouver le peak, sampler des variances pour chaque ND :)
+            flash_peak = numpy.argmax(flash_curve)
+            flash_variances = []
+            for i in range(len(self.synapse.nanodomains)):
+                flash_variances.append(numpy.random.randint(-4, 4))
+        else:
+            flash_peak = 0
+
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
         self.nanodomains_active = []
         for t, nanodomains_multiplier in enumerate(flash_curve):
@@ -1471,9 +1481,15 @@ class TemporalSynapseDmap(Datamap):
             nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
             if nd_mult < 0:
                 nd_mult = 0
-            for nanodomain in self.synapse.nanodomains:
+            for nd_idx, nanodomain in enumerate(self.synapse.nanodomains):
+                if not individual_flashes or t < flash_peak:
+                    flash_variance = 0
+                else:
+                    flash_variance = flash_variances[nd_idx]
+                    if nd_mult + flash_variance < 0:
+                        flash_variance = 0
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
-                    self.synapse.n_molecs_base * nd_mult  # - self.synapse.n_molecs_base
+                    self.synapse.n_molecs_base * (nd_mult + flash_variance) # - self.synapse.n_molecs_base
                 # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
             if self.flash_tstack[t].max() > 0:
                 self.nanodomains_active.append(True)
