@@ -1391,7 +1391,7 @@ class TemporalSynapseDmap(Datamap):
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
         self.update_whole_datamap(0)
 
-    def create_t_stack_dmap_smooth(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=28,
+    def create_t_stack_dmap_smooth(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=None,
                                    end_pad=0):
         """
         Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
@@ -1404,6 +1404,9 @@ class TemporalSynapseDmap(Datamap):
 
         if type(delay) is tuple:
             delay = numpy.random.randint(delay[0], delay[1])
+
+        if type(n_molecules_multiplier) is tuple:
+            n_molecules_multiplier = numpy.random.randint(n_molecules_multiplier[0], n_molecules_multiplier[1])
 
         flash_curve = utils.smooth_ramp_hand_crafted_light_curve(
             delay=delay,

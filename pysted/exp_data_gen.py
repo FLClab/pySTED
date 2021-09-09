@@ -175,6 +175,9 @@ class Synapse():
             min_dist_nm = np.random.randint(min_dist_nm[0], min_dist_nm[1])
         if type(valid_thickness) is tuple:
             valid_thickness = np.random.randint(valid_thickness[0], valid_thickness[1])
+        if type(n_molecs_in_domain) is tuple:
+            n_molecs_in_domain_list = [np.random.randint(n_molecs_in_domain[0], n_molecs_in_domain[1])
+                                       for i in range(n_nanodmains)]
 
         np.random.seed(seed)
         self.nanodomains = []
@@ -196,8 +199,13 @@ class Synapse():
             invalid_positions_idx = np.argwhere(distances < min_dist_nm)[:, 1]
             self.valid_nanodomains_pos = np.delete(self.valid_nanodomains_pos, invalid_positions_idx, axis=0)
 
+        counter = 0
         for row, col in self.nanodomains_coords:
-            self.frame[row, col] += n_molecs_in_domain
+            if type(n_molecs_in_domain) is tuple:
+                self.frame[row, col] += n_molecs_in_domain_list[counter]
+            else:
+                self.frame[row, col] += n_molecs_in_domain
+            counter += 1
         self.n_molecs_in_domains = n_molecs_in_domain
 
     def fatten_nanodomains(self):

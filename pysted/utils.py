@@ -943,7 +943,7 @@ def hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=2
     return light_curve
 
 
-def smooth_ramp_hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
+def smooth_ramp_hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=None, end_pad=0):
     """
     Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.
     :param delay: The number of steps before the peak of the light curve.
@@ -953,6 +953,9 @@ def smooth_ramp_hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_
     :returns: The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
               then decays back to 1 over t = n_decay_steps steps, and stays flat at 1 for end_pad + 1 steps
     """
+    if n_molecules_multiplier is None:
+        n_molecules_multiplier = numpy.random.randint(20, 35)
+
     # why is it so hard for me to plot an exponential decay
     tau = 3
     tmax = 10
