@@ -1392,7 +1392,7 @@ class TemporalSynapseDmap(Datamap):
         self.update_whole_datamap(0)
 
     def create_t_stack_dmap_smooth(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=None,
-                                   end_pad=0):
+                                   end_pad=0, individual_flashses=True):
         """
         Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
         Very similar implementation to TemporalDatamap's create_t_stack_dmap method
@@ -1405,24 +1405,32 @@ class TemporalSynapseDmap(Datamap):
         if type(delay) is tuple:
             delay = numpy.random.randint(delay[0], delay[1])
 
-        if type(n_molecules_multiplier) is tuple:
-            n_molecules_multiplier = numpy.random.randint(n_molecules_multiplier[0], n_molecules_multiplier[1])
-
-        flash_curve = utils.smooth_ramp_hand_crafted_light_curve(
-            delay=delay,
-            n_decay_steps=n_decay_steps,
-            n_molecules_multiplier=n_molecules_multiplier,
-            end_pad=end_pad
-        )
+        flash_curves = []
+        for i in range(len(self.synapse.nanodomains)):
+            flash_curve = utils.smooth_ramp_hand_crafted_light_curve(
+                delay=delay,
+                n_decay_steps=n_decay_steps,
+                n_molecules_multiplier=n_molecules_multiplier,
+                end_pad=end_pad
+            )
+            flash_curves.append(numpy.copy(flash_curve))
 
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
         self.nanodomains_active = []
         for t, nanodomains_multiplier in enumerate(flash_curve):
             # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
-            nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
-            if nd_mult < 0:
-                nd_mult = 0
-            for nanodomain in self.synapse.nanodomains:
+            # nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+            # if nd_mult < 0:
+            #     nd_mult = 0
+            for nd_idx, nanodomain in enumerate(self.synapse.nanodomains):
+                if not individual_flashses:
+                    nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+                    if nd_mult < 0:
+                        nd_mult = 0
+                else:
+                    nd_mult = int(numpy.round(flash_curves[nd_idx][t])) - 1
+                    if nd_mult < 0:
+                        nd_mult = 0
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
                     self.synapse.n_molecs_base * nd_mult    # - self.synapse.n_molecs_base
                 # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)

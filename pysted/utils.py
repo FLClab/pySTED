@@ -955,6 +955,8 @@ def smooth_ramp_hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_
     """
     if n_molecules_multiplier is None:
         n_molecules_multiplier = numpy.random.randint(20, 35)
+    if type(n_molecules_multiplier) is tuple:
+        n_molecules_multiplier = numpy.random.randint(n_molecules_multiplier[0], n_molecules_multiplier[1])
 
     # why is it so hard for me to plot an exponential decay
     tau = 3
