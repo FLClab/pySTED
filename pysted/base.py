@@ -1392,7 +1392,7 @@ class TemporalSynapseDmap(Datamap):
         self.update_whole_datamap(0)
 
     def create_t_stack_dmap_smooth(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=None,
-                                   end_pad=0, individual_flashses=True):
+                                   end_pad=0, individual_flashes=False):
         """
         Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
         Very similar implementation to TemporalDatamap's create_t_stack_dmap method
@@ -1423,7 +1423,7 @@ class TemporalSynapseDmap(Datamap):
             # if nd_mult < 0:
             #     nd_mult = 0
             for nd_idx, nanodomain in enumerate(self.synapse.nanodomains):
-                if not individual_flashses:
+                if not individual_flashes:
                     nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
                     if nd_mult < 0:
                         nd_mult = 0
