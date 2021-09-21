@@ -100,15 +100,12 @@ def test_update_survival_probabilities(object self,
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef int s, sprime, t, tprime
-    cdef FLOATDTYPE_t value
-    cdef int sampled_value
     cdef int prob
     cdef int rsamp
     cdef int current
     cdef str key
     cdef float duty_cycle
 
-    # print("CUMaroonie")
 
     photons_ex = self.fluo.get_photons(i_ex * p_ex)
     k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
@@ -160,8 +157,6 @@ def default_update_survival_probabilities(object self,
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef int s, sprime, t, tprime
-    cdef FLOATDTYPE_t value
-    cdef int sampled_value
     cdef float prob
     cdef float rsamp
     cdef float maxval
@@ -202,8 +197,7 @@ def sample_molecules(object self,
                    int w,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_ex,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted):
-    cdef int s, sprime, t, tprime
-    cdef FLOATDTYPE_t value
+    cdef int s, sprime, t, tprime, o
     cdef int sampled_value
     cdef float prob
     cdef float rsamp
