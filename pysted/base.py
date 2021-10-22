@@ -669,7 +669,7 @@ class Fluorescence:
 
     def get_photons(self, intensity):
         e_photon = scipy.constants.c * scipy.constants.h / self.lambda_
-        return (intensity / e_photon).astype(int)
+        return numpy.floor(intensity / e_photon)
 
     def get_k_bleach(self, lambda_, photons):
         sigma_abs = self.get_sigma_abs(lambda_)
