@@ -22,6 +22,7 @@ from matplotlib import pyplot
 import time
 from pysted import temporal, raster
 from scipy.spatial.distance import cdist
+from tqdm.auto import tqdm, trange
 
 
 def approx_binomial(n, p, size=None):
@@ -1507,7 +1508,6 @@ def action_execution_g(action_selected, frame_shape, starting_pixel, pxsize, dat
                                                                          indices=t_stack_idx)
 
     return acq, intensity_map, datamap, pixel_list
-
 
 def make_path_sane(p):
     """Function to uniformly return a real, absolute filesystem path."""
