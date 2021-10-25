@@ -94,6 +94,7 @@ import warnings
 from matplotlib import pyplot
 import time
 from functools import partial
+import pickle
 
 
 class GaussianBeam:

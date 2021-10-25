@@ -1,5 +1,7 @@
 # User defined
 *cache.pkl
+# Removes the cached files
+panels/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -8,6 +10,7 @@ __pycache__/
 
 # C extensions
 *.so
+*.c
 
 # Distribution / packaging
 .Python

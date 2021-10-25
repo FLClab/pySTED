@@ -101,7 +101,7 @@ action_spaces = {
 
 percents_p_sted = [0.00, 0.10, 0.30, 0.50]
 percents_p_ex = [0.05, 0.25, 0.5, 0.75, 0.95]
-percents_pdt = [0., 0.1, 0.25, 0.5, 0.75, 1.0][:1]
+percents_pdt = [0., 0.1, 0.25, 0.5, 0.75, 1.0][:3]
 
 def generate_example():
     for percent_pdt in percents_pdt:
@@ -126,7 +126,7 @@ def generate_example():
                 min_dist = 100
                 shroom.add_nanodomains((5, 10), min_dist_nm=min_dist, n_molecs_in_domain=n_molecs_in_domain, seed=42, valid_thickness=3)
                 molecules_disposition = shroom.frame.astype(int)
-                molecules_disposition = molecules_disposition[:32, :]
+                molecules_disposition = molecules_disposition[:, :]
 
                 # Generating objects necessary for acquisition simulation
                 laser_ex = base.GaussianBeam(**LASER_EX)
@@ -169,7 +169,7 @@ def generate_example():
 
         # fig.savefig(f"./panels/bleachConstants/previous-{pdt * 1e+6:0.0f}.png", transparent=True, dpi=300)
         # pyplot.close("all")
-        pyplot.show()
+    pyplot.show()
 
 def generate_random_curve():
     while True:
