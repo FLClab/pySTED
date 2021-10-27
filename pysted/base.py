@@ -953,9 +953,6 @@ class Microscope:
         # Bleaching is done, the rest is for intensity calculation
         photons = self.fluo.get_photons(acquired_intensity)
 
-        if seed == 0:
-            seed = None
-
         if photons.shape == pdt.shape:
             returned_acquired_photons = self.detector.get_signal(photons, pdt, seed=seed)
         else:
