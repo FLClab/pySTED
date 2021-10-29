@@ -6,8 +6,8 @@ import random
 from pysted import base, utils, raster, bleach_funcs
 
 class DyMINMicroscope(base.Microscope):
-    def __init__(self, excitation, sted, detector, objective, fluo, opts=None):
-        super(DyMINMicroscope, self).__init__(excitation, sted, detector, objective, fluo)
+    def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False, opts=None):
+        super(DyMINMicroscope, self).__init__(excitation, sted, detector, objective, fluo, load_cache=load_cache)
 
         if isinstance(opts, type(None)):
             opts = {
@@ -102,8 +102,8 @@ class DyMINMicroscope(base.Microscope):
         return returned_photons, bleached_sub_datamaps_dict, scaled_power
 
 class DyMINRESCueMicroscope(base.Microscope):
-    def __init__(self, excitation, sted, detector, objective, fluo, opts=None):
-        super(DyMINRESCueMicroscope, self).__init__(excitation, sted, detector, objective, fluo)
+    def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False, opts=None):
+        super(DyMINRESCueMicroscope, self).__init__(excitation, sted, detector, objective, fluo, load_cache=load_cache)
 
         if isinstance(opts, type(None)):
             opts = {
@@ -209,8 +209,8 @@ class DyMINRESCueMicroscope(base.Microscope):
         return returned_photons, bleached_sub_datamaps_dict, scaled_power
 
 class RESCueMicroscope(base.Microscope):
-    def __init__(self, excitation, sted, detector, objective, fluo, opts=None):
-        super(RESCueMicroscope, self).__init__(excitation, sted, detector, objective, fluo)
+    def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False, opts=None):
+        super(RESCueMicroscope, self).__init__(excitation, sted, detector, objective, fluo, load_cache=load_cache)
 
         if isinstance(opts, type(None)):
             opts = {
