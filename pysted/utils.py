@@ -7,6 +7,7 @@ For use by FLClab (@CERVO) authorized people
 '''
 
 import numpy
+import numpy as np
 import scipy, scipy.constants, scipy.integrate
 
 # import mis par BT
@@ -14,12 +15,14 @@ import math
 import random
 import warnings
 import tifffile
+import os
 
 # import mis par BT pour des tests :)
 from matplotlib import pyplot
 import time
 from pysted import temporal, raster
 from scipy.spatial.distance import cdist
+from tqdm.auto import tqdm, trange
 
 
 def approx_binomial(n, p, size=None):
@@ -869,18 +872,106 @@ def sample_light_curve(light_curves):
     return smoothed_sampled
 
 
-def flash_generator(events_curves_path):
+def flash_generator(events_curves_path, seed=None):
     """
-    xd
-    :param events_curves_path:
-    :return:
+    Generates a flash by sampling from statistics built from save light curves
+    :param events_curves_path: Path to the .npy file containing the light curves
+    :param seed: Sets the seed for random sampling :)
+    :return: A sampled light curve
     """
+    numpy.random.seed(seed)
     events_curves = numpy.load(events_curves_path)
 
     sampled_light_curve = sample_light_curve(events_curves)
 
     return sampled_light_curve
 
+
+def sampled_flash_manipulations(events_curves_path, delay, rescale=True, seed=None):
+    """
+    Samples a light curve and modifies it to make it more prettier for training (i.e. more like the hand crafted light
+    curves)
+    - converts the values to ints
+    - add variable delay at the start of the curve to delay the flash
+    - (optional) rescales the values between [1, 28]
+    :param events_curves_path: Path to the .npy file containing the light curves
+    :param delay: Number of steps where the flash value stays ctw at 1 before the flash starts
+    :param rescale: Whether or not the light curve will be rescaled. For now, if true, simply rescales between [1, 28]
+                    because this is the value range for
+    :param seed: Sets the seed for random sampling :)
+    """
+    numpy.random.seed(seed)
+    events_curves = numpy.load(events_curves_path)
+
+    sampled_light_curve = sample_light_curve(events_curves)
+
+    if rescale:
+        sampled_light_curve = (28 - 1) * (sampled_light_curve - sampled_light_curve.min()) / \
+                                       (sampled_light_curve.max() - sampled_light_curve.min()) + 1
+
+    sampled_light_curve = numpy.round(sampled_light_curve).astype(int)
+
+    if type(delay) is tuple:
+        delay = numpy.random.randint(delay[0], delay[1])
+    if delay > 0:
+        delay = numpy.ones(delay)
+        sampled_light_curve = numpy.append(delay, sampled_light_curve)
+
+    return sampled_light_curve
+
+
+def hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
+    """
+    Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.
+    :param delay: The number of steps before the peak of the light curve.
+    :param n_decay_steps: The number of steps for the light curve to return to 1
+    :param n_molecules_multiplier: The value of the light curve at it's peak
+    :param end_pad: The number of steps where the curve stays flat at 1 after the end of the exponential decay.
+    :returns: The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
+              then decays back to 1 over t = n_decay_steps steps, and stays flat at 1 for end_pad + 1 steps
+    """
+    # why is it so hard for me to plot an exponential decay
+    tau = 3
+    tmax = 10
+    t = np.linspace(0, tmax, n_decay_steps)
+    y = n_molecules_multiplier * np.exp(-t / tau)
+
+    # light_curve = np.ones(20)
+    light_curve = np.ones(delay + n_decay_steps + end_pad)
+    light_curve[delay:delay + y.shape[0]] *= y
+    light_curve = numpy.where(light_curve < 1, 1, light_curve)
+
+    return light_curve
+
+
+def smooth_ramp_hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=None, end_pad=0):
+    """
+    Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.
+    :param delay: The number of steps before the peak of the light curve.
+    :param n_decay_steps: The number of steps for the light curve to return to 1
+    :param n_molecules_multiplier: The value of the light curve at it's peak
+    :param end_pad: The number of steps where the curve stays flat at 1 after the end of the exponential decay.
+    :returns: The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
+              then decays back to 1 over t = n_decay_steps steps, and stays flat at 1 for end_pad + 1 steps
+    """
+    if n_molecules_multiplier is None:
+        n_molecules_multiplier = numpy.random.randint(20, 35)
+    if type(n_molecules_multiplier) is tuple:
+        n_molecules_multiplier = numpy.random.randint(n_molecules_multiplier[0], n_molecules_multiplier[1])
+
+    # why is it so hard for me to plot an exponential decay
+    tau = 3
+    tmax = 10
+    t = np.linspace(0, tmax, n_decay_steps)
+    y = n_molecules_multiplier * np.exp(-t / tau)
+
+    # light_curve = np.ones(20)
+    light_curve = np.ones(delay + n_decay_steps + end_pad + 1)
+    light_curve[delay] = int(0.2 * np.max(y))
+    light_curve[delay + 1:delay + 1 + y.shape[0]] *= y
+    light_curve = numpy.where(light_curve < 1, 1, light_curve)
+
+    return light_curve
 
 
 def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses, min_dist, polygon_scale=(5, 10)):
@@ -1200,6 +1291,24 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
         return n_time_steps, x_pixels_for_flash_ts
 
 
+def time_quantum_to_flash_tstep_correspondance(fwhm_step_sec_corresnpondance, time_quantum_us):
+    """
+    Computes the correspondance between the time quantum value (in us) and the flash time steps
+    :param fwhm_step_sec_corresnpondance: A tuple containing how large in time steps the FWHM of the mean flash is at
+                                          index 0 and how large in useconds we want the FWHM to be at index 1
+    :param time_quantum_us: Value of the time quantum used by the master clock (in us)
+    :return:
+    """
+    fwhm_time_usecs, fwhm_time_steps = fwhm_step_sec_corresnpondance[1], fwhm_step_sec_corresnpondance[0]
+    usec_per_time_step = fwhm_time_usecs / fwhm_time_steps
+    # I think in most cases, the time_quantum will be 1 us
+    # I also need to make sure the fwhm_time_usecs is in usecs and is a multiple of the time_quantum_us ?
+    n_time_quantums_per_flash_ts = int(usec_per_time_step / time_quantum_us)
+    return n_time_quantums_per_flash_ts
+
+
+
+
 def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_idx_dict, curves_path,
                   synapse_flash_curve_dict, isolated_synapses_frames, datamap):
     """
@@ -1399,3 +1508,15 @@ def action_execution_g(action_selected, frame_shape, starting_pixel, pxsize, dat
                                                                          indices=t_stack_idx)
 
     return acq, intensity_map, datamap, pixel_list
+
+def make_path_sane(p):
+    """Function to uniformly return a real, absolute filesystem path."""
+    # ~/directory -> /home/user/directory
+    p = os.path.expanduser(p)
+    # A/.//B -> A/B
+    p = os.path.normpath(p)
+    # Resolve symbolic links
+    p = os.path.realpath(p)
+    # Ensure path is absolute
+    p = os.path.abspath(p)
+    return p

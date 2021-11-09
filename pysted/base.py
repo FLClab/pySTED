@@ -4,25 +4,25 @@ assembling an excitation beam, a STED beam, a detector, and fluorescence
 molecules, to obtain a microscope setup. The following code gives an example of
 how to create such setup and use it to measure and plot the detected signal
 given some ``data_model``.
-    
+
 .. code-block:: python
-    
+
     laser_ex = base.GaussianBeam(488e-9)
     laser_sted = base.DonutBeam(575e-9, zero_residual=0.04)
     detector = base.Detector(def=0.02)
     objective = base.Objective()
     fluo = base.Fluorescence(535e-9)
     microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo)
-    
+
     data_map = io.read_data_map(data_model, 1)
-    
+
     # imaging parameters
     pdt = 10e-6
     p_ex = 1e-6
     p_sted = 30e-3
 
     signal, _ = microscope.get_signal(data_map, 10e-9, pdt, p_ex, p_sted)
-    
+
     from matplotlib import pyplot
     pyplot.imshow(signal)
     pyplot.colorbar()
@@ -51,7 +51,7 @@ For use by FLClab (@CERVO) authorized people
 .. [Jerker1999] Jerker, W., Ülo, M., & Rudolf, R. (1999).
    Photodynamic properties of green fluorescent proteins investigated by
    fluorescence correlation spectroscopy. Chemical Physics, 250(2), 171-186.
-   
+
 .. [Leutenegger2010] Leutenegger, M., Eggeling, C., & Hell, S. W. (2010).
     Analytical description of STED microscopy performance.
     Optics Express, 18(25), 26417–26429.
@@ -68,7 +68,7 @@ For use by FLClab (@CERVO) authorized people
 .. [Willig2006] Willig, K. I., Keller, J., Bossi, M., & Hell, S. W. (2006).
    STED microscopy resolves nanoparticle assemblies.
    New Journal of Physics, 8(6), 106.
-   
+
 .. [Xie2013] Xie, H., Liu, Y., Jin, D., Santangelo, P. J., & Xi, P. (2013).
    Analytical description of high-aperture STED resolution with 0–2pi
    vortex phase modulation.
@@ -81,6 +81,8 @@ import scipy.signal
 import pickle
 
 # from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
+import tqdm
+
 from pysted import utils, cUtils, raster, bleach_funcs
 # import cUtils
 
@@ -92,15 +94,16 @@ import warnings
 from matplotlib import pyplot
 import time
 from functools import partial
+import pickle
 
 
 class GaussianBeam:
     '''This class implements a Gaussian beam (excitation).
-    
+
     :param lambda_: The wavelength of the beam (m).
     :param kwargs: One or more parameters as described in the following table,
                    optional.
-    
+
     +------------------+--------------+----------------------------------------+
     | Parameter        | Default      | Details                                |
     +==================+==============+========================================+
@@ -110,25 +113,25 @@ class GaussianBeam:
     | ``beta``         | ``pi/4``     | The beam incident angle, in            |
     |                  |              | :math:`[0, \pi/2]` (rad).              |
     +------------------+--------------+----------------------------------------+
-    
+
     Polarization :
         * :math:`\pi/2` is left-circular
         * :math:`0` is linear
         * :math:`-\pi/2` is right-circular
     '''
-    
+
     def __init__(self, lambda_, **kwargs):
         self.lambda_ = lambda_
         self.polarization = kwargs.get("polarization", numpy.pi/2)
         self.beta = kwargs.get("beta", numpy.pi/4)
-    
+
     # FIXME: pass Objective object instead of f, n, na, transmission
     def get_intensity(self, power, f, n, na, transmission, datamap_pixelsize):
         '''Compute the transmitted excitation intensity field (W/m²). The
         technique essentially follows the method described in [Xie2013]_,
         where :math:`z = 0`, along with some equations from [Deng2010]_, and
         [RPPhoto2015]_.
-        
+
         :param power: The power of the beam (W).
         :param f: The focal length of the objective (m).
         :param n: The refractive index of the objective.
@@ -148,16 +151,16 @@ class GaussianBeam:
         def fun3(theta, kr):
             return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta) *\
                    scipy.special.jv(2, kr * numpy.sin(theta)) * (1 - numpy.cos(theta))
-        
+
         alpha = numpy.arcsin(na / n)
-        
+
         diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
         center = int(n_pixels / 2)
-        
+
         # [Deng2010]
         k = 2 * numpy.pi * n / self.lambda_
-        
+
         # compute the focal plane integrations i1 to i3 [Xie2013]
         i1 = numpy.empty((n_pixels, n_pixels))
         i2 = numpy.empty((n_pixels, n_pixels))
@@ -169,13 +172,13 @@ class GaussianBeam:
                 w_rel = (x - center)
 
                 angle, radius = utils.cart2pol(w_rel, h_rel)
-                
+
                 kr = k * radius * datamap_pixelsize
                 i1[y, x] = scipy.integrate.quad(fun1, 0, alpha, (kr,))[0]
                 i2[y, x] = scipy.integrate.quad(fun2, 0, alpha, (kr,))[0]
                 i3[y, x] = scipy.integrate.quad(fun3, 0, alpha, (kr,))[0]
                 phi[y, x] = angle
-        
+
         ax = numpy.sin(self.beta)
         ay = numpy.cos(self.beta) * numpy.exp(1j * self.polarization)
 
@@ -191,12 +194,12 @@ class GaussianBeam:
         electromagfieldx = exdx - eydy
         electromagfieldy = eydx + exdy
         electromagfieldz = ezdx + ezdy
-        
+
         # [Xie2013] I = E_x E_x* + E_y E_y* + E_z E_z* (p. 1642)
         intensity = electromagfieldx * numpy.conj(electromagfieldx) +\
                     electromagfieldy * numpy.conj(electromagfieldy) +\
                     electromagfieldz * numpy.conj(electromagfieldz)
-        
+
         # keep it real
         intensity = numpy.real_if_close(intensity)
         # normalize
@@ -212,7 +215,7 @@ class GaussianBeam:
         intensity_flipped[0: n_pixels // 2 + 1, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr, 1)
         intensity_flipped[n_pixels // 2:, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr)
         intensity_flipped[n_pixels // 2:, n_pixels // 2:] = numpy.flip(intensity_tr, 0)
-        
+
         idx_mid = int((intensity.shape[0]-1) / 2)
         r = utils.fwhm(intensity[idx_mid])
         area_fwhm = numpy.pi * (r * datamap_pixelsize) ** 2 / 2
@@ -222,11 +225,11 @@ class GaussianBeam:
 
 class DonutBeam:
     '''This class implements a donut beam (STED).
-    
+
     :param lambda_: The wavelength of the beam (m).
     :param parameters: One or more parameters as described in the following
                        table, optional.
-    
+
     +------------------+--------------+----------------------------------------+
     | Parameter        | Default      | Details                                |
     +==================+==============+========================================+
@@ -243,13 +246,13 @@ class DonutBeam:
     | ``zero_residual``| ``0``        | The ratio between minimum and maximum  |
     |                  |              | intensity (ratio).                     |
     +------------------+--------------+----------------------------------------+
-    
+
     Polarization :
         * :math:`\pi/2` is left-circular
         * :math:`0` is linear
         * :math:`-\pi/2` is right-circular
     '''
-    
+
     def __init__(self, lambda_, **kwargs):
         self.lambda_ = lambda_
         self.polarization = kwargs.get("polarization", numpy.pi/2)
@@ -257,14 +260,14 @@ class DonutBeam:
         self.tau = kwargs.get("tau", 200e-12)
         self.rate = kwargs.get("rate", 80e6)
         self.zero_residual = kwargs.get("zero_residual", 0)
-    
+
     # FIXME: pass Objective object instead of f, n, na, transmission
     def get_intensity(self, power, f, n, na, transmission, datamap_pixelsize):
         '''Compute the transmitted STED intensity field (W/m²). The technique
         essentially follows the method described in [Xie2013]_, where
         :math:`z = 0`, along with some equations from [Deng2010]_, and
         [RPPhoto2015]_.
-        
+
         :param power: The power of the beam (W).
         :param f: The focal length of the objective (m).
         :param n: The refractive index of the objective.
@@ -289,16 +292,16 @@ class DonutBeam:
         def fun5(theta, kr):
             return numpy.sqrt(numpy.cos(theta)) * numpy.sin(theta)**2 *\
                    scipy.special.jv(2, kr * numpy.sin(theta))
-        
+
         alpha = numpy.arcsin(na / n)
-        
+
         diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
         center = int(n_pixels / 2)
-        
+
         # [Deng2010]
         k = 2 * numpy.pi * n / self.lambda_
-        
+
         # compute the angular integrations i1 to i5 [Xie2013]
         i1 = numpy.zeros((n_pixels, n_pixels))
         i2 = numpy.zeros((n_pixels, n_pixels))
@@ -310,21 +313,21 @@ class DonutBeam:
             h_rel = (center - y)
             for x in range(n_pixels):
                 w_rel = (x - center)
-                
+
                 angle, radius = utils.cart2pol(w_rel, h_rel)
-                
+
                 kr = k * radius * datamap_pixelsize
-                
+
                 i1[y, x] = scipy.integrate.quad(fun1, 0, alpha, (kr,))[0]
                 i2[y, x] = scipy.integrate.quad(fun2, 0, alpha, (kr,))[0]
                 i3[y, x] = scipy.integrate.quad(fun3, 0, alpha, (kr,))[0]
                 i4[y, x] = scipy.integrate.quad(fun4, 0, alpha, (kr,))[0]
                 i5[y, x] = scipy.integrate.quad(fun5, 0, alpha, (kr,))[0]
                 phi[y, x] = angle
-        
+
         ax = numpy.sin(self.beta)
         ay = numpy.cos(self.beta) * numpy.exp(1j * self.polarization)
-        
+
         # [Xie2013] eq. 2, where exdx = e_x, eydx = e_y, and ezdx = e_z
         exdx = ax * (i1 * numpy.exp(1j * phi) -\
                      i2 / 2 * numpy.exp(-1j * phi) +\
@@ -332,7 +335,7 @@ class DonutBeam:
         eydx = -ax * 1j / 2 * (i2 * numpy.exp(-1j * phi) +\
                                i3 * numpy.exp(3j * phi))
         ezdx = ax * 1j * (i4 - i5 * numpy.exp(2j * phi))
-        
+
         # [Xie2013] annexe A, where exdy = e'_{2x'}, eydy = e'_{2y'}, and ezdy = e'_{2z'}
         exdy = ay * (i1 * numpy.exp(1j * phi) +\
                      i2 / 2 * numpy.exp(-1j * phi) -\
@@ -340,20 +343,20 @@ class DonutBeam:
         eydy = ay * 1j / 2 * (i2 * numpy.exp(-1j * phi) +\
                               i3 * numpy.exp(3j * phi))
         ezdy = -ay * (i4 + i5 * numpy.exp(2j * phi))
-        
+
         # [Xie2013] eq. 3
         electromagfieldx = exdx - eydy
         electromagfieldy = eydx + exdy
         electromagfieldz = ezdx + ezdy
-        
+
         # [Xie2013] I = E_x E_x* + E_y E_y* + E_z E_z* (p. 1642)
         intensity = electromagfieldx * numpy.conj(electromagfieldx) +\
                     electromagfieldy * numpy.conj(electromagfieldy) +\
                     electromagfieldz * numpy.conj(electromagfieldz)
-        
+
         # keep it real
         intensity = numpy.real_if_close(intensity)
-        
+
         # normalize
         intensity /= numpy.max(intensity)
 
@@ -368,20 +371,20 @@ class DonutBeam:
         intensity_flipped[n_pixels // 2:, 0: n_pixels // 2 + 1] = numpy.flip(intensity_tr)
         intensity_flipped[n_pixels // 2:, n_pixels // 2:] = numpy.flip(intensity_tr, 0)
         intensity = intensity_flipped
-        
+
         # for peak intensity
         duty_cycle = self.tau * self.rate
         intensity /= duty_cycle
-        
+
         idx_mid = int((intensity.shape[0]-1) / 2)
         r_out, r_in = utils.fwhm_donut(intensity[idx_mid])
         big_area = numpy.pi * (r_out * datamap_pixelsize) ** 2 / 2
         small_area = numpy.pi * (r_in * datamap_pixelsize) ** 2 / 2
         area_fwhm = big_area - small_area
-        
+
         # [RPPhoto2015]
         intensity *= 2 * transmission * power / area_fwhm
-        
+
         if power > 0:
             # zero_residual ~= min(intensity) / max(intensity)
             old_max = numpy.max(intensity)
@@ -394,10 +397,10 @@ class DonutBeam:
 
 class Detector:
     '''This class implements the photon detector component.
-    
+
     :param parameters: One or more parameters as described in the following
                        table, optional.
-    
+
     +------------------+--------------+----------------------------------------+
     | Parameter        | Default      | Details                                |
     +==================+==============+========================================+
@@ -422,32 +425,32 @@ class Detector:
     |                  |              | is the ratio of collected photons that |
     |                  |              | are perceived by the detector (ratio). |
     +------------------+--------------+----------------------------------------+
-    
+
     .. [#] The actual number is sampled from a poisson distribution with given
        mean.
-    
+
     .. [#] Excelitas Technologies. (2011). Photon Detection Solutions.
     '''
-    
+
     def __init__(self, **kwargs):
         # detection pinhole
         self.n_airy = kwargs.get("n_airy", 0.7)
-        
+
         # detection noise
         self.noise = kwargs.get("noise", False)
         self.background = kwargs.get("background", 0)
         self.darkcount = kwargs.get("darkcount", 0)
-        
+
         # photon detection
         self.pcef = kwargs.get("pcef", 0.1)
         self.pdef = kwargs.get("pdef", 0.5)
-    
+
     def get_detection_psf(self, lambda_, psf, na, transmission, datamap_pixelsize):
         '''Compute the detection PSF as a convolution between the fluorscence
         PSF and a pinhole, as described by the equation from [Willig2006]_. The
         pinhole raidus is determined using the :attr:`n_airy`, the fluorescence
         wavelength, and the numerical aperture of the objective.
-        
+
         :param lambda_: The fluorescence wavelength (m).
         :param psf: The fluorescence PSF that can the obtained using
                     :meth:`~pysted.base.Fluorescence.get_psf`.
@@ -478,17 +481,22 @@ class Detector:
         ra_flipped[returned_array.shape[0] // 2:, returned_array.shape[1] // 2:] = numpy.flip(intensity_tr, 0)
 
         return ra_flipped
-    
-    def get_signal(self, photons, dwelltime):
+
+    def get_signal(self, photons, dwelltime, seed=None):
         '''Compute the detected signal (in photons) given the number of emitted
         photons and the time spent by the detector.
-        
+
         :param photons: An array of number of emitted photons.
         :param dwelltime: The time spent to detect the emitted photons (s). It is
                           either a scalar or an array shaped like *nb_photons*.
         :returns: An array shaped like *nb_photons*.
         '''
         detection_efficiency = self.pcef * self.pdef # ratio
+        if seed is None:
+            seed = int(str(time.time_ns())[-5:-1])
+            numpy.random.seed(seed)
+        else:
+            numpy.random.seed(seed)
         try:
             signal = numpy.random.binomial(photons.astype(numpy.int64),
                                            detection_efficiency,
@@ -507,13 +515,25 @@ class Detector:
             # background counts per second
             cts = numpy.random.poisson(self.background, signal.shape)
             # background counts during dwell time
-            cts = (cts * dwelltime).astype(numpy.int64)
+            # cts = (cts * dwelltime).astype(numpy.int64)
+            """
+            ^^^ old implementation did this, however I don't think this is right ^^^
+            With this implementation, the number of photons simply increases as pdt increases. For example, if
+            noise is 1000 and pdt is 10e-6, the max photon count for the acq will be around 200, but if I increase pdt
+            to 100e-6 then the max photon count wil be around 2000. So the value simply increases for the whole image.
+            In order to see the noise on the acq, we have to put in ludicrous values for noise of at least 10000000000.
+
+            By commenting this line, I can put a more moderate noise value, around the photon count I expect to get in
+            the image. Then, as the pdt increases, the signal for the rest of the image increases while the noise stays
+            at the same level, which I think makes more sense.
+            """
+
             signal += cts
         if self.darkcount > 0:
             # dark counts per second
             cts = numpy.random.poisson(self.darkcount, signal.shape)
-            # dark counts during dwell time
-            cts = (cts * dwelltime).astype(numpy.int64)
+            # dark counts during dwell time ***DISABLING THIS LINE, see explanation in "if self.background > 0"
+            # cts = (cts * dwelltime).astype(numpy.int64)
             signal += cts
         return signal
 
@@ -521,10 +541,10 @@ class Detector:
 class Objective:
     '''
     This class implements the microscope objective component.
-    
+
     :param parameters: One or more parameters as described in the following
                        table, optional.
-    
+
     +------------------+-------------------+-----------------------------------+
     | Parameter        | Default [#]_      | Details                           |
     +==================+===================+===================================+
@@ -540,10 +560,10 @@ class Objective:
     |                  | ``585: 0.85,``    |                                   |
     |                  | ``575: 0.85``     |                                   |
     +------------------+-------------------+-----------------------------------+
-    
+
     .. [#] Leica 100x tube lense
     '''
-    
+
     def __init__(self, **kwargs):
         self.f = kwargs.get("f", 2e-3)
         self.n = kwargs.get("n", 1.5)
@@ -553,18 +573,18 @@ class Objective:
                                                         550: 0.86,
                                                         585: 0.85,
                                                         575: 0.85})
-    
+
     def get_transmission(self, lambda_):
         return self.transmission[int(lambda_ * 1e9)]
 
 
 class Fluorescence:
     '''This class implements a fluorescence molecule.
-    
+
     :param lambda_: The fluorescence wavelength (m).
     :param parameters: One or more parameters as described in the following
                        table, optional.
-    
+
     +------------------+--------------+----------------------------------------+
     | Parameter        | Default [#]_ | Details                                |
     +==================+==============+========================================+
@@ -594,13 +614,13 @@ class Fluorescence:
     +------------------+--------------+----------------------------------------+
     | ``k_isc``        | ``1e6``      | The intersystem crossing rate (s⁻¹).   |
     +------------------+--------------+----------------------------------------+
-    
+
     .. [#] EGFP
     '''
     def __init__(self, lambda_, **kwargs):
         # psf parameters
         self.lambda_ = lambda_
-        
+
         self.sigma_ste = kwargs.get("sigma_ste", {575: 1e-21})
         self.sigma_abs = kwargs.get("sigma_abs", {488: 3e-20})
         self.sigma_tri = kwargs.get("sigma_tri", 1e-21)
@@ -610,37 +630,37 @@ class Fluorescence:
         self.qy = kwargs.get("qy", 0.6)
         self.phy_react = kwargs.get("phy_react", {488: 1e-3, 575: 1e-5})
         self.k_isc = kwargs.get("k_isc", 0.26e6)
-    
+
     def get_sigma_ste(self, lambda_):
         '''Return the stimulated emission cross-section of the fluorescence
         molecule given the wavelength.
-        
+
         :param lambda_: The STED wavelength (m).
         :returns: The stimulated emission cross-section (m²).
         '''
         return self.sigma_ste[int(lambda_ * 1e9)]
-        
+
     def get_sigma_abs(self, lambda_):
         '''Return the absorption cross-section of the fluorescence molecule
         given the wavelength.
-        
+
         :param lambda_: The STED wavelength (m).
         :returns: The absorption cross-section (m²).
         '''
         return self.sigma_abs[int(lambda_ * 1e9)]
-    
+
     def get_phy_react(self, lambda_):
         '''Return the reaction probability of the fluorescence molecule once it
         is in triplet state T_1 given the wavelength.
-        
+
         :param lambda_: The STED wavelength (m).
         :returns: The probability of reaction (ratio).
         '''
         return self.phy_react[int(lambda_ * 1e9)]
-    
+
     def get_psf(self, na, datamap_pixelsize):
         '''Compute the Gaussian-shaped fluorescence PSF.
-        
+
         :param na: The numerical aperture of the objective.
         :param datamap_pixelsize: The size of an element in the intensity matrix (m).
         :returns: A 2D array.
@@ -648,9 +668,9 @@ class Fluorescence:
         diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
         center = int(n_pixels / 2)
-        
+
         fwhm = self.lambda_ / (2 * na)
-        
+
         half_pixelsize = datamap_pixelsize / 2
         gauss = numpy.zeros((n_pixels, n_pixels))
         for y in range(n_pixels):
@@ -665,11 +685,11 @@ class Fluorescence:
                                                     ((h_lb, h_ub), (w_lb, w_ub)),
                                                     (fwhm,))[0]
         return numpy.real_if_close(gauss / numpy.max(gauss))
-    
+
     def get_photons(self, intensity):
         e_photon = scipy.constants.c * scipy.constants.h / self.lambda_
-        return intensity // e_photon
-    
+        return numpy.floor(intensity / e_photon)
+
     def get_k_bleach(self, lambda_, photons):
         sigma_abs = self.get_sigma_abs(lambda_)
         phy_react = self.get_phy_react(lambda_)
@@ -677,13 +697,17 @@ class Fluorescence:
                 (sigma_abs * photons * (1/self.tau_tri + self.k_isc) +\
                 (self.tau_tri * self.tau))
         return T_1 * photons * self.sigma_tri * phy_react
+        # if lambda_ == 488e-9:
+        #     return photons**2 * phy_react
+        # else:
+        #     return photons**1.5 * phy_react
 
 
 class Microscope:
     '''This class implements a microscopy setup described by an excitation beam,
     a STED (depletion) beam, a detector, some fluorescence molecules, and the
     parameters of the objective.
-    
+
     :param excitation: A :class:`~pysted.base.GaussianBeam` object
                        representing the excitation laser beam.
     :param sted: A :class:`~pysted.base.DonutBeam` object representing the
@@ -702,14 +726,14 @@ class Microscope:
                        important to use load_cache=True only if we know that the previously cached lasers were generated
                        with the same pixel_size as the pixel_size which will be used in the current experiment.
     '''
-    
+
     def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False):
         self.excitation = excitation
         self.sted = sted
         self.detector = detector
         self.objective = objective
         self.fluo = fluo
-                
+
         # caching system
         self.__cache = {}
         if load_cache:
@@ -722,31 +746,31 @@ class Microscope:
         # between the microscope acquisition time steps and the Ca2+ flash time steps
         self.pixel_bank = 0
         self.time_bank = 0
-    
+
     def __str__(self):
         return str(self.__cache.keys())
-    
+
     def is_cached(self, datamap_pixelsize):
         '''Indicate the presence of a cache entry for the given pixel size.
-        
+
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
         :returns: A boolean.
         '''
 
         datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
         return datamap_pixelsize_nm in self.__cache
-    
+
     def cache(self, datamap_pixelsize, save_cache=False):
         '''Compute and cache the excitation and STED intensities, and the
         fluorescence PSF. These intensities are computed with a power of 1 W
         such that they can serve as a basis to compute intensities with any
         power.
-        
+
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
         :param save_cache: A bool which determines whether or not the lasers will be saved to allow for faster load
                            times for future experiments
         :returns: A tuple containing:
-        
+
                   * A 2D array of the excitation intensity for a power of 1 W;
                   * A 2D array of the STED intensity for a a power of 1 W;
                   * A 2D array of the detection PSF.
@@ -755,15 +779,15 @@ class Microscope:
         datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
         if datamap_pixelsize_nm not in self.__cache:
             f, n, na = self.objective.f, self.objective.n, self.objective.na
-            
+
             transmission = self.objective.get_transmission(self.excitation.lambda_)
             i_ex = self.excitation.get_intensity(1, f, n, na,
                                                  transmission, datamap_pixelsize)
-            
+
             transmission = self.objective.get_transmission(self.sted.lambda_)
             i_sted = self.sted.get_intensity(1, f, n, na,
                                              transmission, datamap_pixelsize)
-            
+
             transmission = self.objective.get_transmission(self.fluo.lambda_)
             psf = self.fluo.get_psf(na, datamap_pixelsize)
             # should take data_pixelsize instead of pixelsize, right? same for psf above?
@@ -775,10 +799,10 @@ class Microscope:
         if save_cache:
             pickle.dump(self.__cache, open(".microscope_cache.pkl", "wb"))
         return self.__cache[datamap_pixelsize_nm]
-    
+
     def clear_cache(self):
         '''Empty the cache.
-        
+
         .. important::
            It is important to empty the cache if any of the components
            :attr:`excitation`, :attr:`sted`, :attr:`detector`,
@@ -786,31 +810,31 @@ class Microscope:
            or replaced.
         '''
         self.__cache = {}
-    
+
     def get_effective(self, datamap_pixelsize, p_ex, p_sted):
         '''Compute the detected signal given some molecules disposition.
-        
+
         :param datamap_pixelsize: The size of one pixel of the simulated image (m).
         :param p_ex: The power of the depletion beam (W).
         :param p_sted: The power of the STED beam (W).
         :param data_pixelsize: The size of one pixel of the raw data (m).
         :returns: A 2D array of the effective intensity (W) of a single molecule.
-        
+
         The technique follows the method and equations described in
         [Willig2006]_, [Leutenegger2010]_ and [Holler2011]_.
         '''
 
         h, c = scipy.constants.h, scipy.constants.c
         f, n, na = self.objective.f, self.objective.n, self.objective.na
-        
+
         __i_ex, __i_sted, psf_det = self.cache(datamap_pixelsize)
         i_ex = __i_ex * p_ex
         i_sted = __i_sted * p_sted
-        
+
         # saturation intensity (W/m²) [Leutenegger2010] p. 26419
         sigma_ste = self.fluo.get_sigma_ste(self.sted.lambda_)
         i_s = (h * c) / (self.fluo.tau * self.sted.lambda_ * sigma_ste)
-        
+
         # [Leutenegger2010] eq. 3
         zeta = i_sted / i_s
         k_vib = 1 / self.fluo.tau_vib
@@ -820,7 +844,7 @@ class Microscope:
         # probability of fluorescence given the donut
         eta = (((1 + gamma * numpy.exp(-k_s1 * self.sted.tau * (1 + gamma))) / (1 + gamma)) -
               numpy.exp(-k_s1 * (gamma * self.sted.tau + T))) / (1 - numpy.exp(-k_s1 * T))
-        
+
         # molecular brigthness [Holler2011]
         sigma_abs = self.fluo.get_sigma_abs(self.excitation.lambda_)
         excitation_probability = sigma_abs * i_ex * self.fluo.qy
@@ -830,7 +854,8 @@ class Microscope:
 
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                               pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
-                              bleach_func=bleach_funcs.default_update_survival_probabilities, steps=None):
+                              bleach_func=bleach_funcs.default_update_survival_probabilities, steps=None,
+                              prob_ex=None, prob_sted=None, bleach_mode="default"):
         """
         This function acquires the signal and bleaches simultaneously. It makes a call to compiled C code for speed,
         so make sure the raster.pyx file is compiled!
@@ -899,15 +924,16 @@ class Microscope:
         rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
         laser_pad = i_ex.shape[0] // 2
 
-
-        prob_ex = numpy.ones(datamap.whole_datamap.shape)
-        prob_sted = numpy.ones(datamap.whole_datamap.shape)
+        if prob_ex is None:
+            prob_ex = numpy.ones(datamap.whole_datamap.shape)
+        if prob_sted is None:
+            prob_sted = numpy.ones(datamap.whole_datamap.shape)
         # bleached_sub_datamaps_dict = copy.copy(datamap.sub_datamaps_dict)
         bleached_sub_datamaps_dict = {}
         if isinstance(indices, type(None)):
             indices = {"flashes": 0}
         for key in datamap.sub_datamaps_dict:
-            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key])
+            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key].astype(int))
 
         if seed is None:
             seed = 0
@@ -928,14 +954,16 @@ class Microscope:
         photons = self.fluo.get_photons(acquired_intensity)
 
         if photons.shape == pdt.shape:
-            returned_acquired_photons = self.detector.get_signal(photons, pdt)
+            returned_acquired_photons = self.detector.get_signal(photons, pdt, seed=seed)
         else:
             pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
                                                    int(numpy.ceil(pdt.shape[1] / ratio))))
             new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
             for (row, col) in new_pdt_plist:
                 pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
-            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped)
+            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped, seed=seed)
+
+        unbleached_whole_datamap = numpy.copy(datamap.whole_datamap)
 
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
@@ -943,9 +971,16 @@ class Microscope:
             datamap.whole_datamap = numpy.copy(datamap.base_datamap)
             # BLEACHER LES FLASHS FUTURS
             if datamap.contains_sub_datamaps["flashes"] and indices["flashes"] < datamap.flash_tstack.shape[0]:
-                datamap.bleach_future(indices, bleached_sub_datamaps_dict)
+                if bleach_mode == "default":
+                    datamap.bleach_future(indices, bleached_sub_datamaps_dict)
+                elif bleach_mode == "proportional":
+                    datamap.bleach_future_proportional(indices, bleached_sub_datamaps_dict, unbleached_whole_datamap)
 
-        return returned_acquired_photons, bleached_sub_datamaps_dict, acquired_intensity
+        temporal_acq_elts = {"intensity": acquired_intensity,
+                             "prob_ex": prob_ex,
+                             "prob_sted": prob_sted}
+
+        return returned_acquired_photons, bleached_sub_datamaps_dict, temporal_acq_elts
 
     def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
                           lower_th=1, ltr=0.1, upper_th=100):
@@ -1257,6 +1292,7 @@ class TemporalDatamap(Datamap):
         self.contains_sub_datamaps["flashes"] = True
         self.sub_datamaps_idx_dict["flashes"] = 0
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
 
     def bleach_future(self, indices, bleached_sub_datamaps_dict):
         """
@@ -1300,3 +1336,525 @@ class TemporalDatamap(Datamap):
         """
         self.sub_datamaps_idx_dict = indices
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
+
+
+class TemporalSynapseDmap(Datamap):
+    """
+    Temporal Datamap of a Synaptic region with nanodomains for NeurIPS exps
+    """
+    def __init__(self, whole_datamap, datamap_pixelsize, synapse_obj):
+        super().__init__(whole_datamap, datamap_pixelsize)
+        # faudrait que j'ajoute un attribut qui est l'objet synapse
+        self.synapse = synapse_obj
+        self.contains_sub_datamaps = {"base": True,
+                                      "flashes": False}
+        self.sub_datamaps_idx_dict = {}
+        self.init_molecs_ratio = numpy.ones(self.whole_datamap.shape)
+
+    def __setitem__(self, key, value):
+        if key == "flashes":
+            self.sub_datamaps_idx_dict[key] = value
+            self.sub_datamaps_dict[key] = self.flash_tstack[value]
+        elif key == "base":
+            pass
+
+    def create_t_stack_dmap(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
+        """
+        Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
+        Assumes the roi is set
+        """
+        self.decay_time_us = decay_time_us
+        self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
+        self.sub_datamaps_dict["base"] = self.base_datamap
+
+        flash_curve = utils.hand_crafted_light_curve(delay=delay, n_decay_steps=n_decay_steps,
+                                                     n_molecules_multiplier=n_molecules_multiplier, end_pad=end_pad)
+
+        self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
+        self.nanodomains_active = []
+        for t, nanodomains_multiplier in enumerate(flash_curve):
+            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
+            nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+            if nd_mult < 0:
+                nd_mult = 0
+            for nanodomain in self.synapse.nanodomains:
+                self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
+                    self.synapse.n_molecs_base * nd_mult    # - self.synapse.n_molecs_base
+                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
+            if self.flash_tstack[t].max() > 0:
+                self.nanodomains_active.append(True)
+            else:
+                self.nanodomains_active.append(False)
+
+        self.nanodomains_active_currently = self.nanodomains_active[0]
+        self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
+
+    def create_t_stack_dmap_smooth(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=None,
+                                   end_pad=0, individual_flashes=False):
+        """
+        Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
+        Assumes the roi is set
+        """
+        self.decay_time_us = decay_time_us
+        self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
+        self.sub_datamaps_dict["base"] = self.base_datamap
+
+        if type(delay) is tuple:
+            delay = numpy.random.randint(delay[0], delay[1])
+
+        flash_curves = []
+        for i in range(len(self.synapse.nanodomains)):
+            flash_curve = utils.smooth_ramp_hand_crafted_light_curve(
+                delay=delay,
+                n_decay_steps=n_decay_steps,
+                n_molecules_multiplier=n_molecules_multiplier,
+                end_pad=end_pad
+            )
+            flash_curves.append(numpy.copy(flash_curve))
+
+        self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
+        self.nanodomains_active = []
+        for t, nanodomains_multiplier in enumerate(flash_curve):
+            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
+            # nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+            # if nd_mult < 0:
+            #     nd_mult = 0
+            for nd_idx, nanodomain in enumerate(self.synapse.nanodomains):
+                if not individual_flashes:
+                    nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+                    if nd_mult < 0:
+                        nd_mult = 0
+                else:
+                    nd_mult = int(numpy.round(flash_curves[nd_idx][t])) - 1
+                    if nd_mult < 0:
+                        nd_mult = 0
+                self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
+                    self.synapse.n_molecs_base * nd_mult    # - self.synapse.n_molecs_base
+                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
+            if self.flash_tstack[t].max() > 0:
+                self.nanodomains_active.append(True)
+            else:
+                self.nanodomains_active.append(False)
+
+        self.nanodomains_active_currently = self.nanodomains_active[0]
+        self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
+
+    def create_t_stack_dmap_sampled(self, decay_time_us, delay=0, n_decay_steps=10, curves_path=None,
+                                    individual_flashes=False):
+        """
+        Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
+        Assumes the roi is set
+        """
+        # even though in this case the decay_time_us and n_decay_steps wont help generate the light curve, they will
+        # help define de frequency of updates
+        self.decay_time_us = decay_time_us
+        self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
+        self.sub_datamaps_dict["base"] = self.base_datamap
+
+        if type(delay) is tuple:
+            delay = numpy.random.randint(delay[0], delay[1])
+
+        if curves_path is None:
+            curves_path = "flash_files/events_curves.npy"
+        flash_curve = utils.sampled_flash_manipulations(curves_path, delay, rescale=True, seed=None)
+
+        if individual_flashes:
+            # faire de quoi pour trouver le peak, sampler des variances pour chaque ND :)
+            flash_peak = numpy.argmax(flash_curve)
+            flash_variances = []
+            for i in range(len(self.synapse.nanodomains)):
+                flash_variances.append(numpy.random.randint(-4, 4))
+        else:
+            flash_peak = 0
+
+        self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
+        self.nanodomains_active = []
+        for t, nanodomains_multiplier in enumerate(flash_curve):
+            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
+            nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+            if nd_mult < 0:
+                nd_mult = 0
+            for nd_idx, nanodomain in enumerate(self.synapse.nanodomains):
+                if not individual_flashes or t < flash_peak:
+                    flash_variance = 0
+                else:
+                    flash_variance = flash_variances[nd_idx]
+                    if nd_mult + flash_variance < 0:
+                        flash_variance = 0
+                self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
+                    self.synapse.n_molecs_base * (nd_mult + flash_variance) # - self.synapse.n_molecs_base
+                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
+            if self.flash_tstack[t].max() > 0:
+                self.nanodomains_active.append(True)
+            else:
+                self.nanodomains_active.append(False)
+
+        self.nanodomains_active_currently = self.nanodomains_active[0]
+        self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
+
+    def bleach_future(self, indices, bleached_sub_datamaps_dict):
+        """
+        Applies bleaching to the future flash subdatamaps according to the bleaching that occured to the current flash
+        subdatamap
+        :param indices: A dictionary containing the indices of the time steps we are currently at for the subdatamaps.
+                        For now, as there is only the flash subdatamap implemented, the dictionary will simply be
+                        indices = {"flashes": idx}, with idx being an >=0 integer.
+        :param bleached_sub_datamaps_dict: A dictionary containing the bleached subdatamaps (base, flashes)
+        """
+        what_bleached = self.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
+        self.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
+        # UPDATE THE FUTURE
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            flash_survival = bleached_sub_datamaps_dict["flashes"] / self.flash_tstack[indices["flashes"]]
+        flash_survival[numpy.isnan(flash_survival)] = 1
+        self.flash_tstack[indices["flashes"] + 1:] -= what_bleached
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.multiply(
+            self.flash_tstack[indices["flashes"] + 1:],
+            flash_survival)
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.rint(
+            self.flash_tstack[indices["flashes"] + 1:])
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.where(
+            self.flash_tstack[indices["flashes"] + 1:] < 0,
+            0, self.flash_tstack[indices["flashes"] + 1:])
+        self.flash_tstack = self.flash_tstack.astype('int64')
+        self.whole_datamap += self.flash_tstack[indices["flashes"]]
+
+    def bleach_future_proportional(self, indices, bleached_sub_datamaps_dict, unbleached_whole_datamap):
+        """
+        This function will apply bleaching to the future molecules proportional to what has bleached.
+        For instance, if 3/5 molecules are left after bleaching, then the number of molecules in the subsequent
+        flashes will be multiplied by 3/5
+        """
+        # ???
+        bleached_whole_datamap = numpy.zeros(unbleached_whole_datamap.shape)
+        for key in bleached_sub_datamaps_dict:
+            bleached_whole_datamap += bleached_sub_datamaps_dict[key]
+        ratio = bleached_whole_datamap / numpy.where(numpy.logical_and(unbleached_whole_datamap == 0,
+                                                                       bleached_whole_datamap == 0),
+                                                     1, unbleached_whole_datamap)
+        # self.flash_tstack[indices["flashes"]:, :, :] *= ratio
+        # self.flash_tstack = numpy.ceil(self.flash_tstack)
+        # self.flash_tstack = self.flash_tstack.astype('int64')
+        self.flash_tstack[indices["flashes"]:, :, :] = numpy.ceil(self.flash_tstack[indices["flashes"]:, :, :]
+                                                                  * ratio).astype('int64')
+        self.whole_datamap = bleached_sub_datamaps_dict["base"] + self.flash_tstack[indices["flashes"]]
+
+
+    def update_whole_datamap(self, flash_idx):
+        """
+        This method will be used to update de whole datamap using the indices of the sub datamaps.
+        Whole datamap is the base datamap + all the sub datamaps (for flashes, diffusion, etc).
+        :param flash_idx: The index of the flash for the most recent acquisition.
+        """
+        # If the experiment runs longer than the generated flash curve, just keep extending the final value of the curve
+        if flash_idx >= self.flash_tstack.shape[0]:
+            flash_idx = self.flash_tstack.shape[0] - 1
+        self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
+        self.nanodomains_active_currently = self.nanodomains_active[flash_idx]   # updates whether or not flashing rn
+
+
+    def update_dicts(self, indices):
+        """
+        Method used to update the dicts of the temporal datamap
+        :param indices: A dict containing the indices of the time step for the different temporal sub datamaps (so far
+                        only flashes).
+        """
+        self.sub_datamaps_idx_dict = indices
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
+
+
+class TestTemporalDmap(Datamap):
+    """
+    This is a test class of a simple temporal Datamap of a cube flashing to verify if the stitching of temporal dmaps
+    works correctly
+    """
+    def __init__(self, whole_datamap, datamap_pixelsize):
+        super().__init__(whole_datamap, datamap_pixelsize)
+        self.contains_sub_datamaps = {"base": True,
+                                      "flashes": False}
+        self.sub_datamaps_idx_dict = {}
+
+    def __setitem__(self, key, value):
+        if key == "flashes":
+            self.sub_datamaps_idx_dict[key] = value
+            self.sub_datamaps_dict[key] = self.flash_tstack[value]
+        elif key == "base":
+            pass
+
+    def create_t_stack_dmap(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
+        """
+        Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
+        Assumes the roi is set
+        """
+        self.decay_time_us = decay_time_us
+        self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
+        self.sub_datamaps_dict["base"] = self.base_datamap
+
+        flash_curve = utils.hand_crafted_light_curve(delay=delay, n_decay_steps=n_decay_steps,
+                                                     n_molecules_multiplier=n_molecules_multiplier, end_pad=end_pad)
+
+        self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
+        for t, nanodomains_multiplier in enumerate(flash_curve):
+            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
+            nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+            if nd_mult < 0:
+                nd_mult = 0
+            self.flash_tstack[t][self.roi] = numpy.max(self.whole_datamap) * nd_mult
+
+        self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
+
+    def bleach_future(self, indices, bleached_sub_datamaps_dict):
+        """
+        pass for now
+        """
+        what_bleached = self.flash_tstack[indices["flashes"]] - bleached_sub_datamaps_dict["flashes"]
+        self.flash_tstack[indices["flashes"]] = bleached_sub_datamaps_dict["flashes"]
+        # UPDATE THE FUTURE
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            flash_survival = bleached_sub_datamaps_dict["flashes"] / self.flash_tstack[indices["flashes"]]
+        flash_survival[numpy.isnan(flash_survival)] = 1
+        self.flash_tstack[indices["flashes"] + 1:] -= what_bleached
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.multiply(
+            self.flash_tstack[indices["flashes"] + 1:],
+            flash_survival)
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.rint(
+            self.flash_tstack[indices["flashes"] + 1:])
+        self.flash_tstack[indices["flashes"] + 1:] = numpy.where(
+            self.flash_tstack[indices["flashes"] + 1:] < 0,
+            0, self.flash_tstack[indices["flashes"] + 1:])
+        self.flash_tstack = self.flash_tstack.astype('int64')
+        self.whole_datamap += self.flash_tstack[indices["flashes"]]
+
+    def update_whole_datamap(self, flash_idx):
+        if flash_idx >= self.flash_tstack.shape[0]:
+            flash_idx = self.flash_tstack.shape[0] - 1
+        self.whole_datamap = self.base_datamap + self.flash_tstack[flash_idx]
+
+    def update_dicts(self, indices):
+        self.sub_datamaps_idx_dict = indices
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[indices["flashes"]]
+
+
+class Clock():
+    """
+    Clock class to keep track of time in experiments involving time
+    :param time_quantum_us: The minimal time increment on which the experiment loop will happen. All other time
+                            increments in the experiment should be a multiple of this value (in micro seconds (us))
+                            (int)
+
+    Note : The time_quantum_us is an int and so is the current_time attribute. This means the longest time an experiment
+           can last is determined by the size of the biggest int, which means it is 9223372036854775807 us, or
+           9223372036854.775807 s, which I think should be ample time :)
+    """
+    def __init__(self, time_quantum_us):
+        if type(time_quantum_us) is not int:
+            raise TypeError(f"The time_quantum_us value should be an int, but a {type(time_quantum_us)} was passed !")
+        self.time_quantum_us = time_quantum_us
+        self.current_time = 0
+
+    def update_time(self):
+        """
+        Updates the current_time by 1 time_quantum_us
+        """
+        self.current_time += self.time_quantum_us
+
+    def reset(self):
+        """
+        Resets the current_time to 0
+        """
+        self.current_time = 0
+
+
+class RandomActionSelector():
+    """
+    Class which selects a random action from :
+    0 - Confocal acquisition
+    1 - STED acquisition
+    2 - Wait (for the time of 1 acquisition)
+
+    *** NOTE ***
+    For now we have are pre setting the pdt, p_ex and p_sted that will be used for the actions.
+    A real agent would select the powers / dwellit me individually
+    ************
+
+    :param pdt: The pixel dwell time that will be used in the acquisitions
+    :param p_ex: The excitation beam power that will be used when the selected action is confocal or sted
+    :param p_sted: The STED beam power that will be used when the selected action is sted
+    """
+
+    def __init__(self, pdt, p_ex, p_sted, roi_shape):
+        self.pdt = numpy.ones(roi_shape) * pdt
+        self.p_ex = p_ex
+        self.p_sted = p_sted
+        self.action_selected = None
+        self.action_completed = False
+        self.valid_actions = {0: "confocal", 1: "sted", 2: "wait"}
+        self.n_actions = 3
+        self.current_action_pdt = None
+        self.current_action_p_ex = None
+        self.current_action_p_sted = None
+
+    def select_action(self):
+        """
+        selects a random action from the current actions
+        """
+        # self.action_selected = self.valid_actions[numpy.random.randint(0, self.n_actions)]
+        # temporary dont want him to select wait for debuggind prupouses
+        self.action_selected = self.valid_actions[numpy.random.randint(0, 1)]
+        if self.action_selected == "confocal":
+            self.current_action_p_ex = self.p_ex
+            self.current_action_p_sted = 0.0
+            self.current_action_pdt = self.pdt
+        elif self.action_selected == "sted":
+            self.current_action_p_ex = self.p_ex
+            self.current_action_p_sted = self.p_sted
+            self.current_action_pdt = self.pdt
+        elif self.action_selected == "wait":
+            self.current_action_p_ex = 0.0
+            self.current_action_p_sted = 0.0
+            self.current_action_pdt = self.pdt
+        else:
+            raise ValueError("Impossible action selected :)")
+        self.action_completed = False
+
+
+class TemporalExperiment():
+    """
+    This temporal experiment will run on a loop based on the action selections instead of on the time to make it easier
+    to integrate the agent/gym stuff :)
+    """
+    def __init__(self, clock, microscope, temporal_datamap, exp_runtime, bleach=True, bleach_mode="default"):
+        self.clock = clock
+        self.microscope = microscope
+        self.temporal_datamap = temporal_datamap
+        self.exp_runtime = exp_runtime
+        self.flash_tstep = 0
+        self.bleach = bleach
+        self.bleach_mode = bleach_mode
+
+    def play_action(self, pdt, p_ex, p_sted):
+        """
+        l'idée va comme ça
+        fait une loop sur X épisodes
+            - quand un épisode commence on crée un objet TemporalExperimentV2p1 avec un certain exp_runtime
+            - l'agent choisit une action et la joue
+                - dans la méthode de jouer l'action (ici) on fait toute la gestion des updates de flash mid acq si c'est
+                  le cas, finir l'action early si on run out de temps, ...
+        *** pdt can be a float value, I will convert it into an array filled with that value if this is the case ***
+        """
+        indices = {"flashes": self.flash_tstep}
+        intensity = numpy.zeros(self.temporal_datamap.whole_datamap[self.temporal_datamap.roi].shape).astype(float)
+        prob_ex = numpy.ones(self.temporal_datamap.whole_datamap.shape).astype(float)
+        prob_sted = numpy.ones(self.temporal_datamap.whole_datamap.shape).astype(float)
+        action_required_time = numpy.sum(pdt) * 1e6   # this assumes a pdt given in sec * 1e-6
+        action_completed_time = self.clock.current_time + action_required_time
+        # +1 ensures no weird business if tha last acq completed as the dmap updated
+        time_steps_covered_by_acq = numpy.arange(int(self.clock.current_time) + 1, action_completed_time)
+        dmap_times = []
+        for i in time_steps_covered_by_acq:
+            if i % self.temporal_datamap.time_usec_between_flash_updates == 0 and i != 0:
+                dmap_times.append(i)
+        dmap_update_times = numpy.arange(self.temporal_datamap.time_usec_between_flash_updates, self.exp_runtime + 1,
+                                         self.temporal_datamap.time_usec_between_flash_updates)
+
+        # if len(dmap_times) == 0, this means the acquisition is not interupted and we can just do it whole
+        # if not, then we need to split the acquisition
+        if len(dmap_times) == 0:
+            acq, bleached, temporal_acq_elts = self.microscope.get_signal_and_bleach(self.temporal_datamap,
+                                                                                     self.temporal_datamap.pixelsize,
+                                                                                     pdt, p_ex, p_sted,
+                                                                                     indices=indices,
+                                                                                     acquired_intensity=intensity,
+                                                                                     bleach=self.bleach, update=True,
+                                                                                     bleach_mode=self.bleach_mode)
+
+            intensity = temporal_acq_elts["intensity"]
+            self.clock.current_time += action_required_time
+            return acq, bleached
+        else:
+            # assume raster pixel scan
+            pixel_list = utils.pixel_sampling(intensity, mode="all")
+            flash_t_step_pixel_idx_dict = {}
+            n_keys = 0
+            first_key = self.flash_tstep
+            for i in range(len(dmap_times) + 1):
+                pdt_cumsum = numpy.cumsum(pdt * 1e6)
+                if i < len(dmap_times) and dmap_times[i] >= self.exp_runtime:
+                    # the datamap would update, but the experiment will be over before then
+                    update_pixel_idx = numpy.argwhere(pdt_cumsum + self.clock.current_time > self.exp_runtime)[0, 0]
+                    flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
+                    if self.flash_tstep > first_key:
+                        flash_t_step_pixel_idx_dict[self.flash_tstep] += flash_t_step_pixel_idx_dict[self.flash_tstep - 1]
+                    self.clock.current_time = self.exp_runtime
+                    break
+                elif i < len(dmap_times):  # mid update split
+                    # update_pixel_idx = numpy.argwhere(pdt_cumsum + self.clock.current_time > dmap_update_times[self.flash_tstep])[0, 0]
+                    # not sure if the + 1 is legit but it seems to fix my bug of acqs being 1 pixel short
+                    update_pixel_idx = \
+                    numpy.argwhere(pdt_cumsum + self.clock.current_time > dmap_update_times[self.flash_tstep])[0, 0] + 1
+                    flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
+                    if self.flash_tstep > first_key:
+                        flash_t_step_pixel_idx_dict[self.flash_tstep] += flash_t_step_pixel_idx_dict[self.flash_tstep - 1]
+                    n_keys += 1
+                    self.flash_tstep += 1
+                    self.clock.current_time += pdt_cumsum[update_pixel_idx - 1]
+                else:  # from last update to the end of acq
+                    update_pixel_idx = pdt_cumsum.shape[0] - 1
+                    flash_t_step_pixel_idx_dict[self.flash_tstep] = update_pixel_idx
+                    self.clock.current_time += pdt_cumsum[update_pixel_idx] - pdt_cumsum[flash_t_step_pixel_idx_dict[self.flash_tstep - 1] - 1]
+            key_counter = 0
+            for key in flash_t_step_pixel_idx_dict:
+                if key_counter == 0:
+                    acq_pixel_list = pixel_list[0:flash_t_step_pixel_idx_dict[key]]
+                    # print(f"len(acq_pixel_list) = {len(acq_pixel_list)}")
+                elif key_counter == n_keys:
+                    acq_pixel_list = pixel_list[
+                                     flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key] + 1]
+                    # print(f"len(acq_pixel_list) = {len(acq_pixel_list)}")
+                else:
+                    acq_pixel_list = pixel_list[flash_t_step_pixel_idx_dict[key - 1]:flash_t_step_pixel_idx_dict[key]]
+                if len(acq_pixel_list) == 0:  # acq is over time to go home
+                    # should I still update? PogChampionship I should
+                    key_counter += 1
+                    indices = {"flashes": key}
+                    self.temporal_datamap.update_whole_datamap(key)
+                    self.temporal_datamap.update_dicts(indices)
+                    break
+                    # pass
+                key_counter += 1
+                indices = {"flashes": key}
+                self.temporal_datamap.update_whole_datamap(key)
+                self.temporal_datamap.update_dicts(indices)
+                acq, bleached, temporal_acq_elts = self.microscope.get_signal_and_bleach(self.temporal_datamap,
+                                                                                         self.temporal_datamap.pixelsize,
+                                                                                         pdt, p_ex, p_sted,
+                                                                                         indices=indices,
+                                                                                         acquired_intensity=intensity,
+                                                                                         bleach=self.bleach,
+                                                                                         bleach_mode=self.bleach_mode,
+                                                                                         update=True,
+                                                                                         pixel_list=acq_pixel_list,
+                                                                                         prob_ex=prob_ex,
+                                                                                         prob_sted=prob_sted)
+
+                intensity = temporal_acq_elts["intensity"]
+                prob_ex = temporal_acq_elts["prob_ex"]
+                prob_sted = temporal_acq_elts["prob_sted"]
+
+            return acq, bleached
