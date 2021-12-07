@@ -8,16 +8,16 @@ Once the repository is cloned on your computer (<code> git clone https://github.
 create a venv. You can create the venv anywhere, but for simplicity, create the venv inside the audurand_pysted folder.
 Open a terminal and cd into the audurand_pysted directory. Then call
 
-<code> python -m venv ./my_venv </code>
+<code> python -m venv ./venv </code>
 
-This should create a folder named my_venv inside the audurand_pysted folder. The next step will depend on your operating
+This will create a folder named venv inside the audurand_pysted folder. The next step will depend on your operating
 system. If you are running Windows, run
 
-<code> my_venv\Scripts\activate.bat </code>
+<code> venv\Scripts\activate.bat </code>
 
-If you are running a Linux system (MAC TOO ??? NEED TO VERIFY :) ), run
+If you are running a Linux system, run
 
-<code> source ./my_venv/bin/activate </code>
+<code> source ./venv/bin/activate </code>
 
 This activates the virtual environment. To install the necessary public libraries, run
 
@@ -29,24 +29,8 @@ To compile the C functions, <code> cd </code> into the directory containing audu
 
 and run
 
-<code>python -m pip install -e audurand_pysted </code>
-
-<p>To allow your jupyter notebook to use this venv as a kernel, run
-
-<code>ipython kernel install --name "my_venv" --user</code>
-
-Then once you launch the jupyter notebook
-
-<code>jupyter notebook</code>
-
-and head into the <code>pySTED_tutorial.ipynb</code> file, you should see a kernel named my_venv in the 
-kernels drop-down menu
-
-![yo](/examples/kernel.png)
+<code>python -m pip install -e pysted </code>
 
 </p>
 
-<p> Once the C functions are compiled, try running the <code>ex_albert.py</code> script. It can take a while to 
-execute, but you should get a figure that looks like </p>
-
-![yo](/examples/ex_albert.png)
+<p> Once the C functions are compiled, try running the <code>simple_example_script.py</code> script. It shows the basic workings of pySTED</p>
