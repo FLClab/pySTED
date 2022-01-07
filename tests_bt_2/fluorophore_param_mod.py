@@ -1,4 +1,5 @@
 import os
+import pickle
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -28,7 +29,10 @@ def rescale_func(val_to_scale, current_range_min, current_range_max, new_min, ne
 
 print("Setting up the microscope ...")
 # Microscope stuff
-egfp = {
+
+# DO NOT MODIFY THE VALUES IN THIS DICT!
+# Modify the values in egfp to test stuff out :)
+default_egfp = {
     "lambda_": 535e-9,
     "qy": 0.6,
     "sigma_abs": {
@@ -48,6 +52,33 @@ egfp = {
     },
     "k_isc": 0.48e+6
 }
+
+# fluo params dict to modify and test
+egfp = {
+    "lambda_": 535e-9,
+    "qy": 0.6,
+    "sigma_abs": {
+        488: 0.08e-21,
+        575: 0.02e-21
+    },
+    "sigma_ste": {
+        575: 3.0e-22,
+    },
+    "sigma_tri": 10.14e-21,
+    "tau": 3e-09,
+    "tau_vib": 1.0e-12,
+    "tau_tri": 1.2e-6,
+    "phy_react": {
+        488: 0.008e-5,
+        575: 0.008e-8
+    },
+    "k_isc": 0.48e+6,
+}
+
+if egfp == default_egfp:
+    print("using default fluo params")
+else:
+    print("testing new fluo params")
 
 action_spaces = {
     "p_sted" : {"low" : 0., "high" : 350.0e-3},
@@ -75,20 +106,20 @@ conf_params = {
     "P_STED": 0.0
 }
 
-# multipliers = np.array([0., 0.0078125, 0.015625, 0.03125, 0.0625, 0.125, 0.25, 0.5, 1.])
-multipliers = np.array([0., 1.])
+multipliers = np.array([0., 0.0078125, 0.015625, 0.03125, 0.0625, 0.125, 0.25, 0.5, 1.])
+# multipliers = np.array([0., 1.])
 
-# pdt_values = multipliers * action_spaces["pdt"]["high"]
-# pdt_values = rescale_func(pdt_values, np.min(pdt_values), np.max(pdt_values),
-#                           action_spaces["pdt"]["low"], action_spaces["pdt"]["high"])
-# p_ex_values = multipliers * action_spaces["p_ex"]["high"]
-# p_sted_values = multipliers * action_spaces["p_sted"]["high"]
+pdt_values = multipliers * action_spaces["pdt"]["high"]
+pdt_values = rescale_func(pdt_values, np.min(pdt_values), np.max(pdt_values),
+                          action_spaces["pdt"]["low"], action_spaces["pdt"]["high"])
+p_ex_values = multipliers * action_spaces["p_ex"]["high"]
+p_sted_values = multipliers * action_spaces["p_sted"]["high"]
 
-pdt_values = np.array([10.0e-6])
-p_ex_values = np.array([0.25e-3])
-p_sted_values = np.array([87.5e-3])
+# pdt_values = np.array([10.0e-6])
+# p_ex_values = np.array([0.25e-3])
+# p_sted_values = np.array([87.5e-3])
 
-fluo_params_save_dir = "./tests_bt_2/save_dir_test"
+fluo_params_save_dir = "./tests_bt_2/save_dir"
 if not os.path.exists(fluo_params_save_dir):
     os.mkdir(fluo_params_save_dir)
 
@@ -117,6 +148,7 @@ for pdt_idx, pdt in enumerate(pdt_values):
                 dmap = base.TemporalDatamap(shroom.frame, pixelsize, shroom)
                 dmap.set_roi(i_ex, "max")
                 nd_gt_positions.append(np.copy(np.array(dmap.synapses.nanodomains_coords)))
+                dmap_copy = np.copy(dmap.whole_datamap[dmap.roi])
 
                 # for snr / resolution evaluation
                 conf1, bleached_conf1, _ = microscope.get_signal_and_bleach(
@@ -129,6 +161,14 @@ for pdt_idx, pdt in enumerate(pdt_values):
 
                 acq, bleached_dict, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, pdt, p_ex, p_sted,
                                                                          bleach=True, update=True, seed=seeds[i])
+
+                # fig, axes = plt.subplots(1, 3)
+                #
+                # axes[0].imshow(dmap_copy)
+                # axes[1].imshow(acq)
+                # axes[2].imshow(dmap.whole_datamap[dmap.roi])
+                #
+                # plt.show()
 
                 nd_guess_positions.append(find_nanodomains(acq, dmap.pixelsize))
 
@@ -180,6 +220,35 @@ for pdt_idx, pdt in enumerate(pdt_values):
 f1_score_values_avg = np.squeeze(np.mean(f1_score_values, axis=-1))
 n_photons_values_avg = np.squeeze(np.mean(n_photons_values, axis=-1))
 n_molecules_values_avg = np.squeeze(np.mean(n_molecules_values, axis=-2))
+
+# save the data in an appropriate dir
+if egfp == default_egfp:
+    # save stuff in fluo_params_save_dir + "/fluo_default", along with saving the dict of default fluo params
+    save_dir = fluo_params_save_dir + "/fluo_default"
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+else:
+    # save stuff in a dir named fluo_params_save_dir + "/fluo_<X>", along with saving the dict of used fluo params
+    existing_save_dirs = [x[0] for x in os.walk(fluo_params_save_dir) if 'fluo_' in x[0] and 'default' not in x[0]]
+    existing_dir_indices = [int(x[-1]) for x in existing_save_dirs]
+    save_dir_idx = np.max(existing_dir_indices) + 1
+    save_dir = fluo_params_save_dir + f"/fluo_{save_dir_idx}"
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+
+# ... I think the way I am saving my data is bad, I am waiting too long with too much data loaded before saving it,
+# this will take up too much RAM...
+# save the og arrays and the avg to fluo_params_save_dir
+np.save(save_dir + "/f1_score_values_baseline.npy", f1_score_values)
+np.save(save_dir + "/f1_score_values_avg_baseline.npy", f1_score_values_avg)
+np.save(save_dir + "/n_photons_values_baseline.npy", n_photons_values)
+np.save(save_dir + "/n_photons_values_avg_baseline.npy", n_photons_values_avg)
+np.save(save_dir + "/n_molecules_values_baseline.npy", n_molecules_values)
+np.save(save_dir + "/n_molecules_values_avg_baseline.npy", n_molecules_values_avg)
+dict_file = open(save_dir + "/fluo_params.pkl", "wb")
+pickle.dump(egfp, dict_file)
+dict_file.close()
+
 print(f1_score_values_avg)
 print(n_photons_values_avg)
 print(n_molecules_values_avg)
