@@ -48,8 +48,8 @@ egfp = {
     "tau_vib": 1.0e-12,
     "tau_tri": 1.2e-6,
     "phy_react": {
-        488: 0.008e-5,
-        575: 0.008e-8
+        488: 0.008e-6,
+        575: 0.008e-9
     },
     "k_isc": 0.48e+6,
 }
@@ -91,28 +91,53 @@ shroom_x10.add_nanodomains(10, min_dist_nm=min_dist, n_molecs_in_domain=n_molecs
 dmap_x10 = base.TemporalDatamap(shroom_x10.frame, pixelsize, shroom_x10)
 dmap_x10.set_roi(i_ex, "max")
 
-acq_default, bleached_default, _ = microscope_default.get_signal_and_bleach(dmap_base, dmap_base.pixelsize,
-                                                                            **optim_params,
-                                                                            bleach=True, update=False)
+print(f"default acq 1 ...")
+acq_default_1, bleached_default_1, _ = microscope_default.get_signal_and_bleach(dmap_base, dmap_base.pixelsize,
+                                                                                **optim_params,
+                                                                                bleach=True, update=True)
+print(f"default acq 2 ...")
+acq_default_2, bleached_default_2, _ = microscope_default.get_signal_and_bleach(dmap_base, dmap_base.pixelsize,
+                                                                                **optim_params,
+                                                                                bleach=True, update=True)
+print(f"x10 acq 1 ...")
+acq_x10_1, bleached_x10_1, _ = microscope_test.get_signal_and_bleach(dmap_x10, dmap_x10.pixelsize,
+                                                                     **optim_params,
+                                                                     bleach=True, update=True)
+print(f"x10 acq 2 ...")
+acq_x10_2, bleached_x10_2, _ = microscope_test.get_signal_and_bleach(dmap_x10, dmap_x10.pixelsize,
+                                                                     **optim_params,
+                                                                     bleach=True, update=True)
 
-acq_x10, bleached_x10, _ = microscope_test.get_signal_and_bleach(dmap_x10, dmap_x10.pixelsize,
-                                                                 **optim_params,
-                                                                 bleach=True, update=False)
 
-fig, axes = plt.subplots(2, 2)
+cbar_dict = {"fraction": 0.05, "pad": 0.05}
+fig, axes = plt.subplots(4, 2)
 
-def_acq_imshow = axes[0, 0].imshow(acq_default)
-axes[0, 0].set_title(f"Default parameters")
-fig.colorbar(def_acq_imshow, ax=axes[0, 0], fraction=0.05, pad=0.05)
+def_acq_imshow_1 = axes[0, 0].imshow(acq_default_1)
+axes[0, 0].set_title(f"Default parameters \n Acq 1")
+fig.colorbar(def_acq_imshow_1, ax=axes[0, 0], **cbar_dict)
 
-x10_acq_imshow = axes[0, 1].imshow(acq_x10)
-axes[0, 1].set_title(f"x10 parameters")
-fig.colorbar(x10_acq_imshow, ax=axes[0, 1], fraction=0.05, pad=0.05)
+x10_acq_imshow_1 = axes[0, 1].imshow(acq_x10_1)
+axes[0, 1].set_title(f"x10 parameters \n Acq 1")
+fig.colorbar(x10_acq_imshow_1, ax=axes[0, 1], **cbar_dict)
 
-def_bleached_imshow = axes[1, 0].imshow(bleached_default["base"][dmap_base.roi])
-fig.colorbar(def_bleached_imshow, ax=axes[1, 0], fraction=0.05, pad=0.05)
+def_bleached_imshow_1 = axes[1, 0].imshow(bleached_default_1["base"][dmap_base.roi])
+fig.colorbar(def_bleached_imshow_1, ax=axes[1, 0], **cbar_dict)
 
-x10_bleached_imshow = axes[1, 1].imshow(bleached_x10["base"][dmap_x10.roi])
-fig.colorbar(x10_bleached_imshow, ax=axes[1, 1], fraction=0.05, pad=0.05)
+x10_bleached_imshow_1 = axes[1, 1].imshow(bleached_x10_1["base"][dmap_x10.roi])
+fig.colorbar(x10_bleached_imshow_1, ax=axes[1, 1], **cbar_dict)
+
+def_acq_imshow_2 = axes[2, 0].imshow(acq_default_2)
+axes[2, 0].set_title(f"Acq 2")
+fig.colorbar(def_acq_imshow_2, ax=axes[2, 0], **cbar_dict)
+
+x10_acq_imshow_2 = axes[2, 1].imshow(acq_x10_2)
+axes[2, 1].set_title(f"Acq 2")
+fig.colorbar(x10_acq_imshow_2, ax=axes[2, 1], **cbar_dict)
+
+def_bleached_imshow_2 = axes[3, 0].imshow(bleached_default_2["base"][dmap_base.roi])
+fig.colorbar(def_bleached_imshow_2, ax=axes[3, 0], **cbar_dict)
+
+x10_bleached_imshow_2 = axes[3, 1].imshow(bleached_x10_2["base"][dmap_x10.roi])
+fig.colorbar(x10_bleached_imshow_2, ax=axes[3, 1], **cbar_dict)
 
 plt.show()
