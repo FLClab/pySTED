@@ -115,16 +115,16 @@ pdt_values = rescale_func(pdt_values, np.min(pdt_values), np.max(pdt_values),
 p_ex_values = multipliers * action_spaces["p_ex"]["high"]
 p_sted_values = multipliers * action_spaces["p_sted"]["high"]
 
-pdt_values = np.array([10.0e-6])
-p_ex_values = np.array([0.25e-3])
-p_sted_values = np.array([87.5e-3])
+# pdt_values = np.array([10.0e-6])
+# p_ex_values = np.array([0.25e-3])
+# p_sted_values = np.array([87.5e-3])
 
 fluo_params_save_dir = "./tests_bt_2/save_dir"
 if not os.path.exists(fluo_params_save_dir):
     os.mkdir(fluo_params_save_dir)
 
 n_acqs_per_rep = 1
-n_repetitions = 2   # I want num = 10, 2 for test
+n_repetitions = 10   # I want num = 10, 2 for test
 f1_score_values = np.zeros((pdt_values.shape[0], p_ex_values.shape[0], p_sted_values.shape[0], n_repetitions))
 n_molecules_values = np.zeros((pdt_values.shape[0], p_ex_values.shape[0], p_sted_values.shape[0], n_repetitions, n_acqs_per_rep + 1))
 n_photons_values = np.zeros((pdt_values.shape[0], p_ex_values.shape[0], p_sted_values.shape[0], n_repetitions))
