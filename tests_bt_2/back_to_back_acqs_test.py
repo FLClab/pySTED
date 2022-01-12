@@ -62,8 +62,8 @@ egfp_x10 = {
     "tau_vib": 1.0e-12,   # decreasing reduces STED effect while leaving its photobleaching the same, increasing does ?
     "tau_tri": 1.2e-6,   # decreasing decreases photobleaching, increasing increases photobleaching ?
     "phy_react": {
-        488: 0.008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
-        575: 0.008e-9    # photobleaching cuased by sted beam, lower = less photobleaching
+        488: 0.0008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
+        575: 0.00185e-8    # photobleaching cuased by sted beam, lower = less photobleaching
     },
     "k_isc": 0.48e+6,
 }
@@ -91,8 +91,8 @@ egfp_x100 = {
     "tau_vib": 1.0e-12,   # decreasing reduces STED effect while leaving its photobleaching the same, increasing does ?
     "tau_tri": 1.2e-6,   # decreasing decreases photobleaching, increasing increases photobleaching ?
     "phy_react": {
-        488: 0.008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
-        575: 0.008e-9    # photobleaching cuased by sted beam, lower = less photobleaching
+        488: 0.0008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
+        575: 0.00185e-8   # photobleaching cuased by sted beam, lower = less photobleaching
     },
     "k_isc": 0.48e+6,
 }
@@ -143,7 +143,7 @@ dmap_x100.set_roi(i_ex, "max")
 
 nd_gt_positions = np.copy(np.array(dmap_base.synapses.nanodomains_coords))
 
-n_acqs = 3
+n_acqs = 5
 acqs = []
 bleached = []
 fig, axes = plt.subplots(2, n_acqs)

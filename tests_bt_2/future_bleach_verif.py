@@ -35,7 +35,7 @@ egfp_x10 = {
     "tau_tri": 1.2e-6,   # decreasing decreases photobleaching, increasing increases photobleaching ?
     "phy_react": {
         488: 0.0008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
-        575: 0.008e-9    # photobleaching cuased by sted beam, lower = less photobleaching
+        575: 0.00185e-8    # photobleaching cuased by sted beam, lower = less photobleaching
     },
     "k_isc": 0.48e+6,
 }
@@ -64,7 +64,7 @@ egfp_x100 = {
     "tau_tri": 1.2e-6,   # decreasing decreases photobleaching, increasing increases photobleaching ?
     "phy_react": {
         488: 0.0008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
-        575: 0.008e-9    # photobleaching cuased by sted beam, lower = less photobleaching
+        575: 0.00185e-8   # photobleaching cuased by sted beam, lower = less photobleaching
     },
     "k_isc": 0.48e+6,
 }
