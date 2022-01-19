@@ -57,8 +57,8 @@ egfp_x10 = {
     "tau_vib": 1.0e-12,   # decreasing reduces STED effect while leaving its photobleaching the same, increasing does ?
     "tau_tri": 1.2e-6,   # decreasing decreases photobleaching, increasing increases photobleaching ?
     "phy_react": {
-        488: 0.008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
-        575: 0.008e-9    # photobleaching cuased by sted beam, lower = less photobleaching
+        488: 0.0008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
+        575: 0.00185e-8    # photobleaching cuased by sted beam, lower = less photobleaching
     },
     "k_isc": 0.48e+6,
 }
@@ -86,8 +86,8 @@ egfp_x100 = {
     "tau_vib": 1.0e-12,   # decreasing reduces STED effect while leaving its photobleaching the same, increasing does ?
     "tau_tri": 1.2e-6,   # decreasing decreases photobleaching, increasing increases photobleaching ?
     "phy_react": {
-        488: 0.008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
-        575: 0.008e-9    # photobleaching cuased by sted beam, lower = less photobleaching
+        488: 0.0008e-6,   # photobleaching caused by exc beam, lower = less photobleaching
+        575: 0.00185e-8   # photobleaching cuased by sted beam, lower = less photobleaching
     },
     "k_isc": 0.48e+6,
 }
@@ -97,6 +97,11 @@ optim_params = {
     "p_ex": 0.25e-3,
     "p_sted": 87.5e-3
 }
+# optim_params = {
+#     "pdt": 0.00015,
+#     "p_ex": 0.25e-3 / 2,
+#     "p_sted": 0.0
+# }
 
 pixelsize = 20e-9
 # Generating objects necessary for acquisition simulation
@@ -139,42 +144,48 @@ shroom_x100.add_nanodomains(10, min_dist_nm=min_dist, n_molecs_in_domain=n_molec
 dmap_x100 = base.TemporalDatamap(shroom_x100.frame, pixelsize, shroom_x100)
 dmap_x100.set_roi(i_ex, "max")
 
+bleach = True
+
 print(f"default acq 1 ...")
 start_time = time.time()
 acq_default_1, bleached_default_1, _ = microscope_default.get_signal_and_bleach(dmap_base, dmap_base.pixelsize,
                                                                                 **optim_params,
-                                                                                bleach=True, update=True)
+                                                                                bleach=bleach, update=True)
 print(f"t = {time.time() - start_time} s")
 print(f"default acq 2 ...")
 start_time = time.time()
 acq_default_2, bleached_default_2, _ = microscope_default.get_signal_and_bleach(dmap_base, dmap_base.pixelsize,
                                                                                 **optim_params,
-                                                                                bleach=True, update=True)
+                                                                                bleach=bleach, update=True)
 print(f"t = {time.time() - start_time} s")
 print(f"x10 acq 1 ...")
 start_time = time.time()
 acq_x10_1, bleached_x10_1, _ = microscope_x10.get_signal_and_bleach(dmap_x10, dmap_x10.pixelsize,
                                                                      **optim_params,
-                                                                     bleach=True, update=True)
+                                                                     bleach=bleach, update=True)
 print(f"t = {time.time() - start_time} s")
 print(f"x10 acq 2 ...")
 start_time = time.time()
 acq_x10_2, bleached_x10_2, _ = microscope_x10.get_signal_and_bleach(dmap_x10, dmap_x10.pixelsize,
                                                                      **optim_params,
-                                                                     bleach=True, update=True)
+                                                                     bleach=bleach, update=True)
 print(f"t = {time.time() - start_time} s")
 print(f"x100 acq 1 ...")
 start_time = time.time()
 acq_x100_1, bleached_x100_1, _ = microscope_x100.get_signal_and_bleach(dmap_x100, dmap_x100.pixelsize,
                                                                        **optim_params,
-                                                                       bleach=True, update=True)
+                                                                       bleach=bleach, update=True)
 print(f"t = {time.time() - start_time} s")
 print(f"x100 acq 2 ...")
 start_time = time.time()
 acq_x100_2, bleached_x100_2, _ = microscope_x100.get_signal_and_bleach(dmap_x100, dmap_x100.pixelsize,
                                                                        **optim_params,
-                                                                       bleach=True, update=True)
+                                                                       bleach=bleach, update=True)
 print(f"t = {time.time() - start_time} s")
+
+print(np.sum(acq_default_1))
+print(np.sum(acq_x10_1))
+print(np.sum(acq_x100_1))
 
 cbar_dict = {"fraction": 0.05, "pad": 0.05}
 fig, axes = plt.subplots(4, 3)
