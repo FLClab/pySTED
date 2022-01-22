@@ -6,8 +6,9 @@ np.random.seed(237)
 
 noise_level = 0.1
 
-def f(x, noise_level=noise_level):
-    return np.sin(5 * x[0]) * (1 - np.tanh(x[0] ** 2)) + np.random.randn() * noise_level
+def f(x, noise_level=noise_level, **kwargs):
+    test_val = kwargs.get("test_val", 0)
+    return np.sin(5 * x[0]) * (1 - np.tanh(x[0] ** 2)) + np.random.randn() * noise_level + test_val
 
 
 res = gp_minimize(

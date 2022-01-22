@@ -7,7 +7,6 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from skimage.feature import peak_local_max
 from gym_sted.utils import get_foreground
-from pysted import base
 
 
 def line_step_pixel_list_builder(dmap, line_step=1):
@@ -61,7 +60,9 @@ def microscopy_random_data_loader(paths):
         "line_step": results_table.at[img_idx, "line_step"],
         "pdt": results_table.at[img_idx, "dwelltime"],
         "p_ex": results_table.at[img_idx, "p_ex"],
-        "p_sted": results_table.at[img_idx, "p_sted"]
+        "p_sted": results_table.at[img_idx, "p_sted"],
+        "load_path": load_path,
+        "img_idx": img_idx
     }
 
     return returns_dict
