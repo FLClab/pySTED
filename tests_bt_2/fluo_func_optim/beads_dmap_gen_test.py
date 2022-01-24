@@ -275,6 +275,36 @@ acq_fg, bleached_fg, _ = microscope.get_signal_and_bleach(dmap_fg, dmap_fg.pixel
 simul_fg_conf2, _, _ = microscope.get_signal_and_bleach(dmap_fg, dmap_fg.pixelsize, **conf_params,
                                                         bleach=False, update=False)
 
+fig, axes = plt.subplots(1, 3, figsize=(15, 15))
+
+images = np.dstack([conf1, sted, conf2])
+conf1_imshow = axes[0].imshow(conf1, cmap="hot", vmax=np.max(images))
+axes[0].set_title(f"Albert confocal 1")
+fig.colorbar(conf1_imshow, ax=axes[0], fraction=0.05, pad=0.05)
+
+sted_imshow = axes[1].imshow(sted, cmap="hot", vmax=np.max(images))
+axes[1].set_title(f"Albert acquisition")
+fig.colorbar(sted_imshow, ax=axes[1], fraction=0.05, pad=0.05)
+
+conf2_imshow = axes[2].imshow(conf2, cmap="hot", vmax=np.max(images))
+axes[2].set_title(f"Albert confocal 2")
+fig.colorbar(conf2_imshow, ax=axes[2], fraction=0.05, pad=0.05)
+
+alb_params = {
+    "pdt": results_table.at[img_idx, 'dwelltime'],   # results_table.at[img_idx, 'Bleach']
+    "p_ex": 0.01 * results_table.at[img_idx, 'p_ex'] * p_ex_max,
+    "p_sted": 0.01 * results_table.at[img_idx, 'p_sted'] * p_sted_max
+}
+fig.suptitle(f"Imaging parameters : \n"
+             f"pdt : {alb_params['pdt']} s, \n"
+             f"p_ex : {alb_params['p_ex']} W, \n"
+             f"p_sted : {alb_params['p_sted']} W, \n"
+             f"line_step = {results_table.at[img_idx, 'line_step']}")
+plt.tight_layout()
+plt.show()
+plt.close(fig)
+exit()
+
 fig, axes = plt.subplots(3, 3, figsize=(15, 15))
 
 images = np.dstack([conf1, sted, conf2])
