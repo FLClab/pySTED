@@ -572,7 +572,9 @@ class Objective:
                                                         535: 0.85,
                                                         550: 0.86,
                                                         585: 0.85,
-                                                        575: 0.85})
+                                                        575: 0.85,
+                                                        635: 0.85,
+                                                        750: 0.85})
 
     def get_transmission(self, lambda_):
         return self.transmission[int(lambda_ * 1e9)]
