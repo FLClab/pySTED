@@ -743,6 +743,8 @@ class Microscope:
                 self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
             except FileNotFoundError:
                 pass
+            except EOFError:
+                pass
 
         # This will be used during the acquisition routine to make a better correspondance
         # between the microscope acquisition time steps and the Ca2+ flash time steps
