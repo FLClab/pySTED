@@ -75,6 +75,7 @@ For use by FLClab (@CERVO) authorized people
    Journal of the Optical Society of America A (JOSA A), 30(8), 1640–1645.
 '''
 
+import logging
 import numpy
 import scipy.constants
 import scipy.signal
@@ -738,6 +739,7 @@ class Microscope:
 
         # caching system
         self.__cache = {}
+        logging.warning("the logging thing in pysted also writes to the already openend log file! technology is so amazing :)")
         if load_cache:
             try:
                 self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
