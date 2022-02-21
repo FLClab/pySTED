@@ -739,7 +739,6 @@ class Microscope:
 
         # caching system
         self.__cache = {}
-        logging.warning("the logging thing in pysted also writes to the already openend log file! technology is so amazing :)")
         if load_cache:
             try:
                 self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
