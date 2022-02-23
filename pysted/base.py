@@ -75,6 +75,7 @@ For use by FLClab (@CERVO) authorized people
    Journal of the Optical Society of America A (JOSA A), 30(8), 1640–1645.
 '''
 
+import logging
 import numpy
 import scipy.constants
 import scipy.signal
@@ -572,7 +573,9 @@ class Objective:
                                                         535: 0.85,
                                                         550: 0.86,
                                                         585: 0.85,
-                                                        575: 0.85})
+                                                        575: 0.85,
+                                                        635: 0.85,
+                                                        750: 0.85})
 
     def get_transmission(self, lambda_):
         return self.transmission[int(lambda_ * 1e9)]
@@ -735,12 +738,19 @@ class Microscope:
         self.fluo = fluo
 
         # caching system
-        self.__cache = {}
+        self.__cache = {}   # add all the elements used to compute lasers in the cache
         if load_cache:
             try:
                 self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
-            except FileNotFoundError:
-                pass
+            # except FileNotFoundError:
+            #     pass
+            # except EOFError:
+            #     pass
+            except Exception as e:
+                logging.warning("-----------------")
+                logging.warning(f"an error was caught while trying to load microscope cache")
+                logging.warning(e)
+                logging.warning("-----------------")
 
         # This will be used during the acquisition routine to make a better correspondance
         # between the microscope acquisition time steps and the Ca2+ flash time steps
@@ -776,8 +786,8 @@ class Microscope:
                   * A 2D array of the detection PSF.
         '''
 
-        datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
-        if datamap_pixelsize_nm not in self.__cache:
+        def compute_lasers(datamap_pixelsize_nm):
+            self.__cache[datamap_pixelsize_nm] = {}
             f, n, na = self.objective.f, self.objective.n, self.objective.na
 
             transmission = self.objective.get_transmission(self.excitation.lambda_)
@@ -794,11 +804,28 @@ class Microscope:
             psf_det = self.detector.get_detection_psf(self.fluo.lambda_, psf,
                                                       na, transmission,
                                                       datamap_pixelsize)
-            self.__cache[datamap_pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
+            self.__cache[datamap_pixelsize_nm]["lasers"] = utils.resize(i_ex, i_sted, psf_det)
+            self.__cache[datamap_pixelsize_nm]["f"] = f
+            self.__cache[datamap_pixelsize_nm]["n"] = n
+            self.__cache[datamap_pixelsize_nm]["na"] = na
+            self.__cache[datamap_pixelsize_nm]["exc_lambda"] = self.excitation.lambda_
+            self.__cache[datamap_pixelsize_nm]["sted_lambda"] = self.sted.lambda_
+            self.__cache[datamap_pixelsize_nm]["fluo_lambda"] = self.fluo.lambda_
+
+        datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
+        if datamap_pixelsize_nm not in self.__cache:
+            compute_lasers(datamap_pixelsize_nm)
+        elif (self.__cache[datamap_pixelsize_nm]["f"] != self.objective.f) or \
+                (self.__cache[datamap_pixelsize_nm]["n"] != self.objective.n) or \
+                (self.__cache[datamap_pixelsize_nm]["na"] != self.objective.na) or \
+                (self.__cache[datamap_pixelsize_nm]["exc_lambda"] != self.excitation.lambda_) or \
+                (self.__cache[datamap_pixelsize_nm]["sted_lambda"] != self.sted.lambda_) or \
+                (self.__cache[datamap_pixelsize_nm]["fluo_lambda"] != self.fluo.lambda_):
+            compute_lasers(datamap_pixelsize_nm)
 
         if save_cache:
             pickle.dump(self.__cache, open(".microscope_cache.pkl", "wb"))
-        return self.__cache[datamap_pixelsize_nm]
+        return self.__cache[datamap_pixelsize_nm]["lasers"]
 
     def clear_cache(self):
         '''Empty the cache.

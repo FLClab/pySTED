@@ -96,7 +96,8 @@ def raster_func_c_self_bleach_split_g(
                 value += effective[sprime, tprime] * bleached_datamap[s, t]
                 tprime += 1
             sprime += 1
-        acquired_intensity[int(row / ratio), int(col / ratio)] = value
+        # acquired_intensity[int(row / ratio), int(col / ratio)] = value
+        acquired_intensity[int(row / ratio), int(col / ratio)] += value
 
         if bleach:
             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
@@ -191,7 +192,7 @@ def raster_func_c_self_bleach_dymin(
                     value += effective[sprime, tprime] * bleached_datamap[s, t]
                     tprime += 1
                 sprime += 1
-            acquired_intensity[int(row / ratio), int(col / ratio)] = value
+            acquired_intensity[int(row / ratio), int(col / ratio)] += value
 
             pdts[i] = pdt
             p_exs[i] = p_ex
