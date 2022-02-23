@@ -738,7 +738,7 @@ class Microscope:
         self.fluo = fluo
 
         # caching system
-        self.__cache = {}
+        self.__cache = {}   # add all the elements used to compute lasers in the cache
         if load_cache:
             try:
                 self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
@@ -786,8 +786,8 @@ class Microscope:
                   * A 2D array of the detection PSF.
         '''
 
-        datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
-        if datamap_pixelsize_nm not in self.__cache:
+        def compute_lasers(datamap_pixelsize_nm):
+            self.__cache[datamap_pixelsize_nm] = {}
             f, n, na = self.objective.f, self.objective.n, self.objective.na
 
             transmission = self.objective.get_transmission(self.excitation.lambda_)
@@ -804,11 +804,28 @@ class Microscope:
             psf_det = self.detector.get_detection_psf(self.fluo.lambda_, psf,
                                                       na, transmission,
                                                       datamap_pixelsize)
-            self.__cache[datamap_pixelsize_nm] = utils.resize(i_ex, i_sted, psf_det)
+            self.__cache[datamap_pixelsize_nm]["lasers"] = utils.resize(i_ex, i_sted, psf_det)
+            self.__cache[datamap_pixelsize_nm]["f"] = f
+            self.__cache[datamap_pixelsize_nm]["n"] = n
+            self.__cache[datamap_pixelsize_nm]["na"] = na
+            self.__cache[datamap_pixelsize_nm]["exc_lambda"] = self.excitation.lambda_
+            self.__cache[datamap_pixelsize_nm]["sted_lambda"] = self.sted.lambda_
+            self.__cache[datamap_pixelsize_nm]["fluo_lambda"] = self.fluo.lambda_
+
+        datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
+        if datamap_pixelsize_nm not in self.__cache:
+            compute_lasers(datamap_pixelsize_nm)
+        elif (self.__cache[datamap_pixelsize_nm]["f"] != self.objective.f) or \
+                (self.__cache[datamap_pixelsize_nm]["n"] != self.objective.n) or \
+                (self.__cache[datamap_pixelsize_nm]["na"] != self.objective.na) or \
+                (self.__cache[datamap_pixelsize_nm]["exc_lambda"] != self.excitation.lambda_) or \
+                (self.__cache[datamap_pixelsize_nm]["sted_lambda"] != self.sted.lambda_) or \
+                (self.__cache[datamap_pixelsize_nm]["fluo_lambda"] != self.fluo.lambda_):
+            compute_lasers(datamap_pixelsize_nm)
 
         if save_cache:
             pickle.dump(self.__cache, open(".microscope_cache.pkl", "wb"))
-        return self.__cache[datamap_pixelsize_nm]
+        return self.__cache[datamap_pixelsize_nm]["lasers"]
 
     def clear_cache(self):
         '''Empty the cache.
