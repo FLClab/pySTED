@@ -5,12 +5,12 @@ necessary packages are installed and that the C functions are compiled. pySTED u
 gains, which need to be compiled before execution. 
 
 Once the repository is cloned on your computer (<code> git clone https://github.com/FLClab/pySTED.git </code>),
-create a venv. You can create the venv anywhere, but for simplicity, create the venv inside the audurand_pysted folder.
-Open a terminal and cd into the audurand_pysted directory. Then call
+create a venv. You can create the venv anywhere, but for simplicity, create the venv inside the pySTED folder.
+Open a terminal and cd into the pySTED directory. Then call
 
 <code> python -m venv ./venv </code>
 
-This will create a folder named venv inside the audurand_pysted folder. The next step will depend on your operating
+This will create a folder named venv inside the pySTED folder. The next step will depend on your operating
 system. If you are running Windows, run
 
 <code> venv\Scripts\activate.bat </code>
