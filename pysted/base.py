@@ -626,8 +626,8 @@ class Fluorescence:
     | ``k0``                   | ``0``        | Coefficient of the first first order   |
     |                          |              | term of the photobleaching rate        |
     +--------------------------+--------------+----------------------------------------+
-    | ``k1``                   | ``1.3e-15``  | Coefficient of the b^{th} first order  |
-    |                          |              | term of the photobleaching rate        |
+    | ``k1``                   | ``1.3e-15``  | Coefficient of the :math:`b^{th}` first|
+    |                          |              | order term of the photobleaching rate  |
     +--------------------------+--------------+----------------------------------------+
     | ``b``                    | ``1.4``      | The intersystem crossing rate (s⁻¹).   |
     +--------------------------+--------------+----------------------------------------+
