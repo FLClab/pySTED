@@ -240,9 +240,9 @@ class DonutBeam:
     | ``beta``         | ``pi/4``     | The beam incident angle, in            |
     |                  |              | :math:`[0, \pi/2]` (rad).              |
     +------------------+--------------+----------------------------------------+
-    | ``tau``          | ``200e-12``  | The beam pulse length (s).             |
+    | ``tau``          | ``400e-12``  | The beam pulse length (s).             |
     +------------------+--------------+----------------------------------------+
-    | ``rate``         | ``80e6``     | The beam pulse rate (Hz).              |
+    | ``rate``         | ``40e6``     | The beam pulse rate (Hz).              |
     +------------------+--------------+----------------------------------------+
     | ``zero_residual``| ``0``        | The ratio between minimum and maximum  |
     |                  |              | intensity (ratio).                     |
@@ -262,8 +262,8 @@ class DonutBeam:
         self.lambda_ = lambda_
         self.polarization = kwargs.get("polarization", numpy.pi/2)
         self.beta = kwargs.get("beta", numpy.pi/4)
-        self.tau = kwargs.get("tau", 200e-12)
-        self.rate = kwargs.get("rate", 80e6)
+        self.tau = kwargs.get("tau", 400e-12)
+        self.rate = kwargs.get("rate", 40e6)
         self.zero_residual = kwargs.get("zero_residual", 0)
         self.anti_stoke = kwargs.get("anti_stoke", True)
 
