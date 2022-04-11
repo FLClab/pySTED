@@ -47,16 +47,16 @@ fluo = base.Fluorescence(**egfp)
 
 # These are the parameter ranges our RL agents can select from when playing actions
 action_spaces = {
-    "p_sted" : {"low" : 0., "high" : 350.0e-3},
-    "p_ex" : {"low" : 0., "high" : 250.0e-6},
+    "p_sted" : {"low" : 0., "high" : 175e-3}, # Similar to the sted in our lab
+    "p_ex" : {"low" : 0., "high" : 150e-6}, # Similar to the sted in our lab
     "pdt" : {"low" : 10.0e-6, "high" : 150.0e-6},
 }
 
 # Example values of parameters used when doing a STED acquisition
 sted_params = {
-    "pdt": action_spaces["pdt"]["low"],
+    "pdt": action_spaces["pdt"]["low"] * 2,
     "p_ex": action_spaces["p_ex"]["high"] * 0.6,
-    "p_sted": action_spaces["p_sted"]["high"] * 0.25
+    "p_sted": action_spaces["p_sted"]["high"] * 0.6
 }
 
 # Example values of parameters used when doing a Confocal acquisition. Confocals always have p_sted = 0
@@ -147,19 +147,38 @@ temp_dmap.update_dicts({"flashes": time_idx})
 # (2) The bleached datamaps
 # (3) The acquired intensity. This is only useful when working in a temporal exeperiment setting, in which
 #     an acquisition could be interrupted by the flash happening through it.
+
+
 conf_acq, conf_bleached, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
-                                                              bleach=False, update=True)
-
+                                                              bleach=True, update=True)
+conf_acq2, conf_bleached2, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
+                                                              bleach=True, update=True)
 sted_acq, sted_bleached, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
-                                                              bleach=False, update=True)
+                                                              bleach=True, update=True)
+sted_acq2, sted_bleached2, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
+                                                              bleach=True, update=True)
 
-fig, axes = plt.subplots(1, 2)
 
-axes[0].imshow(conf_acq)
-axes[0].set_title(f"Confocal acquisition")
 
-axes[1].imshow(sted_acq)
-axes[1].set_title(f"STED acquisition")
+
+fig, axes = plt.subplots(2, 2)
+
+vmax = conf_acq.max()
+axes[0,0].imshow(conf_acq, vmax=vmax)
+axes[0,0].set_title(f"Confocal 1")
+
+axes[0,1].imshow(conf_acq2, vmax=vmax)
+axes[0,1].set_title(f"Confocal 2")
+
+vmax = sted_acq.max()
+axes[1,0].imshow(sted_acq, vmax=vmax)
+axes[1,0].set_title(f"STED 1")
+
+
+axes[1,1].imshow(sted_acq2, vmax=vmax)
+axes[1,1].set_title(f"STED 2")
+
+plt.suptitle("The four images where acquired sequentially. \nSame normalization on each row")
 
 plt.show()
 

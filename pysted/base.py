@@ -61,8 +61,8 @@ For use by FLClab (@CERVO) authorized people
    <https://www.rp-photonics.com/optical_intensity.html>.
    
 .. [Oracz2017] Oracz, Joanna, et al. (2017)
-    ‘Photobleaching in STED Nanoscopy and Its Dependence on the Photon Flux
-    Applied for Reversible Silencing of the Fluorophore’.
+    Photobleaching in STED Nanoscopy and Its Dependence on the Photon Flux
+    Applied for Reversible Silencing of the Fluorophore.
     Scientific Reports, vol. 7, no. 1, Sept. 2017, p. 11354.
     www.nature.com.
 
@@ -626,7 +626,7 @@ class Fluorescence:
     | ``k0``                   | ``0``        | Coefficient of the first first order   |
     |                          |              | term of the photobleaching rate        |
     +--------------------------+--------------+----------------------------------------+
-    | ``k1``                   | ``5.2e-10``  | Coefficient of the b^{th} first order  |
+    | ``k1``                   | ``1.3e-15``  | Coefficient of the b^{th} first order  |
     |                          |              | term of the photobleaching rate        |
     +--------------------------+--------------+----------------------------------------+
     | ``b``                    | ``1.4``      | The intersystem crossing rate (s⁻¹).   |
@@ -652,9 +652,9 @@ class Fluorescence:
         self.phy_react = kwargs.get("phy_react", {488: 1e-3, 575: 1e-5})
         self.k_isc = kwargs.get("k_isc", 0.26e6)
         self.k0 = kwargs.get("k0", 0)
-        self.k1 = kwargs.get("k1", 5.2e-10)
+        self.k1 = kwargs.get("k1", 1.3e-15) #Note: divided by (100**2)**1.4, assuming units where wrong in the paper (cm^2 instead of m^2)
         self.b = kwargs.get("b", 1.4)
-        self.triplet_dynamic_frac = kwargs.get("triplet_dynamic_frac", False)
+        self.triplet_dynamic_frac = kwargs.get("triplet_dynamic_frac", 0)
 
 
     def get_sigma_ste(self, lambda_):
@@ -713,6 +713,12 @@ class Fluorescence:
         return numpy.real_if_close(gauss / numpy.max(gauss))
 
     def get_photons(self, intensity, lambda_=None):
+        '''Translate a light intensity to a photon flux.
+        
+        :param intensity: Light intensity (:math:`W/m^{-2}`).
+        :param lambda_: Wavelenght. If None, default to the emission wavelenght.
+        :returns: Photon flux (:math:`m^{-2}s^{-1}`).
+        '''
         if lambda_ is None:
             lambda_ = self.lambda_
         e_photon = scipy.constants.c * scipy.constants.h / lambda_
@@ -721,16 +727,16 @@ class Fluorescence:
     def get_k_bleach(self, lambda_ex, lambda_sted, phi_ex, phi_sted, tau_sted, tau_rep, dwelltime):
         '''Compute a spatial map of the photobleaching rate.
 
-        :param lambda_ex: Wavelength of the the exctiation beam (m).
+        :param lambda_ex: Wavelength of the the excitation beam (m).
         :param lambda_sted: Wavelength of the STED beam (m).
-        :param phi_ex: Spatial map of the excitation photon flux (m^{-2}s^{-1}).
-        :param phi_sted: Spatial map of the STED photon flux (m^{-2}s^{-1}).
-        :param tau_sted: STED pulse temporal width.
-        :param tau_rep: Period of the lasers.
-        :param dwelltime: Time continuously passed centered on a pixel.
-        :returns: A 2D array of the bleaching rate d(Bleached)/dt (s^{-1}).
+        :param phi_ex: Spatial map of the excitation photon flux (:math:`m^{-2}s^{-1}`).
+        :param phi_sted: Spatial map of the STED photon flux (:math:`m^{-2}s^{-1}`).
+        :param tau_sted: STED pulse temporal width (s).
+        :param tau_rep: Period of the lasers (s).
+        :param dwelltime: Time continuously passed centered on a pixel (s).
+        :returns: A 2D array of the bleaching rate d(Bleached)/dt (:math:`s^{-1}`).
 
-        The photobleaching rate for a 4 level system from [Oracz2017]_ is used. The population of S+S_star, from where the photoblesaching happen, was estimated using the simplified model in [Leutenegger2010]_. The triplet dynamic (dependent on the dwelltime) was estimated from the tree level system rate equations 2.14 in [Staudt2009]_, approximating that the population S1 is constant.
+        The photobleaching rate for a 4 level system from [Oracz2017]_ is used. The population of S1+S1*, from where the photobleaching happen, was estimated using the simplified model used for eq. 3 in [Leutenegger2010]_. The triplet dynamic (dependent on the dwelltime) was estimated from the tree level system rate equations 2.14 in [Staudt2009]_, approximating that the population S1 is constant.
         '''
 
         exc_lambda_ = numpy.round(lambda_ex/1e-9)
@@ -752,9 +758,10 @@ class Fluorescence:
         I_sted = phi_sted * (scipy.constants.c * scipy.constants.h / lambda_sted)
         
         # Suppl. Eq. 16 from Oracz et al.
-        # k is defined by Suppl. Eq. 10 from Oracz et al.: d(Bleached)/dt = k * (S1+S1_star)
+        # k is defined by Suppl. Eq. 10 from Oracz et al.: d(Bleached)/dt = k * (S1+S1*)
         k = self.k0*I_sted + self.k1*I_sted**self.b
         
+        # Now, S1 <- S1+S1* (put the two sublevels together, like in [Leutenegger2010])
         # Integral from 0 to tau_sted of k*S1, where S1 = exp(-k_s1*t(1+gamma))
         B =  k * S1_ini * (1 - numpy.exp(-k_s1*tau_sted*(1+gamma))) / (k_s1*(1+gamma))
         
@@ -762,12 +769,12 @@ class Fluorescence:
         mean_k_bleach = B / tau_rep
         
         # Add a very approximate triplet dynamic, if any.
-        # Based on tree level system rate equations 2.14 in [Staudt2009]_,
+        # Based on three level system rate equations 2.14 in [Staudt2009]_,
         # approximating that S1 is constant
         k_tri = 1/self.tau_tri
         k_dwell = (k_tri*dwelltime + numpy.exp(-k_tri*dwelltime) - 1) / (k_tri*dwelltime)
         mean_k_bleach = mean_k_bleach * ((1-self.triplet_dynamic_frac) + self.triplet_dynamic_frac*k_dwell)
-            
+
         return mean_k_bleach
         
 

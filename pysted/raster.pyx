@@ -56,7 +56,7 @@ def raster_func_c_self_bleach_split_g(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef numpy.ndarray[int, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
-    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] step
+    cdef FLOATDTYPE_t step
 
     """
     raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
@@ -74,15 +74,15 @@ def raster_func_c_self_bleach_split_g(
         srand(seed)
 
     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
-    # Calculate the bleaching rate once if the scanning powers does not vary to
+    # Calculate the bleaching rate once if the scanning powers and dwelltimes do not vary to
     # increase speed
-    uniform_ex = np.all(p_ex_roi == p_ex_roi[0, 0])
-    uniform_sted = np.all(p_sted_roi == p_sted_roi[0, 0])
-    uniform_steps = np.all(np.array(steps) == steps[0][0])
-    if uniform_sted and uniform_ex and uniform_steps:
+    uniform_ex = numpy.all(p_ex_roi == p_ex_roi[0, 0])
+    uniform_sted = numpy.all(p_sted_roi == p_sted_roi[0, 0])
+    uniform_pdt = numpy.all(pdt_roi == pdt_roi[0, 0])
+    if uniform_sted and uniform_ex and uniform_pdt:
         p_ex = p_ex_roi[0, 0]
         p_sted = p_sted_roi[0, 0]
-        step = steps[0][0]
+        step = pdt_roi[0, 0]
         photons_ex = self.fluo.get_photons(i_ex * p_ex, self.excitation.lambda_)
         duty_cycle = self.sted.tau * self.sted.rate
         photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle, self.sted.lambda_)

@@ -232,7 +232,7 @@ def default_update_survival_probabilities(object self,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex=None,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_sted=None,):
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
-    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
+    #cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef int s, sprime, t, tprime
     cdef float prob
     cdef float rsamp
@@ -243,7 +243,6 @@ def default_update_survival_probabilities(object self,
     cdef float duty_cycle
 
     maxval = float(RAND_MAX)
-    
     if k_sted is None:
         photons_ex = self.fluo.get_photons(i_ex * p_ex, self.excitation.lambda_)
         duty_cycle = self.sted.tau * self.sted.rate
