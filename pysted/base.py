@@ -499,7 +499,7 @@ class Detector:
 
         return ra_flipped
 
-    def get_signal(self, photons, dwelltime, seed=None):
+    def get_signal(self, photons, dwelltime, rate, seed=None):
         '''Compute the detected signal (in photons) given the number of emitted
         photons and the time spent by the detector.
 
@@ -529,8 +529,8 @@ class Detector:
         if self.noise:
             signal = numpy.random.poisson(signal, signal.shape)
         if self.background > 0:
-            # background counts per second
-            cts = numpy.random.poisson(self.background, signal.shape)
+            # background counts per second, accounting for the detection gating
+            cts = numpy.random.poisson(self.background * self.det_width * rate * dwelltime, signal.shape)
             # background counts during dwell time
             # cts = (cts * dwelltime).astype(numpy.int64)
             """
@@ -547,8 +547,8 @@ class Detector:
 
             signal += cts
         if self.darkcount > 0:
-            # dark counts per second
-            cts = numpy.random.poisson(self.darkcount, signal.shape)
+            # Dark counts per second, accounting for the detection gating
+            cts = numpy.random.poisson(self.darkcount * self.det_width * rate * dwelltime, signal.shape)
             # dark counts during dwell time ***DISABLING THIS LINE, see explanation in "if self.background > 0"
             # cts = (cts * dwelltime).astype(numpy.int64)
             signal += cts
@@ -891,20 +891,25 @@ class Microscope:
         T = 1 / self.sted.rate
         
         assert self.detector.det_delay >= 0 #Verify the detection delay is not negative
-#        assert self.detector.det_width > 0 #Verify the detection width is larger than zero
         T_det = self.detector.det_delay + self.detector.det_width
         assert T_det<=T # verify the detection window does not end after the period
         
-        # eta=(probability of fluorescence)/(initial probability of fluorescence) given the donut
-        if self.detector.det_delay < self.sted.tau: # The detection starts not after the end the sted pulse
-            nom = (((numpy.exp(-k_s1 * self.detector.det_delay * (1 + gamma)) + gamma * numpy.exp(-k_s1 * self.sted.tau * (1 + gamma))) / (1 + gamma)) -
-          numpy.exp(-k_s1 * (gamma * self.sted.tau + T_det)))
+        # eta=(probability of fluorescence)/(initial probability of
+        # fluorescence) given the donut
+        if self.detector.det_delay < self.sted.tau: # The detection starts before the end the sted pulse
+            nom = (((numpy.exp(-k_s1 * self.detector.det_delay * (1 + gamma)) \
+                  + gamma * numpy.exp(-k_s1 * self.sted.tau * (1 + gamma))) / (1 + gamma)) \
+                  - numpy.exp(-k_s1 * (gamma * self.sted.tau + T_det)))
         elif self.sted.tau <= self.detector.det_delay: # The detection starts not before the end of the sted pulse
-            nom = numpy.exp(-k_s1 * gamma * self.sted.tau) * (numpy.exp(-k_s1 * self.detector.det_delay) - numpy.exp(-k_s1 * T_det))
+            nom = numpy.exp(-k_s1 * gamma * self.sted.tau)\
+                  * (numpy.exp(-k_s1 * self.detector.det_delay)\
+                  - numpy.exp(-k_s1 * T_det))
         eta = nom/(1 - numpy.exp(-k_s1 * T))
         
 
-        # molecular brigthness [Holler2011]. This would be the spatial map of time averaged power emitted per molecule if there was no deexcitation caused by the depletion beam
+        # molecular brigthness [Holler2011]. This would be the spatial map of
+        # time averaged power emitted per molecule if there was no deexcitation
+        # caused by the depletion beam
         sigma_abs = self.fluo.get_sigma_abs(self.excitation.lambda_)
         excitation_probability = sigma_abs * i_ex * self.fluo.qy
         if self.sted.anti_stoke:
@@ -1016,14 +1021,14 @@ class Microscope:
         photons = self.fluo.get_photons(acquired_intensity)
 
         if photons.shape == pdt.shape:
-            returned_acquired_photons = self.detector.get_signal(photons, pdt, seed=seed)
+            returned_acquired_photons = self.detector.get_signal(photons, pdt, self.sted.rate, seed=seed)
         else:
             pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
                                                    int(numpy.ceil(pdt.shape[1] / ratio))))
             new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
             for (row, col) in new_pdt_plist:
                 pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
-            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped, seed=seed)
+            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped, self.sted.rate, seed=seed)
 
         unbleached_whole_datamap = numpy.copy(datamap.whole_datamap)
 
@@ -1101,7 +1106,7 @@ class Microscope:
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
 
             pixel_intensity = numpy.sum(effective * datamap.whole_datamap[row_slice, col_slice])
-            pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col])
+            pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col], self.sted.rate)
             photons_per_sec = pixel_photons / pdt[row, col]
             lt_time_photons = photons_per_sec * ltr * pdt[row, col]
             if lower_th is None:
