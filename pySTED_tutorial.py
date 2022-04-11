@@ -26,15 +26,12 @@ egfp = {
     "sigma_ste": {
         575: 3.0e-22,
     },
-    "sigma_tri": 10.14e-21,
     "tau": 3e-09,
     "tau_vib": 1.0e-12,
     "tau_tri": 1.2e-6,
-    "phy_react": {
-        488: 0.008e-5,
-        575: 0.008e-8
-    },
-    "k_isc": 0.48e+6
+    "k1": 1.3e-15, # Atto640N, Oracz2017
+    "b":1.4, # Atto640N, Oracz2017
+    "triplet_dynamics_frac": 0,
 }
 
 pixelsize = 20e-9

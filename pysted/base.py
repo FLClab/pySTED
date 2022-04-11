@@ -605,9 +605,6 @@ class Fluorescence:
     |                          |              | wavelengths as integer (nm) to         |
     |                          |              | absorption cross-section (m²).         |
     +--------------------------+--------------+----------------------------------------+
-    | ``sigma_tri``            |``1e-21``     | The cross-section for triplet-triplet  |
-    |                          |              | absorption (m²).                       |
-    +--------------------------+--------------+----------------------------------------+
     | ``tau``                  | ``3e-9``     | The fluorescence lifetime (s).         |
     +--------------------------+--------------+----------------------------------------+
     | ``tau_vib``              | ``1e-12``    | The vibrational relaxation (s).        |
@@ -615,13 +612,6 @@ class Fluorescence:
     | ``tau_tri``              | ``5e-6``     | The triplet state lifetime (s).        |
     +--------------------------+--------------+----------------------------------------+
     | ``qy``                   | ``0.6``      | The quantum yield (ratio).             |
-    +--------------------------+--------------+----------------------------------------+
-    | ``phy_react``            | ``488: 1e-3``| A dictionnary mapping wavelengths as   |
-    |                          | ``575: 1e-5``| integer (nm) to the probability of     |
-    |                          |              | reaction once the molecule is in       |
-    |                          |              | triplet state T_1 (ratio).             |
-    +--------------------------+--------------+----------------------------------------+
-    | ``k_isc``                | ``1e6``      | The intersystem crossing rate (s⁻¹).   |
     +--------------------------+--------------+----------------------------------------+
     | ``k0``                   | ``0``        | Coefficient of the first first order   |
     |                          |              | term of the photobleaching rate        |
@@ -644,13 +634,10 @@ class Fluorescence:
 
         self.sigma_ste = kwargs.get("sigma_ste", {575: 1e-21})
         self.sigma_abs = kwargs.get("sigma_abs", {488: 3e-20})
-        self.sigma_tri = kwargs.get("sigma_tri", 1e-21)
         self.tau = kwargs.get("tau", 3e-9)
         self.tau_vib = kwargs.get("tau_vib", 1e-12)
         self.tau_tri = kwargs.get("tau_tri", 5e-6)
         self.qy = kwargs.get("qy", 0.6)
-        self.phy_react = kwargs.get("phy_react", {488: 1e-3, 575: 1e-5})
-        self.k_isc = kwargs.get("k_isc", 0.26e6)
         self.k0 = kwargs.get("k0", 0)
         self.k1 = kwargs.get("k1", 1.3e-15) #Note: divided by (100**2)**1.4, assuming units where wrong in the paper (cm^2 instead of m^2)
         self.b = kwargs.get("b", 1.4)
@@ -675,14 +662,6 @@ class Fluorescence:
         '''
         return self.sigma_abs[int(lambda_ * 1e9)]
 
-    def get_phy_react(self, lambda_):
-        '''Return the reaction probability of the fluorescence molecule once it
-        is in triplet state T_1 given the wavelength.
-
-        :param lambda_: The STED wavelength (m).
-        :returns: The probability of reaction (ratio).
-        '''
-        return self.phy_react[int(lambda_ * 1e9)]
 
     def get_psf(self, na, datamap_pixelsize):
         '''Compute the Gaussian-shaped fluorescence PSF.
@@ -772,6 +751,7 @@ class Fluorescence:
         # Based on three level system rate equations 2.14 in [Staudt2009]_,
         # approximating that S1 is constant
         k_tri = 1/self.tau_tri
+        dwelltime += 1e-15
         k_dwell = (k_tri*dwelltime + numpy.exp(-k_tri*dwelltime) - 1) / (k_tri*dwelltime)
         mean_k_bleach = mean_k_bleach * ((1-self.triplet_dynamic_frac) + self.triplet_dynamic_frac*k_dwell)
 
