@@ -461,6 +461,7 @@ class Detector:
         # Gating
         self.det_delay = kwargs.get("det_delay", 750e-12)
         self.det_width = kwargs.get("det_width", 8e-9)
+        assert self.det_delay >= 0 #Verify the detection delay is not negative
 
     def get_detection_psf(self, lambda_, psf, na, transmission, datamap_pixelsize):
         '''Compute the detection PSF as a convolution between the fluorscence
@@ -752,6 +753,8 @@ class Microscope:
         self.detector = detector
         self.objective = objective
         self.fluo = fluo
+        self.T_det = self.detector.det_delay + self.detector.det_width #Time when the detection stop
+        assert self.T_det <= 1 / self.sted.rate # verify the detection window does not end after the period
 
         # caching system
         self.__cache = {}   # add all the elements used to compute lasers in the cache
@@ -889,21 +892,18 @@ class Microscope:
         k_s1 = 1 / self.fluo.tau
         gamma = (zeta * k_vib) / (zeta * k_s1 + k_vib)
         T = 1 / self.sted.rate
-        
-        assert self.detector.det_delay >= 0 #Verify the detection delay is not negative
-        T_det = self.detector.det_delay + self.detector.det_width
-        assert T_det<=T # verify the detection window does not end after the period
+
         
         # eta=(probability of fluorescence)/(initial probability of
         # fluorescence) given the donut
         if self.detector.det_delay < self.sted.tau: # The detection starts before the end the sted pulse
             nom = (((numpy.exp(-k_s1 * self.detector.det_delay * (1 + gamma)) \
                   + gamma * numpy.exp(-k_s1 * self.sted.tau * (1 + gamma))) / (1 + gamma)) \
-                  - numpy.exp(-k_s1 * (gamma * self.sted.tau + T_det)))
+                  - numpy.exp(-k_s1 * (gamma * self.sted.tau + self.T_det)))
         elif self.sted.tau <= self.detector.det_delay: # The detection starts not before the end of the sted pulse
             nom = numpy.exp(-k_s1 * gamma * self.sted.tau)\
                   * (numpy.exp(-k_s1 * self.detector.det_delay)\
-                  - numpy.exp(-k_s1 * T_det))
+                  - numpy.exp(-k_s1 * self.T_det))
         eta = nom/(1 - numpy.exp(-k_s1 * T))
         
 
