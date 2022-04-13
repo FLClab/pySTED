@@ -136,3 +136,5 @@ dmypy.json
 
 #Mac specific hidden files
 .DS_Store
+*.DS_Store
+pysted/.DS_Store
