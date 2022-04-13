@@ -59,6 +59,12 @@ For use by FLClab (@CERVO) authorized people
 .. [RPPhoto2015] RP Photonics Consulting GmbH (Accessed 2015).
    Optical intensity. Encyclopedia of laser physics and technology at
    <https://www.rp-photonics.com/optical_intensity.html>.
+   
+.. [Oracz2017] Oracz, Joanna, et al. (2017)
+    Photobleaching in STED Nanoscopy and Its Dependence on the Photon Flux
+    Applied for Reversible Silencing of the Fluorophore.
+    Scientific Reports, vol. 7, no. 1, Sept. 2017, p. 11354.
+    www.nature.com.
 
 .. [Staudt2009] Staudt, T. M. (2009).
    Strategies to reduce photobleaching, dark state transitions and phototoxicity
@@ -605,35 +611,37 @@ class Fluorescence:
     :param parameters: One or more parameters as described in the following
                        table, optional.
 
-    +------------------+--------------+----------------------------------------+
-    | Parameter        | Default [#]_ | Details                                |
-    +==================+==============+========================================+
-    | ``sigma_ste``    |``575: 1e-21``| A dictionnary mapping STED wavelengths |
-    |                  |              | as integer (nm) to stimulated emission |
-    |                  |              | cross-section (m²).                    |
-    +------------------+--------------+----------------------------------------+
-    | ``sigma_abs``    |``488: 3e-20``| A dictionnary mapping excitation       |
-    |                  |              | wavelengths as integer (nm) to         |
-    |                  |              | absorption cross-section (m²).         |
-    +------------------+--------------+----------------------------------------+
-    | ``sigma_tri``    |``1e-21``     | The cross-section for triplet-triplet  |
-    |                  |              | absorption (m²).                       |
-    +------------------+--------------+----------------------------------------+
-    | ``tau``          | ``3e-9``     | The fluorescence lifetime (s).         |
-    +------------------+--------------+----------------------------------------+
-    | ``tau_vib``      | ``1e-12``    | The vibrational relaxation (s).        |
-    +------------------+--------------+----------------------------------------+
-    | ``tau_tri``      | ``5e-6``     | The triplet state lifetime (s).        |
-    +------------------+--------------+----------------------------------------+
-    | ``qy``           | ``0.6``      | The quantum yield (ratio).             |
-    +------------------+--------------+----------------------------------------+
-    | ``phy_react``    | ``488: 1e-3``| A dictionnary mapping wavelengths as   |
-    |                  | ``575: 1e-5``| integer (nm) to the probability of     |
-    |                  |              | reaction once the molecule is in       |
-    |                  |              | triplet state T_1 (ratio).             |
-    +------------------+--------------+----------------------------------------+
-    | ``k_isc``        | ``1e6``      | The intersystem crossing rate (s⁻¹).   |
-    +------------------+--------------+----------------------------------------+
+    +--------------------------+--------------+----------------------------------------+
+    | Parameter                | Default [#]_ | Details                                |
+    +==========================+==============+========================================+
+    | ``sigma_ste``            |``575: 1e-21``| A dictionnary mapping STED wavelengths |
+    |                          |              | as integer (nm) to stimulated emission |
+    |                          |              | cross-section (m²).                    |
+    +--------------------------+--------------+----------------------------------------+
+    | ``sigma_abs``            |``488: 3e-20``| A dictionnary mapping excitation       |
+    |                          |              | wavelengths as integer (nm) to         |
+    |                          |              | absorption cross-section (m²).         |
+    +--------------------------+--------------+----------------------------------------+
+    | ``tau``                  | ``3e-9``     | The fluorescence lifetime (s).         |
+    +--------------------------+--------------+----------------------------------------+
+    | ``tau_vib``              | ``1e-12``    | The vibrational relaxation (s).        |
+    +--------------------------+--------------+----------------------------------------+
+    | ``tau_tri``              | ``5e-6``     | The triplet state lifetime (s).        |
+    +--------------------------+--------------+----------------------------------------+
+    | ``qy``                   | ``0.6``      | The quantum yield (ratio).             |
+    +--------------------------+--------------+----------------------------------------+
+    | ``k0``                   | ``0``        | Coefficient of the first first order   |
+    |                          |              | term of the photobleaching rate        |
+    +--------------------------+--------------+----------------------------------------+
+    | ``k1``                   | ``1.3e-15``  | Coefficient of the :math:`b^{th}` first|
+    |                          |              | order term of the photobleaching rate  |
+    +--------------------------+--------------+----------------------------------------+
+    | ``b``                    | ``1.4``      | The intersystem crossing rate (s⁻¹).   |
+    +--------------------------+--------------+----------------------------------------+
+    | ``triplet_dynamics_frac``| ``0``        | Fraction of the bleaching which is due |
+    |                          |              | to the (very long) triplets dynamics.  |
+    |                          |              | Caution: not based on rigorous theory  |
+    +--------------------------+--------------+----------------------------------------+
 
     .. [#] EGFP
     '''
@@ -643,13 +651,15 @@ class Fluorescence:
 
         self.sigma_ste = kwargs.get("sigma_ste", {575: 1e-21})
         self.sigma_abs = kwargs.get("sigma_abs", {488: 3e-20})
-        self.sigma_tri = kwargs.get("sigma_tri", 1e-21)
         self.tau = kwargs.get("tau", 3e-9)
         self.tau_vib = kwargs.get("tau_vib", 1e-12)
         self.tau_tri = kwargs.get("tau_tri", 5e-6)
         self.qy = kwargs.get("qy", 0.6)
-        self.phy_react = kwargs.get("phy_react", {488: 1e-3, 575: 1e-5})
-        self.k_isc = kwargs.get("k_isc", 0.26e6)
+        self.k0 = kwargs.get("k0", 0)
+        self.k1 = kwargs.get("k1", 1.3e-15) #Note: divided by (100**2)**1.4, assuming units where wrong in the paper (cm^2 instead of m^2)
+        self.b = kwargs.get("b", 1.4)
+        self.triplet_dynamic_frac = kwargs.get("triplet_dynamic_frac", 0)
+
 
     def get_sigma_ste(self, lambda_):
         '''Return the stimulated emission cross-section of the fluorescence
@@ -669,14 +679,6 @@ class Fluorescence:
         '''
         return self.sigma_abs[int(lambda_ * 1e9)]
 
-    def get_phy_react(self, lambda_):
-        '''Return the reaction probability of the fluorescence molecule once it
-        is in triplet state T_1 given the wavelength.
-
-        :param lambda_: The STED wavelength (m).
-        :returns: The probability of reaction (ratio).
-        '''
-        return self.phy_react[int(lambda_ * 1e9)]
 
     def get_psf(self, na, datamap_pixelsize):
         '''Compute the Gaussian-shaped fluorescence PSF.
@@ -706,21 +708,72 @@ class Fluorescence:
                                                     (fwhm,))[0]
         return numpy.real_if_close(gauss / numpy.max(gauss))
 
-    def get_photons(self, intensity):
-        e_photon = scipy.constants.c * scipy.constants.h / self.lambda_
+    def get_photons(self, intensity, lambda_=None):
+        '''Translate a light intensity to a photon flux.
+        
+        :param intensity: Light intensity (:math:`W/m^{-2}`).
+        :param lambda_: Wavelenght. If None, default to the emission wavelenght.
+        :returns: Photon flux (:math:`m^{-2}s^{-1}`).
+        '''
+        if lambda_ is None:
+            lambda_ = self.lambda_
+        e_photon = scipy.constants.c * scipy.constants.h / lambda_
         return numpy.floor(intensity / e_photon)
 
-    def get_k_bleach(self, lambda_, photons):
-        sigma_abs = self.get_sigma_abs(lambda_)
-        phy_react = self.get_phy_react(lambda_)
-        T_1 = self.k_isc * sigma_abs * photons /\
-                (sigma_abs * photons * (1/self.tau_tri + self.k_isc) +\
-                (self.tau_tri * self.tau))
-        return T_1 * photons * self.sigma_tri * phy_react
-        # if lambda_ == 488e-9:
-        #     return photons**2 * phy_react
-        # else:
-        #     return photons**1.5 * phy_react
+    def get_k_bleach(self, lambda_ex, lambda_sted, phi_ex, phi_sted, tau_sted, tau_rep, dwelltime):
+        '''Compute a spatial map of the photobleaching rate.
+
+        :param lambda_ex: Wavelength of the the excitation beam (m).
+        :param lambda_sted: Wavelength of the STED beam (m).
+        :param phi_ex: Spatial map of the excitation photon flux (:math:`m^{-2}s^{-1}`).
+        :param phi_sted: Spatial map of the STED photon flux (:math:`m^{-2}s^{-1}`).
+        :param tau_sted: STED pulse temporal width (s).
+        :param tau_rep: Period of the lasers (s).
+        :param dwelltime: Time continuously passed centered on a pixel (s).
+        :returns: A 2D array of the bleaching rate d(Bleached)/dt (:math:`s^{-1}`).
+
+        The photobleaching rate for a 4 level system from [Oracz2017]_ is used. The population of S1+S1*, from where the photobleaching happen, was estimated using the simplified model used for eq. 3 in [Leutenegger2010]_. The triplet dynamic (dependent on the dwelltime) was estimated from the tree level system rate equations 2.14 in [Staudt2009]_, approximating that the population S1 is constant.
+        '''
+
+        exc_lambda_ = numpy.round(lambda_ex/1e-9)
+        sted_lambda_ = numpy.round(lambda_sted/1e-9)
+        phi_sted = phi_sted * tau_rep/tau_sted
+                
+        # Constants used for [Leutenegger2010] eq. 3
+        sigma_ste = self.sigma_ste[sted_lambda_]
+        phi_s = 1 / (self.tau * sigma_ste) # Saturation flux, at which k_sted = k_s1
+        zeta = phi_sted / phi_s # Saturation factor => k_sted = zeta*k_ex
+        k_vib = 1 / self.tau_vib
+        k_s1 = 1 / self.tau
+        gamma = (zeta * k_vib) / (zeta * k_s1 + k_vib) # Effective saturation factor (takes
+        # into account rexcitation of S0_star by sted beam) => S1 decay rate = k1*(1-gamma)
+        
+        # Excited fluorophores population assuming an infinitely small
+        # pulse and that SO=1 is constant.
+        S1_ini = self.sigma_abs[exc_lambda_] * phi_ex * tau_rep
+        I_sted = phi_sted * (scipy.constants.c * scipy.constants.h / lambda_sted)
+        
+        # Suppl. Eq. 16 from Oracz et al.
+        # k is defined by Suppl. Eq. 10 from Oracz et al.: d(Bleached)/dt = k * (S1+S1*)
+        k = self.k0*I_sted + self.k1*I_sted**self.b
+        
+        # Now, S1 <- S1+S1* (put the two sublevels together, like in [Leutenegger2010])
+        # Integral from 0 to tau_sted of k*S1, where S1 = exp(-k_s1*t(1+gamma))
+        B =  k * S1_ini * (1 - numpy.exp(-k_s1*tau_sted*(1+gamma))) / (k_s1*(1+gamma))
+        
+        # The agerage bleaching rate over a period
+        mean_k_bleach = B / tau_rep
+        
+        # Add a very approximate triplet dynamic, if any.
+        # Based on three level system rate equations 2.14 in [Staudt2009]_,
+        # approximating that S1 is constant
+        k_tri = 1/self.tau_tri
+        dwelltime += 1e-15
+        k_dwell = (k_tri*dwelltime + numpy.exp(-k_tri*dwelltime) - 1) / (k_tri*dwelltime)
+        mean_k_bleach = mean_k_bleach * ((1-self.triplet_dynamic_frac) + self.triplet_dynamic_frac*k_dwell)
+
+        return mean_k_bleach
+        
 
 
 class Microscope:
