@@ -91,7 +91,7 @@ class DyMINMicroscope(base.Microscope):
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
                                 _pdt, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted)
+                                row, col, h, w, prob_ex, prob_sted, None, None)
                 sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
 
         if update and bleach:
@@ -198,7 +198,7 @@ class DyMINRESCueMicroscope(base.Microscope):
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
                                 _pdt, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted)
+                                row, col, h, w, prob_ex, prob_sted, None, None)
                 sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
 
         if update and bleach:
@@ -308,7 +308,7 @@ class RESCueMicroscope(base.Microscope):
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
                                 _pdt, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted)
+                                row, col, h, w, prob_ex, prob_sted, None, None)
                 sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
 
         if update and bleach:
