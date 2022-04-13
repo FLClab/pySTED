@@ -139,14 +139,14 @@ class GaussianBeam:
         where :math:`z = 0`, along with some equations from [Deng2010]_, and
         [RPPhoto2015]_.
 
-        :param power: The power of the beam (W).
+        :param power: The time averaged power of the beam (W).
         :param f: The focal length of the objective (m).
         :param n: The refractive index of the objective.
         :param na: The numerical aperture of the objective.
         :param transmission: The transmission ratio of the objective (given the
                              wavelength of the excitation beam).
         :param datamap_pixelsize: The size of an element in the intensity matrix (m).
-        :returns: A 2D array.
+        :returns: A 2D array of the time averaged intensity (W/m^2).
         '''
 
         def fun1(theta, kr):
@@ -246,13 +246,17 @@ class DonutBeam:
     | ``beta``         | ``pi/4``     | The beam incident angle, in            |
     |                  |              | :math:`[0, \pi/2]` (rad).              |
     +------------------+--------------+----------------------------------------+
-    | ``tau``          | ``200e-12``  | The beam pulse length (s).             |
+    | ``tau``          | ``400e-12``  | The beam pulse length (s).             |
     +------------------+--------------+----------------------------------------+
-    | ``rate``         | ``80e6``     | The beam pulse rate (Hz).              |
+    | ``rate``         | ``40e6``     | The beam pulse rate (Hz).              |
     +------------------+--------------+----------------------------------------+
     | ``zero_residual``| ``0``        | The ratio between minimum and maximum  |
     |                  |              | intensity (ratio).                     |
     +------------------+--------------+----------------------------------------+
+    | ``anti_stoke``   | ``True``     | Presence of anti-stoke (sted beam)     |
+    |                  |              | excitation                             |
+    +------------------+--------------+----------------------------------------+
+            
 
     Polarization :
         * :math:`\pi/2` is left-circular
@@ -264,9 +268,10 @@ class DonutBeam:
         self.lambda_ = lambda_
         self.polarization = kwargs.get("polarization", numpy.pi/2)
         self.beta = kwargs.get("beta", numpy.pi/4)
-        self.tau = kwargs.get("tau", 200e-12)
-        self.rate = kwargs.get("rate", 80e6)
+        self.tau = kwargs.get("tau", 400e-12)
+        self.rate = kwargs.get("rate", 40e6)
         self.zero_residual = kwargs.get("zero_residual", 0)
+        self.anti_stoke = kwargs.get("anti_stoke", True)
 
     # FIXME: pass Objective object instead of f, n, na, transmission
     def get_intensity(self, power, f, n, na, transmission, datamap_pixelsize):
@@ -282,6 +287,7 @@ class DonutBeam:
         :param transmission: The transmission ratio of the objective (given the
                              wavelength of the STED beam).
         :param datamap_pixelsize: The size of an element in the intensity matrix (m).
+        :returns: A 2D array of the time averaged intensity (W/m^2).
         '''
 
         def fun1(theta, kr):
@@ -432,6 +438,12 @@ class Detector:
     |                  |              | is the ratio of collected photons that |
     |                  |              | are perceived by the detector (ratio). |
     +------------------+--------------+----------------------------------------+
+    | ``det_delay``    | ``750e-12``  | Delay between the beginning of a period|
+    |                  |              | the start of the detection             |
+    +------------------+--------------+----------------------------------------+
+    | ``det_width``    | ``8e-9``     | Detection duration                     |
+    +------------------+--------------+----------------------------------------+
+
 
     .. [#] The actual number is sampled from a poisson distribution with given
        mean.
@@ -451,6 +463,11 @@ class Detector:
         # photon detection
         self.pcef = kwargs.get("pcef", 0.1)
         self.pdef = kwargs.get("pdef", 0.5)
+        
+        # Gating
+        self.det_delay = kwargs.get("det_delay", 750e-12)
+        self.det_width = kwargs.get("det_width", 8e-9)
+        assert self.det_delay >= 0 #Verify the detection delay is not negative
 
     def get_detection_psf(self, lambda_, psf, na, transmission, datamap_pixelsize):
         '''Compute the detection PSF as a convolution between the fluorscence
@@ -489,7 +506,7 @@ class Detector:
 
         return ra_flipped
 
-    def get_signal(self, photons, dwelltime, seed=None):
+    def get_signal(self, photons, dwelltime, rate, seed=None):
         '''Compute the detected signal (in photons) given the number of emitted
         photons and the time spent by the detector.
 
@@ -519,8 +536,8 @@ class Detector:
         if self.noise:
             signal = numpy.random.poisson(signal, signal.shape)
         if self.background > 0:
-            # background counts per second
-            cts = numpy.random.poisson(self.background, signal.shape)
+            # background counts per second, accounting for the detection gating
+            cts = numpy.random.poisson(self.background * self.det_width * rate * dwelltime, signal.shape)
             # background counts during dwell time
             # cts = (cts * dwelltime).astype(numpy.int64)
             """
@@ -537,8 +554,8 @@ class Detector:
 
             signal += cts
         if self.darkcount > 0:
-            # dark counts per second
-            cts = numpy.random.poisson(self.darkcount, signal.shape)
+            # Dark counts per second, accounting for the detection gating
+            cts = numpy.random.poisson(self.darkcount * self.det_width * rate * dwelltime, signal.shape)
             # dark counts during dwell time ***DISABLING THIS LINE, see explanation in "if self.background > 0"
             # cts = (cts * dwelltime).astype(numpy.int64)
             signal += cts
@@ -789,6 +806,8 @@ class Microscope:
         self.detector = detector
         self.objective = objective
         self.fluo = fluo
+        self.T_det = self.detector.det_delay + self.detector.det_width #Time when the detection stop
+        assert self.T_det <= 1 / self.sted.rate # verify the detection window does not end after the period
 
         # caching system
         self.__cache = {}   # add all the elements used to compute lasers in the cache
@@ -892,16 +911,20 @@ class Microscope:
         self.__cache = {}
 
     def get_effective(self, datamap_pixelsize, p_ex, p_sted):
-        '''Compute the detected signal given some molecules disposition.
+        '''Computes the effective point spread function, defined here as the spatial map of time averaged detected power per molecule, taking the sted de-excitation, anti-stoke excitation and the detector properties (detection psf and gating) into account.
 
         :param datamap_pixelsize: The size of one pixel of the simulated image (m).
-        :param p_ex: The power of the depletion beam (W).
+        :param p_ex: The time averaged power of the excitation beam (W).
         :param p_sted: The power of the STED beam (W).
         :param data_pixelsize: The size of one pixel of the raw data (m).
-        :returns: A 2D array of the effective intensity (W) of a single molecule.
+        :returns: A 2D array of the intensity (W/molecule)
 
         The technique follows the method and equations described in
-        [Willig2006]_, [Leutenegger2010]_ and [Holler2011]_.
+        [Willig2006]_, [Leutenegger2010]_ and [Holler2011]_. Notable approximations from [Leutenegger2010]_ include the assumption that the excitation pulse width is infinitely small and that the sted pulse is of perfect rectangular shape and starts at the beginning of the period. Also, a two energy levels (plus their vibrational sub-levels) with two rate equations is used. To include the vibrational decay dynamics (parametrized by the vibrational decay rate), an effective saturation factor is used.
+        
+        To account for the detection gating, the bounds in the integral from [Leutenegger2010]_ eq. 3 were adjusted.
+        
+        Anti-stokes excitation at the beginnning of the period was by added by modeling the sted beam as an infinitely small pulse, similarly to the excitation pulse. This leads to an underestimation of its effect on the detected signal, since excitation by the STED beam near the end of the STED beam, for example, would have less time to be depleted.
         '''
 
         h, c = scipy.constants.h, scipy.constants.c
@@ -915,20 +938,37 @@ class Microscope:
         sigma_ste = self.fluo.get_sigma_ste(self.sted.lambda_)
         i_s = (h * c) / (self.fluo.tau * self.sted.lambda_ * sigma_ste)
 
-        # [Leutenegger2010] eq. 3
+
+        # Equivalent of [Leutenegger2010] eq. 3, but with detector gating parameters to modify the bounds of the integral
         zeta = i_sted / i_s
         k_vib = 1 / self.fluo.tau_vib
         k_s1 = 1 / self.fluo.tau
         gamma = (zeta * k_vib) / (zeta * k_s1 + k_vib)
         T = 1 / self.sted.rate
-        # probability of fluorescence given the donut
-        eta = (((1 + gamma * numpy.exp(-k_s1 * self.sted.tau * (1 + gamma))) / (1 + gamma)) -
-              numpy.exp(-k_s1 * (gamma * self.sted.tau + T))) / (1 - numpy.exp(-k_s1 * T))
 
-        # molecular brigthness [Holler2011]
+        
+        # eta=(probability of fluorescence)/(initial probability of
+        # fluorescence) given the donut
+        if self.detector.det_delay < self.sted.tau: # The detection starts before the end the sted pulse
+            nom = (((numpy.exp(-k_s1 * self.detector.det_delay * (1 + gamma)) \
+                  + gamma * numpy.exp(-k_s1 * self.sted.tau * (1 + gamma))) / (1 + gamma)) \
+                  - numpy.exp(-k_s1 * (gamma * self.sted.tau + self.T_det)))
+        elif self.sted.tau <= self.detector.det_delay: # The detection starts not before the end of the sted pulse
+            nom = numpy.exp(-k_s1 * gamma * self.sted.tau)\
+                  * (numpy.exp(-k_s1 * self.detector.det_delay)\
+                  - numpy.exp(-k_s1 * self.T_det))
+        eta = nom/(1 - numpy.exp(-k_s1 * T))
+        
+
+        # molecular brigthness [Holler2011]. This would be the spatial map of
+        # time averaged power emitted per molecule if there was no deexcitation
+        # caused by the depletion beam
         sigma_abs = self.fluo.get_sigma_abs(self.excitation.lambda_)
         excitation_probability = sigma_abs * i_ex * self.fluo.qy
-
+        if self.sted.anti_stoke:
+            sigma_abs_sted = self.fluo.get_sigma_abs(self.sted.lambda_)
+            excitation_probability += sigma_abs_sted * (i_sted * self.sted.tau * self.sted.rate) * self.fluo.qy
+            
         # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
 
@@ -1034,14 +1074,14 @@ class Microscope:
         photons = self.fluo.get_photons(acquired_intensity)
 
         if photons.shape == pdt.shape:
-            returned_acquired_photons = self.detector.get_signal(photons, pdt, seed=seed)
+            returned_acquired_photons = self.detector.get_signal(photons, pdt, self.sted.rate, seed=seed)
         else:
             pixeldwelltime_reshaped = numpy.zeros((int(numpy.ceil(pdt.shape[0] / ratio)),
                                                    int(numpy.ceil(pdt.shape[1] / ratio))))
             new_pdt_plist = utils.pixel_sampling(pixeldwelltime_reshaped, mode='all')
             for (row, col) in new_pdt_plist:
                 pixeldwelltime_reshaped[row, col] = pdt[row * ratio, col * ratio]
-            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped, seed=seed)
+            returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped, self.sted.rate, seed=seed)
 
         unbleached_whole_datamap = numpy.copy(datamap.whole_datamap)
 
@@ -1119,7 +1159,7 @@ class Microscope:
             col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
 
             pixel_intensity = numpy.sum(effective * datamap.whole_datamap[row_slice, col_slice])
-            pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col])
+            pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col], self.sted.rate)
             photons_per_sec = pixel_photons / pdt[row, col]
             lt_time_photons = photons_per_sec * ltr * pdt[row, col]
             if lower_th is None:
