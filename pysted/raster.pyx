@@ -56,7 +56,7 @@ def raster_func_c_self_bleach_split_g(
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef numpy.ndarray[int, ndim=2] bleached_datamap
     cdef FLOATDTYPE_t duty_cycle
-    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] step
+    cdef FLOATDTYPE_t step
 
     """
     raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
@@ -74,6 +74,24 @@ def raster_func_c_self_bleach_split_g(
         srand(seed)
 
     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
+    # Calculate the bleaching rate once if the scanning powers and dwelltimes do not vary to
+    # increase speed
+    uniform_ex = numpy.all(p_ex_roi == p_ex_roi[0, 0])
+    uniform_sted = numpy.all(p_sted_roi == p_sted_roi[0, 0])
+    uniform_pdt = numpy.all(pdt_roi == pdt_roi[0, 0])
+    if uniform_sted and uniform_ex and uniform_pdt:
+        p_ex = p_ex_roi[0, 0]
+        p_sted = p_sted_roi[0, 0]
+        step = pdt_roi[0, 0]
+        photons_ex = self.fluo.get_photons(i_ex * p_ex, self.excitation.lambda_)
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle, self.sted.lambda_)
+        k_sted = self.fluo.get_k_bleach(self.excitation.lambda_, self.sted.lambda_, photons_ex, photons_sted, self.sted.tau, 1/self.sted.rate, step,)
+        k_ex = k_sted * 0.
+    else:
+        k_sted = None
+        k_ex = None
+
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
 
@@ -101,7 +119,7 @@ def raster_func_c_self_bleach_split_g(
 
         if bleach:
             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, prob_ex,
-                        prob_sted)
+                        prob_sted, k_sted, k_ex)
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function

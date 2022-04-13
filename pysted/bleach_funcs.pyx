@@ -228,9 +228,11 @@ def default_update_survival_probabilities(object self,
                    int h,
                    int w,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_ex,
-                   numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted):
+                   numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted,
+                   numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex=None,
+                   numpy.ndarray[FLOATDTYPE_t, ndim=2] k_sted=None,):
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
-    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
+    #cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef int s, sprime, t, tprime
     cdef float prob
     cdef float rsamp
@@ -241,12 +243,13 @@ def default_update_survival_probabilities(object self,
     cdef float duty_cycle
 
     maxval = float(RAND_MAX)
-
-    photons_ex = self.fluo.get_photons(i_ex * p_ex)
-    k_ex = self.fluo.get_k_bleach(self.excitation.lambda_, photons_ex)
-    duty_cycle = self.sted.tau * self.sted.rate
-    photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle)
-    k_sted = self.fluo.get_k_bleach(self.sted.lambda_, photons_sted)
+    if k_sted is None:
+        photons_ex = self.fluo.get_photons(i_ex * p_ex, self.excitation.lambda_)
+        duty_cycle = self.sted.tau * self.sted.rate
+        photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle, self.sted.lambda_)
+        k_sted = self.fluo.get_k_bleach(self.excitation.lambda_, self.sted.lambda_, photons_ex, photons_sted, self.sted.tau, 1/self.sted.rate, step, )
+    if k_ex is None:
+        k_ex = k_sted * 0.
 
     for key in bleached_sub_datamaps_dict:
         sprime = 0
