@@ -18,7 +18,7 @@ ext_modules = [Extension("pysted.cUtils", ["pysted/cUtils.c"]),
                Extension("pysted.bleach_funcs", ["pysted/bleach_funcs.pyx"])]
 
 setup(name="pysted",
-      version=pysted.__revision__,
+      version=".".join((pysted.__version__, pysted.__revision__)),
       description="STED image simulator in Python",
       author=pysted.__author__,
       packages=["pysted"],
