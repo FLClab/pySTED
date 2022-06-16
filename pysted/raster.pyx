@@ -10,10 +10,10 @@ cimport cython
 from libc.math cimport exp
 from libc.stdlib cimport rand, srand, RAND_MAX
 
-INTDTYPE = numpy.int32
+INTDTYPE = numpy.int64
 FLOATDTYPE = numpy.float64
 
-ctypedef numpy.int32_t INTDTYPE_t
+ctypedef numpy.int64_t INTDTYPE_t
 ctypedef numpy.float64_t FLOATDTYPE_t
 
 
@@ -34,7 +34,7 @@ def raster_func_c_self_bleach_split_g(
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_ex_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_sted_roi,
         bint bleach,   # bint is a bool
-        dict bleached_sub_datamaps_dict,
+        numpy.ndarray[INTDTYPE_t, ndim=3] bleached_sub_datamaps_dict,
         int seed,
         object bleach_func,   # uncertain of the type for a cfunc, but this seems to be working so ???
         object sample_func,
@@ -102,9 +102,9 @@ def raster_func_c_self_bleach_split_g(
         effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
         # i think resetting each time ensures that we are acquiring on the dmap while it is
         # being bleached. Either way, it doesn't affect speed, so I will keep it here
-        bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=numpy.int32)
-        for key in bleached_sub_datamaps_dict:
-            bleached_datamap += bleached_sub_datamaps_dict[key]
+        # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict[0].shape, dtype=numpy.int32)
+        # for key in bleached_sub_datamaps_dict:
+        bleached_datamap = numpy.sum(bleached_sub_datamaps_dict, axis=0).astype(numpy.int32)
 
         value = 0.0
         sprime = 0

@@ -59,7 +59,7 @@ For use by FLClab (@CERVO) authorized people
 .. [RPPhoto2015] RP Photonics Consulting GmbH (Accessed 2015).
    Optical intensity. Encyclopedia of laser physics and technology at
    <https://www.rp-photonics.com/optical_intensity.html>.
-   
+
 .. [Oracz2017] Oracz, Joanna, et al. (2017)
     Photobleaching in STED Nanoscopy and Its Dependence on the Photon Flux
     Applied for Reversible Silencing of the Fluorophore.
@@ -256,7 +256,7 @@ class DonutBeam:
     | ``anti_stoke``   | ``True``     | Presence of anti-stoke (sted beam)     |
     |                  |              | excitation                             |
     +------------------+--------------+----------------------------------------+
-            
+
 
     Polarization :
         * :math:`\pi/2` is left-circular
@@ -463,7 +463,7 @@ class Detector:
         # photon detection
         self.pcef = kwargs.get("pcef", 0.1)
         self.pdef = kwargs.get("pdef", 0.5)
-        
+
         # Gating
         self.det_delay = kwargs.get("det_delay", 750e-12)
         self.det_width = kwargs.get("det_width", 8e-9)
@@ -710,7 +710,7 @@ class Fluorescence:
 
     def get_photons(self, intensity, lambda_=None):
         '''Translate a light intensity to a photon flux.
-        
+
         :param intensity: Light intensity (:math:`W/m^{-2}`).
         :param lambda_: Wavelenght. If None, default to the emission wavelenght.
         :returns: Photon flux (:math:`m^{-2}s^{-1}`).
@@ -738,7 +738,7 @@ class Fluorescence:
         exc_lambda_ = numpy.round(lambda_ex/1e-9)
         sted_lambda_ = numpy.round(lambda_sted/1e-9)
         phi_sted = phi_sted * tau_rep/tau_sted
-                
+
         # Constants used for [Leutenegger2010] eq. 3
         sigma_ste = self.sigma_ste[sted_lambda_]
         phi_s = 1 / (self.tau * sigma_ste) # Saturation flux, at which k_sted = k_s1
@@ -747,23 +747,23 @@ class Fluorescence:
         k_s1 = 1 / self.tau
         gamma = (zeta * k_vib) / (zeta * k_s1 + k_vib) # Effective saturation factor (takes
         # into account rexcitation of S0_star by sted beam) => S1 decay rate = k1*(1-gamma)
-        
+
         # Excited fluorophores population assuming an infinitely small
         # pulse and that SO=1 is constant.
         S1_ini = self.sigma_abs[exc_lambda_] * phi_ex * tau_rep
         I_sted = phi_sted * (scipy.constants.c * scipy.constants.h / lambda_sted)
-        
+
         # Suppl. Eq. 16 from Oracz et al.
         # k is defined by Suppl. Eq. 10 from Oracz et al.: d(Bleached)/dt = k * (S1+S1*)
         k = self.k0*I_sted + self.k1*I_sted**self.b
-        
+
         # Now, S1 <- S1+S1* (put the two sublevels together, like in [Leutenegger2010])
         # Integral from 0 to tau_sted of k*S1, where S1 = exp(-k_s1*t(1+gamma))
         B =  k * S1_ini * (1 - numpy.exp(-k_s1*tau_sted*(1+gamma))) / (k_s1*(1+gamma))
-        
+
         # The agerage bleaching rate over a period
         mean_k_bleach = B / tau_rep
-        
+
         # Add a very approximate triplet dynamic, if any.
         # Based on three level system rate equations 2.14 in [Staudt2009]_,
         # approximating that S1 is constant
@@ -773,7 +773,7 @@ class Fluorescence:
         mean_k_bleach = mean_k_bleach * ((1-self.triplet_dynamic_frac) + self.triplet_dynamic_frac*k_dwell)
 
         return mean_k_bleach
-        
+
 
 
 class Microscope:
@@ -921,9 +921,9 @@ class Microscope:
 
         The technique follows the method and equations described in
         [Willig2006]_, [Leutenegger2010]_ and [Holler2011]_. Notable approximations from [Leutenegger2010]_ include the assumption that the excitation pulse width is infinitely small and that the sted pulse is of perfect rectangular shape and starts at the beginning of the period. Also, a two energy levels (plus their vibrational sub-levels) with two rate equations is used. To include the vibrational decay dynamics (parametrized by the vibrational decay rate), an effective saturation factor is used.
-        
+
         To account for the detection gating, the bounds in the integral from [Leutenegger2010]_ eq. 3 were adjusted.
-        
+
         Anti-stokes excitation at the beginnning of the period was by added by modeling the sted beam as an infinitely small pulse, similarly to the excitation pulse. This leads to an underestimation of its effect on the detected signal, since excitation by the STED beam near the end of the STED beam, for example, would have less time to be depleted.
         '''
 
@@ -946,7 +946,7 @@ class Microscope:
         gamma = (zeta * k_vib) / (zeta * k_s1 + k_vib)
         T = 1 / self.sted.rate
 
-        
+
         # eta=(probability of fluorescence)/(initial probability of
         # fluorescence) given the donut
         if self.detector.det_delay < self.sted.tau: # The detection starts before the end the sted pulse
@@ -958,7 +958,7 @@ class Microscope:
                   * (numpy.exp(-k_s1 * self.detector.det_delay)\
                   - numpy.exp(-k_s1 * self.T_det))
         eta = nom/(1 - numpy.exp(-k_s1 * T))
-        
+
 
         # molecular brigthness [Holler2011]. This would be the spatial map of
         # time averaged power emitted per molecule if there was no deexcitation
@@ -968,7 +968,7 @@ class Microscope:
         if self.sted.anti_stoke:
             sigma_abs_sted = self.fluo.get_sigma_abs(self.sted.lambda_)
             excitation_probability += sigma_abs_sted * (i_sted * self.sted.tau * self.sted.rate) * self.fluo.qy
-            
+
         # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
 
@@ -1064,10 +1064,12 @@ class Microscope:
             for idx, step in enumerate(steps):
                 steps[idx] = utils.float_to_array_verifier(step, datamap_roi.shape)
 
+        bleached_sub_datamaps = numpy.stack([value for key, value in bleached_sub_datamaps_dict.items()], axis=0)
+
         raster_func = raster.raster_func_c_self_bleach_split_g
         sample_func = bleach_funcs.sample_molecules
-        raster_func(self, datamap, acquired_intensity, numpy.array(pixel_list).astype(numpy.int32), ratio, rows_pad,
-                    cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleach, bleached_sub_datamaps_dict,
+        raster_func(self, datamap, acquired_intensity, numpy.array(pixel_list), ratio, rows_pad,
+                    cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleach, bleached_sub_datamaps,
                     seed, bleach_func, sample_func, steps)
 
         # Bleaching is done, the rest is for intensity calculation

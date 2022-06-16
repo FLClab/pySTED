@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -150,8 +151,10 @@ conf_acq, conf_bleached, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsi
                                                               bleach=True, update=True)
 conf_acq2, conf_bleached2, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
                                                               bleach=True, update=True)
+start = time.time()
 sted_acq, sted_bleached, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
                                                               bleach=True, update=True)
+print(time.time() - start)
 sted_acq2, sted_bleached2, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
                                                               bleach=True, update=True)
 
