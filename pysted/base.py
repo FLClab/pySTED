@@ -1072,6 +1072,9 @@ class Microscope:
                     cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleach, bleached_sub_datamaps,
                     seed, bleach_func, sample_func, steps)
 
+        for i, key in enumerate(bleached_sub_datamaps_dict.keys()):
+            bleached_sub_datamaps_dict[key] = bleached_sub_datamaps[i]
+
         # Bleaching is done, the rest is for intensity calculation
         photons = self.fluo.get_photons(acquired_intensity)
 

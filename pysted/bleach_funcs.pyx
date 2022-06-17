@@ -254,7 +254,7 @@ def default_update_survival_probabilities(object self,
         k_ex = k_sted * 0.
 
     # for key in range(len(bleached_sub_datamaps_dict)):
-    for s in prange(row, row + h, nogil=True):
+    for s in prange(row, row + h, nogil=True, schedule="static"):
         sprime = s - row
         for t in range(col, col + w):
             tprime = t - col
@@ -286,7 +286,7 @@ def sample_molecules(object self,
     maxval = float(RAND_MAX)
 
     for key in range(bleached_sub_datamaps_dict.shape[0]):
-        for s in range(row, row + h):
+        for s in prange(row, row + h, nogil=True, schedule="dynamic"):
             for t in range(col, col + w):
                 current = bleached_sub_datamaps_dict[key, s, t]
                 if current > 0:

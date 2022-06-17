@@ -51,7 +51,9 @@ class DyMINMicroscope(base.Microscope):
         if isinstance(indices, type(None)):
             indices = 0   # VÉRIF À QUOI INDICES SERT?
         for key in datamap.sub_datamaps_dict:
-            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key])
+            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key]).astype(int)
+
+        bleached_sub_datamaps = numpy.stack([value for key, value in bleached_sub_datamaps_dict.items()], axis=0)
 
         for (row, col) in pixel_list:
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
@@ -88,11 +90,12 @@ class DyMINMicroscope(base.Microscope):
                     returned_photons[row, col] += pixel_photons
 
             if bleach:
+
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
-                                _pdt, bleached_sub_datamaps_dict,
+                                _pdt, bleached_sub_datamaps,
                                 row, col, h, w, prob_ex, prob_sted, None, None)
-                sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
+                sample_func(self, bleached_sub_datamaps, row, col, h, w, prob_ex, prob_sted)
 
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
