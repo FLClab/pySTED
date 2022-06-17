@@ -54,6 +54,7 @@ class DyMINMicroscope(base.Microscope):
             bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key]).astype(int)
 
         bleached_sub_datamaps = numpy.stack([value for key, value in bleached_sub_datamaps_dict.items()], axis=0)
+        datamap_shapes = [value.shape[0] if value.ndim == 3 else 1 for key, value in bleached_sub_datamaps_dict.items()]
 
         for (row, col) in pixel_list:
             row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
@@ -68,9 +69,10 @@ class DyMINMicroscope(base.Microscope):
                 h, w = effective.shape
 
                 # Uses the bleached datamap
-                bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=numpy.int32)
-                for key in bleached_sub_datamaps_dict:
-                    bleached_datamap += bleached_sub_datamaps_dict[key]
+                # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=numpy.int32)
+                # for key in bleached_sub_datamaps_dict:
+                #     bleached_datamap += bleached_sub_datamaps_dict[key]
+                bleached_datamap = numpy.sum(bleached_sub_datamaps, axis=0)
 
                 pixel_intensity = numpy.sum(effective * bleached_datamap[row_slice, col_slice])
                 pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time, self.sted.rate)
@@ -96,6 +98,12 @@ class DyMINMicroscope(base.Microscope):
                                 _pdt, bleached_sub_datamaps,
                                 row, col, h, w, prob_ex, prob_sted, None, None)
                 sample_func(self, bleached_sub_datamaps, row, col, h, w, prob_ex, prob_sted)
+
+        tmp = {}
+        for i, (key, values) in enumerate(bleached_sub_datamaps_dict.items()):
+            start = sum(datamap_shapes[:i])
+            tmp[key] = bleached_sub_datamaps[start : start + values.shape[0]].squeeze()
+        bleached_sub_datamaps_dict = tmp
 
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict

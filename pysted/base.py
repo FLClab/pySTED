@@ -1065,15 +1065,13 @@ class Microscope:
                 steps[idx] = utils.float_to_array_verifier(step, datamap_roi.shape)
 
         bleached_sub_datamaps = numpy.stack([value for key, value in bleached_sub_datamaps_dict.items()], axis=0)
+        datamap_shapes = [value.shape[0] if value.ndim == 3 else 1 for key, value in bleached_sub_datamaps_dict.items()]
 
         raster_func = raster.raster_func_c_self_bleach_split_g
         sample_func = bleach_funcs.sample_molecules
         raster_func(self, datamap, acquired_intensity, numpy.array(pixel_list), ratio, rows_pad,
                     cols_pad, laser_pad, prob_ex, prob_sted, pdt, p_ex, p_sted, bleach, bleached_sub_datamaps,
                     seed, bleach_func, sample_func, steps)
-
-        for i, key in enumerate(bleached_sub_datamaps_dict.keys()):
-            bleached_sub_datamaps_dict[key] = bleached_sub_datamaps[i]
 
         # Bleaching is done, the rest is for intensity calculation
         photons = self.fluo.get_photons(acquired_intensity)
@@ -1089,6 +1087,12 @@ class Microscope:
             returned_acquired_photons = self.detector.get_signal(photons, pixeldwelltime_reshaped, self.sted.rate, seed=seed)
 
         unbleached_whole_datamap = numpy.copy(datamap.whole_datamap)
+
+        tmp = {}
+        for i, (key, values) in enumerate(bleached_sub_datamaps_dict.items()):
+            start = sum(datamap_shapes[:i])
+            tmp[key] = bleached_sub_datamaps[start : start + values.shape[0]].squeeze()
+        bleached_sub_datamaps_dict = tmp
 
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
