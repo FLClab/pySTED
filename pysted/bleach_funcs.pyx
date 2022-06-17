@@ -286,7 +286,7 @@ def sample_molecules(object self,
     maxval = float(RAND_MAX)
 
     for key in range(bleached_sub_datamaps_dict.shape[0]):
-        for s in prange(row, row + h, nogil=True, schedule="dynamic"):
+        for s in range(row, row + h):
             for t in range(col, col + w):
                 current = bleached_sub_datamaps_dict[key, s, t]
                 if current > 0:
