@@ -9,6 +9,7 @@ cimport cython
 
 from libc.math cimport exp
 from libc.stdlib cimport rand, srand, RAND_MAX
+from cython.parallel import prange
 
 INTDTYPE = numpy.int64
 FLOATDTYPE = numpy.float64
@@ -40,24 +41,6 @@ def raster_func_c_self_bleach_split_g(
         object sample_func,
         list steps
 ):
-    cdef int row, col
-    cdef int sprime, tprime
-    cdef int h, w
-    cdef int current
-    cdef int max_len = len(pixel_list)
-    cdef FLOATDTYPE_t value
-    cdef int sampled_value
-    cdef int prob
-    cdef int rsamp
-    cdef FLOATDTYPE_t pdt, p_ex, p_sted
-    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] pre_effective, effective
-    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
-    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex, i_sted
-    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
-    cdef numpy.ndarray[int, ndim=2] bleached_datamap
-    cdef FLOATDTYPE_t duty_cycle
-    cdef FLOATDTYPE_t step
-
     """
     raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
     excitation power (p_ex) AND/OR sted power (p_sted) vary through the sample. This function thus requires these
@@ -66,6 +49,24 @@ def raster_func_c_self_bleach_split_g(
     Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
     components of the datamap are bleached separately).
     """
+
+    cdef int row, col, s, t
+    cdef int sprime, tprime
+    cdef int h, w
+    cdef int current
+    cdef int max_len = len(pixel_list)
+    cdef float value
+    cdef int sampled_value
+    cdef int prob
+    cdef int rsamp
+    cdef FLOATDTYPE_t pdt, p_ex, p_sted
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] pre_effective, effective
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] i_ex, i_sted
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
+    cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] bleached_datamap
+    cdef FLOATDTYPE_t duty_cycle
+    cdef FLOATDTYPE_t step
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -104,16 +105,18 @@ def raster_func_c_self_bleach_split_g(
         # being bleached. Either way, it doesn't affect speed, so I will keep it here
         # bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict[0].shape, dtype=numpy.int32)
         # for key in bleached_sub_datamaps_dict:
-        bleached_datamap = numpy.sum(bleached_sub_datamaps_dict, axis=0).astype(numpy.int32)
+        bleached_datamap = numpy.sum(bleached_sub_datamaps_dict, axis=0).astype(numpy.float64)
 
-        value = 0.0
-        sprime = 0
-        for s in range(row, row + h):
-            tprime = 0
+        value = 0.
+        # sprime = 0
+        for s in prange(row, row + h, nogil=True, schedule="static"):
+            sprime = s - row
+            # tprime = 0
             for t in range(col, col + w):
+                tprime = t - col
                 value += effective[sprime, tprime] * bleached_datamap[s, t]
-                tprime += 1
-            sprime += 1
+                # tprime += 1
+            # sprime += 1
         # acquired_intensity[int(row / ratio), int(col / ratio)] = value
         acquired_intensity[int(row / ratio), int(col / ratio)] += value
 

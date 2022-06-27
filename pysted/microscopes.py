@@ -102,7 +102,8 @@ class DyMINMicroscope(base.Microscope):
         tmp = {}
         for i, (key, values) in enumerate(bleached_sub_datamaps_dict.items()):
             start = sum(datamap_shapes[:i])
-            tmp[key] = bleached_sub_datamaps[start : start + values.shape[0]].squeeze()
+            delta = values.shape[0] if values.ndim == 3 else 1
+            tmp[key] = bleached_sub_datamaps[start : start + delta].squeeze()
         bleached_sub_datamaps_dict = tmp
 
         if update and bleach:
