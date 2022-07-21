@@ -71,7 +71,7 @@ class DyMINMicroscope(base.Microscope):
                     bleached_datamap += bleached_sub_datamaps_dict[key]
 
                 pixel_intensity = numpy.sum(effective * bleached_datamap[row_slice, col_slice])
-                pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time)
+                pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time, self.sted.rate)
 
                 # Stores the action taken for futures bleaching
                 pdts[i] = decision_time
@@ -91,7 +91,7 @@ class DyMINMicroscope(base.Microscope):
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
                                 _pdt, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted)
+                                row, col, h, w, prob_ex, prob_sted, None, None)
                 sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
 
         if update and bleach:
@@ -165,7 +165,7 @@ class DyMINRESCueMicroscope(base.Microscope):
                     bleached_datamap += bleached_sub_datamaps_dict[key]
 
                 pixel_intensity = numpy.sum(effective * bleached_datamap[row_slice, col_slice])
-                pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time)
+                pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time, self.sted.rate)
 
                 # Stores the action taken for futures bleaching
                 pdts[i] = decision_time
@@ -182,7 +182,7 @@ class DyMINRESCueMicroscope(base.Microscope):
 
                         # Acquire another time as in RESCue
                         pdts[i] += pdt[row, col]
-                        pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col])
+                        pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col], self.sted.rate)
                         returned_photons[row, col] += pixel_photons
                 else:
                     # If signal is less than threshold count then skip pixel
@@ -198,7 +198,7 @@ class DyMINRESCueMicroscope(base.Microscope):
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
                                 _pdt, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted)
+                                row, col, h, w, prob_ex, prob_sted, None, None)
                 sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
 
         if update and bleach:
@@ -276,7 +276,7 @@ class RESCueMicroscope(base.Microscope):
 
                 # Calculates the number of acquired photons
                 pixel_intensity = numpy.sum(effective * bleached_datamap[row_slice, col_slice])
-                pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time)
+                pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), decision_time, self.sted.rate)
 
                 # Stores the action taken for futures bleaching
                 pdts[i] = decision_time
@@ -308,7 +308,7 @@ class RESCueMicroscope(base.Microscope):
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
                                 _pdt, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted)
+                                row, col, h, w, prob_ex, prob_sted, None, None)
                 sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
 
         if update and bleach:
