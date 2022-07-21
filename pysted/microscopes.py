@@ -87,12 +87,14 @@ class DyMINMicroscope(base.Microscope):
                 if scale_power > 0.:
                     returned_photons[row, col] += pixel_photons
 
-            if bleach:
+            # We add row_slice.start and col_slice.start to recenter the slice
+            mask = (numpy.argwhere(bleached_datamap[row_slice, col_slice] > 0) + numpy.array([[row_slice.start, col_slice.start]])).tolist()
+            if bleach and (len(mask) > 0):
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
                                 _pdt, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted, None, None)
-                sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
+                                row, col, h, w, mask, prob_ex, prob_sted, None, None)
+                sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
 
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
@@ -194,12 +196,14 @@ class DyMINRESCueMicroscope(base.Microscope):
                     # if scale_power > 0.:
                     #     returned_photons[row, col] += pixel_photons
 
-            if bleach:
+            # We add row_slice.start and col_slice.start to recenter the slice
+            mask = (numpy.argwhere(bleached_datamap[row_slice, col_slice] > 0) + numpy.array([[row_slice.start, col_slice.start]])).tolist()
+            if bleach and (len(mask) > 0):
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
                                 _pdt, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted, None, None)
-                sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
+                                row, col, h, w, mask, prob_ex, prob_sted, None, None)
+                sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
 
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
@@ -304,12 +308,14 @@ class RESCueMicroscope(base.Microscope):
                     thresholds[row, col] = 1
                     returned_photons[row, col] += pixel_photons
 
-            if bleach:
+            # We add row_slice.start and col_slice.start to recenter the slice
+            mask = (numpy.argwhere(bleached_datamap[row_slice, col_slice] > 0) + numpy.array([[row_slice.start, col_slice.start]])).tolist()
+            if bleach and (len(mask) > 0):
                 for _p_ex, _p_sted, _pdt in zip(p_exs, p_steds, pdts):
                     bleach_func(self, i_ex, i_sted, _p_ex, _p_sted,
                                 _pdt, bleached_sub_datamaps_dict,
-                                row, col, h, w, prob_ex, prob_sted, None, None)
-                sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, prob_ex, prob_sted)
+                                row, col, h, w, mask, prob_ex, prob_sted, None, None)
+                sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
 
         if update and bleach:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
