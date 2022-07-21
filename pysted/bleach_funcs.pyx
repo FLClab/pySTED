@@ -4,6 +4,7 @@ import numpy
 import bleach_funcs
 cimport numpy
 cimport cython
+import copy
 
 from libc.math cimport exp
 from libc.stdlib cimport rand, srand, RAND_MAX
@@ -283,13 +284,15 @@ def sample_molecules(object self,
     cdef float sampled_prob
     cdef int current
     cdef str key
+    cdef numpy.ndarray[INT64DTYPE_t, ndim=2] copied_datamap
 
     maxval = float(RAND_MAX)
 
     for key in bleached_sub_datamaps_dict:
+        copied_datamap = copy.deepcopy(bleached_sub_datamaps_dict[key])
         for s in range(row, row + h):
             for t in range(col, col + w):
-                current = bleached_sub_datamaps_dict[key][s, t]
+                current = copied_datamap[key][s, t]
                 if current > 0:
                     # Calculates the binomial sampling
                     sampled_value = 0
@@ -300,4 +303,5 @@ def sample_molecules(object self,
                         sampled_prob = rsamp / maxval
                         if sampled_prob <= prob:
                             sampled_value += 1
-                    bleached_sub_datamaps_dict[key][s, t] = sampled_value
+                    copied_datamap[s, t] = sampled_value
+        bleached_sub_datamaps_dict[key] = copied_datamap
