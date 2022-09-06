@@ -4,14 +4,17 @@ import numpy
 import bleach_funcs
 cimport numpy
 cimport cython
+import copy
 
 from libc.math cimport exp
 from libc.stdlib cimport rand, srand, RAND_MAX
 
 INTDTYPE = numpy.int32
+INT64DTYPE = numpy.int64
 FLOATDTYPE = numpy.float64
 
 ctypedef numpy.int32_t INTDTYPE_t
+ctypedef numpy.int64_t INT64DTYPE_t
 ctypedef numpy.float64_t FLOATDTYPE_t
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
@@ -52,20 +55,20 @@ def default_update_survival_probabilities(object self,
     if k_ex is None:
         k_ex = k_sted * 0.
 
-    for key in bleached_sub_datamaps_dict:
-        for (s, t) in mask:
-            sprime = s - row
-            tprime = t - col
-        # for s in range(row, row + h):
-        #     tprime = 0
-        #     for t in range(col, col + w):
-        #         # Updates probabilites
-        #         # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
-            prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * step)
-            prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * step)
-            #
-            #     tprime += 1
-            # sprime += 1
+    # for key in bleached_sub_datamaps_dict:
+    for (s, t) in mask:
+        sprime = s - row
+        tprime = t - col
+    # for s in range(row, row + h):
+    #     tprime = 0
+    #     for t in range(col, col + w):
+    #         # Updates probabilites
+    #         # I THINK I COMPUTE THIS WETHER THE PIXEL WAS EMPTY OR NOT?
+        prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * step)
+        prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * step)
+        #
+        #     tprime += 1
+        # sprime += 1
 
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
@@ -86,17 +89,19 @@ def sample_molecules(object self,
     cdef float maxval
     cdef float sampled_prob
     cdef int current
+    cdef numpy.ndarray[INT64DTYPE_t, ndim=2] datamap
     cdef str key
 
     maxval = float(RAND_MAX)
 
     for key in bleached_sub_datamaps_dict:
+        datamap = bleached_sub_datamaps_dict[key]
         for (s, t) in mask:
         #     sprime = s - row
         #     tprime = t - col
         # for s in range(row, row + h):
         #     for t in range(col, col + w):
-            current = bleached_sub_datamaps_dict[key][s, t]
+            current = datamap[s, t]
             if current > 0:
                 # Calculates the binomial sampling
                 sampled_value = 0
@@ -107,4 +112,21 @@ def sample_molecules(object self,
                     sampled_prob = rsamp / maxval
                     if sampled_prob <= prob:
                         sampled_value += 1
-                bleached_sub_datamaps_dict[key][s, t] = sampled_value
+                datamap[s, t] = sampled_value
+        bleached_sub_datamaps_dict[key] = datamap
+
+        # copied_datamap = copy.deepcopy(bleached_sub_datamaps_dict[key])
+        # for (s, t) in mask:
+        #     current = copied_datamap[s, t]
+        #     if current > 0:
+        #         # Calculates the binomial sampling
+        #         sampled_value = 0
+        #         prob = prob_ex[s, t] * prob_sted[s, t]
+        #         # For each count we sample a random variable
+        #         for o in range(current):
+        #             rsamp = rand()
+        #             sampled_prob = rsamp / maxval
+        #             if sampled_prob <= prob:
+        #                 sampled_value += 1
+        #         copied_datamap[s, t] = sampled_value
+        # bleached_sub_datamaps_dict[key] = copied_datamap
