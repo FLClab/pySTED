@@ -8,7 +8,7 @@ given some ``data_model``.
 .. code-block:: python
 
     laser_ex = base.GaussianBeam(488e-9)
-    laser_sted = base.DonutBeam(575e-9, sidual=0.04)
+    laser_sted = base.DonutBeam(575e-9, zero_residual=0.04)
     detector = base.Detector(def=0.02)
     objective = base.Objective()
     fluo = base.Fluorescence(535e-9)
