@@ -99,7 +99,6 @@ def raster_func_c_self_bleach_split_g(
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
 
-
     is_uniform = uniform_sted and uniform_ex and uniform_pdt
     effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
 
@@ -112,16 +111,16 @@ def raster_func_c_self_bleach_split_g(
 
         mask = []
 
-        # i think resetting each time ensures that we are acquiring on the dmap while it is
-        # being bleached. Either way, it doesn't affect speed, so I will keep it here
+        # Combines the datamaps into a single datamap
         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=numpy.int64)
         for key in bleached_sub_datamaps_dict:
             current_datamap = bleached_sub_datamaps_dict[key]
             for s in range(row, row + h):
                 for t in range(col, col + w):
                     bleached_datamap[s, t] += current_datamap[s, t]
-            # bleached_datamap += bleached_sub_datamaps_dict[key]
 
+        # Calculates the acquired intensity and keeps track of the position
+        # of the emitters
         value = 0.0
         sprime = 0
         for s in range(row, row + h):
@@ -132,13 +131,17 @@ def raster_func_c_self_bleach_split_g(
                 value += effective[sprime, tprime] * bleached_datamap[s, t]
                 tprime += 1
             sprime += 1
-        # acquired_intensity[int(row / ratio), int(col / ratio)] = value
         acquired_intensity[int(row / ratio), int(col / ratio)] += value
 
+        # Bleaches the sample
         if bleach:
             bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex,
                         prob_sted, k_ex, k_sted)
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
+
+            # We reset the survival probabilty
+            prob_ex = numpy.ones_like(prob_ex)
+            prob_sted = numpy.ones_like(prob_sted)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
@@ -219,6 +222,7 @@ def raster_func_dymin(
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
 
+    # Extracts DyMIN parameters
     SCALE_POWER = self.opts["scale_power"]
     DECISION_TIME = self.opts["decision_time"]
     THRESHOLD_COUNT = self.opts["threshold_count"]
@@ -226,6 +230,7 @@ def raster_func_dymin(
 
     is_uniform = uniform_sted and uniform_ex and uniform_pdt
     if is_uniform:
+        # Pre-calculates necessary variables
         effectives = numpy.zeros((num_steps, h, w), dtype=numpy.float64)
         k_steds = numpy.zeros((num_steps, k_sted.shape[0], k_sted.shape[1]), dtype=numpy.float64)
         k_exs = numpy.zeros((num_steps, k_ex.shape[0], k_ex.shape[1]), dtype=numpy.float64)
@@ -263,6 +268,7 @@ def raster_func_dymin(
                     if bleach and (bleached_datamap[s, t] > 0):
                         mask.append((s, t))
 
+        # DyMIN implementation for every step
         for i in range(num_steps):
 
             scale_power = SCALE_POWER[i]
@@ -303,7 +309,7 @@ def raster_func_dymin(
             if i == num_steps - 1:
                 returned_photons[row, col] += pixel_photons
 
-        # We add row_slice.start and col_slice.start to recenter the slice
+        # Bleaches the sample after pixel is scanned
         if bleach:
             for i in range(num_steps):
                 if pdts[i] > 0:
@@ -313,6 +319,10 @@ def raster_func_dymin(
                                 pdts[i], bleached_sub_datamaps_dict,
                                 row, col, h, w, mask, prob_ex, prob_sted, k_ex, k_sted)
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
+
+            # We reset the survival probabilty
+            prob_ex = numpy.ones_like(prob_ex)
+            prob_sted = numpy.ones_like(prob_sted)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
@@ -393,6 +403,7 @@ def raster_func_rescue(
     pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
     h, w = pre_effective.shape[0], pre_effective.shape[1]
 
+    # Extracts RESCue parameters
     LOWER_THRESHOLD = self.opts["lower_threshold"]
     UPPER_THRESHOLD = self.opts["upper_threshold"]
     DECISION_TIME = self.opts["decision_time"]
@@ -400,6 +411,7 @@ def raster_func_rescue(
 
     is_uniform = uniform_sted and uniform_ex and uniform_pdt
     if is_uniform:
+        # Pre-calculates necessary variables
         effectives = numpy.zeros((num_steps, h, w), dtype=numpy.float64)
         k_steds = numpy.zeros((num_steps, k_sted.shape[0], k_sted.shape[1]), dtype=numpy.float64)
         k_exs = numpy.zeros((num_steps, k_ex.shape[0], k_ex.shape[1]), dtype=numpy.float64)
@@ -431,6 +443,7 @@ def raster_func_rescue(
                     if bleach and (bleached_datamap[s, t] > 0):
                         mask.append((s, t))
 
+        # RESCue steps
         for i in range(num_steps):
 
             # Extract parameters
@@ -484,6 +497,7 @@ def raster_func_rescue(
                 thresholds[row, col] = 1
                 returned_photons[row, col] += pixel_photons
 
+        # Bleaches the sample once the pixel was acquired
         if bleach:
             for i in range(num_steps):
                 if pdts[i] > 0:
@@ -493,3 +507,6 @@ def raster_func_rescue(
                                 pdts[i], bleached_sub_datamaps_dict,
                                 row, col, h, w, mask, prob_ex, prob_sted, k_ex, k_sted)
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
+
+            prob_ex = numpy.ones_like(prob_ex)
+            prob_sted = numpy.ones_like(prob_sted)
