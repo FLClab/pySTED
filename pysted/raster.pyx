@@ -135,8 +135,6 @@ def raster_func_c_self_bleach_split_g(
                 tprime += 1
             sprime += 1
         acquired_intensity[int(row / ratio), int(col / ratio)] += value
-#        print("tacq = ", time.time()-t0)
-
 
         # Bleaches the sample
         if bleach:
