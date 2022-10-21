@@ -79,15 +79,6 @@ def raster_func_c_self_bleach_split_g(
 
     i_ex, i_sted, _ = self.cache(datamap.pixelsize)
 
-    #TODO: remove prob_ex and prob_sted from the arguments of this function???
-    #TODO: put this bloc maybe lower for better organization
-#    prob_ex = numpy.ones(numpy.array(i_ex).shape).astype("float64")
-#    prob_sted = numpy.ones(numpy.array(i_sted).shape).astype("float64")
-    #TODO: initialize those two arrays in a more legit way: ask Benoit and Antho
-    #TODO: THis leads weidly to less than otpimized array access. What happened here??? Daratype???
-    prob_ex = prob_ex[:numpy.array(i_ex).shape[0],:numpy.array(i_ex).shape[1]]
-    prob_sted =prob_ex[:numpy.array(i_sted).shape[0],:numpy.array(i_sted).shape[1]]
-
     # Calculate the bleaching rate once if the scanning powers and dwelltimes do not vary to
     # increase speed
     uniform_ex = numpy.all(p_ex_roi == p_ex_roi[0, 0])
