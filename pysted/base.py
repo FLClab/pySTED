@@ -968,8 +968,6 @@ class Microscope:
         # time averaged power emitted per molecule if there was no deexcitation
         # caused by the depletion beam
         sigma_abs = self.fluo.get_sigma_abs(self.excitation.lambda_)
-        excitation_probability = sigma_abs * i_ex * self.fluo.qy #without saturation
-        excitation_probability *= ((h*c)/self.excitation.lambda_) * self.fluo.qy # Convert excitation probability into power, multiply by quantum yield 
         phi_ex = i_ex / ((h*c)/self.excitation.lambda_)
         probexc = (1 - numpy.exp( - sigma_abs * phi_ex * 1/self.sted.rate)) * self.fluo.qy 
         excitation_probability = probexc/(1/self.sted.rate  /(h*c/self.sted.lambda_)) 
