@@ -210,7 +210,7 @@ class GaussianBeam:
         # keep it real
         intensity = numpy.real_if_close(intensity)
         # normalize
-        intensity /= numpy.max(intensity)
+        intensity /= (intensity*datamap_pixelsize**2).sum() 
 
         # Here, the laser should be perfectly symmetrical, however, it is not because of the way python/computers handle
         # floating point values. In order to make it symmetrical, as it should be, we flip the upper right corner of
@@ -227,7 +227,7 @@ class GaussianBeam:
         r = utils.fwhm(intensity[idx_mid])
         area_fwhm = numpy.pi * (r * datamap_pixelsize) ** 2 / 2
         # [RPPhoto2015]
-        return intensity_flipped * 2 * transmission * power / area_fwhm
+        return intensity_flipped * transmission * power 
 
 
 class DonutBeam:
@@ -287,7 +287,7 @@ class DonutBeam:
         :param transmission: The transmission ratio of the objective (given the
                              wavelength of the STED beam).
         :param datamap_pixelsize: The size of an element in the intensity matrix (m).
-        :returns: A 2D array of the time averaged intensity (W/m^2).
+        :returns: A 2D array of the instant intensity (W/m^2).
         '''
 
         def fun1(theta, kr):
@@ -371,7 +371,7 @@ class DonutBeam:
         intensity = numpy.real_if_close(intensity)
 
         # normalize
-        intensity /= numpy.max(intensity)
+        intensity /= (intensity*datamap_pixelsize**2).sum() 
 
         # Here, the laser should be perfectly symmetrical, however, it is not because of the way python/computers handle
         # floating point values. In order to make it symmetrical, as it should be, we flip the upper right corner of
@@ -396,7 +396,7 @@ class DonutBeam:
         area_fwhm = big_area - small_area
 
         # [RPPhoto2015]
-        intensity *= 2 * transmission * power / area_fwhm
+        intensity *= transmission * power  
 
         if power > 0:
             # zero_residual ~= min(intensity) / max(intensity)
@@ -597,8 +597,7 @@ class Objective:
                                                         550: 0.86,
                                                         585: 0.85,
                                                         575: 0.85,
-                                                        635: 0.85,
-                                                        750: 0.85})
+                                                        })
 
     def get_transmission(self, lambda_):
         return self.transmission[int(lambda_ * 1e9)]
@@ -643,8 +642,9 @@ class Fluorescence:
     |                          |              | Caution: not based on rigorous theory  |
     +--------------------------+--------------+----------------------------------------+
 
-    .. [#] EGFP
+    .. [#] EGFP (k1 and b for ATTO647N from [Oracz2017]_)
     '''
+    #TODO: note the sources for the egfps defaults?
     def __init__(self, lambda_, **kwargs):
         # psf parameters
         self.lambda_ = lambda_
@@ -732,7 +732,11 @@ class Fluorescence:
         :param dwelltime: Time continuously passed centered on a pixel (s).
         :returns: A 2D array of the bleaching rate d(Bleached)/dt (:math:`s^{-1}`).
 
-        The photobleaching rate for a 4 level system from [Oracz2017]_ is used. The population of S1+S1*, from where the photobleaching happen, was estimated using the simplified model used for eq. 3 in [Leutenegger2010]_. The triplet dynamic (dependent on the dwelltime) was estimated from the tree level system rate equations 2.14 in [Staudt2009]_, approximating that the population S1 is constant.
+        The photobleaching rate for a 4 level system from [Oracz2017]_ is used. The 
+        population of S1+S1*, from where the photobleaching happen, was estimated using 
+        the simplified model used for eq. 3 in [Leutenegger2010]_. The triplet dynamic 
+        (dependent on the dwelltime) was estimated from the tree level system rate 
+        equations 2.14 in [Staudt2009]_, approximating that the population S1 is constant.
         '''
 
         exc_lambda_ = numpy.round(lambda_ex/1e-9)
@@ -750,7 +754,7 @@ class Fluorescence:
         
         # Excited fluorophores population assuming an infinitely small
         # pulse and that SO=1 is constant.
-        S1_ini = self.sigma_abs[exc_lambda_] * phi_ex * tau_rep
+        S1_ini = 1-numpy.exp(-self.sigma_abs[exc_lambda_] * phi_ex * tau_rep)
         I_sted = phi_sted * (scipy.constants.c * scipy.constants.h / lambda_sted)
         
         # Suppl. Eq. 16 from Oracz et al.
@@ -763,7 +767,7 @@ class Fluorescence:
         
         # The agerage bleaching rate over a period
         mean_k_bleach = B / tau_rep
-        
+
         # Add a very approximate triplet dynamic, if any.
         # Based on three level system rate equations 2.14 in [Staudt2009]_,
         # approximating that S1 is constant
@@ -931,8 +935,8 @@ class Microscope:
         f, n, na = self.objective.f, self.objective.n, self.objective.na
 
         __i_ex, __i_sted, psf_det = self.cache(datamap_pixelsize)
-        i_ex = __i_ex * p_ex
-        i_sted = __i_sted * p_sted
+        i_ex = __i_ex * p_ex #the time averaged excitation intensity
+        i_sted = __i_sted * p_sted #the instant sted intensity (instant p_sted = p_sted/(self.sted.tau * self.sted.rate))
 
         # saturation intensity (W/m²) [Leutenegger2010] p. 26419
         sigma_ste = self.fluo.get_sigma_ste(self.sted.lambda_)
@@ -964,12 +968,14 @@ class Microscope:
         # time averaged power emitted per molecule if there was no deexcitation
         # caused by the depletion beam
         sigma_abs = self.fluo.get_sigma_abs(self.excitation.lambda_)
-        excitation_probability = sigma_abs * i_ex * self.fluo.qy
+        phi_ex = i_ex / ((h*c)/self.excitation.lambda_)
+        probexc = (1 - numpy.exp( - sigma_abs * phi_ex * 1/self.sted.rate)) * self.fluo.qy 
+        excitation_probability = probexc/(1/self.sted.rate  /(h*c/self.sted.lambda_)) 
         if self.sted.anti_stoke:
             sigma_abs_sted = self.fluo.get_sigma_abs(self.sted.lambda_)
             excitation_probability += sigma_abs_sted * (i_sted * self.sted.tau * self.sted.rate) * self.fluo.qy
-            
-        # effective intensity of a single molecule (W) [Willig2006] eq. 3
+
+        # effective intensity of a single molecule (W) [Willig2006] eq. 3    
         return excitation_probability * eta * psf_det
 
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
