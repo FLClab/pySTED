@@ -46,7 +46,15 @@ def default_update_survival_probabilities(object self,
     cdef str key
     cdef float duty_cycle
 
+    t0 = time.time()
+
     maxval = float(RAND_MAX)
+#    from pprint import pprint
+#    pprint(dict(
+#        k_sted_mean = numpy.mean(k_sted),
+#        k_sted_max = numpy.max(k_sted),
+#        k_ex_mean = numpy.mean(k_ex)
+#        ))
     if k_sted is None:
         photons_ex = self.fluo.get_photons(i_ex * p_ex, self.excitation.lambda_)
         duty_cycle = self.sted.tau * self.sted.rate
@@ -54,7 +62,6 @@ def default_update_survival_probabilities(object self,
         k_sted = self.fluo.get_k_bleach(self.excitation.lambda_, self.sted.lambda_, photons_ex, photons_sted, self.sted.tau, 1/self.sted.rate, step, )
     if k_ex is None:
         k_ex = k_sted * 0.
-
     for (s, t) in mask:
         sprime = s - row
         tprime = t - col
@@ -81,6 +88,7 @@ def sample_molecules(object self,
     cdef int current
     cdef numpy.ndarray[INT64DTYPE_t, ndim=2] datamap
     cdef str key
+    cdef numpy.ndarray[INT64DTYPE_t, ndim=2] copied_datamap
 
     maxval = float(RAND_MAX)
 
