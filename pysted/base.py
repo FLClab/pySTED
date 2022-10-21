@@ -59,7 +59,7 @@ For use by FLClab (@CERVO) authorized people
 .. [RPPhoto2015] RP Photonics Consulting GmbH (Accessed 2015).
    Optical intensity. Encyclopedia of laser physics and technology at
    <https://www.rp-photonics.com/optical_intensity.html>.
-   
+
 .. [Oracz2017] Oracz, Joanna, et al. (2017)
     Photobleaching in STED Nanoscopy and Its Dependence on the Photon Flux
     Applied for Reversible Silencing of the Fluorophore.
@@ -210,7 +210,7 @@ class GaussianBeam:
         # keep it real
         intensity = numpy.real_if_close(intensity)
         # normalize
-        intensity /= (intensity*datamap_pixelsize**2).sum() 
+        intensity /= (intensity*datamap_pixelsize**2).sum()
 
         # Here, the laser should be perfectly symmetrical, however, it is not because of the way python/computers handle
         # floating point values. In order to make it symmetrical, as it should be, we flip the upper right corner of
@@ -227,8 +227,33 @@ class GaussianBeam:
         r = utils.fwhm(intensity[idx_mid])
         area_fwhm = numpy.pi * (r * datamap_pixelsize) ** 2 / 2
         # [RPPhoto2015]
-        return intensity_flipped * transmission * power 
+        return intensity_flipped * transmission * power
 
+    def __eq__(self, other):
+        """
+        Overloads the equal method of the `GaussianBeam` object. Two `GaussianBeam`
+        objects are equal if all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are equal
+        """
+        if not isinstance(other, GaussianBeam):
+            return False
+        return all([
+            getattr(self, key) == getattr(other, key) for key in vars(self).keys()
+        ])
+
+    def __ne__(self, other):
+        """
+        Overloads the not equal method of the `GaussianBeam` object. Two `GaussianBeam`
+        objects are not equal if not all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are not equal
+        """
+        return not self == other
 
 class DonutBeam:
     '''This class implements a donut beam (STED).
@@ -256,7 +281,7 @@ class DonutBeam:
     | ``anti_stoke``   | ``True``     | Presence of anti-stoke (sted beam)     |
     |                  |              | excitation                             |
     +------------------+--------------+----------------------------------------+
-            
+
 
     Polarization :
         * :math:`\pi/2` is left-circular
@@ -371,7 +396,7 @@ class DonutBeam:
         intensity = numpy.real_if_close(intensity)
 
         # normalize
-        intensity /= (intensity*datamap_pixelsize**2).sum() 
+        intensity /= (intensity*datamap_pixelsize**2).sum()
 
         # Here, the laser should be perfectly symmetrical, however, it is not because of the way python/computers handle
         # floating point values. In order to make it symmetrical, as it should be, we flip the upper right corner of
@@ -396,7 +421,7 @@ class DonutBeam:
         area_fwhm = big_area - small_area
 
         # [RPPhoto2015]
-        intensity *= transmission * power  
+        intensity *= transmission * power
 
         if power > 0:
             # zero_residual ~= min(intensity) / max(intensity)
@@ -407,6 +432,31 @@ class DonutBeam:
 
         return intensity
 
+    def __eq__(self, other):
+        """
+        Overloads the equal method of the `DonutBeam` object. Two `DonutBeam`
+        objects are equal if all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are equal
+        """
+        if not isinstance(other, DonutBeam):
+            return False
+        return all([
+            getattr(self, key) == getattr(other, key) for key in vars(self).keys()
+        ])
+
+    def __ne__(self, other):
+        """
+        Overloads the not equal method of the `DonutBeam` object. Two `DonutBeam`
+        objects are not equal if not all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are not equal
+        """
+        return not self == other
 
 class Detector:
     '''This class implements the photon detector component.
@@ -463,7 +513,7 @@ class Detector:
         # photon detection
         self.pcef = kwargs.get("pcef", 0.1)
         self.pdef = kwargs.get("pdef", 0.5)
-        
+
         # Gating
         self.det_delay = kwargs.get("det_delay", 750e-12)
         self.det_width = kwargs.get("det_width", 8e-9)
@@ -527,40 +577,47 @@ class Detector:
                                            photons.shape) * dwelltime
         except:
             # on Windows numpy.random.binomial cannot generate 64-bit integers
-            # MARCHE PAS QUAND C'EST JUSTE UN SCALAIRE QUI EST PASSÉ
             signal = utils.approx_binomial(photons.astype(numpy.int64),
                                            detection_efficiency,
                                            photons.shape) * dwelltime
         # add noise, background, and dark counts
-
         if self.noise:
             signal = numpy.random.poisson(signal, signal.shape)
         if self.background > 0:
             # background counts per second, accounting for the detection gating
             cts = numpy.random.poisson(self.background * self.det_width * rate * dwelltime, signal.shape)
-            # background counts during dwell time
-            # cts = (cts * dwelltime).astype(numpy.int64)
-            """
-            ^^^ old implementation did this, however I don't think this is right ^^^
-            With this implementation, the number of photons simply increases as pdt increases. For example, if
-            noise is 1000 and pdt is 10e-6, the max photon count for the acq will be around 200, but if I increase pdt
-            to 100e-6 then the max photon count wil be around 2000. So the value simply increases for the whole image.
-            In order to see the noise on the acq, we have to put in ludicrous values for noise of at least 10000000000.
-
-            By commenting this line, I can put a more moderate noise value, around the photon count I expect to get in
-            the image. Then, as the pdt increases, the signal for the rest of the image increases while the noise stays
-            at the same level, which I think makes more sense.
-            """
-
             signal += cts
         if self.darkcount > 0:
             # Dark counts per second, accounting for the detection gating
             cts = numpy.random.poisson(self.darkcount * self.det_width * rate * dwelltime, signal.shape)
-            # dark counts during dwell time ***DISABLING THIS LINE, see explanation in "if self.background > 0"
-            # cts = (cts * dwelltime).astype(numpy.int64)
             signal += cts
         return signal
 
+    def __eq__(self, other):
+        """
+        Overloads the equal method of the `Detector` object. Two `Detector`
+        objects are equal if all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are equal
+        """
+        if not isinstance(other, Detector):
+            return False
+        return all([
+            getattr(self, key) == getattr(other, key) for key in vars(self).keys()
+        ])
+
+    def __ne__(self, other):
+        """
+        Overloads the not equal method of the `Detector` object. Two `Detector`
+        objects are not equal if not all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are not equal
+        """
+        return not self == other
 
 class Objective:
     '''
@@ -601,6 +658,32 @@ class Objective:
 
     def get_transmission(self, lambda_):
         return self.transmission[int(lambda_ * 1e9)]
+
+    def __eq__(self, other):
+        """
+        Overloads the equal method of the `Objective` object. Two `Objective`
+        objects are equal if all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are equal
+        """
+        if not isinstance(other, Objective):
+            return False
+        return all([
+            getattr(self, key) == getattr(other, key) for key in vars(self).keys()
+        ])
+
+    def __ne__(self, other):
+        """
+        Overloads the not equal method of the `Objective` object. Two `Objective`
+        objects are not equal if not all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are not equal
+        """
+        return not self == other
 
 
 class Fluorescence:
@@ -660,6 +743,31 @@ class Fluorescence:
         self.b = kwargs.get("b", 1.4)
         self.triplet_dynamic_frac = kwargs.get("triplet_dynamic_frac", 0)
 
+    def __eq__(self, other):
+        """
+        Overloads the equal method of the `Fluorescence` object. Two fluorescence
+        objects are equal if all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are equal
+        """
+        if not isinstance(other, Fluorescence):
+            return False
+        return all([
+            getattr(self, key) == getattr(other, key) for key in vars(self).keys()
+        ])
+
+    def __ne__(self, other):
+        """
+        Overloads the not equal method of the fluorescence object. Two fluorescence
+        objects are not equal if not all of their constituent are equals.
+
+        :param other: Any type of python objects
+
+        :returns : A `bool` wheter both objects are not equal
+        """
+        return not self == other
 
     def get_sigma_ste(self, lambda_):
         '''Return the stimulated emission cross-section of the fluorescence
@@ -710,7 +818,7 @@ class Fluorescence:
 
     def get_photons(self, intensity, lambda_=None):
         '''Translate a light intensity to a photon flux.
-        
+
         :param intensity: Light intensity (:math:`W/m^{-2}`).
         :param lambda_: Wavelenght. If None, default to the emission wavelenght.
         :returns: Photon flux (:math:`m^{-2}s^{-1}`).
@@ -732,17 +840,17 @@ class Fluorescence:
         :param dwelltime: Time continuously passed centered on a pixel (s).
         :returns: A 2D array of the bleaching rate d(Bleached)/dt (:math:`s^{-1}`).
 
-        The photobleaching rate for a 4 level system from [Oracz2017]_ is used. The 
-        population of S1+S1*, from where the photobleaching happen, was estimated using 
-        the simplified model used for eq. 3 in [Leutenegger2010]_. The triplet dynamic 
-        (dependent on the dwelltime) was estimated from the tree level system rate 
+        The photobleaching rate for a 4 level system from [Oracz2017]_ is used. The
+        population of S1+S1*, from where the photobleaching happen, was estimated using
+        the simplified model used for eq. 3 in [Leutenegger2010]_. The triplet dynamic
+        (dependent on the dwelltime) was estimated from the tree level system rate
         equations 2.14 in [Staudt2009]_, approximating that the population S1 is constant.
         '''
 
         exc_lambda_ = numpy.round(lambda_ex/1e-9)
         sted_lambda_ = numpy.round(lambda_sted/1e-9)
         phi_sted = phi_sted * tau_rep/tau_sted
-                
+
         # Constants used for [Leutenegger2010] eq. 3
         sigma_ste = self.sigma_ste[sted_lambda_]
         phi_s = 1 / (self.tau * sigma_ste) # Saturation flux, at which k_sted = k_s1
@@ -751,20 +859,20 @@ class Fluorescence:
         k_s1 = 1 / self.tau
         gamma = (zeta * k_vib) / (zeta * k_s1 + k_vib) # Effective saturation factor (takes
         # into account rexcitation of S0_star by sted beam) => S1 decay rate = k1*(1-gamma)
-        
+
         # Excited fluorophores population assuming an infinitely small
         # pulse and that SO=1 is constant.
         S1_ini = 1-numpy.exp(-self.sigma_abs[exc_lambda_] * phi_ex * tau_rep)
         I_sted = phi_sted * (scipy.constants.c * scipy.constants.h / lambda_sted)
-        
+
         # Suppl. Eq. 16 from Oracz et al.
         # k is defined by Suppl. Eq. 10 from Oracz et al.: d(Bleached)/dt = k * (S1+S1*)
         k = self.k0*I_sted + self.k1*I_sted**self.b
-        
+
         # Now, S1 <- S1+S1* (put the two sublevels together, like in [Leutenegger2010])
         # Integral from 0 to tau_sted of k*S1, where S1 = exp(-k_s1*t(1+gamma))
         B =  k * S1_ini * (1 - numpy.exp(-k_s1*tau_sted*(1+gamma))) / (k_s1*(1+gamma))
-        
+
         # The agerage bleaching rate over a period
         mean_k_bleach = B / tau_rep
 
@@ -777,8 +885,6 @@ class Fluorescence:
         mean_k_bleach = mean_k_bleach * ((1-self.triplet_dynamic_frac) + self.triplet_dynamic_frac*k_dwell)
 
         return mean_k_bleach
-        
-
 
 class Microscope:
     '''This class implements a microscopy setup described by an excitation beam,
@@ -815,13 +921,17 @@ class Microscope:
 
         # caching system
         self.__cache = {}   # add all the elements used to compute lasers in the cache
+        cache_keys = ["lasers", "objective", "excitation", "sted", "fluo"]
         if load_cache:
             try:
                 self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
-            # except FileNotFoundError:
-            #     pass
-            # except EOFError:
-            #     pass
+                flag = False
+                for key, values in self.__cache.items():
+                    if not all([ckey in values.keys() for ckey in cache_keys]):
+                        flag = True
+                if flag:
+                    self.__cache = {}
+
             except Exception as e:
                 logging.warning("-----------------")
                 logging.warning(f"an error was caught while trying to load microscope cache")
@@ -842,7 +952,6 @@ class Microscope:
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
         :returns: A boolean.
         '''
-
         datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
         return datamap_pixelsize_nm in self.__cache
 
@@ -881,22 +990,18 @@ class Microscope:
                                                       na, transmission,
                                                       datamap_pixelsize)
             self.__cache[datamap_pixelsize_nm]["lasers"] = utils.resize(i_ex, i_sted, psf_det)
-            self.__cache[datamap_pixelsize_nm]["f"] = f
-            self.__cache[datamap_pixelsize_nm]["n"] = n
-            self.__cache[datamap_pixelsize_nm]["na"] = na
-            self.__cache[datamap_pixelsize_nm]["exc_lambda"] = self.excitation.lambda_
-            self.__cache[datamap_pixelsize_nm]["sted_lambda"] = self.sted.lambda_
-            self.__cache[datamap_pixelsize_nm]["fluo_lambda"] = self.fluo.lambda_
+            self.__cache[datamap_pixelsize_nm]["objective"] = self.objective
+            self.__cache[datamap_pixelsize_nm]["excitation"] = self.excitation
+            self.__cache[datamap_pixelsize_nm]["sted"] = self.sted
+            self.__cache[datamap_pixelsize_nm]["fluo"] = self.fluo
 
         datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
         if datamap_pixelsize_nm not in self.__cache:
             compute_lasers(datamap_pixelsize_nm)
-        elif (self.__cache[datamap_pixelsize_nm]["f"] != self.objective.f) or \
-                (self.__cache[datamap_pixelsize_nm]["n"] != self.objective.n) or \
-                (self.__cache[datamap_pixelsize_nm]["na"] != self.objective.na) or \
-                (self.__cache[datamap_pixelsize_nm]["exc_lambda"] != self.excitation.lambda_) or \
-                (self.__cache[datamap_pixelsize_nm]["sted_lambda"] != self.sted.lambda_) or \
-                (self.__cache[datamap_pixelsize_nm]["fluo_lambda"] != self.fluo.lambda_):
+        elif (self.__cache[datamap_pixelsize_nm]["objective"] != self.objective) or \
+             (self.__cache[datamap_pixelsize_nm]["excitation"] != self.excitation) or \
+             (self.__cache[datamap_pixelsize_nm]["sted"] != self.sted) or \
+             (self.__cache[datamap_pixelsize_nm]["fluo"] != self.fluo):
             compute_lasers(datamap_pixelsize_nm)
 
         if save_cache:
@@ -925,9 +1030,9 @@ class Microscope:
 
         The technique follows the method and equations described in
         [Willig2006]_, [Leutenegger2010]_ and [Holler2011]_. Notable approximations from [Leutenegger2010]_ include the assumption that the excitation pulse width is infinitely small and that the sted pulse is of perfect rectangular shape and starts at the beginning of the period. Also, a two energy levels (plus their vibrational sub-levels) with two rate equations is used. To include the vibrational decay dynamics (parametrized by the vibrational decay rate), an effective saturation factor is used.
-        
+
         To account for the detection gating, the bounds in the integral from [Leutenegger2010]_ eq. 3 were adjusted.
-        
+
         Anti-stokes excitation at the beginnning of the period was by added by modeling the sted beam as an infinitely small pulse, similarly to the excitation pulse. This leads to an underestimation of its effect on the detected signal, since excitation by the STED beam near the end of the STED beam, for example, would have less time to be depleted.
         '''
 
@@ -950,7 +1055,7 @@ class Microscope:
         gamma = (zeta * k_vib) / (zeta * k_s1 + k_vib)
         T = 1 / self.sted.rate
 
-        
+
         # eta=(probability of fluorescence)/(initial probability of
         # fluorescence) given the donut
         if self.detector.det_delay < self.sted.tau: # The detection starts before the end the sted pulse
@@ -962,20 +1067,20 @@ class Microscope:
                   * (numpy.exp(-k_s1 * self.detector.det_delay)\
                   - numpy.exp(-k_s1 * self.T_det))
         eta = nom/(1 - numpy.exp(-k_s1 * T))
-        
+
 
         # molecular brigthness [Holler2011]. This would be the spatial map of
         # time averaged power emitted per molecule if there was no deexcitation
         # caused by the depletion beam
         sigma_abs = self.fluo.get_sigma_abs(self.excitation.lambda_)
         phi_ex = i_ex / ((h*c)/self.excitation.lambda_)
-        probexc = (1 - numpy.exp( - sigma_abs * phi_ex * 1/self.sted.rate)) * self.fluo.qy 
-        excitation_probability = probexc/(1/self.sted.rate  /(h*c/self.sted.lambda_)) 
+        probexc = (1 - numpy.exp( - sigma_abs * phi_ex * 1/self.sted.rate)) * self.fluo.qy
+        excitation_probability = probexc/(1/self.sted.rate  /(h*c/self.sted.lambda_))
         if self.sted.anti_stoke:
             sigma_abs_sted = self.fluo.get_sigma_abs(self.sted.lambda_)
             excitation_probability += sigma_abs_sted * (i_sted * self.sted.tau * self.sted.rate) * self.fluo.qy
 
-        # effective intensity of a single molecule (W) [Willig2006] eq. 3    
+        # effective intensity of a single molecule (W) [Willig2006] eq. 3
         return excitation_probability * eta * psf_det
 
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
@@ -1059,7 +1164,7 @@ class Microscope:
         if isinstance(indices, type(None)):
             indices = {"flashes": 0}
         for key in datamap.sub_datamaps_dict:
-            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key].astype(int))
+            bleached_sub_datamaps_dict[key] = numpy.copy(datamap.sub_datamaps_dict[key].astype(numpy.int64))
 
         if seed is None:
             seed = 0
