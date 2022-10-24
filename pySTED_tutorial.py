@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import time
 
 from pysted import base, utils
 from pysted import exp_data_gen as dg
@@ -146,7 +147,6 @@ temp_dmap.update_dicts({"flashes": time_idx})
 # (3) The acquired intensity. This is only useful when working in a temporal exeperiment setting, in which
 #     an acquisition could be interrupted by the flash happening through it.
 
-
 conf_acq, conf_bleached, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
                                                               bleach=True, update=True, seed=42)
 conf_acq2, conf_bleached2, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
@@ -155,8 +155,6 @@ sted_acq, sted_bleached, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dm
                                                               bleach=True, update=True, seed=42)
 sted_acq2, sted_bleached2, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
                                                               bleach=True, update=True, seed=42)
-
-
 
 
 fig, axes = plt.subplots(2, 2)
