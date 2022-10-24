@@ -282,8 +282,16 @@ def raster_func_dymin(
             for s in range(row, row + h):
                 for t in range(col, col + w):
                     bleached_datamap[s, t] += current_datamap[s, t]
-                    if bleach and (bleached_datamap[s, t] > 0):
-                        mask.append((s, t))
+
+        # Creates the masked values
+        sprime = 0
+        for s in range(row, row + h):
+            tprime = 0
+            for t in range(col, col + w):
+                if bleach and (bleached_datamap[s, t] > 0):
+                    mask.append((s, t))
+                tprime += 1
+            sprime += 1
 
         # DyMIN implementation for every step
         for i in range(num_steps):
@@ -451,15 +459,23 @@ def raster_func_rescue(
         p_steds = p_steds * 0.
         mask = []
 
-        # Uses the bleached datamap, only updates the necessary parts
+        # Uses the bleached datamap
         bleached_datamap = numpy.zeros(bleached_sub_datamaps_dict["base"].shape, dtype=numpy.int64)
         for key in bleached_sub_datamaps_dict:
             current_datamap = bleached_sub_datamaps_dict[key]
             for s in range(row, row + h):
                 for t in range(col, col + w):
                     bleached_datamap[s, t] += current_datamap[s, t]
-                    if bleach and (bleached_datamap[s, t] > 0):
-                        mask.append((s, t))
+
+        # Creates the masked values
+        sprime = 0
+        for s in range(row, row + h):
+            tprime = 0
+            for t in range(col, col + w):
+                if bleach and (bleached_datamap[s, t] > 0):
+                    mask.append((s, t))
+                tprime += 1
+            sprime += 1
 
         # RESCue steps
         for i in range(num_steps):
