@@ -20,6 +20,19 @@ ctypedef numpy.float64_t FLOATDTYPE_t
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
+def reset_prob(
+    list mask,
+    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_ex,
+    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted
+):
+    cdef int s, t
+    for (s, t) in mask:
+        prob_ex[s, t] = 1.0
+        prob_sted[s, t] = 1.0
+
+
+@cython.boundscheck(False)  # turn off bounds-checking for entire function
+@cython.wraparound(False)  # turn off negative index wrapping for entire function
 def raster_func_c_self_bleach_split_g(
         object self,
         object datamap,
@@ -143,8 +156,9 @@ def raster_func_c_self_bleach_split_g(
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
 
             # We reset the survival probabilty
-            prob_ex = numpy.ones_like(prob_ex)
-            prob_sted = numpy.ones_like(prob_sted)
+            reset_prob(mask, prob_ex, prob_sted)
+            # prob_ex = numpy.ones_like(prob_ex)
+            # prob_sted = numpy.ones_like(prob_sted)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
@@ -324,8 +338,9 @@ def raster_func_dymin(
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
 
             # We reset the survival probabilty
-            prob_ex = numpy.ones_like(prob_ex)
-            prob_sted = numpy.ones_like(prob_sted)
+            reset_prob(mask, prob_ex, prob_sted)
+            # prob_ex = numpy.ones_like(prob_ex)
+            # prob_sted = numpy.ones_like(prob_sted)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
@@ -511,5 +526,6 @@ def raster_func_rescue(
                                 row, col, h, w, mask, prob_ex, prob_sted, k_ex, k_sted)
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
 
-            prob_ex = numpy.ones_like(prob_ex)
-            prob_sted = numpy.ones_like(prob_sted)
+            reset_prob(mask, prob_ex, prob_sted)
+            # prob_ex = numpy.ones_like(prob_ex)
+            # prob_sted = numpy.ones_like(prob_sted)
