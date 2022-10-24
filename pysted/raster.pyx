@@ -497,7 +497,7 @@ def raster_func_rescue(
                 sprime = s - row
                 tprime = t - col
                 value += effective[sprime, tprime] * bleached_datamap[s, t]
-                
+
             pixel_photons = self.detector.get_signal(self.fluo.get_photons(value), decision_time, self.sted.rate)
 
             # Stores the action taken for futures bleaching
