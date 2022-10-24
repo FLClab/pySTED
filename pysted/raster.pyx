@@ -310,13 +310,10 @@ def raster_func_dymin(
 
             # pixel_intensity = numpy.sum(effective * bleached_datamap[row_slice, col_slice])
             value = 0.0
-            sprime = 0
-            for s in range(row, row + h):
-                tprime = 0
-                for t in range(col, col + w):
-                    value += effective[sprime, tprime] * bleached_datamap[s, t]
-                    tprime += 1
-                sprime += 1
+            for (s, t) in mask:
+                sprime = s - row
+                tprime = t - col
+                value += effective[sprime, tprime] * bleached_datamap[s, t]
 
             pixel_photons = self.detector.get_signal(self.fluo.get_photons(value), decision_time, self.sted.rate)
 
@@ -496,13 +493,11 @@ def raster_func_rescue(
 
             # Convolve the effective and the datamap
             value = 0.0
-            sprime = 0
-            for s in range(row, row + h):
-                tprime = 0
-                for t in range(col, col + w):
-                    value += effective[sprime, tprime] * bleached_datamap[s, t]
-                    tprime += 1
-                sprime += 1
+            for (s, t) in mask:
+                sprime = s - row
+                tprime = t - col
+                value += effective[sprime, tprime] * bleached_datamap[s, t]
+                
             pixel_photons = self.detector.get_signal(self.fluo.get_photons(value), decision_time, self.sted.rate)
 
             # Stores the action taken for futures bleaching
