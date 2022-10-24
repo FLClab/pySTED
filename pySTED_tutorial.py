@@ -157,7 +157,7 @@ times = []
 for _ in range(10):
     start = time.time()
     sted_acq2, sted_bleached2, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
-                                                                  bleach=True, update=True, seed=42)
+                                                                  bleach=True, update=False, seed=42)
 
     times.append(time.time() - start)
 print(np.mean(times), np.std(times))

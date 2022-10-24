@@ -159,7 +159,9 @@ def raster_func_c_self_bleach_split_g(
                         prob_sted, k_ex, k_sted)
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
 
-            reset_prob(mask, prob_ex, prob_sted)
+            # reset_prob(mask, prob_ex, prob_sted)
+            prob_ex = numpy.ones_like(prob_ex, dtype=numpy.float64)
+            prob_sted = numpy.ones_like(prob_sted, dtype=numpy.float64)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
