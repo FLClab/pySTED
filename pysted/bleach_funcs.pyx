@@ -49,12 +49,6 @@ def default_update_survival_probabilities(object self,
     t0 = time.time()
 
     maxval = float(RAND_MAX)
-#    from pprint import pprint
-#    pprint(dict(
-#        k_sted_mean = numpy.mean(k_sted),
-#        k_sted_max = numpy.max(k_sted),
-#        k_ex_mean = numpy.mean(k_ex)
-#        ))
     if k_sted is None:
         photons_ex = self.fluo.get_photons(i_ex * p_ex, self.excitation.lambda_)
         duty_cycle = self.sted.tau * self.sted.rate
