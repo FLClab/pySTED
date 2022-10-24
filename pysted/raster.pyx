@@ -74,7 +74,7 @@ def raster_func_c_self_bleach_split_g(
     cdef FLOATDTYPE_t duty_cycle
     cdef FLOATDTYPE_t step
     cdef list mask
-    cdef bint uniform_sted, uniform_ex, uniform_pdt, is_uniform
+    cdef bint uniform_sted, uniform_ex, uniform_pdt, is_uniform, is_single_datamap
 
     """
     raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
@@ -98,30 +98,35 @@ def raster_func_c_self_bleach_split_g(
     uniform_ex = numpy.all(p_ex_roi == p_ex_roi[0, 0])
     uniform_sted = numpy.all(p_sted_roi == p_sted_roi[0, 0])
     uniform_pdt = numpy.all(pdt_roi == pdt_roi[0, 0])
-    if uniform_sted and uniform_ex and uniform_pdt:
+    is_uniform = uniform_sted and uniform_ex and uniform_pdt
+
+    if is_uniform:
         p_ex = p_ex_roi[0, 0]
         p_sted = p_sted_roi[0, 0]
         pdt = pdt_roi[0, 0]
         photons_ex = self.fluo.get_photons(i_ex * p_ex, self.excitation.lambda_)
         duty_cycle = self.sted.tau * self.sted.rate
         photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle, self.sted.lambda_)
+
+        # Calculates photobleaching constants
         k_sted = self.fluo.get_k_bleach(self.excitation.lambda_, self.sted.lambda_, photons_ex, photons_sted, self.sted.tau, 1/self.sted.rate, pdt,)
         k_ex = k_sted * 0.
 
         # Calculates prob ex and sted once
         prob_ex = numpy.exp(-1. * k_ex * pdt)
         prob_sted = numpy.exp(-1. * k_sted * pdt)
+
+        # Calculates effective psf
+        effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
     else:
         k_sted = None
         k_ex = None
 
-        effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
+        # Calculates effective psf to get the shape
+        effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
 
-    pre_effective = self.get_effective(datamap.pixelsize, p_ex_roi[0, 0], p_sted_roi[0, 0])
-    h, w = pre_effective.shape[0], pre_effective.shape[1]
-
-    is_uniform = uniform_sted and uniform_ex and uniform_pdt
-    effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
+    h, w = effective.shape[0], effective.shape[1]
+    is_single_datamap = len(bleached_sub_datamaps_dict.keys()) > 1
 
     for (row, col) in pixel_list:
         if not is_uniform:
@@ -152,6 +157,8 @@ def raster_func_c_self_bleach_split_g(
                 value += effective[sprime, tprime] * bleached_datamap[s, t]
                 tprime += 1
             sprime += 1
+            
+        # Sets intensity value
         acquired_intensity[int(row / ratio), int(col / ratio)] += value
 
         # Bleaches the sample

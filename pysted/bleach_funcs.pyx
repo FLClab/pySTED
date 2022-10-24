@@ -36,7 +36,6 @@ def default_update_survival_probabilities(object self,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex=None,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_sted=None,):
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
-    #cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef int s, sprime, t, tprime
     cdef float prob
     cdef float rsamp
@@ -49,12 +48,6 @@ def default_update_survival_probabilities(object self,
     t0 = time.time()
 
     maxval = float(RAND_MAX)
-#    from pprint import pprint
-#    pprint(dict(
-#        k_sted_mean = numpy.mean(k_sted),
-#        k_sted_max = numpy.max(k_sted),
-#        k_ex_mean = numpy.mean(k_ex)
-#        ))
     if k_sted is None:
         photons_ex = self.fluo.get_photons(i_ex * p_ex, self.excitation.lambda_)
         duty_cycle = self.sted.tau * self.sted.rate
@@ -63,8 +56,6 @@ def default_update_survival_probabilities(object self,
     if k_ex is None:
         k_ex = k_sted * 0.
     for (s, t) in mask:
-        # sprime = s - row
-        # tprime = t - col
         prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[s, t] * step)
         prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[s, t] * step)
 

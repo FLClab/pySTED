@@ -148,19 +148,13 @@ temp_dmap.update_dicts({"flashes": time_idx})
 #     an acquisition could be interrupted by the flash happening through it.
 
 conf_acq, conf_bleached, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
-                                                              bleach=True, update=False, seed=42)
+                                                              bleach=True, update=True, seed=42)
 conf_acq2, conf_bleached2, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
-                                                              bleach=True, update=False, seed=42)
+                                                              bleach=True, update=True, seed=42)
 sted_acq, sted_bleached, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
-                                                              bleach=True, update=False, seed=42)
-times = []
-for _ in range(10):
-    start = time.time()
-    sted_acq2, sted_bleached2, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
-                                                                  bleach=True, update=False, seed=42)
-
-    times.append(time.time() - start)
-print(np.mean(times), np.std(times))
+                                                              bleach=True, update=True, seed=42)
+sted_acq2, sted_bleached2, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
+                                                              bleach=True, update=True, seed=42)
 
 
 fig, axes = plt.subplots(2, 2)
