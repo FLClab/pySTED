@@ -156,9 +156,8 @@ def raster_func_c_self_bleach_split_g(
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
 
             # We reset the survival probabilty
-            reset_prob(mask, prob_ex, prob_sted)
-            # prob_ex = numpy.ones_like(prob_ex)
-            # prob_sted = numpy.ones_like(prob_sted)
+            prob_ex = numpy.ones_like(prob_ex)
+            prob_sted = numpy.ones_like(prob_sted)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
