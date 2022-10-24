@@ -101,7 +101,7 @@ def sample_molecules(object self,
             if current > 0:
                 # Calculates the binomial sampling
                 sampled_value = 0
-                prob = prob_ex[s, t] * prob_sted[s, t]
+                prob = prob_ex[sprime, tprime] * prob_sted[sprime, tprime]
                 # For each count we sample a random variable
                 for o in range(current):
                     rsamp = rand()
