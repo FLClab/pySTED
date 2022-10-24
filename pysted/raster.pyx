@@ -105,6 +105,9 @@ def raster_func_c_self_bleach_split_g(
     is_uniform = uniform_sted and uniform_ex and uniform_pdt
     effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
 
+    prob_ex = numpy.ones_like(effective, dtype=numpy.float64)
+    prob_sted = numpy.ones_like(effective, dtype=numpy.float64)
+
     for (row, col) in pixel_list:
         if not is_uniform:
             pdt = pdt_roi[row, col]
@@ -130,7 +133,7 @@ def raster_func_c_self_bleach_split_g(
             tprime = 0
             for t in range(col, col + w):
                 if bleach and (bleached_datamap[s, t] > 0):
-                    mask.append((s, t))
+                    mask.append((sprime, tprime))
                 value += effective[sprime, tprime] * bleached_datamap[s, t]
                 tprime += 1
             sprime += 1
