@@ -107,6 +107,10 @@ def raster_func_c_self_bleach_split_g(
         photons_sted = self.fluo.get_photons(i_sted * p_sted * duty_cycle, self.sted.lambda_)
         k_sted = self.fluo.get_k_bleach(self.excitation.lambda_, self.sted.lambda_, photons_ex, photons_sted, self.sted.tau, 1/self.sted.rate, pdt,)
         k_ex = k_sted * 0.
+
+        # Calculates prob ex and sted once
+        prob_ex = numpy.exp(-1. * k_ex * pdt)
+        prob_sted = numpy.exp(-1. * k_sted * pdt)
     else:
         k_sted = None
         k_ex = None
@@ -118,9 +122,6 @@ def raster_func_c_self_bleach_split_g(
 
     is_uniform = uniform_sted and uniform_ex and uniform_pdt
     effective = self.get_effective(datamap.pixelsize, p_ex, p_sted)
-
-    prob_ex = numpy.ones_like(pre_effective, dtype=numpy.float64)
-    prob_sted = numpy.ones_like(pre_effective, dtype=numpy.float64)
 
     for (row, col) in pixel_list:
         if not is_uniform:
@@ -155,13 +156,13 @@ def raster_func_c_self_bleach_split_g(
 
         # Bleaches the sample
         if bleach:
-            bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex,
-                        prob_sted, k_ex, k_sted)
+            if not is_uniform:
+                # reset_prob(mask, prob_ex, prob_sted)
+                prob_ex = numpy.ones_like(prob_ex, dtype=numpy.float64)
+                prob_sted = numpy.ones_like(prob_sted, dtype=numpy.float64)
+                bleach_func(self, i_ex, i_sted, p_ex, p_sted, pdt, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex,
+                            prob_sted, k_ex, k_sted)
             sample_func(self, bleached_sub_datamaps_dict, row, col, h, w, mask, prob_ex, prob_sted)
-
-            # reset_prob(mask, prob_ex, prob_sted)
-            prob_ex = numpy.ones_like(prob_ex, dtype=numpy.float64)
-            prob_sted = numpy.ones_like(prob_sted, dtype=numpy.float64)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
@@ -255,9 +256,8 @@ def raster_func_dymin(
     if is_uniform:
         # Pre-calculates necessary variables
         effectives = numpy.zeros((num_steps, h, w), dtype=numpy.float64)
-        k_steds = numpy.zeros((num_steps, k_sted.shape[0], k_sted.shape[1]), dtype=numpy.float64)
-        k_exs = numpy.zeros((num_steps, k_ex.shape[0], k_ex.shape[1]), dtype=numpy.float64)
-
+        k_steds = numpy.zeros((num_steps, h, w), dtype=numpy.float64)
+        k_exs = numpy.zeros((num_steps, h, w), dtype=numpy.float64)
         for i in range(num_steps):
             effective = self.get_effective(datamap.pixelsize, p_ex, SCALE_POWER[i] * p_sted)
             effectives[i] = effective
