@@ -38,7 +38,7 @@ egfp = {
 pixelsize = 20e-9
 # Generating objects necessary for acquisition simulation
 laser_ex = base.GaussianBeam(488e-9)
-laser_sted = base.DonutBeam(575e-9, zero_residual=0, rate=40e6, tau=400e-12, anti_stoke=True)  #Similar to the labs microscope
+laser_sted = base.DonutBeam(575e-9, zero_residual=0, rate=40e6, tau=400e-12, anti_stoke=False)  #Similar to the labs microscope
 detector = base.Detector(noise=True, det_delay=750e-12, det_width=8e-9, background=0) #Similar to the labs microscope
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
