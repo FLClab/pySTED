@@ -53,9 +53,9 @@ class Beads():
 
         for row, col in beads_pos:
             if type(self.n_molecs) is int:
-                self.frame[row, col] += self.n_molecs
+                self.frame[row, col] = self.n_molecs
             elif type(self.n_molecs) is tuple:
-                self.frame[row, col] += np.random.randint(np.min(self.n_molecs), np.max(self.n_molecs))
+                self.frame[row, col] = np.random.randint(np.min(self.n_molecs), np.max(self.n_molecs))
             else:
                 raise TypeError("Class attribute n_molecs has to be an int or a tuple")
 
