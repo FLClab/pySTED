@@ -45,7 +45,8 @@ class Beads():
 
         self.frame = self.generate_frame()
 
-    def generate_frame(self):
+    def generate_frame(self, seed=None):
+        np.random.seed(seed)
         self.frame = np.zeros(self.img_shape)
 
         beads_pos = np.random.randint(self.img_shape, size=(self.n_beads, 2))
