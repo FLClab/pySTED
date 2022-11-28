@@ -30,6 +30,41 @@ def rotate_nds(nd_coords, rot_angle, frame_shape=(64, 64)):
 
     return rotated_nd_coords
 
+
+class Beads():
+    def __init__(self, n_molecs, n_beads, datamap_pixelsize_nm=20, img_shape=(64, 64), seed=None):
+        np.random.seed(seed)
+        self.img_shape = img_shape
+        self.datamap_pixelsize_nm = datamap_pixelsize_nm
+        if type(n_molecs) is int or type(n_molecs) is tuple:
+            self.n_molecs = n_molecs
+        else:
+            raise TypeError("Class attribute n_molecs has to be an int or a tuple")
+
+        self.n_beads = n_beads
+
+        self.frame = self.generate_frame()
+
+    def generate_frame(self):
+        self.frame = np.zeros(self.img_shape)
+
+        beads_pos = np.random.randint(self.img_shape, size=(self.n_beads, 2))
+
+        for row, col in beads_pos:
+            if type(self.n_molecs) is int:
+                self.frame[row, col] += self.n_molecs
+            elif type(self.n_molecs) is tuple:
+                self.frame[row, col] += np.random.randint(np.min(self.n_molecs), np.max(self.n_molecs))
+            else:
+                raise TypeError("Class attribute n_molecs has to be an int or a tuple")
+
+        return self.frame
+
+
+
+
+
+
 class Synapse():
     """
     Synapse class
