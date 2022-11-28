@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import time
 
 from pysted import base, utils
 from pysted import exp_data_gen as dg
@@ -37,7 +38,7 @@ egfp = {
 pixelsize = 20e-9
 # Generating objects necessary for acquisition simulation
 laser_ex = base.GaussianBeam(488e-9)
-laser_sted = base.DonutBeam(575e-9, zero_residual=0, rate=40e6, tau=400e-12, anti_stoke=True)  #Similar to the labs microscope
+laser_sted = base.DonutBeam(575e-9, zero_residual=0, rate=40e6, tau=400e-12, anti_stoke=False)  #Similar to the labs microscope
 detector = base.Detector(noise=True, det_delay=750e-12, det_width=8e-9, background=0) #Similar to the labs microscope
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
@@ -95,10 +96,11 @@ psf_sted = microscope.get_effective(pixelsize, action_spaces["p_ex"]["high"], ac
 # temporal element
 # First, we use the Synapse class in exp_data_gen to simulate a synapse-like structure and add nanostructures to it
 # You could use any integer-valued array as a Datamap
+
 shroom1 = dg.Synapse(5, mode="mushroom", seed=42)
 
 n_molecs_in_domain1, min_dist1 = 135, 50
-shroom1.add_nanodomains(10, min_dist_nm=min_dist1, n_molecs_in_domain=n_molecs_in_domain1, valid_thickness=7)
+shroom1.add_nanodomains(10, min_dist_nm=min_dist1, n_molecs_in_domain=n_molecs_in_domain1, valid_thickness=7, seed=42)
 
 # create the Datamap and set its region of interest
 dmap = base.Datamap(shroom1.frame, pixelsize)
@@ -106,7 +108,7 @@ dmap.set_roi(i_ex, "max")
 
 shroom2 = dg.Synapse(5, mode="mushroom", seed=42)
 n_molecs_in_domain2, min_dist2 = 0, 50
-shroom2.add_nanodomains(10, min_dist_nm=min_dist2, n_molecs_in_domain=n_molecs_in_domain2, valid_thickness=7)
+shroom2.add_nanodomains(10, min_dist_nm=min_dist2, n_molecs_in_domain=n_molecs_in_domain2, valid_thickness=7, seed=42)
 
 # create a temporal Datamap which will also contain information on the positions of nanodomains
 # We create a temporal element by making the nanostructures flash
@@ -145,17 +147,14 @@ temp_dmap.update_dicts({"flashes": time_idx})
 # (3) The acquired intensity. This is only useful when working in a temporal exeperiment setting, in which
 #     an acquisition could be interrupted by the flash happening through it.
 
-
 conf_acq, conf_bleached, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
-                                                              bleach=True, update=True)
+                                                              bleach=True, update=True, seed=42)
 conf_acq2, conf_bleached2, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
-                                                              bleach=True, update=True)
+                                                              bleach=True, update=True, seed=42)
 sted_acq, sted_bleached, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
-                                                              bleach=True, update=True)
+                                                              bleach=True, update=True, seed=42)
 sted_acq2, sted_bleached2, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
-                                                              bleach=True, update=True)
-
-
+                                                              bleach=True, update=True, seed=42)
 
 
 fig, axes = plt.subplots(2, 2)
