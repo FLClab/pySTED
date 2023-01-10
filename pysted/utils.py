@@ -953,6 +953,7 @@ def smooth_ramp_hand_crafted_light_curve_2(n_steps_rise=10, n_steps_decay=10, de
     light_curve = light_curve / np.max(light_curve)
     light_curve[delay:delay + n_steps_rise] = rise_values
     light_curve[:delay] = 0
+    light_curve *= n_molecules_multiplier
 
     return light_curve
 
