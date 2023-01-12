@@ -1678,7 +1678,7 @@ class TemporalSynapseDmap(Datamap):
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
         self.update_whole_datamap(0)
         
-    def create_t_stack_dmap_smooth_2(self, time_usec_step_correspondance, n_steps_rise=100,
+    def create_t_stack_dmap_smooth_2(self, time_usec_step_correspondance, exp_time_us=2000000, n_steps_rise=100,
                                      n_steps_decay=25, delay=0, end_pad=0, n_molecules_multiplier=20,
                                      individual_flashes=False):
         n_steps_light_curve = delay + n_steps_rise + n_steps_decay
@@ -1698,6 +1698,11 @@ class TemporalSynapseDmap(Datamap):
                 n_steps_rise=n_steps_rise,
                 end_pad=end_pad
             )
+            n_steps_total = flash_curve.shape[0]
+            if exp_time_us > n_steps_total * time_usec_step_correspondance:
+                n_steps_missing = int(exp_time_us - (n_steps_total * time_usec_step_correspondance))
+                missing_steps = numpy.ones(n_steps_missing + 1)
+                flash_curve = numpy.append(flash_curve, missing_steps)
             flash_curves.append(numpy.copy(flash_curve))
 
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
