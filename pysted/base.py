@@ -1704,6 +1704,8 @@ class TemporalSynapseDmap(Datamap):
                 n_steps_missing = int(n_usec_missing / time_usec_step_correspondance)
                 missing_steps = numpy.ones(n_steps_missing + 1)
                 flash_curve = numpy.append(flash_curve, missing_steps)
+            pyplot.plot(flash_curve)
+            pyplot.show()
             flash_curves.append(numpy.copy(flash_curve))
 
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
