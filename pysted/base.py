@@ -1646,6 +1646,8 @@ class TemporalSynapseDmap(Datamap):
                 n_molecules_multiplier=n_molecules_multiplier,
                 end_pad=end_pad
             )
+            pyplot.plot(flash_curve)
+            pyplot.show()
             flash_curves.append(numpy.copy(flash_curve))
 
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
