@@ -1678,13 +1678,14 @@ class TemporalSynapseDmap(Datamap):
         self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
         self.update_whole_datamap(0)
         
-    def create_t_stack_dmap_smooth_2(self, time_usec_step_correspondance, exp_time_us=2000000, n_steps_rise=100,
+    def create_t_stack_dmap_smooth_2(self, time_usec_step_correspondance, n_steps_rise=100,
                                      n_steps_decay=25, delay=0, end_pad=0, n_molecules_multiplier=20,
-                                     individual_flashes=False):
+                                     individual_flashes=False, **kwargs):
         n_steps_light_curve = delay + n_steps_rise + n_steps_decay
         self.time_usec_between_flash_updates = int(time_usec_step_correspondance)
         self.decay_time_us = int(n_steps_decay / self.time_usec_between_flash_updates)
         self.sub_datamaps_dict["base"] = self.base_datamap
+        exp_time_us = kwargs.get("exp_time_us", 2000000)
 
         if type(delay) is tuple:
             delay = numpy.random.randint(delay[0], delay[1])
