@@ -1721,15 +1721,17 @@ class TemporalSynapseDmap(Datamap):
             #     nd_mult = 0
             for nd_idx, nanodomain in enumerate(self.synapse.nanodomains):
                 if not individual_flashes:
-                    nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+                    # nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+                    nd_mult = nanodomains_multiplier - 1
                     if nd_mult < 0:
                         nd_mult = 0
                 else:
-                    nd_mult = int(numpy.round(flash_curves[nd_idx][t])) - 1
+                    # nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+                    nd_mult = nanodomains_multiplier - 1
                     if nd_mult < 0:
                         nd_mult = 0
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
-                    self.synapse.n_molecs_base * nd_mult    # - self.synapse.n_molecs_base
+                    int(self.synapse.n_molecs_base * nd_mult)    # - self.synapse.n_molecs_base
                 # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
             if self.flash_tstack[t].max() > 0:
                 self.nanodomains_active.append(True)
