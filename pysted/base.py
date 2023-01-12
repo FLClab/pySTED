@@ -1646,6 +1646,7 @@ class TemporalSynapseDmap(Datamap):
                 n_molecules_multiplier=n_molecules_multiplier,
                 end_pad=end_pad
             )
+            print(flash_curve)
             pyplot.plot(flash_curve)
             pyplot.show()
             flash_curves.append(numpy.copy(flash_curve))
@@ -1706,6 +1707,7 @@ class TemporalSynapseDmap(Datamap):
                 n_steps_missing = int(n_usec_missing / time_usec_step_correspondance)
                 missing_steps = numpy.ones(n_steps_missing + 1)
                 flash_curve = numpy.append(flash_curve, missing_steps)
+            print(flash_curve)
             pyplot.plot(flash_curve)
             pyplot.show()
             flash_curves.append(numpy.copy(flash_curve))
