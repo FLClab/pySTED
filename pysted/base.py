@@ -1700,7 +1700,8 @@ class TemporalSynapseDmap(Datamap):
             )
             n_steps_total = flash_curve.shape[0]
             if exp_time_us > n_steps_total * time_usec_step_correspondance:
-                n_steps_missing = int(exp_time_us - (n_steps_total * time_usec_step_correspondance))
+                n_usec_missing = int(exp_time_us - (n_steps_total * time_usec_step_correspondance))
+                n_steps_missing = int(n_usec_missing / time_usec_step_correspondance)
                 missing_steps = numpy.ones(n_steps_missing + 1)
                 flash_curve = numpy.append(flash_curve, missing_steps)
             flash_curves.append(numpy.copy(flash_curve))
