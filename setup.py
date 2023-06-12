@@ -1,4 +1,7 @@
 
+import os 
+import setuptools
+
 from distutils.command.build_py import build_py
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
@@ -21,7 +24,12 @@ setup(name="pysted",
       version=".".join((pysted.__version__, pysted.__revision__)),
       description="STED image simulator in Python",
       author=pysted.__author__,
-      packages=["pysted"],
+      packages=setuptools.find_packages(where="."),
+      package_data={"pysted" : [
+          "data/examples/factin/*.npy",
+          "data/examples/psd95/*.npy",
+          "data/examples/tubulin/*.npy"
+      ]},
       platforms=["any"],
       license="LGPL",
       ext_modules = cythonize(ext_modules),
@@ -46,5 +54,6 @@ setup(name="pysted",
         "tifffile",
         "tqdm",
         "pyqt5",
-      ]
+      ],
+      include_package_data=True
 )

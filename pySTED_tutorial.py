@@ -38,7 +38,7 @@ egfp = {
 pixelsize = 20e-9
 # Generating objects necessary for acquisition simulation
 laser_ex = base.GaussianBeam(488e-9)
-laser_sted = base.DonutBeam(575e-9, zero_residual=0, rate=40e6, tau=400e-12, anti_stoke=True)  #Similar to the labs microscope
+laser_sted = base.DonutBeam(575e-9, zero_residual=0, rate=40e6, tau=400e-12, anti_stoke=False)  #Similar to the labs microscope
 detector = base.Detector(noise=True, det_delay=750e-12, det_width=8e-9, background=0) #Similar to the labs microscope
 objective = base.Objective()
 fluo = base.Fluorescence(**egfp)
@@ -152,14 +152,9 @@ conf_acq, conf_bleached, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsi
 conf_acq2, conf_bleached2, _ = microscope.get_signal_and_bleach(dmap, dmap.pixelsize, **conf_params,
                                                               bleach=True, update=False, seed=42)
 sted_acq, sted_bleached, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
-                                                              bleach=True, update=False, seed=42)
-times = []
-for _ in range(10):
-    start = time.time()
-    sted_acq2, sted_bleached2, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
-                                                                  bleach=True, update=True, seed=42)
-    times.append(time.time() - start)
-print(np.mean(times), np.std(times))
+                                                              bleach=True, update=True, seed=42)
+sted_acq2, sted_bleached2, _ = microscope.get_signal_and_bleach(temp_dmap, temp_dmap.pixelsize, **sted_params,
+                                                              bleach=True, update=True, seed=42)
 
 
 fig, axes = plt.subplots(2, 2)

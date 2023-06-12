@@ -920,6 +920,44 @@ def sampled_flash_manipulations(events_curves_path, delay, rescale=True, seed=No
     return sampled_light_curve
 
 
+def smooth_ramp_hand_crafted_light_curve_2(n_steps_rise=10, n_steps_decay=10, delay=0, n_molecules_multiplier=None,
+                                           end_pad=0):
+    if n_molecules_multiplier is None:
+        n_molecules_multiplier = numpy.random.randint(20, 35)
+    if type(n_molecules_multiplier) is tuple:
+        n_molecules_multiplier = numpy.random.randint(n_molecules_multiplier[0], n_molecules_multiplier[1])
+
+    mean = 0
+    std = 1
+    variance = np.square(std)
+    x = np.arange(-5, 5, .01)
+    f = np.exp(-np.square(x - mean) / 2 * variance) / (np.sqrt(2 * np.pi * variance))
+
+    gaussian_rise_full_res = f[:int(f.shape[0]/2)]
+    # first ~third of the gaussian rise are values close to 0, dont need them
+    gaussian_rise_full_res = gaussian_rise_full_res[int(gaussian_rise_full_res.shape[0] / 3):]
+    gaussian_rise_full_res = gaussian_rise_full_res / np.max(gaussian_rise_full_res)
+
+    rise_indices = np.linspace(0, gaussian_rise_full_res.shape[0] - 1, num=n_steps_rise, dtype=int)
+    rise_values = gaussian_rise_full_res[rise_indices]
+
+    # why is it so hard for me to plot an exponential decay
+    tau = 3
+    tmax = 10
+    t = np.linspace(0, tmax, n_steps_decay)
+    y = n_molecules_multiplier * np.exp(-t / tau)
+
+    light_curve = np.ones(delay + n_steps_rise + n_steps_decay + end_pad + 1)
+    light_curve[delay + n_steps_rise - 1:delay + n_steps_rise - 1 + y.shape[0]] *= y
+    # light_curve = numpy.where(light_curve < 1, 1, light_curve)
+    light_curve = light_curve / np.max(light_curve)
+    light_curve[delay:delay + n_steps_rise] = rise_values
+    light_curve[:delay] = 0
+    light_curve *= n_molecules_multiplier
+
+    return light_curve
+
+
 def hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
     """
     Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.

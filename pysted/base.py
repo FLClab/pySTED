@@ -971,24 +971,42 @@ class Microscope:
                   * A 2D array of the detection PSF.
         '''
 
-        def compute_lasers(datamap_pixelsize_nm):
-            self.__cache[datamap_pixelsize_nm] = {}
+        def compute_lasers(datamap_pixelsize_nm, reset_cache=True):
+            """
+            We only reset the components in the cache if it is necessary
+            """
+            if reset_cache:
+                self.__cache[datamap_pixelsize_nm] = {}
+
             f, n, na = self.objective.f, self.objective.n, self.objective.na
 
-            transmission = self.objective.get_transmission(self.excitation.lambda_)
-            i_ex = self.excitation.get_intensity(1, f, n, na,
+            # Verifies excitation laser
+            if self.excitation == self.__cache[datamap_pixelsize_nm].get("excitation", None):
+                i_ex, _, _ = self.__cache[datamap_pixelsize_nm]["lasers"]
+            else:
+                transmission = self.objective.get_transmission(self.excitation.lambda_)
+                i_ex = self.excitation.get_intensity(1, f, n, na,
+                                                     transmission, datamap_pixelsize)
+
+            # Verifies STED laser
+            if self.sted == self.__cache[datamap_pixelsize_nm].get("sted", None):
+                _, i_sted, _ = self.__cache[datamap_pixelsize_nm]["lasers"]
+            else:
+                transmission = self.objective.get_transmission(self.sted.lambda_)
+                i_sted = self.sted.get_intensity(1, f, n, na,
                                                  transmission, datamap_pixelsize)
 
-            transmission = self.objective.get_transmission(self.sted.lambda_)
-            i_sted = self.sted.get_intensity(1, f, n, na,
-                                             transmission, datamap_pixelsize)
+            # Verifies fluo
+            if self.fluo == self.__cache[datamap_pixelsize_nm].get("fluo", None):
+                _, _, psf_det = self.__cache[datamap_pixelsize_nm]["lasers"]
+            else:
+                transmission = self.objective.get_transmission(self.fluo.lambda_)
+                psf = self.fluo.get_psf(na, datamap_pixelsize)
+                # should take data_pixelsize instead of pixelsize, right? same for psf above?
+                psf_det = self.detector.get_detection_psf(self.fluo.lambda_, psf,
+                                                          na, transmission,
+                                                          datamap_pixelsize)
 
-            transmission = self.objective.get_transmission(self.fluo.lambda_)
-            psf = self.fluo.get_psf(na, datamap_pixelsize)
-            # should take data_pixelsize instead of pixelsize, right? same for psf above?
-            psf_det = self.detector.get_detection_psf(self.fluo.lambda_, psf,
-                                                      na, transmission,
-                                                      datamap_pixelsize)
             self.__cache[datamap_pixelsize_nm]["lasers"] = utils.resize(i_ex, i_sted, psf_det)
             self.__cache[datamap_pixelsize_nm]["objective"] = self.objective
             self.__cache[datamap_pixelsize_nm]["excitation"] = self.excitation
@@ -997,12 +1015,12 @@ class Microscope:
 
         datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
         if datamap_pixelsize_nm not in self.__cache:
-            compute_lasers(datamap_pixelsize_nm)
+            compute_lasers(datamap_pixelsize_nm, reset_cache=True)
         elif (self.__cache[datamap_pixelsize_nm]["objective"] != self.objective) or \
              (self.__cache[datamap_pixelsize_nm]["excitation"] != self.excitation) or \
              (self.__cache[datamap_pixelsize_nm]["sted"] != self.sted) or \
              (self.__cache[datamap_pixelsize_nm]["fluo"] != self.fluo):
-            compute_lasers(datamap_pixelsize_nm)
+            compute_lasers(datamap_pixelsize_nm, reset_cache=False)
 
         if save_cache:
             pickle.dump(self.__cache, open(".microscope_cache.pkl", "wb"))
@@ -1086,7 +1104,7 @@ class Microscope:
     def get_signal_and_bleach(self, datamap, pixelsize, pdt, p_ex, p_sted, indices=None, acquired_intensity=None,
                               pixel_list=None, bleach=True, update=True, seed=None, filter_bypass=False,
                               bleach_func=bleach_funcs.default_update_survival_probabilities, steps=None,
-                              prob_ex=None, prob_sted=None, bleach_mode="default"):
+                              prob_ex=None, prob_sted=None, bleach_mode="default", *args, **kwargs):
         """
         This function acquires the signal and bleaches simultaneously. It makes a call to compiled C code for speed,
         so make sure the raster.pyx file is compiled!
@@ -1335,7 +1353,6 @@ class Microscope:
         """
         self.pixel_bank = 0
 
-
 class Datamap:
     """
     This class implements a datamap, containing a disposition of molecules and a ROI to image.
@@ -1448,7 +1465,6 @@ class Datamap:
             raise ValueError("Bleached datamap to set as new datamap has to be of the same shape as the datamap pre "
                              "bleaching.")
         self.whole_datamap = bleached_datamap
-
 
 class TemporalDatamap(Datamap):
     """
@@ -1666,6 +1682,67 @@ class TemporalSynapseDmap(Datamap):
                         nd_mult = 0
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
                     self.synapse.n_molecs_base * nd_mult    # - self.synapse.n_molecs_base
+                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
+            if self.flash_tstack[t].max() > 0:
+                self.nanodomains_active.append(True)
+            else:
+                self.nanodomains_active.append(False)
+
+        self.nanodomains_active_currently = self.nanodomains_active[0]
+        self.contains_sub_datamaps["flashes"] = True
+        self.sub_datamaps_idx_dict["flashes"] = 0
+        self.sub_datamaps_dict["flashes"] = self.flash_tstack[0]
+        self.update_whole_datamap(0)
+        
+    def create_t_stack_dmap_smooth_2(self, time_usec_step_correspondance, n_steps_rise=100,
+                                     n_steps_decay=25, delay=0, end_pad=0, n_molecules_multiplier=20,
+                                     individual_flashes=False, **kwargs):
+        n_steps_light_curve = delay + n_steps_rise + n_steps_decay
+        self.time_usec_between_flash_updates = int(time_usec_step_correspondance)
+        self.decay_time_us = int(n_steps_decay / self.time_usec_between_flash_updates)
+        self.sub_datamaps_dict["base"] = self.base_datamap
+        exp_time_us = kwargs.get("exp_time_us", 2000000)
+
+        if type(delay) is tuple:
+            delay = numpy.random.randint(delay[0], delay[1])
+
+        flash_curves = []
+        for i in range(len(self.synapse.nanodomains)):
+            flash_curve = utils.smooth_ramp_hand_crafted_light_curve_2(
+                delay=delay,
+                n_steps_decay=n_steps_decay,
+                n_molecules_multiplier=n_molecules_multiplier,
+                n_steps_rise=n_steps_rise,
+                end_pad=end_pad
+            )
+            n_steps_total = flash_curve.shape[0]
+            if exp_time_us > n_steps_total * time_usec_step_correspondance:
+                n_usec_missing = int(exp_time_us - (n_steps_total * time_usec_step_correspondance))
+                n_steps_missing = int(n_usec_missing / time_usec_step_correspondance)
+                missing_steps = numpy.ones(n_steps_missing + 1)
+                flash_curve = numpy.append(flash_curve, missing_steps)
+            flash_curves.append(numpy.copy(flash_curve))
+
+        self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
+        self.nanodomains_active = []
+        for t, nanodomains_multiplier in enumerate(flash_curve):
+            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
+            # nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+            # if nd_mult < 0:
+            #     nd_mult = 0
+            for nd_idx, nanodomain in enumerate(self.synapse.nanodomains):
+                if not individual_flashes:
+                    # nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+                    nd_mult = nanodomains_multiplier - 1
+                    if nd_mult < 0:
+                        nd_mult = 0
+                else:
+                    # nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
+                    nd_mult = nanodomains_multiplier - 1
+                    if nd_mult < 0:
+                        nd_mult = 0
+                self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
+                    int(self.synapse.n_molecs_base * nd_mult)    # - self.synapse.n_molecs_base
                 # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
             if self.flash_tstack[t].max() > 0:
                 self.nanodomains_active.append(True)

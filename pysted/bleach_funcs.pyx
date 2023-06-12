@@ -36,7 +36,6 @@ def default_update_survival_probabilities(object self,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex=None,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_sted=None,):
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
-    #cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex, k_sted
     cdef int s, sprime, t, tprime
     cdef float prob
     cdef float rsamp
@@ -57,10 +56,8 @@ def default_update_survival_probabilities(object self,
     if k_ex is None:
         k_ex = k_sted * 0.
     for (s, t) in mask:
-        sprime = s - row
-        tprime = t - col
-        prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[sprime, tprime] * step)
-        prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[sprime, tprime] * step)
+        prob_ex[s, t] = prob_ex[s, t] * exp(-1. * k_ex[s, t] * step)
+        prob_sted[s, t] = prob_sted[s, t] * exp(-1. * k_sted[s, t] * step)
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
@@ -88,12 +85,14 @@ def sample_molecules(object self,
 
     for key in bleached_sub_datamaps_dict:
         datamap = bleached_sub_datamaps_dict[key]
-        for (s, t) in mask:
+        for (sprime, tprime) in mask:
+            s = sprime + row
+            t = tprime + col
             current = datamap[s, t]
             if current > 0:
                 # Calculates the binomial sampling
                 sampled_value = 0
-                prob = prob_ex[s, t] * prob_sted[s, t]
+                prob = prob_ex[sprime, tprime] * prob_sted[sprime, tprime]
                 # For each count we sample a random variable
                 for o in range(current):
                     rsamp = rand()
