@@ -565,10 +565,17 @@ class Detector:
                           either a scalar or an array shaped like *nb_photons*.
         :returns: An array shaped like *nb_photons*.
         '''
+        if isinstance(photons, int):
+            photons = numpy.array([photons], dtype=numpy.int64)
+
         detection_efficiency = self.pcef * self.pdef # ratio
         if seed is None:
-            seed = int(str(time.time_ns())[-5:-1])
-            numpy.random.seed(seed)
+            # On Windows this seems to be causing some problems when get_signal
+            # is called repeatedly since time_ns may not be fast enough...
+            # Leaving the seed to None, seems to do the trick.
+            # seed = int(str(time.time_ns())[-5:-1])
+            # numpy.random.seed(seed)
+            pass
         else:
             numpy.random.seed(seed)
         try:

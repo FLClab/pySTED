@@ -33,6 +33,8 @@ def approx_binomial(n, p, size=None):
     :param size: The shape of the output (int or tuple of ints, optional).
     :returns: 64-bit int or array of 64-bit ints.
     '''
+    if not isinstance(n, numpy.ndarray):
+        n = numpy.array(n, dtype=numpy.int64)
     is_0 = n == 0
     n[is_0] = 1
     gaussian = numpy.random.normal(n*p, numpy.sqrt(n*p*(1-p)), size=size)
