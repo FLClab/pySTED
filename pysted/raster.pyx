@@ -197,7 +197,7 @@ def raster_func_dymin(
         int laser_pad,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_ex,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted,
-        numpy.ndarray[INT64DTYPE_t, ndim=2] returned_photons,
+        numpy.ndarray[FLOATDTYPE_t, ndim=2] returned_photons,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] scaled_power,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] pdt_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_ex_roi,
