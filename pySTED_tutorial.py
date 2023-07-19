@@ -67,7 +67,7 @@ conf_params = {
 # generate the microscope from its constituent parts
 # if load_cache is true, it will load the previously generated microscope. This can save time if a
 # microscope was previsously generated and used the same pixelsize we are using now
-microscope = microscopes.RESCueMicroscope(laser_ex, laser_sted, detector, objective, fluo, load_cache=True)
+microscope = base.Microscope(laser_ex, laser_sted, detector, objective, fluo, load_cache=True)
 i_ex, i_sted, _ = microscope.cache(pixelsize, save_cache=True)
 psf_conf = microscope.get_effective(pixelsize, action_spaces["p_ex"]["high"], 0.0)
 psf_sted = microscope.get_effective(pixelsize, action_spaces["p_ex"]["high"], action_spaces["p_sted"]["high"] * 0.25)

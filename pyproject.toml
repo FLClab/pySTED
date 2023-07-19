@@ -6,3 +6,54 @@ requires = [
     "cython",
     "oldest-supported-numpy"
 ]
+
+[project]
+name = "pysted"
+authors = [
+    {name = "Audrey Durand"},
+    {name = "Benoit Turcotte"},
+    {name = "Anthony Bilodeau"},
+    {name = "Albert Michaud-Gagnon"}
+]
+dynamic = ["version", "readme"]
+description = "STED image simulator in Python"
+dependencies = [
+    "certifi",
+    "cycler",
+    "Cython",
+    "decorator",
+    "imageio",
+    "kiwisolver",
+    "matplotlib",
+    "networkx",
+    "numpy",
+    "pyparsing",
+    "python-dateutil",
+    "PyWavelets",
+    "scikit-image",
+    "scipy",
+    "six",
+    "tifffile",
+    "tqdm",
+    "pyqt5",
+]
+license={text="LGPL"}
+
+[tool.setuptools.dynamic]
+version = {attr = "pysted.VERSION"}
+readme = {file = ["REAME.md"]}
+
+[tool.setuptools]
+# ...
+# By default, include-package-data is true in pyproject.toml, so you do
+# NOT have to specify this line.
+include-package-data = true
+
+[tool.setuptools.packages.find]
+# scanning for namespace packages is true by default in pyproject.toml, so
+# you do NOT need to include the following line.
+namespaces = true
+where = ["."]
+
+[tool.setuptools.package-data]
+"*" = ["*.npy"]

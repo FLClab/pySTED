@@ -1,7 +1,6 @@
 
 import time
 import numpy
-import bleach_funcs
 cimport numpy
 cimport cython
 import copy

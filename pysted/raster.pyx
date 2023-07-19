@@ -2,7 +2,6 @@
 import time
 import numpy
 from matplotlib import pyplot as plt
-import bleach_funcs
 cimport numpy
 import scipy
 cimport cython
@@ -19,7 +18,6 @@ ctypedef numpy.int64_t INT64DTYPE_t
 ctypedef numpy.float64_t FLOATDTYPE_t
 
 
-
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
 def reset_prob(
@@ -31,19 +29,6 @@ def reset_prob(
     for (s, t) in mask:
         prob_ex[s, t] = 1.0
         prob_sted[s, t] = 1.0
-
-@cython.boundscheck(False)  # turn off bounds-checking for entire function
-@cython.wraparound(False)  # turn off negative index wrapping for entire function
-def reset_prob(
-    list mask,
-    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_ex,
-    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted
-):
-    cdef int s, t
-    for (s, t) in mask:
-        prob_ex[s, t] = 1.0
-        prob_sted[s, t] = 1.0
-
 
 @cython.boundscheck(False)  # turn off bounds-checking for entire function
 @cython.wraparound(False)  # turn off negative index wrapping for entire function
