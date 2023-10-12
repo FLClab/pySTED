@@ -917,7 +917,7 @@ class Microscope:
                        with the same pixel_size as the pixel_size which will be used in the current experiment.
     '''
 
-    def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False):
+    def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False, verbose=False):
         self.excitation = excitation
         self.sted = sted
         self.detector = detector
@@ -940,10 +940,11 @@ class Microscope:
                     self.__cache = {}
 
             except Exception as e:
-                logging.warning("-----------------")
-                logging.warning(f"an error was caught while trying to load microscope cache")
-                logging.warning(e)
-                logging.warning("-----------------")
+                if verbose:
+                    logging.warning("-----------------")
+                    logging.warning(f"an error was caught while trying to load microscope cache")
+                    logging.warning(e)
+                    logging.warning("-----------------")
 
         # This will be used during the acquisition routine to make a better correspondance
         # between the microscope acquisition time steps and the Ca2+ flash time steps
