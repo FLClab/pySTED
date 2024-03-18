@@ -1,11 +1,12 @@
 [build-system]
 # Minimum requirements for the build system to execute.
 requires = [
-    "setuptools",
+    "setuptools>=61.0",
     "wheel",
     "cython",
     "oldest-supported-numpy"
 ]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "pysted"
@@ -17,6 +18,8 @@ authors = [
 ]
 dynamic = ["version", "readme"]
 description = "STED image simulator in Python"
+keywords = ["microscopy", "sted", "simulation"]
+requires-python = ">=3.8"
 dependencies = [
     "certifi",
     "cycler",
@@ -34,10 +37,13 @@ dependencies = [
     "scipy",
     "six",
     "tifffile",
-    "tqdm",
-    "pyqt5",
+    "tqdm"
 ]
-license={text="LGPL"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
 
 [tool.setuptools.dynamic]
 version = {attr = "pysted.VERSION"}
@@ -57,3 +63,20 @@ where = ["."]
 
 [tool.setuptools.package-data]
 "*" = ["*.npy"]
+
+[project.urls]
+Homepage = "https://github.com/FLClab/pySTED"
+Issues = "https://github.com/FLClab/pySTED/issues"
+
+[tool.cibuildwheel]
+before-all = "uname -a"
+build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*"]
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "manylinux2014"
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
