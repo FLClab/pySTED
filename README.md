@@ -1,42 +1,31 @@
+<img src="doc/img/figure0_v0.png">
+
 # pySTED
 
-The pySTED simulator aims to realistically simulate STED imaging acquisitions. The implementation follows from the analytical descriptions of STED microscopy mechanisms.
+<a target="_blank" href="https://colab.research.google.com/drive/128pOe4KwnZ7MH6HFcd-mG1HjwDWvohnq?usp=sharing">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
-The simulator consists in a microscope that acquires images on a datamap describing the structure to image. The microscope is comprised of five objects : the excitation and STED beams, an objective lens, a detector, and the photophysical parameters of the fluorophores. Each object is characterized by adjustable parameters which will affect the image signal, such as the fluorophore's quantum yield, the detector's efficiency, and the background signal. The datamap is represented by a 2D array in which each element of the structure of interest indicates the number of fluorescent molecules at that position.
+We have built a realistic STED simulation platform within the Python environment, namely pysted. pysted breaks down a STED acquisition into its main constituents: wavelength dependent focusing properties of the objective lens, fluorophore excitation and depletion, and fluorescence detection. Each step of the acquisition process corresponds to an independent component of the pipeline and is created with its own parameters that users can modify according to their experimental requirements. Generating a synthetic image with the pysted simulator requires the user to specify the positions of the emitters in the field of view (referred to as datamap) and to provide the characteristics of the fluorophore). The emission and photobleaching properties of the fluorophores that are implemented in pysted and inspired from previous theoretical and experimental models. As in a real experiment, the datamap is continuously being updated during the simulation process to realistically simulate point-scanning acquisition schemes.
 
 ## Installation
 
 We recommend using a virtual environment in which to install pySTED. [Anaconda](https://docs.anaconda.com/anaconda/install/index.html) facilitates the creation of a virtual environment on most operating system. For exemple, a virtual environment can be created using
 ```bash
-conda create --name venv python=3.8
-conda activate venv
-```
-
-Otherwise, a virtual environment can be created using the built-in python functionalities. This will create a folder named venv inside the pySTED folder which can then be activated depending on the operating system.
-```bash
-python -m venv ./venv
-
-# On Windows
-venv\Scripts\activate.bat
-
-# On Linux / MAC os
-source ./venv/bin/activate
+conda create --name pysted python=3.10
+conda activate pysted
 ```
 
 ### Using pip
 
 We do not provide a pypi installation package (yet). The user can however install pySTED using the url of the current repository
 ```bash
-python -m pip install git+https://github.com/FLClab/pySTED
+pip install pysted
 ```
 
 ### From source 
 
-I will detail here how to setup the installation of pySTED inside its own virtual environment. This ensures all the
-necessary packages are installed and that the C functions are compiled. pySTED uses some C functions for performance 
-gains, which need to be compiled before execution. 
-
-Once the repository is cloned on your computer 
+Clone the repository on your computer 
 ```bash
 git clone https://github.com/FLClab/pySTED.git
 ```
@@ -47,9 +36,19 @@ python -m pip install -r pySTED/requirements.txt
 python -m pip install -e pySTED
 ```
 
-## Example
+*Note.* Using the local install will require to compile the cython code that are required in pySTED.
+
+## Usage
+
+We highly recommend to run the provided notebook to get some insight about how to use pySTED. 
+
+### Notebook
+
+A [Google Colab](https://colab.research.google.com/drive/128pOe4KwnZ7MH6HFcd-mG1HjwDWvohnq?usp=sharing) jupyter notebook is provided to learn the basics of `pysted`.
+
+### Local
   
-Once the C functions are compiled, try running the script. It shows the basic workings of pySTED.
+Once `pysted` is installed, running the example script should be possible.
 ```bash 
-python simple_example_script.py
+python pySTED_tutorial.py
 ```
