@@ -1,4 +1,4 @@
-<img src="doc/img/figure0_v0.png">
+<img src="docs/img/figure0_v0.png">
 
 # pySTED
 

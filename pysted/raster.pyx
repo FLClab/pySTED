@@ -1,4 +1,7 @@
 
+'''Cython implementations of the raster functions
+'''
+
 import time
 import numpy
 from matplotlib import pyplot as plt
@@ -53,8 +56,7 @@ def raster_func_c_self_bleach_split_g(
         object sample_func,
         list steps
 ):
-    """
-    raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
+    """raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
     excitation power (p_ex) AND/OR sted power (p_sted) AND/OR pixel dwell time vary through the sample. 
     This function thus requires these parameters to be passed as arrays of floats the same size as the ROI being imaged.
 

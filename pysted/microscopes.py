@@ -1,13 +1,14 @@
 
-'''This modules implements different configuration of a `base.Microscope`.
+'''This modules implements different configuration of a ``base.Microscope``.
 
 Currently implemented microscopes are 
-- `DyMINMicroscope`
-- `DyMINRESCueMicroscope`
-- `RESCueMicroscope`
 
-Implementing their own microscope requires to reimplement the `get_signal_and_bleach` 
-method of a `base.Microscope`.
+* ``DyMINMicroscope``
+* ``DyMINRESCueMicroscope``
+* ``RESCueMicroscope``
+
+Implementing their own microscope requires to reimplement the ``get_signal_and_bleach`` 
+method of a ``base.Microscope``.
 
 .. rubric:: References
 
@@ -24,8 +25,7 @@ import random
 from pysted import base, utils, raster, bleach_funcs
 
 class DyMINMicroscope(base.Microscope):
-    """
-    Implements a `DyMINMicroscope`.
+    '''Implements a ``DyMINMicroscope``.
 
     Refer to [Heine2017]_ for details about DyMIN microscopy.
 
@@ -39,10 +39,10 @@ class DyMINMicroscope(base.Microscope):
             "decision_time" : [10e-6, 10e-6, -1], # Time to acquire photons
             "threshold_count" : [8, 8, 0] # Minimal number of photons for next step
         }
-    """
+    '''
     def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False, opts=None, verbose=False):
         """
-        Instantiates the `DyMINMicroscope`
+        Instantiates the ``DyMINMicroscope``
 
         :param excitation: A :class:`~pysted.base.GaussianBeam` object
                         representing the excitation laser beam.

@@ -1,4 +1,7 @@
 
+'''Cython implementations of the photobleaching functions.
+'''
+
 import time
 import numpy
 cimport numpy
@@ -34,6 +37,8 @@ def default_update_survival_probabilities(object self,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex=None,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_sted=None,):
+    """Updates the survival probabilities
+    """
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef int s, sprime, t, tprime
     cdef float prob
@@ -69,6 +74,8 @@ def sample_molecules(object self,
                    list mask,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_ex,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted):
+    """Binomial sampling of the number of molecules at each position within the datamap.
+    """
     cdef int s, sprime, t, tprime, o
     cdef int sampled_value
     cdef float prob
