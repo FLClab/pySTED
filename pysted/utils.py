@@ -10,14 +10,12 @@ import numpy
 import numpy as np
 import scipy, scipy.constants, scipy.integrate
 
-# import mis par BT
 import math
 import random
 import warnings
 import tifffile
 import os
 
-# import mis par BT pour des tests :)
 from matplotlib import pyplot
 import time
 from pysted import temporal, raster
@@ -836,7 +834,6 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
        W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
        Cambridge University Press ISBN-13: 9780521880688
     ----------
-    ça parait tu que j'ai copy pasta cette fonction de stack overflow ou non
     """
 
     # try:
@@ -943,7 +940,6 @@ def smooth_ramp_hand_crafted_light_curve_2(n_steps_rise=10, n_steps_decay=10, de
     rise_indices = np.linspace(0, gaussian_rise_full_res.shape[0] - 1, num=n_steps_rise, dtype=int)
     rise_values = gaussian_rise_full_res[rise_indices]
 
-    # why is it so hard for me to plot an exponential decay
     tau = 3
     tmax = 10
     t = np.linspace(0, tmax, n_steps_decay)
@@ -970,7 +966,6 @@ def hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=2
     :returns: The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
               then decays back to 1 over t = n_decay_steps steps, and stays flat at 1 for end_pad + 1 steps
     """
-    # why is it so hard for me to plot an exponential decay
     tau = 3
     tmax = 10
     t = np.linspace(0, tmax, n_decay_steps)
@@ -999,7 +994,6 @@ def smooth_ramp_hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_
     if type(n_molecules_multiplier) is tuple:
         n_molecules_multiplier = numpy.random.randint(n_molecules_multiplier[0], n_molecules_multiplier[1])
 
-    # why is it so hard for me to plot an exponential decay
     tau = 3
     tmax = 10
     t = np.linspace(0, tmax, n_decay_steps)
@@ -1027,7 +1021,6 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
     :return: the fiber object and the polygon objects representing the synapses
     """
     min_array, max_array = numpy.asarray((fibre_min, fibre_min)), numpy.asarray((fibre_max, fibre_max))
-    # jpense jpeux controller l'angle aussi
     fibre = temporal.Fiber(random_params={"num_points": (fibre_min, fibre_max),
                                                     "pos": [numpy.zeros((1, 2)) + min_array,
                                                             datamap_shape - max_array],
@@ -1048,9 +1041,6 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
             synapse_positions = numpy.expand_dims(synapse_positions, 0).astype(int)
             n_added += 1
             continue
-        # comparer la distance du point samplé à tous les points dans la liste
-        # vérifier qu'elle est plus grande que min_distance pour tous les points déjà présents,
-        # si c'est le cas, l'ajouter à la liste, sinon continuer le while :)
         else:
             sample_to_verify = numpy.expand_dims(numpy.copy(sampled_node), axis=0).astype(int)
             synapse_positions = numpy.append(synapse_positions, sample_to_verify, axis=0).astype(int)
@@ -1132,7 +1122,7 @@ def generate_secondary_fibers(datamap_shape, main_fiber, n_sec, min_dist=10, sec
 def generate_synapses_on_fiber(datamap_shape, main_fiber, n_syn, min_dist, synapse_scale=(5, 10)):
     """
     Generates polygon objects (representing synapses) on the main fiber
-    *** add a seed? ***
+    
     :param datamap_shape: The shape of the datamap on which the main_fiber lies
     :param main_fiber: Fiber object representing the main branch
     :param n_syn: The interval from which we will sample the number of synapses to spawn (tuple)
@@ -1157,9 +1147,6 @@ def generate_synapses_on_fiber(datamap_shape, main_fiber, n_syn, min_dist, synap
             synapse_positions = numpy.expand_dims(synapse_positions, 0).astype(int)
             n_added += 1
             continue
-        # comparer la distance du point samplé à tous les points dans la liste
-        # vérifier qu'elle est plus grande que min_distance pour tous les points déjà présents,
-        # si c'est le cas, l'ajouter à la liste, sinon continuer le while :)
         else:
             sample_to_verify = numpy.expand_dims(numpy.copy(sampled_node), axis=0).astype(int)
             synapse_positions = numpy.append(synapse_positions, sample_to_verify, axis=0).astype(int)
@@ -1184,10 +1171,12 @@ def generate_synapses_on_fiber(datamap_shape, main_fiber, n_syn, min_dist, synap
 def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, min_fiber_dist=3, min_synapse_dist=1,
                              sec_fiber_len=(10, 20), synapse_scale=(5, 5), seed=None):
     """
-    This function wraps up the generation of fibers with secondary branches and synapses in a neat little package :)
-    - Add variable number of synapses, distances, ?
+    This function wraps up the generation of fibers with secondary branches and synapses in a stand-alone function
+
+    TODO:
+    - Add variable number of synapses, distances, 
     - Add "position identifiers" to the synapses so I can easily make them flash after
-    - ??
+
     :param image_shape: The shape of the ROI in which we want to spawn stuff
     :param main_nodes: ???
     :param n_sec_fibers: The interval for the number of secondary fibers branching from the main fiber (tuple)
@@ -1212,7 +1201,6 @@ def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, 
                                                "scale": (1, 5)}, seed=seed)
 
     # generate secondary fibers
-    # ces params là devraient être ajustables
     sec_fibers = generate_secondary_fibers(image_shape, fibre_rand, n_sec_fibers, min_fiber_dist,
                                            sec_len=sec_fiber_len, seed=seed)
 
@@ -1223,15 +1211,13 @@ def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, 
                                                         synapse_scale=synapse_scale)
         synapses_lists.append(ith_fiber_synapses)
 
-    roi = ((0, 0), image_shape)  # jtrouve que la façon de gérer la shape de l'ensemble est weird
+    roi = ((0, 0), image_shape)
     ensemble_test = temporal.Ensemble(roi=roi)
     ensemble_test.append(fibre_rand)
     for idx, sec_fiber in enumerate(sec_fibers):
         ensemble_test.append(sec_fiber)
         for synapse in synapses_lists[idx]:
             ensemble_test.append(synapse)
-
-    # frame = ensemble_test.return_frame()
 
     return ensemble_test, synapses_lists
 
@@ -1326,7 +1312,7 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
         n_pixels_per_tstep = sec_per_time_step / pixel_dwelltime
         return n_time_steps, n_pixels_per_tstep
     elif mode == "pdt":
-        n_time_steps = int(acquisition_time_sec / pixel_dwelltime)   # fait chier que les ordis savent pas comment math
+        n_time_steps = int(acquisition_time_sec / pixel_dwelltime) 
         x_pixels_for_flash_ts = round(sec_per_time_step / pixel_dwelltime)
         return n_time_steps, x_pixels_for_flash_ts
 
@@ -1414,7 +1400,6 @@ def action_execution(action_selected, frame_shape, starting_pixel, pxsize, datam
              acquisition should start
     """
     valid_actions = ["confocal", "sted"]
-    # vérifier si action_selected est dans valid_actions, sinon lancer une erreur
 
     if action_selected == "confocal":
         pixel_list = generate_raster_pixel_list(frame_shape[0] * frame_shape[1], starting_pixel, frozen_datamap)
@@ -1444,8 +1429,6 @@ def action_execution(action_selected, frame_shape, starting_pixel, pxsize, datam
 def action_execution_2(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope,
                        pdt, p_ex, p_sted, intensity_map, bleach, t_stack_idx):
     """
-    *** This version exists because I am dumb ***
-    *** This version is here to manage the sub_datamaps because the other doesn't. I need to resolve this :) ***
     Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
     Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
     by a flash, for example.
@@ -1470,7 +1453,6 @@ def action_execution_2(action_selected, frame_shape, starting_pixel, pxsize, dat
              acquisition should start
     """
     valid_actions = ["confocal", "sted"]
-    # vérifier si action_selected est dans valid_actions, sinon lancer une erreur
 
     if action_selected == "confocal":
         pixel_list = generate_raster_pixel_list(frame_shape[0] * frame_shape[1], starting_pixel, frozen_datamap)
@@ -1499,8 +1481,6 @@ def action_execution_2(action_selected, frame_shape, starting_pixel, pxsize, dat
 def action_execution_g(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope,
                        pdt, p_ex, p_sted, intensity_map, bleach, t_stack_idx):
     """
-    *** This version exists because I am dumb ***
-    *** This version is here to manage the sub_datamaps because the other doesn't. I need to resolve this :) ***
     Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
     Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
     by a flash, for example.

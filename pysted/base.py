@@ -86,23 +86,10 @@ import numpy
 import scipy.constants
 import scipy.signal
 import pickle
-
-# from pysted import cUtils, utils   # je dois changer ce import en les 2 autres en dessous pour que ça marche
-import tqdm
+import copy
+import os
 
 from pysted import utils, cUtils, raster, bleach_funcs
-# import cUtils
-
-# import mis par BT pour des tests
-import copy
-import configparser
-import ast
-import warnings
-from matplotlib import pyplot
-import time
-from functools import partial
-import pickle
-
 
 class GaussianBeam:
     '''This class implements a Gaussian beam (excitation).
@@ -880,10 +867,10 @@ class Fluorescence:
         # Integral from 0 to tau_sted of k*S1, where S1 = exp(-k_s1*t(1+gamma))
         B =  k * S1_ini * (1 - numpy.exp(-k_s1*tau_sted*(1+gamma))) / (k_s1*(1+gamma))
 
-        # The agerage bleaching rate over a period
+        # The average bleaching rate over a period
         mean_k_bleach = B / tau_rep
 
-        # Add a very approximate triplet dynamic, if any.
+        # Add a approximate triplet dynamic, if any.
         # Based on three level system rate equations 2.14 in [Staudt2009]_,
         # approximating that S1 is constant
         k_tri = 1/self.tau_tri
@@ -912,9 +899,6 @@ class Microscope:
                        (load_cache=False) or if they will be loaded from the previous save (load_cache=True). Generating
                        the lasers from scratch can take a long time (takes longer as the pixel_size decreases), so
                        loading the cache can save time when doing multiple experiments using the same pixel_size.
-                       It is
-                       important to use load_cache=True only if we know that the previously cached lasers were generated
-                       with the same pixel_size as the pixel_size which will be used in the current experiment.
     '''
 
     def __init__(self, excitation, sted, detector, objective, fluo, load_cache=False, verbose=False):
@@ -930,21 +914,23 @@ class Microscope:
         self.__cache = {}   # add all the elements used to compute lasers in the cache
         cache_keys = ["lasers", "objective", "excitation", "sted", "fluo"]
         if load_cache:
-            try:
-                self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
-                flag = False
-                for key, values in self.__cache.items():
-                    if not all([ckey in values.keys() for ckey in cache_keys]):
-                        flag = True
-                if flag:
-                    self.__cache = {}
+            if os.path.isfile(".microscope_cache.pkl"):
+                try:
+                    self.__cache = pickle.load(open(".microscope_cache.pkl", "rb"))
+                    flag = False
+                    for key, values in self.__cache.items():
+                        if not all([ckey in values.keys() for ckey in cache_keys]):
+                            flag = True
+                    if flag:
+                        self.__cache = {}
 
-            except Exception as e:
-                if verbose:
-                    logging.warning("-----------------")
-                    logging.warning(f"an error was caught while trying to load microscope cache")
-                    logging.warning(e)
-                    logging.warning("-----------------")
+                except Exception as e:
+                    if verbose:
+                        logging.warning("-----------------")
+                        logging.warning(f"An exception was caught while trying to load the microscope cache")
+                        logging.warning(f"The microscope cache will be built...")
+                        logging.warning(e)
+                        logging.warning("-----------------")
 
         # This will be used during the acquisition routine to make a better correspondance
         # between the microscope acquisition time steps and the Ca2+ flash time steps
@@ -1169,15 +1155,11 @@ class Microscope:
         if not filter_bypass:
             pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
 
-        # *** VÉRIFIER SI CE TO DO LÀ EST FAIT ***
-        # TODO: make sure I handle passing an acq matrix correctly / verifying its shape and shit
         ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
         if acquired_intensity is None:
             acquired_intensity = numpy.zeros((int(numpy.ceil(datamap_roi.shape[0] / ratio)),
                                               int(numpy.ceil(datamap_roi.shape[1] / ratio))))
-        else:
-            # verify the shape and shit
-            pass
+
         rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
         laser_pad = i_ex.shape[0] // 2
 
@@ -1185,7 +1167,7 @@ class Microscope:
             prob_ex = numpy.ones(datamap.whole_datamap.shape)
         if prob_sted is None:
             prob_sted = numpy.ones(datamap.whole_datamap.shape)
-        # bleached_sub_datamaps_dict = copy.copy(datamap.sub_datamaps_dict)
+        
         bleached_sub_datamaps_dict = {}
         if isinstance(indices, type(None)):
             indices = {"flashes": 0}
@@ -1196,7 +1178,7 @@ class Microscope:
             seed = 0
 
         if steps is None:
-            steps = [pdt]   # what will happen if i input an array for pdt originally ???
+            steps = [pdt]
         else:
             for idx, step in enumerate(steps):
                 steps[idx] = utils.float_to_array_verifier(step, datamap_roi.shape)
@@ -1226,7 +1208,6 @@ class Microscope:
             datamap.sub_datamaps_dict = bleached_sub_datamaps_dict
             datamap.base_datamap = datamap.sub_datamaps_dict["base"]
             datamap.whole_datamap = numpy.copy(datamap.base_datamap)
-            # BLEACHER LES FLASHS FUTURS
             if datamap.contains_sub_datamaps["flashes"] and indices["flashes"] < datamap.flash_tstack.shape[0]:
                 if bleach_mode == "default":
                     datamap.bleach_future(indices, bleached_sub_datamaps_dict)
@@ -1239,108 +1220,13 @@ class Microscope:
 
         return returned_acquired_photons, bleached_sub_datamaps_dict, temporal_acq_elts
 
-    def get_signal_rescue(self, datamap, pixelsize, pdt, p_ex, p_sted, pixel_list=None, bleach=True, update=True,
-                          lower_th=1, ltr=0.1, upper_th=100):
-        """
-        Function to bleach the datamap as the signal is acquired using RESCue method (EN PARLER PLUS ET METTRE UNE
-        CITATION AU PAPIER OU QQCHOSE UNE FOIS QUE J'AURAI RELU L'ARTICLE ET TOUT)
-        :param datamap: A Datamap object containing the relevant molecule disposition information, pixel size and ROI.
-        :param pixelsize: Grid size for the laser movement. Has to be a multiple of datamap.pixelsize. (m)
-        :param pdt: Time spent by the lasers on each pixel. Can be a float or an array of floats of same shape as
-                    as the datamap ROI (datamap.whole_datamap[datamap.roi]) (s)
-        :param p_ex: Power of the excitation beam. Can be a float or an array of floats of same shape as
-                     as the datamap ROI (datamap.whole_datamap[datamap.roi]) (W)
-        :param p_sted: Power of the STED beam. Can be a float or an array of floats of same shape as
-                       as the datamap ROI (datamap.whole_datamap[datamap.roi])(W)
-        :param pixel_list: List of pixels on which the laser will be applied. If None, a normal raster scan of every
-                           pixel of the ROI will be done. Set to None by default.
-        :param bleach: A bool which determines whether or not bleaching will occur. Set to True by default.
-        :param update: A bool which determines whether or not the Datamap object will be updated with the bleaching.
-                       Set to True by default.
-        :param lower_th: The minimum number of photons we wish to detect on a pixel in (pdt * ltr) seconds to determine
-                         if we continue illuminating the pixel.
-        :param ltr: The ratio of the pdt time in which we will decide whether or not we continue illuminating the pixel.
-        :param upper_th: The maximum number of photons we wish to detect on a pixel in (pdt * utr) seconds before moving
-                         to the next pixel.
-        :param utr: The ratio of the pdt time in which we will decide wether or not enough photons have already been
-                    detected in order to move on to the next pixel before ellapsing the whole pdt time.
-        :returns: The acquired detected photons, and the bleached datamap.
-        """
-        #TODO : Pouvoir mettre None à upper_th
-        datamap_roi = datamap.whole_datamap[datamap.roi]
-        pdt = utils.float_to_array_verifier(pdt, datamap_roi.shape)
-        p_ex = utils.float_to_array_verifier(p_ex, datamap_roi.shape)
-        p_sted = utils.float_to_array_verifier(p_sted, datamap_roi.shape)
-
-        datamap_pixelsize = datamap.pixelsize
-        i_ex, i_sted, psf_det = self.cache(datamap_pixelsize)
-        if datamap.roi is None:
-            # demander au dude de setter une roi
-            datamap.set_roi(i_ex)
-
-        datamap_roi = datamap.whole_datamap[datamap.roi]
-        pixel_list = utils.pixel_list_filter(datamap_roi, pixel_list, pixelsize, datamap_pixelsize)
-
-        ratio = utils.pxsize_ratio(pixelsize, datamap_pixelsize)
-        rows_pad, cols_pad = datamap.roi_corners['tl'][0], datamap.roi_corners['tl'][1]
-        laser_pad = i_ex.shape[0] // 2
-
-        prob_ex = numpy.ones(datamap.whole_datamap.shape)
-        prob_sted = numpy.ones(datamap.whole_datamap.shape)
-        bleached_datamap = numpy.copy(datamap.whole_datamap)
-        returned_photons = numpy.zeros(datamap.whole_datamap[datamap.roi].shape)
-
-        for (row, col) in pixel_list:
-            effective = self.get_effective(datamap_pixelsize, p_ex[row, col], p_sted[row, col])
-            row_slice = slice(row + rows_pad - laser_pad, row + rows_pad + laser_pad + 1)
-            col_slice = slice(col + cols_pad - laser_pad, col + cols_pad + laser_pad + 1)
-
-            pixel_intensity = numpy.sum(effective * datamap.whole_datamap[row_slice, col_slice])
-            pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col], self.sted.rate)
-            photons_per_sec = pixel_photons / pdt[row, col]
-            lt_time_photons = photons_per_sec * ltr * pdt[row, col]
-            if lower_th is None:
-                pass
-            elif lt_time_photons < lower_th:
-                pdt[row, col] = ltr * pdt[row, col]
-            else:
-                if upper_th is None:
-                    pass
-                elif pixel_photons > upper_th:
-                    # jpense pas que je dois mult par utr, je dois mult par le temps requis pour arriver à upper_th
-                    time_to_ut = upper_th / photons_per_sec
-                    pdt[row, col] = time_to_ut
-                else:
-                    pass
-
-            # ça serait tu mieux de calculer mon nombre de photons avec le photons_per_sec?
-            # i think so right?
-            rescue_pixel_photons = photons_per_sec * pdt[row, col]
-            # rescue_pixel_photons = self.detector.get_signal(self.fluo.get_photons(pixel_intensity), pdt[row, col])
-            returned_photons[int(row / ratio), int(col / ratio)] = rescue_pixel_photons
-
-            if bleach is True:
-                kwargs = {'i_ex': i_ex, 'i_sted': i_sted, 'fluo': self.fluo, 'excitation': self.excitation,
-                          'sted': self.sted, 'p_ex': p_ex[row, col], 'p_sted': p_sted[row, col],
-                          'pdt': pdt[row, col], 'prob_ex': prob_ex, 'prob_sted': prob_sted,
-                          'region': (row_slice, col_slice)}
-                prob_ex, prob_sted = self.bleach_func(**kwargs)
-                bleached_datamap[row_slice, col_slice] = \
-                    numpy.random.binomial(bleached_datamap[row_slice, col_slice],
-                                          prob_ex[row_slice, col_slice] * prob_sted[row_slice, col_slice])
-
-        if update:
-            datamap.whole_datamap = bleached_datamap
-
-        return returned_photons, bleached_datamap
-
     def add_to_pixel_bank(self, n_pixels_per_tstep):
         """
         Adds the residual pixels to the pixel bank
         :param n_pixels_per_tstep: The number of pixels which the microscope has the time to acquire during 1
                                    time step of the Ca2+ flash event
         """
-        integer_n_pixels_per_tstep = int(n_pixels_per_tstep)   # np.floor() fonctionne comme int()
+        integer_n_pixels_per_tstep = int(n_pixels_per_tstep)
         self.pixel_bank += n_pixels_per_tstep - integer_n_pixels_per_tstep
 
     def take_from_pixel_bank(self):
@@ -1348,7 +1234,7 @@ class Microscope:
         Verifies the amount stored in the pixel_bank, returns the integer part if greater or equal to 1
         :return: The integer part of the pixel_bank of the microscope
         """
-        integer_pixel_bank = int(self.pixel_bank)   # np.floor() fonctionne comme int()
+        integer_pixel_bank = int(self.pixel_bank)
         if integer_pixel_bank >= 1:
             self.pixel_bank -= integer_pixel_bank
             return integer_pixel_bank
@@ -1403,7 +1289,7 @@ class Datamap:
         rows_max, cols_max = self.whole_datamap.shape[0] - rows_min - 1, self.whole_datamap.shape[1] - cols_min - 1
 
         if intervals is None:
-            # l'utilisateur n'a pas définit de ROI, on lui demande de la définir ici
+            # User did not provide intervals
             print(f"ROI must be within rows [{rows_min}, {rows_max}] inclusively, "
                   f"columns must be within [{cols_min}, {cols_max}] inclusively")
             roi = {'rows': None, 'cols': None}
@@ -1428,9 +1314,8 @@ class Datamap:
                                 'bl': (roi['rows'][1], roi['cols'][0]), 'br': (roi['rows'][1], roi['cols'][1])}
 
         elif intervals == 'max':
-            # l'utilisateur veut itérer sur la whole_datamap, alors la padder de 0 comme normal
+            # User wants the maximal interval
             self.whole_datamap, rows_pad, cols_pad = utils.array_padder(self.whole_datamap, laser)
-            # def mes 4 coins et ma slice
             self.roi = (slice(rows_pad, self.whole_datamap.shape[0] - rows_pad),
                         slice(cols_pad, self.whole_datamap.shape[1] - cols_pad))
             self.roi_corners = {'tl': (rows_pad, cols_pad),
@@ -1440,7 +1325,7 @@ class Datamap:
                                        self.whole_datamap.shape[1] - cols_pad - 1)}
 
         elif type(intervals) is dict:
-            # j'assume que l'utilisateur a passé un dictionnaire avec roi['rows'] et roi['cols'] comme intervalles
+            # User used a dict of intervals with rows/cols
             if intervals['rows'][0] < rows_min or intervals['rows'][0] > rows_max or \
                intervals['rows'][1] < rows_min or intervals['rows'][1] > rows_max or \
                intervals['cols'][0] < cols_min or intervals['cols'][0] > cols_max or \
@@ -1629,14 +1514,13 @@ class TemporalSynapseDmap(Datamap):
         self.flash_tstack = numpy.zeros((flash_curve.shape[0], *self.whole_datamap.shape))
         self.nanodomains_active = []
         for t, nanodomains_multiplier in enumerate(flash_curve):
-            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap, which I think I want
+            # -1 makes it so the whole_datamap at flash values of 1 are equal to the base datamap
             nd_mult = int(numpy.round(nanodomains_multiplier)) - 1
             if nd_mult < 0:
                 nd_mult = 0
             for nanodomain in self.synapse.nanodomains:
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
                     self.synapse.n_molecs_base * nd_mult    # - self.synapse.n_molecs_base
-                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
             if self.flash_tstack[t].max() > 0:
                 self.nanodomains_active.append(True)
             else:
@@ -1690,7 +1574,6 @@ class TemporalSynapseDmap(Datamap):
                         nd_mult = 0
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
                     self.synapse.n_molecs_base * nd_mult    # - self.synapse.n_molecs_base
-                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
             if self.flash_tstack[t].max() > 0:
                 self.nanodomains_active.append(True)
             else:
@@ -1751,7 +1634,6 @@ class TemporalSynapseDmap(Datamap):
                         nd_mult = 0
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
                     int(self.synapse.n_molecs_base * nd_mult)    # - self.synapse.n_molecs_base
-                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
             if self.flash_tstack[t].max() > 0:
                 self.nanodomains_active.append(True)
             else:
@@ -1784,7 +1666,6 @@ class TemporalSynapseDmap(Datamap):
         flash_curve = utils.sampled_flash_manipulations(curves_path, delay, rescale=True, seed=None)
 
         if individual_flashes:
-            # faire de quoi pour trouver le peak, sampler des variances pour chaque ND :)
             flash_peak = numpy.argmax(flash_curve)
             flash_variances = []
             for i in range(len(self.synapse.nanodomains)):
@@ -1808,7 +1689,6 @@ class TemporalSynapseDmap(Datamap):
                         flash_variance = 0
                 self.flash_tstack[t][self.roi][nanodomain.coords[0], nanodomain.coords[1]] = \
                     self.synapse.n_molecs_base * (nd_mult + flash_variance) # - self.synapse.n_molecs_base
-                # qui a eu l'idée de mettre un - qui me permet d'avoir des vals négatives ici? (c moi :)
             if self.flash_tstack[t].max() > 0:
                 self.nanodomains_active.append(True)
             else:
@@ -1853,7 +1733,6 @@ class TemporalSynapseDmap(Datamap):
         For instance, if 3/5 molecules are left after bleaching, then the number of molecules in the subsequent
         flashes will be multiplied by 3/5
         """
-        # ???
         bleached_whole_datamap = numpy.zeros(unbleached_whole_datamap.shape)
         for key in bleached_sub_datamaps_dict:
             bleached_whole_datamap += bleached_sub_datamaps_dict[key]

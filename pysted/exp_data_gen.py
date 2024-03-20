@@ -265,13 +265,6 @@ class Synapse():
     def flash_nanodomains(self, current_time, time_quantum_us, delay=0, fwhm_step_usec_correspondance=(10, 1500000)):
         """
         Verifies if the nanodomains need to be updated for the flash, updates them if it is the case
-
-        l'idée du delay est que je ne veux pas nécessairement commencer la routine de flash au début de l'exp, je ne
-        suis pas certain de comment je veux l'implem encore :)
-
-        *** ??? I DON'T THINK THIS IS HOW I WANT TO HANDLE IT ??? ***
-
-        :param current_time: The current_time of the clock
         """
         n_time_quantums_us_per_flash_step = utils.time_quantum_to_flash_tstep_correspondance(
             fwhm_step_usec_correspondance,
@@ -340,8 +333,7 @@ class Synapse():
 class Nanodomain():
     """
     Nanodomain class
-    For now I don't think this will do much other than say where the nanodomains are situated. For later exps, we will
-    add flash routines and such to this class :)
+
     :param img_shape: The shape of the image in which the nanodomains will be placed
     :param valid_positions: A list of the valid positions from which to randomly sample a nanodomain position.
     """

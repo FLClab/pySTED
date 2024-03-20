@@ -46,13 +46,25 @@ def raster_func_c_self_bleach_split_g(
         numpy.ndarray[FLOATDTYPE_t, ndim=2] pdt_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_ex_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_sted_roi,
-        bint bleach,   # bint is a bool
+        bint bleach,
         dict bleached_sub_datamaps_dict,
         int seed,
-        object bleach_func,   # uncertain of the type for a cfunc, but this seems to be working so ???
+        object bleach_func,
         object sample_func,
         list steps
 ):
+    """
+    raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
+    excitation power (p_ex) AND/OR sted power (p_sted) AND/OR pixel dwell time vary through the sample. 
+    This function thus requires these parameters to be passed as arrays of floats the same size as the ROI being imaged.
+
+    Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
+    components of the datamap are bleached separately).
+
+    To speed up the calculation, the position of the emitters are kept in memory and only 
+    those positions are updated by the bleaching method.
+    """
+
     cdef int row, col
     cdef int sprime, tprime
     cdef int h, w
@@ -73,15 +85,6 @@ def raster_func_c_self_bleach_split_g(
     cdef FLOATDTYPE_t step
     cdef list mask
     cdef bint uniform_sted, uniform_ex, uniform_pdt, is_uniform, is_single_datamap
-
-    """
-    raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
-    excitation power (p_ex) AND/OR sted power (p_sted) vary through the sample. This function thus requires these
-    parameters to be passed as arrays of floats the same size as the ROI being imaged.
-
-    Additionally, this function seperately bleaches the different parts composing the datamap (i.e. the base and flash
-    components of the datamap are bleached separately).
-    """
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
@@ -187,13 +190,16 @@ def raster_func_dymin(
         numpy.ndarray[FLOATDTYPE_t, ndim=2] pdt_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_ex_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_sted_roi,
-        bint bleach,   # bint is a bool
+        bint bleach,
         dict bleached_sub_datamaps_dict,
         int seed,
-        object bleach_func,   # uncertain of the type for a cfunc, but this seems to be working so ???
+        object bleach_func,
         object sample_func,
         list steps
 ):
+    """
+    Implements the raster scanning and photobleaching of DyMIN microscopy
+    """
     cdef int row, col, i
     cdef int sprime, tprime
     cdef int h, w
@@ -374,13 +380,16 @@ def raster_func_rescue(
         numpy.ndarray[FLOATDTYPE_t, ndim=2] pdt_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_ex_roi,
         numpy.ndarray[FLOATDTYPE_t, ndim=2] p_sted_roi,
-        bint bleach,   # bint is a bool
+        bint bleach,   
         dict bleached_sub_datamaps_dict,
         int seed,
-        object bleach_func,   # uncertain of the type for a cfunc, but this seems to be working so ???
+        object bleach_func,
         object sample_func,
         list steps
 ):
+    """
+    Implements the raster scanning and photobleaching of RESCue microscopy
+    """
     cdef int row, col, i
     cdef int sprime, tprime
     cdef int h, w
