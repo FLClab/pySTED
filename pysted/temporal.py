@@ -13,7 +13,7 @@ TIMESTEP = 1
 
 class Nodes:
     """
-    A `Nodes` object is responsible to interact with a list of nodes and apply
+    A ``Nodes`` object is responsible to interact with a list of nodes and apply
     different forces or jitters to the a single node
     """
     def __init__(self, nodes, parent=None):
@@ -38,7 +38,8 @@ class Nodes:
 
     def apply_force(self, mean=0., std=0.1, field=None):
         """
-        This method allows to apply a `force` on each nodes
+        This method allows to apply a ``force`` on each nodes
+
         :param mean: The `mean` parameter of the normal function to calculate the force
         :param mean: The `std` parameter of the normal function to calculate the force
         :param field: (Optional) A `numpy.ndarray` of the force field
@@ -54,23 +55,22 @@ class Nodes:
 
     def reset_force(self):
         """
-        This method allows to reset the current `force` that is being applied on
-        all nodes
+        Reset the current ``force`` that is being applied on all nodes
         """
         self.nodes_acc = numpy.zeros_like(self.nodes_acc)
 
     def reset_speed(self):
         """
-        This method allows to reset the current `speed` that is being applied on
-        all nodes
+        Reset the current ``speed`` that is being applied on all nodes
         """
         self.nodes_speed = numpy.zeros_like(self.nodes_speed)
 
     def apply_jitter(self, mean=0., std=0.1):
         """
         This method allows to jitter the position of each nodes.
-        :param mean: The `mean` parameter of the normal function to calculate jitter
-        :param mean: The `std` parameter of the normal function to calculate jitter
+
+        :param mean: The ``mean`` parameter of the normal function to calculate jitter
+        :param mean: The ``std`` parameter of the normal function to calculate jitter
         """
         jitter = numpy.random.normal(loc=mean, scale=std, size=self.nodes_position.shape)
         jitter = jitter.astype(numpy.float32)
@@ -80,8 +80,10 @@ class Nodes:
 
     def add_node(self, node, pos="tail"):
         """
-        Methods that implements adding a node to the current nodes. We copy the
-        speed and acc of next node
+        Methods that implements adding a node to the current nodes. 
+        
+        We copy the speed and acc of next node
+
         :param node: A (y, x) coordinates of the node to add
         :param pos: (Optional) Where to add the node. Should be in {"tail", "head"}
         """
@@ -107,7 +109,8 @@ class Nodes:
 
 class NodesCombiner:
     """
-    A `NodesCombiner` object is responsible to combine multiple `Nodes` object.
+    A ``NodesCombiner`` object is responsible to combine multiple ``Nodes`` object.
+
     We store the combined objects into an objects list.
     """
     def __init__(self):
@@ -116,8 +119,9 @@ class NodesCombiner:
 
     def add_object(self, obj):
         """
-        Allows to add a `Nodes` object to the `NodesCombinator`
-        :param obj: A `Nodes` obj
+        Allows to add a ``Nodes`` object to the ``NodesCombinator``
+
+        :param obj: A ``Nodes`` obj
         """
         self.objects.append(obj)
 
@@ -130,42 +134,42 @@ class NodesCombiner:
 
     def apply_force(self, *args):
         """
-        This method allows to apply a `force` on each nodes
+        This method allows to apply a ``force`` on each nodes
         """
         for obj in self.objects:
             obj.apply_force(*args)
 
     def apply_jitter(self, *args):
         """
-        This method applies a `jitter` on each nodes
+        This method applies a ``jitter`` on each nodes
         """
         for obj in self.objects:
             obj.apply_jitter(*args)
 
     def reset_force(self, *args):
         """
-        This method allows to reset the `force` currently applied on each node
+        This method allows to reset the ``force`` currently applied on each node
         """
         for obj in self.objects:
             obj.reset_force(*args)
 
     def reset_speed(self, *args):
         """
-        This method allows to reset the `speed` of each node
+        This method allows to reset the ``speed`` of each node
         """
         for obj in self.objects:
             obj.reset_speed(*args)
 
 class Polygon(Nodes):
     """
-    A `Polygon` is a set of `Nodes` that are closed to the exterior world
+    A ``Polygon`` is a set of ``Nodes`` that are closed to the exterior world
     """
     def __init__(self, coords=None, random_params={}, parent=None):
         """
         Instantiates the Polygon class
-        :param coords: (Optional) A (N, 2) `numpy.ndarray` of the coordinates of
+        :param coords: (Optional) A (N, 2) ``numpy.ndarray`` of the coordinates of
                        the polygon
-        :param random_params: (Optional) A `dict` of paramters to generate the random
+        :param random_params: (Optional) A ``dict`` of paramters to generate the random
                               polygons
         """
         if isinstance(coords, type(None)):
@@ -174,23 +178,27 @@ class Polygon(Nodes):
 
     def return_shape(self, shape=None):
         """
-        Returns the polygon indices
+        Return the polygon indices
+
         :param shape: The shape of the field of view
-        :returns : A `numpy.ndarray` of row coords
-                   A `numpy.ndarray` of col coords
+        :return : A ``numpy.ndarray`` of row coords
+                   A ``numpy.ndarray`` of col coords
         """
         return draw.polygon(*(self.nodes_position).T.astype(int), shape=shape)
 
     def generate_random(self, num_points=(5, 25), scale=(10, 15), pos=((0, 0), (0, 0))):
         """
-        Generates a random set of coords. To do so, we make use of the Convex Hull
-        of a random set of points
+        Generates a random set of coords. 
+        
+        To do so, we make use of the Convex Hull of a random set of points
+
         :param num_points: Uniformly generates a number of points for the convex
                            hull between num_points[0] and num_points[1]
         :param scale: Uniformly generates a scale factor for the convex
                       hull between scale[0] and scale[1]
-        :param pos: Uniformly positions the convex hull in space. Should be a `tuple`
+        :param pos: Uniformly positions the convex hull in space. Should be a ``tuple``
                     of top-left and bottom-right corner in (y, x) coordinates
+        :return: A (N,2) ``numpy.ndarray`` of coordinates
         """
         # Creates a ConvexHull of a random set of points
         random_points = numpy.random.rand(random.randrange(*num_points), 2)
@@ -204,8 +212,11 @@ class Polygon(Nodes):
 
     def expand(self, scale=0.1):
         """
-        Implements an expand method of the `Polygon`. We assume that the polygon
-        is exapanded from its center of mass
+        Implements an expand method of the ``Polygon``. 
+        
+        We assume that the polygon is exapanded from its center of mass
+
+        :param scale: The scale factor to expand the polygon
         """
         coords = self.nodes_position
 
@@ -217,7 +228,11 @@ class Polygon(Nodes):
 
     def area(self):
         """
-        Calculates the area covered by the `Polygon`. We use the Shoelace formulation
+        Calculates the area covered by the ``Polygon``. 
+        
+        We use the Shoelace formulation
+
+        :return: The area of the polygon
         """
         x, y = self.nodes_position.T
         return 0.5 * numpy.abs(numpy.dot(x,numpy.roll(y,1))-numpy.dot(y,numpy.roll(x,1)))
@@ -241,14 +256,17 @@ class Polygon(Nodes):
 
 class Fiber(Nodes):
     """
-    A `Fiber` is a set of nodes that are connected but not closed
+    A ``Fiber`` is a set of nodes that are connected but not closed
     """
     def __init__(self, coords=None, random_params={}, parent=None, seed=None):
         """
-        Instantiates the `Fiber` class
-        :param coords: A `numpy.ndarray` of the `Fiber` coordinates
-        :param parent: A `tuple` of a parent `Nodes` with corresponding `node_id`
-                       We assume the parent to be the head of the `Fiber`
+        Instantiates the ``Fiber`` class
+
+        :param coords: A ``numpy.ndarray`` of the ``Fiber`` coordinates
+        :param random_params: A ``dict`` of parameters to generate the random
+        :param parent: A ``tuple`` of a parent ``Nodes`` with corresponding ``node_id``
+                       We assume the parent to be the head of the ``Fiber``
+        :param seed: (Optional) A seed to set for the random number generator
         """
         if isinstance(coords, type(None)):
             coords = self.generate_random(**random_params, seed=seed)
@@ -258,18 +276,20 @@ class Fiber(Nodes):
     def generate_random(self, num_points=(10, 50), angle=(-math.pi/8, math.pi/8),
                               scale=(1, 5), pos=((0, 0), (0, 0)), seed=None):
         """
-        Generates a random set of points. To do so, we incrementaly add a point
-        to list of coordinates. It could be seen as building a serpent from the
-        head to the tail.
+        Generates a random set of points. 
+        
+        To do so, we incrementaly add a point to list of coordinates. It could be 
+        seen as building a serpent from the head to the tail.
+
         :param num_points: (min, max) values of the uniform sampling to generate
                            the number of points of the fiber
         :param angle: (min, max) values of the uniform sampling to generate the
                       angle from the previous angle
         :param scale: (min, max) values of the uniform sampling to generate the
                       displacement
-        :param pos: Uniformly sample a position of the `Fiber` object. Should be
-                    a `tuple` of top-left and bottom-right corner in (y, x) coordinates
-        :returns : A (N,2) `numpy.ndarray` of coordinates
+        :param pos: Uniformly sample a position of the ``Fiber`` object. Should be
+                    a ``tuple`` of top-left and bottom-right corner in (y, x) coordinates
+        :return: A (N,2) ``numpy.ndarray`` of coordinates
         """
         if seed is not None:
             numpy.random.RandomState(seed)
@@ -303,7 +323,8 @@ class Fiber(Nodes):
 
     def grow(self, prob=0.5, angle=(-math.pi/8, math.pi/8), scale=(2, 3)):
         """
-        This methods implements the growth of a `Fiber`
+        This methods implements the growth of a ``Fiber``
+
         :param angle: (min, max) values of the uniform sampling to generate the
                       angle from the previous angle
         :param scale: (min, max) values of the uniform sampling to generate the
@@ -319,6 +340,8 @@ class Fiber(Nodes):
     def spawn(self, num=(2, 10)):
         """
         Method that implements spawn of synapses
+
+        :param num: (min, max) values of the number of synapses to spawn
         """
         coords = self.nodes_position
         # Avoids sampling edge nodes
@@ -339,9 +362,10 @@ class Fiber(Nodes):
 
     def return_shape(self, shape=None):
         """
-        Returns `Fiber` indices.
+        Return ``Fiber`` indices.
+
         :param shape: The shape of the field of view
-        :returns : A `numpy.ndarray` of row coords
+        :return : A `numpy.ndarray` of row coords
                    A `numpy.ndarray` of col coords
         """
         coords = self.nodes_position.astype(int)
@@ -367,7 +391,8 @@ class Fiber(Nodes):
 
     def _grow_head(self, angle, scale):
         """
-        Implements the growth of the head of the `Fiber`
+        Implements the growth of the head of the ``Fiber``
+
         :param angle: (min, max) values of the uniform sampling to generate the
                       angle from the previous angle
         :param scale: (min, max) values of the uniform sampling to generate the
@@ -390,7 +415,8 @@ class Fiber(Nodes):
 
     def _grow_tail(self, angle, scale):
         """
-        Implements the growth of the tail of the `Fiber`
+        Implements the growth of the tail of the ``Fiber``
+
         :param angle: (min, max) values of the uniform sampling to generate the
                       angle from the previous angle
         :param scale: (min, max) values of the uniform sampling to generate the
@@ -429,12 +455,14 @@ class Fiber(Nodes):
 
 class Synapse(NodesCombiner):
     """
-    A `Synapse` is a protuberance that starts from a `Fiber`. It is
-    defined as the combination of a `Fiber` and a `Polygon` objects
+    A ``Synapse`` is a protuberance that starts from a ``Fiber``. 
+    
+    It is defined as the combination of a ``Fiber`` and a ``Polygon`` objects
     """
     def __init__(self, neck_coord, neck_direction, parent=None):
         """
-        Instantiates the `Synapse` object
+        Instantiates the ``Synapse`` object
+
         :param neck_coord: A (y, x) coordinate of neck coord
         :param neck_direction: An angle towards which to generate the synapse
         :param parent: A `tuple` of the parent and node id
@@ -462,6 +490,9 @@ class Synapse(NodesCombiner):
     def grow(self, angle=(-math.pi/8, math.pi/8), scale=(1, 2)):
         """
         Method that implements the growth of the synapse
+
+        :param angle: (min, max) values of the uniform sampling to generate the angle
+        :param scale: (min, max) values of the uniform sampling to generate the displacement
         """
         # While the head cycle has not started, we grow the neck
         if self.lifecycle <= self.head_cycle_start:
@@ -491,10 +522,11 @@ class Synapse(NodesCombiner):
 
     def return_shape(self, shape=None):
         """
-        Returns `Synapse` indices.
+        Return ``Synapse`` indices.
+
         :param shape: The shape of the field of view
-        :returns : A `numpy.ndarray` of row coords
-                   A `numpy.ndarray` of col coords
+        :return : A ``numpy.ndarray`` of row coords
+                  A ``numpy.ndarray`` of col coords
         """
         rr, cc = [], []
         rows, cols = self.neck.return_shape(shape)
@@ -506,12 +538,13 @@ class Synapse(NodesCombiner):
 
 class Ensemble:
     """
-    Creates an `Ensemble` object which is responsible to handle different objects
+    Creates an ``Ensemble`` object which is responsible to handle different objects
     that are based on a `Nodes` object
     """
     def __init__(self, roi=((0, 0), (256, 256))):
         """
-        Instantiates an `Ensemble` object
+        Instantiates an ``Ensemble`` object
+
         :param roi: A `tuple` defining the limits of the region of interest. ((miny, minx), (maxy, maxx))
         """
         self.objects = []
@@ -519,9 +552,10 @@ class Ensemble:
 
     def generate_sequence(self, num_frames):
         """
-        Generates the sequence of frames of the `Ensemble`
-        :param length: The number of frames to generate
-        :returns : A 3D `numpy.ndarray` of the sequence
+        Generates the sequence of frames of the ``Ensemble``
+
+        :param num_frames: The number of frames to generate
+        :return : A 3D ``numpy.ndarray`` of the sequence
         """
         sequence = []
         for i in trange(num_frames, desc="Frames"):
@@ -538,14 +572,21 @@ class Ensemble:
 
     def append(self, obj):
         """
-        Appends the `obj` to then `Ensemble`
+        Appends the ``obj`` to then ``Ensemble``
+
+        :param obj: The object to append
         """
         self.objects.append(obj)
 
     def update(self, prob=0.05, force=(0., 0.1), jitter=(0., 0.01)):
         """
-        Updates all objects in the `Ensemble` if an object is out of the region
-        of interest then it is simply removed
+        Updates all objects in the ``Ensemble``.
+        
+        If an object is out of the region of interest then it is simply removed
+
+        :param prob: The probability of applying a force
+        :param force: A ``tuple`` of the force to apply
+        :param jitter: A ``tuple`` of the jitter to apply
         """
         for i in reversed(range(len(self))):
             obj = self.objects[i] # This will allow to remove out of roi objects
@@ -561,9 +602,10 @@ class Ensemble:
 
     def return_frame(self, image=None):
         """
-        Creates the frame of the current state of the `Ensemble`
-        :param image: (Optional) An `numpy.ndarray` to write to
-        :returns : A 2D `numpy.ndarray` of the current state
+        Creates the frame of the current state of the ``Ensemble``
+
+        :param image: (Optional) An ``numpy.ndarray`` to write to
+        :return: A 2D ``numpy.ndarray`` of the current state
         """
         if isinstance(image, type(None)):
             image = numpy.zeros(numpy.diff(self.roi, axis=0).ravel())
@@ -580,7 +622,8 @@ class Ensemble:
         Creates a dictionnary containing the pixels corresponding to the objects in the frame.
         This could be useful if we want to do something other than plot the ojbects, such as
         tagging them for flashing or something.
-        :return:
+
+        :return: A ``dict`` of the objects
         """
         obj_dict = {}
         if obj_type == "all":
@@ -605,7 +648,7 @@ class Ensemble:
 
     def show(self, ax=None):
         """
-        Implements a `show` function of the ensemble
+        Implements a ``show`` function of the ensemble
         """
         if isinstance(ax, type(None)):
             fig, ax = pyplot.subplots()
@@ -615,7 +658,9 @@ class Ensemble:
 
     def spawn(self, prob=0.1):
         """
-        Implements a `spawn` function to randomly spawn synapses
+        Implements a ``spawn`` function to randomly spawn synapses
+
+        :param prob: The probability of spawning a synapse
         """
         for i in reversed(range(len(self))):
             obj = self.objects[i]
@@ -626,27 +671,31 @@ class Ensemble:
 
     def reset_force(self):
         """
-        Applies the reset_force to all objects of the `Ensemble`
+        Applies the reset_force to all objects of the ``Ensemble``
         """
         for obj in self.objects:
             obj.reset_force()
 
     def reset_speed(self):
         """
-        Applies the reset_force to all objects of the `Ensemble`
+        Applies the reset_force to all objects of the ``Ensemble``
         """
         for obj in self.objects:
             obj.reset_speed()
 
     def __getitem__(self, index):
         """
-        Implements a `getitem` method
+        Implements a ``__getitem__`` method
+
+        :return: The object at the index
         """
         return self.objects[index]
 
     def __len__(self):
         """
-        Implements a `len` method
+        Implements a ``__len__`` method
+
+        :return: The number of objects in the ``Ensemble``
         """
         return len(self.objects)
 
