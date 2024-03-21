@@ -1,195 +1,53 @@
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-<html lang="en" data-content_root="../">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>pysted.exp_data_gen &#8212; pySTED 0.0.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
-    <script src="../_static/documentation_options.js?v=e3a6060d"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysted.exp_data_gen &mdash; pySTED 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/fonts.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=e3a6060d"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pysted.exp_data_gen.degrees_to_radians" href="pysted.exp_data_gen.degrees_to_radians.html" />
-    <link rel="prev" title="pysted.data.loader.DatamapLoader" href="pysted.data.loader.DatamapLoader.html" />
-   
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
+    <link rel="prev" title="pysted.data.loader.DatamapLoader" href="pysted.data.loader.DatamapLoader.html" /> 
+</head>
 
-  
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-  </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
-
-          <div class="body" role="main">
-            
-  <section id="module-pysted.exp_data_gen">
-<span id="pysted-exp-data-gen"></span><h1>pysted.exp_data_gen<a class="headerlink" href="#module-pysted.exp_data_gen" title="Link to this heading">¶</a></h1>
-<p class="rubric">Functions</p>
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysted.exp_data_gen.degrees_to_radians.html#pysted.exp_data_gen.degrees_to_radians" title="pysted.exp_data_gen.degrees_to_radians"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrees_to_radians</span></code></a>(angle_deg)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysted.exp_data_gen.rotate_nds.html#pysted.exp_data_gen.rotate_nds" title="pysted.exp_data_gen.rotate_nds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_nds</span></code></a>(nd_coords, rot_angle[, frame_shape])</p></td>
-<td><p>rotates the nanodomain coords :param nd_coords: list or np.array of the nanodomain coords in the unrotated frame :param rot_angle: rotation angle in degrees :param frame_shape: shape of the image in which the NDs reside.</p></td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Classes</p>
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysted.exp_data_gen.Beads.html#pysted.exp_data_gen.Beads" title="pysted.exp_data_gen.Beads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Beads</span></code></a>(n_molecs, n_beads[, ...])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysted.exp_data_gen.Nanodomain.html#pysted.exp_data_gen.Nanodomain" title="pysted.exp_data_gen.Nanodomain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Nanodomain</span></code></a>(img_shape[, valid_positions])</p></td>
-<td><p>Nanodomain class</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysted.exp_data_gen.Synapse.html#pysted.exp_data_gen.Synapse" title="pysted.exp_data_gen.Synapse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Synapse</span></code></a>(n_molecs[, datamap_pixelsize_nm, ...])</p></td>
-<td><p>Synapse class Implemented with the intent of using a datamap_pixelsize of 20nm, to generate synapses with width of 500nm and height of 200nm inside a 64px by 64px datamap (1080nm x 1080nm). The synapse will have nanodomains along its upper edge :param n_molecs: The number of molecules that will be placed in every pixel of the synapse :param datamap_pixelsize_nm: The pixelsize (in nm) of the datamap :param width_nm: Interval for the desired width (in nm) of the synapse. The width will be sampled from this interval :param height_nm: Interval for the desired height (in nm) of the synapse. The height will be sampled from this                   interval :param img_shape: The shape of the image (tuple) :param dendrite_thickness: Interval for the desired thickness of the dendrite (in pixels) to which the synapse is                            connected. The height will be sampled from this interval. Basically, this just determines                            how much of the dendrite we see in the ROI, drawn as a line on the bottom of the image. :param mode: The mode used for the random synapse generation. 'mushroom' will produce a mushroom-like synapse              (i.e., an ellipse connected to the dendrite by a recangular-ish neck). 'bump' will produce a bump-like              synapse (i.e., a have ellipse protruding from the dendrite). 'rand' will randomly select one of these              2 modes. :param seed: Sets the seed for the randomness.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py class">
-<dt class="sig sig-object py" id="pysted.exp_data_gen.Nanodomain">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.exp_data_gen.</span></span><span class="sig-name descname"><span class="pre">Nanodomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Nanodomain" title="Link to this definition">¶</a></dt>
-<dd><p>Nanodomain class</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>img_shape</strong> – The shape of the image in which the nanodomains will be placed</p></li>
-<li><p><strong>valid_positions</strong> – A list of the valid positions from which to randomly sample a nanodomain position.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.exp_data_gen.Nanodomain.add_flash_curve">
-<span class="sig-name descname"><span class="pre">add_flash_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events_curves_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Nanodomain.add_flash_curve" title="Link to this definition">¶</a></dt>
-<dd><p>Adds a list of molecule values for a certain number of frames</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.exp_data_gen.</span></span><span class="sig-name descname"><span class="pre">Synapse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_molecs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize_nm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_nm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(400,</span> <span class="pre">800)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_nm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(300,</span> <span class="pre">600)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(64,</span> <span class="pre">64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dendrite_thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rand'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse" title="Link to this definition">¶</a></dt>
-<dd><p>Synapse class
-Implemented with the intent of using a datamap_pixelsize of 20nm, to generate synapses with width of 500nm and
-height of 200nm inside a 64px by 64px datamap (1080nm x 1080nm).
-The synapse will have nanodomains along its upper edge
-:param n_molecs: The number of molecules that will be placed in every pixel of the synapse
-:param datamap_pixelsize_nm: The pixelsize (in nm) of the datamap
-:param width_nm: Interval for the desired width (in nm) of the synapse. The width will be sampled from this interval
-:param height_nm: Interval for the desired height (in nm) of the synapse. The height will be sampled from this</p>
-<blockquote>
-<div><p>interval</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>img_shape</strong> – The shape of the image (tuple)</p></li>
-<li><p><strong>dendrite_thickness</strong> – Interval for the desired thickness of the dendrite (in pixels) to which the synapse is
-connected. The height will be sampled from this interval. Basically, this just determines
-how much of the dendrite we see in the ROI, drawn as a line on the bottom of the image.</p></li>
-<li><p><strong>mode</strong> – The mode used for the random synapse generation. ‘mushroom’ will produce a mushroom-like synapse
-(i.e., an ellipse connected to the dendrite by a recangular-ish neck). ‘bump’ will produce a bump-like
-synapse (i.e., a have ellipse protruding from the dendrite). ‘rand’ will randomly select one of these
-2 modes.</p></li>
-<li><p><strong>seed</strong> – Sets the seed for the randomness</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse.add_nanodomains">
-<span class="sig-name descname"><span class="pre">add_nanodomains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_nanodmains</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist_nm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecs_in_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse.add_nanodomains" title="Link to this definition">¶</a></dt>
-<dd><p>Adds nanodomains on the periphery of the synapse.
-:param n_nanodmains: The number of nanodomains that will be attempted to be added. If n_nanodomains is too</p>
-<blockquote>
-<div><p>high and the min_dist_nm is too high, it may not be able to place all the nanodomains,
-in which case a warning will be raised to tell the user not all nanodomains have been
-placed</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>min_dist_nm</strong> – The minimum distance (in nm) separating the nanodomains.</p></li>
-<li><p><strong>n_molecs_in_domain</strong> – The number of molecules to be added at the nanodomain positions</p></li>
-<li><p><strong>seed</strong> – Sets the seed for the random placement of nanodomains</p></li>
-<li><p><strong>valid_thickness</strong> – The thickness of the valid region for the nanodomains. This value is 0 by default,
-meaning the nanodomains will only be placed on the upper perimeter of the synapse</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse.fatten_nanodomains">
-<span class="sig-name descname"><span class="pre">fatten_nanodomains</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse.fatten_nanodomains" title="Link to this definition">¶</a></dt>
-<dd><p>Fattens the nanodomains by 1 pixel on each side (if the side is within the synapse)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse.filter_valid_nanodomain_pos">
-<span class="sig-name descname"><span class="pre">filter_valid_nanodomain_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse.filter_valid_nanodomain_pos" title="Link to this definition">¶</a></dt>
-<dd><p>Returns a list of the valid nanodomain positions. The valid positions are on the upper half of the perimeter
-of the synapse
-:param thickness: The thickness of the valid region for the nanodomains. This value is 0 by default, meaning the</p>
-<blockquote>
-<div><p>nanodomains will only be placed on the upper perimeter of the synapse</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list of the valid positions for the nanodomains.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse.flash_nanodomains">
-<span class="sig-name descname"><span class="pre">flash_nanodomains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_quantum_us</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm_step_usec_correspondance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">1500000)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse.flash_nanodomains" title="Link to this definition">¶</a></dt>
-<dd><p>Verifies if the nanodomains need to be updated for the flash, updates them if it is the case</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pysted.exp_data_gen.rotate_nds">
-<span class="sig-prename descclassname"><span class="pre">pysted.exp_data_gen.</span></span><span class="sig-name descname"><span class="pre">rotate_nds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nd_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(64,</span> <span class="pre">64)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.rotate_nds" title="Link to this definition">¶</a></dt>
-<dd><p>rotates the nanodomain coords
-:param nd_coords: list or np.array of the nanodomain coords in the unrotated frame
-:param rot_angle: rotation angle in degrees
-:param frame_shape: shape of the image in which the NDs reside. Should be (64, 64) in most cases</p>
-</dd></dl>
-
-</section>
-
-
-          </div>
           
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">pySTED</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<ul class="current">
+          <a href="../index.html" class="icon icon-home">
+            pySTED
+          </a>
+              <div class="version">
+                0.0.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="pysted.html">pysted</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysted.base.html">pysted.base</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysted.bleach_funcs.html">pysted.bleach_funcs</a></li>
@@ -223,53 +81,200 @@ of the synapse
 </li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="pysted.html">pysted</a><ul>
-      <li>Previous: <a href="pysted.data.loader.DatamapLoader.html" title="previous chapter">pysted.data.loader.DatamapLoader</a></li>
-      <li>Next: <a href="pysted.exp_data_gen.degrees_to_radians.html" title="next chapter">pysted.exp_data_gen.degrees_to_radians</a></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &#169;2024, Audrey Durand and Flavie Lavoie-Cardinal.
-      
-      |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
-      
-      |
-      <a href="../_sources/modules/pysted.exp_data_gen.rst.txt"
-          rel="nofollow">Page source</a>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySTED</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pysted.html">pysted</a></li>
+      <li class="breadcrumb-item active">pysted.exp_data_gen</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/pysted.exp_data_gen.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pysted.exp_data_gen">
+<span id="pysted-exp-data-gen"></span><h1>pysted.exp_data_gen<a class="headerlink" href="#module-pysted.exp_data_gen" title="Link to this heading"></a></h1>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.exp_data_gen.degrees_to_radians.html#pysted.exp_data_gen.degrees_to_radians" title="pysted.exp_data_gen.degrees_to_radians"><code class="xref py py-obj docutils literal notranslate"><span class="pre">degrees_to_radians</span></code></a>(angle_deg)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.exp_data_gen.rotate_nds.html#pysted.exp_data_gen.rotate_nds" title="pysted.exp_data_gen.rotate_nds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_nds</span></code></a>(nd_coords, rot_angle[, frame_shape])</p></td>
+<td><p>rotates the nanodomain coords :param nd_coords: list or np.array of the nanodomain coords in the unrotated frame :param rot_angle: rotation angle in degrees :param frame_shape: shape of the image in which the NDs reside.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.exp_data_gen.Beads.html#pysted.exp_data_gen.Beads" title="pysted.exp_data_gen.Beads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Beads</span></code></a>(n_molecs, n_beads[, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.exp_data_gen.Nanodomain.html#pysted.exp_data_gen.Nanodomain" title="pysted.exp_data_gen.Nanodomain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Nanodomain</span></code></a>(img_shape[, valid_positions])</p></td>
+<td><p>Nanodomain class</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.exp_data_gen.Synapse.html#pysted.exp_data_gen.Synapse" title="pysted.exp_data_gen.Synapse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Synapse</span></code></a>(n_molecs[, datamap_pixelsize_nm, ...])</p></td>
+<td><p>Synapse class Implemented with the intent of using a datamap_pixelsize of 20nm, to generate synapses with width of 500nm and height of 200nm inside a 64px by 64px datamap (1080nm x 1080nm). The synapse will have nanodomains along its upper edge :param n_molecs: The number of molecules that will be placed in every pixel of the synapse :param datamap_pixelsize_nm: The pixelsize (in nm) of the datamap :param width_nm: Interval for the desired width (in nm) of the synapse. The width will be sampled from this interval :param height_nm: Interval for the desired height (in nm) of the synapse. The height will be sampled from this                   interval :param img_shape: The shape of the image (tuple) :param dendrite_thickness: Interval for the desired thickness of the dendrite (in pixels) to which the synapse is                            connected. The height will be sampled from this interval. Basically, this just determines                            how much of the dendrite we see in the ROI, drawn as a line on the bottom of the image. :param mode: The mode used for the random synapse generation. 'mushroom' will produce a mushroom-like synapse              (i.e., an ellipse connected to the dendrite by a recangular-ish neck). 'bump' will produce a bump-like              synapse (i.e., a have ellipse protruding from the dendrite). 'rand' will randomly select one of these              2 modes. :param seed: Sets the seed for the randomness.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.exp_data_gen.Nanodomain">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.exp_data_gen.</span></span><span class="sig-name descname"><span class="pre">Nanodomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Nanodomain" title="Link to this definition"></a></dt>
+<dd><p>Nanodomain class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_shape</strong> – The shape of the image in which the nanodomains will be placed</p></li>
+<li><p><strong>valid_positions</strong> – A list of the valid positions from which to randomly sample a nanodomain position.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.exp_data_gen.Nanodomain.add_flash_curve">
+<span class="sig-name descname"><span class="pre">add_flash_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events_curves_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Nanodomain.add_flash_curve" title="Link to this definition"></a></dt>
+<dd><p>Adds a list of molecule values for a certain number of frames</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.exp_data_gen.</span></span><span class="sig-name descname"><span class="pre">Synapse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_molecs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize_nm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width_nm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(400,</span> <span class="pre">800)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height_nm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(300,</span> <span class="pre">600)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(64,</span> <span class="pre">64)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dendrite_thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rand'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse" title="Link to this definition"></a></dt>
+<dd><p>Synapse class
+Implemented with the intent of using a datamap_pixelsize of 20nm, to generate synapses with width of 500nm and
+height of 200nm inside a 64px by 64px datamap (1080nm x 1080nm).
+The synapse will have nanodomains along its upper edge
+:param n_molecs: The number of molecules that will be placed in every pixel of the synapse
+:param datamap_pixelsize_nm: The pixelsize (in nm) of the datamap
+:param width_nm: Interval for the desired width (in nm) of the synapse. The width will be sampled from this interval
+:param height_nm: Interval for the desired height (in nm) of the synapse. The height will be sampled from this</p>
+<blockquote>
+<div><p>interval</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_shape</strong> – The shape of the image (tuple)</p></li>
+<li><p><strong>dendrite_thickness</strong> – Interval for the desired thickness of the dendrite (in pixels) to which the synapse is
+connected. The height will be sampled from this interval. Basically, this just determines
+how much of the dendrite we see in the ROI, drawn as a line on the bottom of the image.</p></li>
+<li><p><strong>mode</strong> – The mode used for the random synapse generation. ‘mushroom’ will produce a mushroom-like synapse
+(i.e., an ellipse connected to the dendrite by a recangular-ish neck). ‘bump’ will produce a bump-like
+synapse (i.e., a have ellipse protruding from the dendrite). ‘rand’ will randomly select one of these
+2 modes.</p></li>
+<li><p><strong>seed</strong> – Sets the seed for the randomness</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse.add_nanodomains">
+<span class="sig-name descname"><span class="pre">add_nanodomains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_nanodmains</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist_nm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecs_in_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse.add_nanodomains" title="Link to this definition"></a></dt>
+<dd><p>Adds nanodomains on the periphery of the synapse.
+:param n_nanodmains: The number of nanodomains that will be attempted to be added. If n_nanodomains is too</p>
+<blockquote>
+<div><p>high and the min_dist_nm is too high, it may not be able to place all the nanodomains,
+in which case a warning will be raised to tell the user not all nanodomains have been
+placed</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_dist_nm</strong> – The minimum distance (in nm) separating the nanodomains.</p></li>
+<li><p><strong>n_molecs_in_domain</strong> – The number of molecules to be added at the nanodomain positions</p></li>
+<li><p><strong>seed</strong> – Sets the seed for the random placement of nanodomains</p></li>
+<li><p><strong>valid_thickness</strong> – The thickness of the valid region for the nanodomains. This value is 0 by default,
+meaning the nanodomains will only be placed on the upper perimeter of the synapse</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse.fatten_nanodomains">
+<span class="sig-name descname"><span class="pre">fatten_nanodomains</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse.fatten_nanodomains" title="Link to this definition"></a></dt>
+<dd><p>Fattens the nanodomains by 1 pixel on each side (if the side is within the synapse)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse.filter_valid_nanodomain_pos">
+<span class="sig-name descname"><span class="pre">filter_valid_nanodomain_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thickness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse.filter_valid_nanodomain_pos" title="Link to this definition"></a></dt>
+<dd><p>Returns a list of the valid nanodomain positions. The valid positions are on the upper half of the perimeter
+of the synapse
+:param thickness: The thickness of the valid region for the nanodomains. This value is 0 by default, meaning the</p>
+<blockquote>
+<div><p>nanodomains will only be placed on the upper perimeter of the synapse</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of the valid positions for the nanodomains.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.exp_data_gen.Synapse.flash_nanodomains">
+<span class="sig-name descname"><span class="pre">flash_nanodomains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_quantum_us</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm_step_usec_correspondance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">1500000)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.Synapse.flash_nanodomains" title="Link to this definition"></a></dt>
+<dd><p>Verifies if the nanodomains need to be updated for the flash, updates them if it is the case</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.exp_data_gen.rotate_nds">
+<span class="sig-prename descclassname"><span class="pre">pysted.exp_data_gen.</span></span><span class="sig-name descname"><span class="pre">rotate_nds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nd_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_angle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(64,</span> <span class="pre">64)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.exp_data_gen.rotate_nds" title="Link to this definition"></a></dt>
+<dd><p>rotates the nanodomain coords
+:param nd_coords: list or np.array of the nanodomain coords in the unrotated frame
+:param rot_angle: rotation angle in degrees
+:param frame_shape: shape of the image in which the NDs reside. Should be (64, 64) in most cases</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pysted.data.loader.DatamapLoader.html" class="btn btn-neutral float-left" title="pysted.data.loader.DatamapLoader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pysted.exp_data_gen.degrees_to_radians.html" class="btn btn-neutral float-right" title="pysted.exp_data_gen.degrees_to_radians" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
-    
+  <hr/>
 
-    
-  </body>
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Audrey Durand and Flavie Lavoie-Cardinal.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>

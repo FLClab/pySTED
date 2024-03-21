@@ -1,495 +1,53 @@
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-<html lang="en" data-content_root="../">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>pysted.temporal &#8212; pySTED 0.0.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
-    <script src="../_static/documentation_options.js?v=e3a6060d"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pysted.temporal &mdash; pySTED 0.0.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/fonts.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=e3a6060d"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="pysted.temporal.Ensemble" href="pysted.temporal.Ensemble.html" />
-    <link rel="prev" title="pysted.raster.reset_prob" href="pysted.raster.reset_prob.html" />
-   
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
+    <link rel="prev" title="pysted.raster.reset_prob" href="pysted.raster.reset_prob.html" /> 
+</head>
 
-  
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-  </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
-
-          <div class="body" role="main">
-            
-  <section id="module-pysted.temporal">
-<span id="pysted-temporal"></span><h1>pysted.temporal<a class="headerlink" href="#module-pysted.temporal" title="Link to this heading">¶</a></h1>
-<p class="rubric">Classes</p>
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysted.temporal.Ensemble.html#pysted.temporal.Ensemble" title="pysted.temporal.Ensemble"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Ensemble</span></code></a>([roi])</p></td>
-<td><p>Creates an <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code> object which is responsible to handle different objects that are based on a <cite>Nodes</cite> object</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysted.temporal.Fiber.html#pysted.temporal.Fiber" title="pysted.temporal.Fiber"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fiber</span></code></a>([coords, random_params, parent, seed])</p></td>
-<td><p>A <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> is a set of nodes that are connected but not closed</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysted.temporal.Nodes.html#pysted.temporal.Nodes" title="pysted.temporal.Nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Nodes</span></code></a>(nodes[, parent])</p></td>
-<td><p>A <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object is responsible to interact with a list of nodes and apply different forces or jitters to the a single node</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysted.temporal.NodesCombiner.html#pysted.temporal.NodesCombiner" title="pysted.temporal.NodesCombiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodesCombiner</span></code></a>()</p></td>
-<td><p>A <code class="docutils literal notranslate"><span class="pre">NodesCombiner</span></code> object is responsible to combine multiple <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="pysted.temporal.Polygon.html#pysted.temporal.Polygon" title="pysted.temporal.Polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Polygon</span></code></a>([coords, random_params, parent])</p></td>
-<td><p>A <code class="docutils literal notranslate"><span class="pre">Polygon</span></code> is a set of <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> that are closed to the exterior world</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="pysted.temporal.Synapse.html#pysted.temporal.Synapse" title="pysted.temporal.Synapse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Synapse</span></code></a>(neck_coord, neck_direction[, parent])</p></td>
-<td><p>A <code class="docutils literal notranslate"><span class="pre">Synapse</span></code> is a protuberance that starts from a <code class="docutils literal notranslate"><span class="pre">Fiber</span></code>.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py class">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">((0,</span> <span class="pre">0),</span> <span class="pre">(256,</span> <span class="pre">256))</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble" title="Link to this definition">¶</a></dt>
-<dd><p>Creates an <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code> object which is responsible to handle different objects
-that are based on a <cite>Nodes</cite> object</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.append" title="Link to this definition">¶</a></dt>
-<dd><p>Appends the <code class="docutils literal notranslate"><span class="pre">obj</span></code> to then <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>obj</strong> – The object to append</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble.generate_objects_dict">
-<span class="sig-name descname"><span class="pre">generate_objects_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.generate_objects_dict" title="Link to this definition">¶</a></dt>
-<dd><p>Creates a dictionnary containing the pixels corresponding to the objects in the frame.
-This could be useful if we want to do something other than plot the ojbects, such as
-tagging them for flashing or something.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">dict</span></code> of the objects</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble.generate_sequence">
-<span class="sig-name descname"><span class="pre">generate_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_frames</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.generate_sequence" title="Link to this definition">¶</a></dt>
-<dd><p>Generates the sequence of frames of the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>num_frames</strong> – The number of frames to generate</p>
-</dd>
-</dl>
-<p>:return : A 3D <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of the sequence</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble.reset_force">
-<span class="sig-name descname"><span class="pre">reset_force</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.reset_force" title="Link to this definition">¶</a></dt>
-<dd><p>Applies the reset_force to all objects of the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble.reset_speed">
-<span class="sig-name descname"><span class="pre">reset_speed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.reset_speed" title="Link to this definition">¶</a></dt>
-<dd><p>Applies the reset_force to all objects of the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble.return_frame">
-<span class="sig-name descname"><span class="pre">return_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.return_frame" title="Link to this definition">¶</a></dt>
-<dd><p>Creates the frame of the current state of the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>image</strong> – (Optional) An <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> to write to</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A 2D <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of the current state</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble.show">
-<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.show" title="Link to this definition">¶</a></dt>
-<dd><p>Implements a <code class="docutils literal notranslate"><span class="pre">show</span></code> function of the ensemble</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble.spawn">
-<span class="sig-name descname"><span class="pre">spawn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.spawn" title="Link to this definition">¶</a></dt>
-<dd><p>Implements a <code class="docutils literal notranslate"><span class="pre">spawn</span></code> function to randomly spawn synapses</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>prob</strong> – The probability of spawning a synapse</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Ensemble.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">0.1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">0.01)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.update" title="Link to this definition">¶</a></dt>
-<dd><p>Updates all objects in the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code>.</p>
-<p>If an object is out of the region of interest then it is simply removed</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>prob</strong> – The probability of applying a force</p></li>
-<li><p><strong>force</strong> – A <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of the force to apply</p></li>
-<li><p><strong>jitter</strong> – A <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of the jitter to apply</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pysted.temporal.Fiber">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Fiber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber" title="Link to this definition">¶</a></dt>
-<dd><p>A <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> is a set of nodes that are connected but not closed</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Fiber.generate_random">
-<span class="sig-name descname"><span class="pre">generate_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">50)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-0.39269908169872414,</span> <span class="pre">0.39269908169872414)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">((0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0))</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.generate_random" title="Link to this definition">¶</a></dt>
-<dd><p>Generates a random set of points.</p>
-<p>To do so, we incrementaly add a point to list of coordinates. It could be 
-seen as building a serpent from the head to the tail.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>num_points</strong> – (min, max) values of the uniform sampling to generate
-the number of points of the fiber</p></li>
-<li><p><strong>angle</strong> – (min, max) values of the uniform sampling to generate the
-angle from the previous angle</p></li>
-<li><p><strong>scale</strong> – (min, max) values of the uniform sampling to generate the
-displacement</p></li>
-<li><p><strong>pos</strong> – Uniformly sample a position of the <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> object. Should be
-a <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of top-left and bottom-right corner in (y, x) coordinates</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A (N,2) <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of coordinates</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Fiber.grow">
-<span class="sig-name descname"><span class="pre">grow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-0.39269908169872414,</span> <span class="pre">0.39269908169872414)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2,</span> <span class="pre">3)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.grow" title="Link to this definition">¶</a></dt>
-<dd><p>This methods implements the growth of a <code class="docutils literal notranslate"><span class="pre">Fiber</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>angle</strong> – (min, max) values of the uniform sampling to generate the
-angle from the previous angle</p></li>
-<li><p><strong>scale</strong> – (min, max) values of the uniform sampling to generate the
-displacement</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Fiber.return_shape">
-<span class="sig-name descname"><span class="pre">return_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.return_shape" title="Link to this definition">¶</a></dt>
-<dd><p>Return <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> indices.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>shape</strong> – The shape of the field of view</p>
-</dd>
-</dl>
-<dl>
-<dt>:return<span class="classifier">A <cite>numpy.ndarray</cite> of row coords</span></dt><dd><p>A <cite>numpy.ndarray</cite> of col coords</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Fiber.spawn">
-<span class="sig-name descname"><span class="pre">spawn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2,</span> <span class="pre">10)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.spawn" title="Link to this definition">¶</a></dt>
-<dd><p>Method that implements spawn of synapses</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>num</strong> – (min, max) values of the number of synapses to spawn</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Fiber.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.update" title="Link to this definition">¶</a></dt>
-<dd><p>Updates the position of each node based on the current forces and speeds</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pysted.temporal.Nodes">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes" title="Link to this definition">¶</a></dt>
-<dd><p>A <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object is responsible to interact with a list of nodes and apply
-different forces or jitters to the a single node</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Nodes.add_node">
-<span class="sig-name descname"><span class="pre">add_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tail'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.add_node" title="Link to this definition">¶</a></dt>
-<dd><p>Methods that implements adding a node to the current nodes.</p>
-<p>We copy the speed and acc of next node</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>node</strong> – A (y, x) coordinates of the node to add</p></li>
-<li><p><strong>pos</strong> – (Optional) Where to add the node. Should be in {“tail”, “head”}</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Nodes.apply_force">
-<span class="sig-name descname"><span class="pre">apply_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.apply_force" title="Link to this definition">¶</a></dt>
-<dd><p>This method allows to apply a <code class="docutils literal notranslate"><span class="pre">force</span></code> on each nodes</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mean</strong> – The <cite>mean</cite> parameter of the normal function to calculate the force</p></li>
-<li><p><strong>mean</strong> – The <cite>std</cite> parameter of the normal function to calculate the force</p></li>
-<li><p><strong>field</strong> – (Optional) A <cite>numpy.ndarray</cite> of the force field</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Nodes.apply_jitter">
-<span class="sig-name descname"><span class="pre">apply_jitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.apply_jitter" title="Link to this definition">¶</a></dt>
-<dd><p>This method allows to jitter the position of each nodes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>mean</strong> – The <code class="docutils literal notranslate"><span class="pre">mean</span></code> parameter of the normal function to calculate jitter</p></li>
-<li><p><strong>mean</strong> – The <code class="docutils literal notranslate"><span class="pre">std</span></code> parameter of the normal function to calculate jitter</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Nodes.reset_force">
-<span class="sig-name descname"><span class="pre">reset_force</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.reset_force" title="Link to this definition">¶</a></dt>
-<dd><p>Reset the current <code class="docutils literal notranslate"><span class="pre">force</span></code> that is being applied on all nodes</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Nodes.reset_speed">
-<span class="sig-name descname"><span class="pre">reset_speed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.reset_speed" title="Link to this definition">¶</a></dt>
-<dd><p>Reset the current <code class="docutils literal notranslate"><span class="pre">speed</span></code> that is being applied on all nodes</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Nodes.return_shape">
-<span class="sig-name descname"><span class="pre">return_shape</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.return_shape" title="Link to this definition">¶</a></dt>
-<dd><p>Should be implemented in the supered classes</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Nodes.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.update" title="Link to this definition">¶</a></dt>
-<dd><p>Updates the position of each node based on the current forces and speeds</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">NodesCombiner</span></span><a class="headerlink" href="#pysted.temporal.NodesCombiner" title="Link to this definition">¶</a></dt>
-<dd><p>A <code class="docutils literal notranslate"><span class="pre">NodesCombiner</span></code> object is responsible to combine multiple <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object.</p>
-<p>We store the combined objects into an objects list.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.add_object">
-<span class="sig-name descname"><span class="pre">add_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.add_object" title="Link to this definition">¶</a></dt>
-<dd><p>Allows to add a <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object to the <code class="docutils literal notranslate"><span class="pre">NodesCombinator</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>obj</strong> – A <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> obj</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.apply_force">
-<span class="sig-name descname"><span class="pre">apply_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.apply_force" title="Link to this definition">¶</a></dt>
-<dd><p>This method allows to apply a <code class="docutils literal notranslate"><span class="pre">force</span></code> on each nodes</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.apply_jitter">
-<span class="sig-name descname"><span class="pre">apply_jitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.apply_jitter" title="Link to this definition">¶</a></dt>
-<dd><p>This method applies a <code class="docutils literal notranslate"><span class="pre">jitter</span></code> on each nodes</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.reset_force">
-<span class="sig-name descname"><span class="pre">reset_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.reset_force" title="Link to this definition">¶</a></dt>
-<dd><p>This method allows to reset the <code class="docutils literal notranslate"><span class="pre">force</span></code> currently applied on each node</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.reset_speed">
-<span class="sig-name descname"><span class="pre">reset_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.reset_speed" title="Link to this definition">¶</a></dt>
-<dd><p>This method allows to reset the <code class="docutils literal notranslate"><span class="pre">speed</span></code> of each node</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.update" title="Link to this definition">¶</a></dt>
-<dd><p>Updates the position of each node based on the current forces and speeds</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pysted.temporal.Polygon">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon" title="Link to this definition">¶</a></dt>
-<dd><p>A <code class="docutils literal notranslate"><span class="pre">Polygon</span></code> is a set of <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> that are closed to the exterior world</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Polygon.area">
-<span class="sig-name descname"><span class="pre">area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.area" title="Link to this definition">¶</a></dt>
-<dd><p>Calculates the area covered by the <code class="docutils literal notranslate"><span class="pre">Polygon</span></code>.</p>
-<p>We use the Shoelace formulation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The area of the polygon</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Polygon.expand">
-<span class="sig-name descname"><span class="pre">expand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.expand" title="Link to this definition">¶</a></dt>
-<dd><p>Implements an expand method of the <code class="docutils literal notranslate"><span class="pre">Polygon</span></code>.</p>
-<p>We assume that the polygon is exapanded from its center of mass</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>scale</strong> – The scale factor to expand the polygon</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Polygon.generate_random">
-<span class="sig-name descname"><span class="pre">generate_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">25)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">15)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">((0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0))</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.generate_random" title="Link to this definition">¶</a></dt>
-<dd><p>Generates a random set of coords.</p>
-<p>To do so, we make use of the Convex Hull of a random set of points</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>num_points</strong> – Uniformly generates a number of points for the convex
-hull between num_points[0] and num_points[1]</p></li>
-<li><p><strong>scale</strong> – Uniformly generates a scale factor for the convex
-hull between scale[0] and scale[1]</p></li>
-<li><p><strong>pos</strong> – Uniformly positions the convex hull in space. Should be a <code class="docutils literal notranslate"><span class="pre">tuple</span></code>
-of top-left and bottom-right corner in (y, x) coordinates</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A (N,2) <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of coordinates</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Polygon.return_shape">
-<span class="sig-name descname"><span class="pre">return_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.return_shape" title="Link to this definition">¶</a></dt>
-<dd><p>Return the polygon indices</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>shape</strong> – The shape of the field of view</p>
-</dd>
-</dl>
-<dl>
-<dt>:return<span class="classifier">A <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of row coords</span></dt><dd><p>A <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of col coords</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Polygon.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.update" title="Link to this definition">¶</a></dt>
-<dd><p>Updates the position of each node based on the current forces and speeds</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pysted.temporal.Synapse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Synapse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">neck_coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neck_direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Synapse" title="Link to this definition">¶</a></dt>
-<dd><p>A <code class="docutils literal notranslate"><span class="pre">Synapse</span></code> is a protuberance that starts from a <code class="docutils literal notranslate"><span class="pre">Fiber</span></code>.</p>
-<p>It is defined as the combination of a <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> and a <code class="docutils literal notranslate"><span class="pre">Polygon</span></code> objects</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Synapse.grow">
-<span class="sig-name descname"><span class="pre">grow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-0.39269908169872414,</span> <span class="pre">0.39269908169872414)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">2)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Synapse.grow" title="Link to this definition">¶</a></dt>
-<dd><p>Method that implements the growth of the synapse</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>angle</strong> – (min, max) values of the uniform sampling to generate the angle</p></li>
-<li><p><strong>scale</strong> – (min, max) values of the uniform sampling to generate the displacement</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pysted.temporal.Synapse.return_shape">
-<span class="sig-name descname"><span class="pre">return_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Synapse.return_shape" title="Link to this definition">¶</a></dt>
-<dd><p>Return <code class="docutils literal notranslate"><span class="pre">Synapse</span></code> indices.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>shape</strong> – The shape of the field of view</p>
-</dd>
-</dl>
-<dl>
-<dt>:return<span class="classifier">A <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of row coords</span></dt><dd><p>A <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of col coords</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-
-
-          </div>
           
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">pySTED</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<ul class="current">
+          <a href="../index.html" class="icon icon-home">
+            pySTED
+          </a>
+              <div class="version">
+                0.0.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="pysted.html">pysted</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pysted.base.html">pysted.base</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pysted.bleach_funcs.html">pysted.bleach_funcs</a></li>
@@ -564,53 +122,500 @@ of top-left and bottom-right corner in (y, x) coordinates</p></li>
 </li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="pysted.html">pysted</a><ul>
-      <li>Previous: <a href="pysted.raster.reset_prob.html" title="previous chapter">pysted.raster.reset_prob</a></li>
-      <li>Next: <a href="pysted.temporal.Ensemble.html" title="next chapter">pysted.temporal.Ensemble</a></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &#169;2024, Audrey Durand and Flavie Lavoie-Cardinal.
-      
-      |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
-      
-      |
-      <a href="../_sources/modules/pysted.temporal.rst.txt"
-          rel="nofollow">Page source</a>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pySTED</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="pysted.html">pysted</a></li>
+      <li class="breadcrumb-item active">pysted.temporal</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/pysted.temporal.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pysted.temporal">
+<span id="pysted-temporal"></span><h1>pysted.temporal<a class="headerlink" href="#module-pysted.temporal" title="Link to this heading"></a></h1>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.temporal.Ensemble.html#pysted.temporal.Ensemble" title="pysted.temporal.Ensemble"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Ensemble</span></code></a>([roi])</p></td>
+<td><p>Creates an <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code> object which is responsible to handle different objects that are based on a <cite>Nodes</cite> object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.temporal.Fiber.html#pysted.temporal.Fiber" title="pysted.temporal.Fiber"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fiber</span></code></a>([coords, random_params, parent, seed])</p></td>
+<td><p>A <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> is a set of nodes that are connected but not closed</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.temporal.Nodes.html#pysted.temporal.Nodes" title="pysted.temporal.Nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Nodes</span></code></a>(nodes[, parent])</p></td>
+<td><p>A <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object is responsible to interact with a list of nodes and apply different forces or jitters to the a single node</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.temporal.NodesCombiner.html#pysted.temporal.NodesCombiner" title="pysted.temporal.NodesCombiner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodesCombiner</span></code></a>()</p></td>
+<td><p>A <code class="docutils literal notranslate"><span class="pre">NodesCombiner</span></code> object is responsible to combine multiple <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.temporal.Polygon.html#pysted.temporal.Polygon" title="pysted.temporal.Polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Polygon</span></code></a>([coords, random_params, parent])</p></td>
+<td><p>A <code class="docutils literal notranslate"><span class="pre">Polygon</span></code> is a set of <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> that are closed to the exterior world</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.temporal.Synapse.html#pysted.temporal.Synapse" title="pysted.temporal.Synapse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Synapse</span></code></a>(neck_coord, neck_direction[, parent])</p></td>
+<td><p>A <code class="docutils literal notranslate"><span class="pre">Synapse</span></code> is a protuberance that starts from a <code class="docutils literal notranslate"><span class="pre">Fiber</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">((0,</span> <span class="pre">0),</span> <span class="pre">(256,</span> <span class="pre">256))</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble" title="Link to this definition"></a></dt>
+<dd><p>Creates an <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code> object which is responsible to handle different objects
+that are based on a <cite>Nodes</cite> object</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.append" title="Link to this definition"></a></dt>
+<dd><p>Appends the <code class="docutils literal notranslate"><span class="pre">obj</span></code> to then <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj</strong> – The object to append</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.generate_objects_dict">
+<span class="sig-name descname"><span class="pre">generate_objects_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.generate_objects_dict" title="Link to this definition"></a></dt>
+<dd><p>Creates a dictionnary containing the pixels corresponding to the objects in the frame.
+This could be useful if we want to do something other than plot the ojbects, such as
+tagging them for flashing or something.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">dict</span></code> of the objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.generate_sequence">
+<span class="sig-name descname"><span class="pre">generate_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_frames</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.generate_sequence" title="Link to this definition"></a></dt>
+<dd><p>Generates the sequence of frames of the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num_frames</strong> – The number of frames to generate</p>
+</dd>
+</dl>
+<p>:return : A 3D <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of the sequence</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.reset_force">
+<span class="sig-name descname"><span class="pre">reset_force</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.reset_force" title="Link to this definition"></a></dt>
+<dd><p>Applies the reset_force to all objects of the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.reset_speed">
+<span class="sig-name descname"><span class="pre">reset_speed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.reset_speed" title="Link to this definition"></a></dt>
+<dd><p>Applies the reset_force to all objects of the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.return_frame">
+<span class="sig-name descname"><span class="pre">return_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.return_frame" title="Link to this definition"></a></dt>
+<dd><p>Creates the frame of the current state of the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>image</strong> – (Optional) An <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> to write to</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of the current state</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.show">
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.show" title="Link to this definition"></a></dt>
+<dd><p>Implements a <code class="docutils literal notranslate"><span class="pre">show</span></code> function of the ensemble</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.spawn">
+<span class="sig-name descname"><span class="pre">spawn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.spawn" title="Link to this definition"></a></dt>
+<dd><p>Implements a <code class="docutils literal notranslate"><span class="pre">spawn</span></code> function to randomly spawn synapses</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prob</strong> – The probability of spawning a synapse</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">0.1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">0.01)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.update" title="Link to this definition"></a></dt>
+<dd><p>Updates all objects in the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code>.</p>
+<p>If an object is out of the region of interest then it is simply removed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prob</strong> – The probability of applying a force</p></li>
+<li><p><strong>force</strong> – A <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of the force to apply</p></li>
+<li><p><strong>jitter</strong> – A <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of the jitter to apply</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.temporal.Fiber">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Fiber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber" title="Link to this definition"></a></dt>
+<dd><p>A <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> is a set of nodes that are connected but not closed</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Fiber.generate_random">
+<span class="sig-name descname"><span class="pre">generate_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">50)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-0.39269908169872414,</span> <span class="pre">0.39269908169872414)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">((0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0))</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.generate_random" title="Link to this definition"></a></dt>
+<dd><p>Generates a random set of points.</p>
+<p>To do so, we incrementaly add a point to list of coordinates. It could be 
+seen as building a serpent from the head to the tail.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_points</strong> – (min, max) values of the uniform sampling to generate
+the number of points of the fiber</p></li>
+<li><p><strong>angle</strong> – (min, max) values of the uniform sampling to generate the
+angle from the previous angle</p></li>
+<li><p><strong>scale</strong> – (min, max) values of the uniform sampling to generate the
+displacement</p></li>
+<li><p><strong>pos</strong> – Uniformly sample a position of the <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> object. Should be
+a <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of top-left and bottom-right corner in (y, x) coordinates</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A (N,2) <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Fiber.grow">
+<span class="sig-name descname"><span class="pre">grow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-0.39269908169872414,</span> <span class="pre">0.39269908169872414)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2,</span> <span class="pre">3)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.grow" title="Link to this definition"></a></dt>
+<dd><p>This methods implements the growth of a <code class="docutils literal notranslate"><span class="pre">Fiber</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>angle</strong> – (min, max) values of the uniform sampling to generate the
+angle from the previous angle</p></li>
+<li><p><strong>scale</strong> – (min, max) values of the uniform sampling to generate the
+displacement</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Fiber.return_shape">
+<span class="sig-name descname"><span class="pre">return_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.return_shape" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>shape</strong> – The shape of the field of view</p>
+</dd>
+</dl>
+<dl>
+<dt>:return<span class="classifier">A <cite>numpy.ndarray</cite> of row coords</span></dt><dd><p>A <cite>numpy.ndarray</cite> of col coords</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Fiber.spawn">
+<span class="sig-name descname"><span class="pre">spawn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2,</span> <span class="pre">10)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.spawn" title="Link to this definition"></a></dt>
+<dd><p>Method that implements spawn of synapses</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num</strong> – (min, max) values of the number of synapses to spawn</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Fiber.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Fiber.update" title="Link to this definition"></a></dt>
+<dd><p>Updates the position of each node based on the current forces and speeds</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.temporal.Nodes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes" title="Link to this definition"></a></dt>
+<dd><p>A <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object is responsible to interact with a list of nodes and apply
+different forces or jitters to the a single node</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Nodes.add_node">
+<span class="sig-name descname"><span class="pre">add_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tail'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.add_node" title="Link to this definition"></a></dt>
+<dd><p>Methods that implements adding a node to the current nodes.</p>
+<p>We copy the speed and acc of next node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node</strong> – A (y, x) coordinates of the node to add</p></li>
+<li><p><strong>pos</strong> – (Optional) Where to add the node. Should be in {“tail”, “head”}</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Nodes.apply_force">
+<span class="sig-name descname"><span class="pre">apply_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.apply_force" title="Link to this definition"></a></dt>
+<dd><p>This method allows to apply a <code class="docutils literal notranslate"><span class="pre">force</span></code> on each nodes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean</strong> – The <cite>mean</cite> parameter of the normal function to calculate the force</p></li>
+<li><p><strong>mean</strong> – The <cite>std</cite> parameter of the normal function to calculate the force</p></li>
+<li><p><strong>field</strong> – (Optional) A <cite>numpy.ndarray</cite> of the force field</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Nodes.apply_jitter">
+<span class="sig-name descname"><span class="pre">apply_jitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.apply_jitter" title="Link to this definition"></a></dt>
+<dd><p>This method allows to jitter the position of each nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean</strong> – The <code class="docutils literal notranslate"><span class="pre">mean</span></code> parameter of the normal function to calculate jitter</p></li>
+<li><p><strong>mean</strong> – The <code class="docutils literal notranslate"><span class="pre">std</span></code> parameter of the normal function to calculate jitter</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Nodes.reset_force">
+<span class="sig-name descname"><span class="pre">reset_force</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.reset_force" title="Link to this definition"></a></dt>
+<dd><p>Reset the current <code class="docutils literal notranslate"><span class="pre">force</span></code> that is being applied on all nodes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Nodes.reset_speed">
+<span class="sig-name descname"><span class="pre">reset_speed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.reset_speed" title="Link to this definition"></a></dt>
+<dd><p>Reset the current <code class="docutils literal notranslate"><span class="pre">speed</span></code> that is being applied on all nodes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Nodes.return_shape">
+<span class="sig-name descname"><span class="pre">return_shape</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.return_shape" title="Link to this definition"></a></dt>
+<dd><p>Should be implemented in the supered classes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Nodes.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Nodes.update" title="Link to this definition"></a></dt>
+<dd><p>Updates the position of each node based on the current forces and speeds</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">NodesCombiner</span></span><a class="headerlink" href="#pysted.temporal.NodesCombiner" title="Link to this definition"></a></dt>
+<dd><p>A <code class="docutils literal notranslate"><span class="pre">NodesCombiner</span></code> object is responsible to combine multiple <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object.</p>
+<p>We store the combined objects into an objects list.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.add_object">
+<span class="sig-name descname"><span class="pre">add_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.add_object" title="Link to this definition"></a></dt>
+<dd><p>Allows to add a <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> object to the <code class="docutils literal notranslate"><span class="pre">NodesCombinator</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>obj</strong> – A <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> obj</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.apply_force">
+<span class="sig-name descname"><span class="pre">apply_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.apply_force" title="Link to this definition"></a></dt>
+<dd><p>This method allows to apply a <code class="docutils literal notranslate"><span class="pre">force</span></code> on each nodes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.apply_jitter">
+<span class="sig-name descname"><span class="pre">apply_jitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.apply_jitter" title="Link to this definition"></a></dt>
+<dd><p>This method applies a <code class="docutils literal notranslate"><span class="pre">jitter</span></code> on each nodes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.reset_force">
+<span class="sig-name descname"><span class="pre">reset_force</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.reset_force" title="Link to this definition"></a></dt>
+<dd><p>This method allows to reset the <code class="docutils literal notranslate"><span class="pre">force</span></code> currently applied on each node</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.reset_speed">
+<span class="sig-name descname"><span class="pre">reset_speed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.reset_speed" title="Link to this definition"></a></dt>
+<dd><p>This method allows to reset the <code class="docutils literal notranslate"><span class="pre">speed</span></code> of each node</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.NodesCombiner.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.NodesCombiner.update" title="Link to this definition"></a></dt>
+<dd><p>Updates the position of each node based on the current forces and speeds</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.temporal.Polygon">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon" title="Link to this definition"></a></dt>
+<dd><p>A <code class="docutils literal notranslate"><span class="pre">Polygon</span></code> is a set of <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> that are closed to the exterior world</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Polygon.area">
+<span class="sig-name descname"><span class="pre">area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.area" title="Link to this definition"></a></dt>
+<dd><p>Calculates the area covered by the <code class="docutils literal notranslate"><span class="pre">Polygon</span></code>.</p>
+<p>We use the Shoelace formulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The area of the polygon</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Polygon.expand">
+<span class="sig-name descname"><span class="pre">expand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.expand" title="Link to this definition"></a></dt>
+<dd><p>Implements an expand method of the <code class="docutils literal notranslate"><span class="pre">Polygon</span></code>.</p>
+<p>We assume that the polygon is exapanded from its center of mass</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scale</strong> – The scale factor to expand the polygon</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Polygon.generate_random">
+<span class="sig-name descname"><span class="pre">generate_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">25)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">15)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">((0,</span> <span class="pre">0),</span> <span class="pre">(0,</span> <span class="pre">0))</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.generate_random" title="Link to this definition"></a></dt>
+<dd><p>Generates a random set of coords.</p>
+<p>To do so, we make use of the Convex Hull of a random set of points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_points</strong> – Uniformly generates a number of points for the convex
+hull between num_points[0] and num_points[1]</p></li>
+<li><p><strong>scale</strong> – Uniformly generates a scale factor for the convex
+hull between scale[0] and scale[1]</p></li>
+<li><p><strong>pos</strong> – Uniformly positions the convex hull in space. Should be a <code class="docutils literal notranslate"><span class="pre">tuple</span></code>
+of top-left and bottom-right corner in (y, x) coordinates</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A (N,2) <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Polygon.return_shape">
+<span class="sig-name descname"><span class="pre">return_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.return_shape" title="Link to this definition"></a></dt>
+<dd><p>Return the polygon indices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>shape</strong> – The shape of the field of view</p>
+</dd>
+</dl>
+<dl>
+<dt>:return<span class="classifier">A <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of row coords</span></dt><dd><p>A <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of col coords</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Polygon.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Polygon.update" title="Link to this definition"></a></dt>
+<dd><p>Updates the position of each node based on the current forces and speeds</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.temporal.Synapse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.temporal.</span></span><span class="sig-name descname"><span class="pre">Synapse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">neck_coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neck_direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Synapse" title="Link to this definition"></a></dt>
+<dd><p>A <code class="docutils literal notranslate"><span class="pre">Synapse</span></code> is a protuberance that starts from a <code class="docutils literal notranslate"><span class="pre">Fiber</span></code>.</p>
+<p>It is defined as the combination of a <code class="docutils literal notranslate"><span class="pre">Fiber</span></code> and a <code class="docutils literal notranslate"><span class="pre">Polygon</span></code> objects</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Synapse.grow">
+<span class="sig-name descname"><span class="pre">grow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-0.39269908169872414,</span> <span class="pre">0.39269908169872414)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1,</span> <span class="pre">2)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Synapse.grow" title="Link to this definition"></a></dt>
+<dd><p>Method that implements the growth of the synapse</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>angle</strong> – (min, max) values of the uniform sampling to generate the angle</p></li>
+<li><p><strong>scale</strong> – (min, max) values of the uniform sampling to generate the displacement</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Synapse.return_shape">
+<span class="sig-name descname"><span class="pre">return_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Synapse.return_shape" title="Link to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">Synapse</span></code> indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>shape</strong> – The shape of the field of view</p>
+</dd>
+</dl>
+<dl>
+<dt>:return<span class="classifier">A <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of row coords</span></dt><dd><p>A <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of col coords</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pysted.raster.reset_prob.html" class="btn btn-neutral float-left" title="pysted.raster.reset_prob" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pysted.temporal.Ensemble.html" class="btn btn-neutral float-right" title="pysted.temporal.Ensemble" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
-    
+  <hr/>
 
-    
-  </body>
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Audrey Durand and Flavie Lavoie-Cardinal.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>
