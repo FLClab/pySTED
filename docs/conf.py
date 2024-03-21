@@ -127,30 +127,30 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = "classic"
+html_theme = "renku"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    "bodyfont": "sans-serif",
-    "headfont": "sans-serif",
-    "footerbgcolor": "white",
-    "footertextcolor": "#555555",
-    "relbarbgcolor": "white",
-    "relbartextcolor": "#666666",
-    "relbarlinkcolor": "#444444",
-    "sidebarbgcolor": "white",
-    "sidebartextcolor": "#444444",
-    "sidebarlinkcolor": "#444444",
-    "bgcolor": "white",
-    "textcolor": "#222222",
-    "linkcolor": "#0090c0",
-    "visitedlinkcolor": "#00608f",
-    "headtextcolor": "#1a1a1a",
-    "headbgcolor": "white",
-    "headlinkcolor": "#aaaaaa",
-}
+# html_theme_options = {
+#     "bodyfont": "sans-serif",
+#     "headfont": "sans-serif",
+#     "footerbgcolor": "white",
+#     "footertextcolor": "#555555",
+#     "relbarbgcolor": "white",
+#     "relbartextcolor": "#666666",
+#     "relbarlinkcolor": "#444444",
+#     "sidebarbgcolor": "white",
+#     "sidebartextcolor": "#444444",
+#     "sidebarlinkcolor": "#444444",
+#     "bgcolor": "white",
+#     "textcolor": "#222222",
+#     "linkcolor": "#0090c0",
+#     "visitedlinkcolor": "#00608f",
+#     "headtextcolor": "#1a1a1a",
+#     "headbgcolor": "white",
+#     "headlinkcolor": "#aaaaaa",
+# }
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
