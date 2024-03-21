@@ -51,6 +51,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.autosummary',
+    'sphinx.ext.githubpages',
     'm2r'
 ]
 autosummary_generate = True
