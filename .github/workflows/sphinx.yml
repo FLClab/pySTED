@@ -19,11 +19,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: html-docs
-          path: ${{ github.workspace }}/docs/build/
+          path: ${{ github.workspace }}/docs/build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/master'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ${{ github.workspace }}/docs/build/
+          publish_dir: ${{ github.workspace }}/docs/build
