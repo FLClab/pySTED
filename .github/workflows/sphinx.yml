@@ -10,12 +10,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v3
-    - name: Install dependencies
-      run: |
-        pip install sphinx sphinx_rtd_theme myst_parser m2r
-        pip install -e .    
     - name: Build HTML
-      uses: ammaraskar/sphinx-action@master
+      uses: ammaraskar/sphinx-action@master   
+      with:
+          pre-build-command: |
+            pip sphinx sphinx_rtd_theme myst_parser m2r
+            pip install -e .
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
