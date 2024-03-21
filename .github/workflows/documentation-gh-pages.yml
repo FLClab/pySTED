@@ -6,20 +6,8 @@ permissions:
   contents: write
 
 jobs:
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
-      - name: Install dependencies
-        run: |
-          pip install sphinx sphinx_rtd_theme myst_parser m2r
-          pip install -e .
-      - name: Sphinx build
-        run: |
-          sphinx-build docs _build
   pages:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -27,5 +15,12 @@ jobs:
       pages: write
       id-token: write
     steps:
-    - id: deployment
-      uses: sphinx-notes/pages@v3
+      - id: deployment
+      - uses: sphinx-notes/pages@v3
+      - name: Install dependencies
+        run: |
+          pip install sphinx sphinx_rtd_theme myst_parser m2r
+          pip install -e .
+      - name: Sphinx build
+        run: |
+          sphinx-build docs _build
