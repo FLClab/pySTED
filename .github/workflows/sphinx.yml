@@ -22,16 +22,18 @@ jobs:
       run: |
         python -m pip install sphinx sphinx_rtd_theme myst_parser m2r
         python -m pip install -e .
-        sphinx-build docs docs/build
+        sphinx-build docs ${{ github.workspace }}/docs/build
+        pwd
+        ls ${{ github.workspace }}/docs/build
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: html-docs
-        path: docs/build/html/
+        path: ${{ github.workspace }}/docs/build/html/
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
       if: github.ref == 'refs/heads/main'
       with:
         publish_branch: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/build/html
+        publish_dir: ${{ github.workspace }}/docs/build/html
