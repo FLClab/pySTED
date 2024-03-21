@@ -29,7 +29,8 @@ def approx_binomial(n, p, size=None):
     :param n: The number of trials (int or array of ints).
     :param p: The probability of success (float).
     :param size: The shape of the output (int or tuple of ints, optional).
-    :returns: 64-bit int or array of 64-bit ints.
+
+    :return: 64-bit int or array of 64-bit ints.
     '''
     if not isinstance(n, numpy.ndarray):
         n = numpy.array(n, dtype=numpy.int64)
@@ -54,7 +55,8 @@ def cart2pol(x, y):
 
     :param x: The :math:`x` cartesian coordinate.
     :param y: The :math:`y` cartesian coordinate.
-    :returns: A tuple of the angle :math:`\\theta` and the lenght :math:`rho`.
+
+    :return: A tuple of the angle :math:`\\theta` and the lenght :math:`rho`.
     '''
     theta = numpy.arctan2(y, x)
     rho = numpy.sqrt(x**2 + y**2)
@@ -68,7 +70,8 @@ def complex_quadrature(func, a, b, args):
     :param a: The lower bound of the integration.
     :param b: The upper bound of the integration.
     :param args: Additionals arguments of the function to integrate.
-    :returns: The integration result as a complex number.
+
+    :return: The integration result as a complex number.
     '''
     def real_func(x, args):
         return scipy.real(func(x, args))
@@ -83,7 +86,8 @@ def fwhm(values):
     '''Compute the full width at half maximum of the Gaussian-shaped values.
 
     :param values: An array of values describing a Gaussian shape.
-    :returns: The full width at half maximum.
+
+    :return: The full width at half maximum.
     '''
     hm = numpy.max(values) / 2
     idx_max = numpy.argmax(values)
@@ -97,7 +101,8 @@ def fwhm_donut(values):
     '''Compute the full width at half maximum of the donut-shaped values.
 
     :param values: An array of values describing a donut shape.
-    :returns: A tuple of the outer and inner width at half maximum.
+
+    :return: A tuple of the outer and inner width at half maximum.
     '''
     hm = numpy.max(values) / 2
     idx_max = numpy.argmax(values)
@@ -145,7 +150,8 @@ def rescale(data, factor):
     :param data: A 2D array.
     :param factor: The ratio between the original container units and the new
                    container units.
-    :returns: A 2D array.
+
+    :return: A 2D array.
     '''
     assert factor > 0, "The rescale factor must be positive!"
     new_data_h = int(data.shape[0] // factor)
@@ -166,7 +172,8 @@ def resize(*images):
     '''Resize images to the shape of the largest (pad with zeros).
 
     :param images: Square shaped images.
-    :returns: A tuple of copies of the given *images* resized to the size of the
+
+    :return: A tuple of copies of the given *images* resized to the size of the
               largest input image.
     '''
     def fit(small_image, large_image):
@@ -191,7 +198,8 @@ def inverse(x, a=1):
 
     :param x: An integer or array.
     :param a: The scale of *x*.
-    :returns: The result of the function, same shape as *x*.
+
+    :return: The result of the function, same shape as *x*.
     '''
     return 1 / (a * x + 1)
 
@@ -201,7 +209,8 @@ def inverse_exponential(x, a=1):
 
     :param x: An integer or array.
     :param a: The scale of *x*.
-    :returns: The result of the function, same shape as *x*.
+
+    :return: The result of the function, same shape as *x*.
     '''
     return 1 / (numpy.exp(a * x))
 
@@ -232,9 +241,8 @@ def stack(datamap, data):
 
     :param datamap: A 2D array indicating how many data are positioned in every
     :param data: A 2D array containing the data to replicate.
-    :returns: A 2D array shaped like *datamap*.
-    *** EN DATE DU 23/09 CETTE FONCTION N'EST PAS UTILISÉE NUL PART ***
-    *** JE VAIS TOUT DE MÊME LA GARDER, CAR C'EST LA RÉFÉRENCE ORIGINALES POUR TOUTES LES FONCTIONS STACK ***
+
+    :return: A 2D array shaped like *datamap*.
     '''
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
     frame = numpy.zeros((datamap.shape[0] + h_pad, datamap.shape[1] + w_pad))
@@ -271,8 +279,8 @@ def stack_btmod_definitive(datamap, data, data_pixelsize, img_pixelsize, pixel_l
     :param img_pixelsize: Distance the laser moves in between each application of data. Must be a multiple of the
                           data_pixelsize (m)
     :param pixel_list: List of pixels on which we want to do the acquisition.
-    :returns: A 2D array shaped like *datamap*.
-    *** CALLED ONCE IN microscope.get_signal WHEN A PIXEL LIST IS PASSED (23/09) ***
+
+    :return: A 2D array shaped like *datamap*.
     '''
     filtered_pixel_list = pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize)
     h_pad, w_pad = int(data.shape[0] / 2) * 2, int(data.shape[1] / 2) * 2
@@ -290,10 +298,12 @@ def stack_btmod_definitive(datamap, data, data_pixelsize, img_pixelsize, pixel_l
 def pixel_sampling(datamap, mode="all"):
     '''
     Function to test different pixel sampling methods, instead of simply imaging pixel by pixel
+
     :param datamap: A 2D array of the data to be imaged, used for its shape.
     :param mode: A keyword to determine the order of pixels in the returned list. By default, all pixels are added in a
                  raster scan (left to right, row by row) order.
-    :returns: A list containing all the pixels in the order in which we want them to be imaged.
+
+    :return: A list containing all the pixels in the order in which we want them to be imaged.
     '''
     pixel_list = []
     if mode == "all":
@@ -350,9 +360,11 @@ def pixel_sampling(datamap, mode="all"):
 def pxsize_comp2(img_pixelsize, data_pixelsize):
     """
     Try number 2 for my float comparison function that hopefully will give the right values this time :)
+
     :param img_pixelsize: Acquisition pixel size. Has to be a multiple of data_pixelsize (m).
     :param data_pixelsize: Raw data pixelsize (m).
-    :returns: Integer values of the pixelsizes which can later be used to compute ratios and stuff :)
+
+    :return: Integer values of the pixelsizes which can later be used to compute ratios and stuff :)
     """
     # test = img_pixelsize / data_pixelsize
     # test_int = int(img_pixelsize / data_pixelsize)
@@ -375,13 +387,17 @@ def pxsize_comp2(img_pixelsize, data_pixelsize):
 
 def pxsize_comp_array_maker(img_pixelsize, data_pixelsize, datamap):
     """
+    Compare the pixel sizes of the image and the datamap and return the appropriate pixel sizes for the acquisition.
+
     Function which utilizes the ratio between the image pixelsize and the datamap pixelsize to create an appropriatly
     sized output datamap for a normal raster scan acquisition with ratio jumps between laser applications. This assures
     that the laser application is placed in the appropriate acquisition output pixel.
+    
     :param img_pixelsize: The image pixelsize (m)
     :param data_pixelsize: The datamap pixelsize (m)
     :param datamap: The datamap on which the acquisition is made
-    :returns: An empty datamap of shape (ceil(datamap.shape[0] / ratio), ceil(datamap.shape[1] / ratio))
+    
+    :return: An empty datamap of shape (ceil(datamap.shape[0] / ratio), ceil(datamap.shape[1] / ratio))
     """
     img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = img_pixelsize_int / data_pixelsize_int
@@ -393,14 +409,18 @@ def pxsize_comp_array_maker(img_pixelsize, data_pixelsize, datamap):
 
 def pxsize_grid(img_pixelsize, data_pixelsize, datamap):
     """
-    Function which creates a grid of the pixels which can be iterated on based on the ratio between img_pixelsize and
+    Function which creates a grid of the pixels. 
+    
+    This can be iterated on based on the ratio between img_pixelsize and
     data_pixelsize. Imagine the laser is fixed on a grid and can only make discrete movements, and this grid size is
     determined by the ratio
+
     :param img_pixelsize: Size of the minimum distance the laser must do between acquisitions (m). Must be a multiple of
                           data_pixelsize.
     :param data_pixelsize: Size of a pixel of the datamap (m).
     :param datamap: Raw molecule dispotion on which we wish to do an acquisition.
-    :returns: A list of the pixels which can be iterated on (?)
+    
+    :return: A list of the pixels which can be iterated on (?)
     """
     img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = int(img_pixelsize_int / data_pixelsize_int)
@@ -416,9 +436,11 @@ def pxsize_grid(img_pixelsize, data_pixelsize, datamap):
 def pxsize_ratio(img_pixelsize, data_pixelsize):
     """
     Computes the ratio between the acquisition pixel size and the datamap pixel size
+    
     :param img_pixelsize: Minimum distance the laser must move during application. Multiple of data_pixelsize (m).
     :param data_pixelsize: Size of a pixel in the datamap (m).
-    :returns: the ratio between pixel sizes
+    
+    :return: the ratio between pixel sizes
     """
     img_pixelsize_int, data_pixelsize_int = pxsize_comp2(img_pixelsize, data_pixelsize)
     ratio = int(img_pixelsize_int / data_pixelsize_int)
@@ -428,11 +450,12 @@ def pxsize_ratio(img_pixelsize, data_pixelsize):
 def mse_calculator(array1, array2):
     """
     Compute the RMS between two arrays. Must be of same size
+    
     :param array1: First array
     :param array2: Second array
-    :returns: Mean squarred error of the 2 arrays
+    
+    :return: Mean squarred error of the 2 arrays
     """
-    # jpourrais mettre un ti qqchose ici pour vérifier si les 2 arrays ont la même forme, jsp si c'est nécessaire
     array_diff = numpy.absolute(array1 - array2)
     array_diff_squared = numpy.square(array_diff)
     mean_squared_error = float(numpy.sum(array_diff_squared) / (array1.shape[0] * array1.shape[1]))
@@ -443,11 +466,13 @@ def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize, output
     """
     Function to pre-filter a pixel list. Depending on the ratio between the data_pixelsize and acquisition pixelsize,
     a certain number of pixels must be skipped between laser applications.
+    
     :param pixel_list: The list of pixels passed to the acquisition function, which needs to be filtered
     :param img_pixelsize: The acquisition pixelsize (m)
     :param data_pixelsize: The data pixelsize (m)
     :param output_empty: Bool to allow (or not) this function to return an empty pixel list
-    :returns: A filtered version of the input pixel_list, from which the pixels which can't be iterated over due to the
+    
+    :return: A filtered version of the input pixel_list, from which the pixels which can't be iterated over due to the
               pixel sizes have been removed
     """
     # figure out valid pixels to iterate on based on ratio between pixel sizes
@@ -490,11 +515,13 @@ def pixel_list_filter(datamap, pixel_list, img_pixelsize, data_pixelsize, output
 def symmetry_verifier(array, direction="vertical", plot=False):
     """
     Verifies if the given array is symmetrical along the vertical or horizontal direction
+    
     :param array: Array to be verified for symmetry
     :param direction: Direction along which to verify the symmetry. Vertical to see upper vs lower half, Horizontal to
                       see left vs right half.
     :param plot: Determines whether or not graphs of array and its symmetry will be displayed.
-    :returns: Array(s) displaying the symmetry
+    
+    :return: Array(s) displaying the symmetry
     """
 
     direction_lc = direction.lower()
@@ -546,11 +573,13 @@ def symmetry_verifier(array, direction="vertical", plot=False):
 def array_padder(base, laser, pad_value=0):
     """
     Function used to pad an array (base) according to the size of the secondary array being iterated over it (laser).
+    
     :param base: Base array on which we wish to iterate another array.
     :param laser: Secondary array which will be iterated over the base array. Axes have to be of odd lengths in order
                   for it to have a well defined single pixel center.
     :param pad_value: Value of the padded region.
-    :returns: Padded version of the base array, along with the number of added rows and columns
+    
+    :return: Padded version of the base array, along with the number of added rows and columns
     """
 
     laser_rows, laser_cols = laser.shape
@@ -563,9 +592,13 @@ def array_padder(base, laser, pad_value=0):
 
 def pad_values(laser):
     """
-    Returns the minimum necessary rows, cols to pad an array with if we want to iterated over all of it with a laser
+    Pad values for the array_padder function
+
+    Return the minimum necessary rows, cols to pad an array with if we want to iterated over all of it with a laser
+    
     :param laser: Array of the shape of the laser which we want to iterated over a datamap.
-    :returns: rows_pad, cols_pad, the number of rows and columns we need to pad the array with.
+    
+    :return: rows_pad, cols_pad, the number of rows and columns we need to pad the array with.
     """
     rows_pad, cols_pad = laser.shape[0] // 2, laser.shape[1] // 2
     return rows_pad, cols_pad
@@ -573,12 +606,16 @@ def pad_values(laser):
 
 def array_unpadder(padded_base, laser):
     """
+    Unpads an array according to the size of the secondary array being iterated over it.
+
     Function used to unpad a padded array (padded_base) according to the size of the secondary array being iterated over
     it (laser).
+    
     :param padded_base: Padded Base array which we wish to unpad.
     :param laser: Secondary array which has been iterated over padded_base. Axes have to be of odd lengths in order for
                   it to have a well defined single pixel center.
-    :returns: An unpadded version of the padded_base.
+    
+    :return: An unpadded version of the padded_base.
     """
 
     laser_rows, laser_cols = laser.shape
@@ -593,13 +630,15 @@ def array_unpadder(padded_base, laser):
 def datamap_generator(shape, sources, molecules, random_state=None):
     """
     Function to generate a datamap with randomly located molecules.
+
     :param shape: A tuple representing the shape of the datamap. If only 1 number is passed, a square datamap will be
                   generated.
     :param sources: Number of molecule sources to be randomly placed on the datamap.
     :param molecules: Average number of molecules contained on each source. The actual number of molecules will be
                       determined by poisson sampling.
     :param random_state: Sets the seed of the random number generator.
-    :returns: A datamap containing the randomly placed molecules
+    
+    :return: A datamap containing the randomly placed molecules
     """
     numpy.random.seed(random_state)
     if type(shape) == int:
@@ -615,9 +654,11 @@ def datamap_generator(shape, sources, molecules, random_state=None):
 def molecules_symmetry(pre_bleach, post_bleach):
     """
     Function to compare the ratio of surviving molecules in the upper vs lower half of a datamap.
+    
     :param pre_bleach: The datamap before bleaching it.
     :param post_bleach: The datamap after bleaching it.
-    :returns: Ratio of molecules surviving bleach, split between upper half and lower half
+    
+    :return: Ratio of molecules surviving bleach, split between upper half and lower half
     """
     # We have to compare the same datamap before and after applying lasers on it, so the shape has to be the same
     if pre_bleach.shape != post_bleach.shape:
@@ -642,9 +683,11 @@ def molecules_symmetry(pre_bleach, post_bleach):
 
 def molecules_survival(pre_bleach, post_bleach):
     """
-    Returns the ratio of surviving molecules
+    Return the ratio of surviving molecules
+    
     :param pre_bleach: The datamap before bleaching it.
     :param post_bleach: The datamap after bleaching it.
+    
     :return: Ratio of molecules surviving bleach
     """
     return numpy.sum(post_bleach) / numpy.sum(pre_bleach)
@@ -652,12 +695,16 @@ def molecules_survival(pre_bleach, post_bleach):
 
 def float_to_array_verifier(float_or_array, shape):
     """
-    This function serves to verify if a certain input is a float or an array. If it is a float, it will return an array
-    of shape (shape) filled with the float value. If it is an array, it will verify if it is of the appropriate shape.
+    Verify if a given input is a float or an array. 
+    
+    If it is a float, it will return an array of shape (shape) filled. 
+    If it is an array, it will verify if it is of the appropriate shape.
     If it is neither, it will return an error
+    
     :param float_or_array: Either a float or an array containing floats
     :param shape: The shape we want for our array (tuple)
-    :returns: An array of the appropriate shape
+   
+    :return: An array of the appropriate shape
     """
     if isinstance(float_or_array, (float, numpy.floating)):
         returned_array = numpy.ones(shape) * float_or_array
@@ -671,6 +718,7 @@ def float_to_array_verifier(float_or_array, shape):
 def dict_write_func(file, dictio):
     """
     Write a dict to a text file in a good way :)
+
     :param file: path of the file to write to
     :param dictio: the dictionnary we wish to write to a txt file
     """
@@ -682,8 +730,10 @@ def dict_write_func(file, dictio):
 
 def event_reader(file):
     """
-    Read events from a file containing event dictionaries and return the dicts to a listé
+    Read events from a file containing event dictionaries and return the dicts to a list
+
     :param file: Path to the txt file containing the dict for the events
+    
     :return: A list containing the dicts of every identified event in a video
     """
     events_list = []
@@ -697,6 +747,7 @@ def event_reader(file):
 def add_event(file, start_frame, end_frame, start_row, end_row, start_col, end_col):
     """
     Function that allows a user to easily store an event in a file, which can later be read with the event_reader func.
+    
     :param file: File to write the dict to. The goal is to use 1 text file to which we will write all the vents for
                  1 video.
     :param start_frame: Frame number for the start of the event
@@ -719,8 +770,10 @@ def get_light_curve(video_path, event):
     """
     Use a tif video of Ca2+ flashes along with a ROI (spatial and temporal) to convert the data to an intensity/photon
     count curve.
+    
     :param video_path: The path to the video file from which we want to extract an event light curve (str)
     :param event: A dictionary containing the start and end info for frames, rows, columns of an event (dict)
+    
     :return: A vector representing the mean intensity accros the frames of the event
     """
     data_vid = tifffile.imread(video_path)
@@ -735,9 +788,11 @@ def get_light_curve(video_path, event):
 def rescale_data(data, to_int=True, divider=1):
     """
     Function to rescale the data (made for light curves, might be of use elsewhere) between 1 and max-min
+    
     :param data: data to rescale.
     :param to_int: Determines whether the data is truncated to ints after being normalized. Useful for using the
                    fast acquisition function.
+    
     :return: The data rescaled between 1 and max(data) - min(data)
     """
     b, a = numpy.max(data) - numpy.min(data), 1
@@ -750,8 +805,10 @@ def rescale_data(data, to_int=True, divider=1):
 def shift_data(data, peak_idx=5):
     """
     Function to shift the data (made for light curves, might be of use elsewhere) so the peak is on idx 5
+    
     :param data: data to shift
     :param peak_idx: idx at which we want the peak to be
+    
     :return: The shifted data
     """
     peak_arg = numpy.argmax(data)
@@ -772,7 +829,9 @@ def get_avg_lightcurve(light_curves):
     This function takes as input a list of light curves and processes them so they are rescaled and shifted to align
     their peaks. It then return the avg light curve as well as its standard deviation, so we can sample a light curve
     for event simulation.
+    
     :param light_curves: list of light curves of Ca2+ flash events
+    
     :return: the avg light curve and std of the light curve
     """
     shifted_curves = []
@@ -803,7 +862,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         Must be less then `window_size` - 1.
     deriv: int
         the order of the derivative to compute (default = 0 means only smoothing)
-    Returns
+    Return
     -------
     ys : ndarray, shape (N)
         the smoothed signal (or it's n-th derivative).
@@ -861,7 +920,9 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
 def sample_light_curve(light_curves):
     """
     This function allows to sample from a distribution of light curves and handles the smoothing and correcting values.
+    
     :param light_curves: list containing the light curves we wish to do stats and sample from
+    
     :return: A smoothed curve sampled from the distribution
     """
     avg_curve, std_curve = get_avg_lightcurve(light_curves)
@@ -874,8 +935,10 @@ def sample_light_curve(light_curves):
 def flash_generator(events_curves_path, seed=None):
     """
     Generates a flash by sampling from statistics built from save light curves
+    
     :param events_curves_path: Path to the .npy file containing the light curves
     :param seed: Sets the seed for random sampling :)
+    
     :return: A sampled light curve
     """
     numpy.random.seed(seed)
@@ -890,9 +953,11 @@ def sampled_flash_manipulations(events_curves_path, delay, rescale=True, seed=No
     """
     Samples a light curve and modifies it to make it more prettier for training (i.e. more like the hand crafted light
     curves)
+    
     - converts the values to ints
     - add variable delay at the start of the curve to delay the flash
     - (optional) rescales the values between [1, 28]
+    
     :param events_curves_path: Path to the .npy file containing the light curves
     :param delay: Number of steps where the flash value stays ctw at 1 before the flash starts
     :param rescale: Whether or not the light curve will be rescaled. For now, if true, simply rescales between [1, 28]
@@ -959,11 +1024,13 @@ def smooth_ramp_hand_crafted_light_curve_2(n_steps_rise=10, n_steps_decay=10, de
 def hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
     """
     Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.
+    
     :param delay: The number of steps before the peak of the light curve.
     :param n_decay_steps: The number of steps for the light curve to return to 1
     :param n_molecules_multiplier: The value of the light curve at it's peak
     :param end_pad: The number of steps where the curve stays flat at 1 after the end of the exponential decay.
-    :returns: The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
+    
+    :return: The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
               then decays back to 1 over t = n_decay_steps steps, and stays flat at 1 for end_pad + 1 steps
     """
     tau = 3
@@ -982,11 +1049,13 @@ def hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=2
 def smooth_ramp_hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_multiplier=None, end_pad=0):
     """
     Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.
+    
     :param delay: The number of steps before the peak of the light curve.
     :param n_decay_steps: The number of steps for the light curve to return to 1
     :param n_molecules_multiplier: The value of the light curve at it's peak
     :param end_pad: The number of steps where the curve stays flat at 1 after the end of the exponential decay.
-    :returns: The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
+    
+    :return: The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
               then decays back to 1 over t = n_decay_steps steps, and stays flat at 1 for end_pad + 1 steps
     """
     if n_molecules_multiplier is None:
@@ -1011,6 +1080,7 @@ def smooth_ramp_hand_crafted_light_curve(delay=2, n_decay_steps=10, n_molecules_
 def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses, min_dist, polygon_scale=(5, 10)):
     """
     This func allows a user to generate a fiber object and synapses attached to it.
+    
     :param datamap_shape: shape of the image to which we will add the fiber and synapses
     :param fibre_min: min position for the fibre to start at
     :param fibre_max: max position for the fibre to start at
@@ -1018,6 +1088,7 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
     :param min_dist: min distance we want to have between the synapses. this is to make sure we don't have overlapping
                      synapses
     :param polygon_scale: values from which the polygon size will be sampled
+    
     :return: the fiber object and the polygon objects representing the synapses
     """
     min_array, max_array = numpy.asarray((fibre_min, fibre_min)), numpy.asarray((fibre_max, fibre_max))
@@ -1066,12 +1137,14 @@ def generate_fiber_with_synapses(datamap_shape, fibre_min, fibre_max, n_synapses
 def generate_secondary_fibers(datamap_shape, main_fiber, n_sec, min_dist=10, sec_len=(2, 6), seed=None):
     """
     This function allows to spawn secondary fibers branching from a main fiber
+    
     :param datamap_shape: The shape of the datamap in which the main fiber resides
     :param main_fiber: The main fiber object to which we will add secondary fiber branches
     :param n_sec: The interval for the number of secondary branches we wish to spawn (tuple)
     :param min_dist: The min distance between spawned secondary fiber, to ensure they are not all clumped
     :param sec_len: The interval for the length of the secondary fibers (tuple)
     :param seed: Random number generator seed
+    
     :return: a list containing the secondary fiber objects
     """
     n_added = 0
@@ -1128,6 +1201,7 @@ def generate_synapses_on_fiber(datamap_shape, main_fiber, n_syn, min_dist, synap
     :param n_syn: The interval from which we will sample the number of synapses to spawn (tuple)
     :param min_dist: The minimal distance between 2 synapses, to prevent clumping
     :param synapse_scale: The interval form which we will sample each synapses' size
+    
     :return: A list containing all the synapses on the main fiber
     """
     n_added = 0
@@ -1186,6 +1260,7 @@ def generate_synaptic_fibers(image_shape, main_nodes, n_sec_fibers, n_synapses, 
     :param sec_fiber_len: The interval for the lengths of the secondary fibers
     :param synapse_scale: The interval for the size of the synapses
     :param seed: Random number generator seed
+    
     :return: An array containing the disposition of molecules corresponding to the generated shape and a list
              containing all the synapses (Polygon objects)
     """
@@ -1226,8 +1301,10 @@ def generate_synapse_flash_dicts(synapses_list, roi_shape):
     """
     This function is used to generate the dictionnaries needed to keep track of which synapses are flashing and where
     they are situatied in the flash and such
+    
     :param synapses_list: The list of all the synapses in the frame (flattenened)
     :param roi_shape: The shape of the frame
+    
     :return: synapse_flashing_dict, a dict corresponding the synapses to whether they are currently flashing or not,
              synapse_flash_idx_dict, a dict corresponding each flash to where in the light curve they are at,
              synapse_flash_curve_dict, a dict containing the light curve sampled for the flash of this synapse,
@@ -1249,9 +1326,11 @@ def generate_synapse_flash_dicts(synapses_list, roi_shape):
 def generate_raster_pixel_list(n_pixels_to_add, starting_pixel, img):
     """
     Generates a pixel list of a raster scan of n_pixels_to_add pixels starting from starting_pixel
+    
     :param n_pixels_to_add: The number of pixels for which we want to image
     :param starting_pixel: The starting point of our raster scan
     :param img: the img in which the raster scan occurs
+    
     :return: A pixel list for the raster scan starting at starting_pixel
     """
     if starting_pixel[0] >= img.shape[0] or starting_pixel[1] >= img.shape[1]:
@@ -1272,9 +1351,11 @@ def generate_raster_pixel_list(n_pixels_to_add, starting_pixel, img):
 
 def set_starting_pixel(previous_pixel, image_shape, ratio=1):
     """
-    Returns a value 1 pixel further from the last pixel of an acquisition list in an normal raster scan fashion.
+    Return a value 1 pixel further from the last pixel of an acquisition list in an normal raster scan fashion.
+    
     :param previous_pixel: The pixel on which the previous raster scan stopped
     :param image_shape: the shape of the ROI on which the raster scan is occuring
+    
     :return: The pixel on which the next raster scan should start
     """
     starting_pixel = list(previous_pixel)
@@ -1293,11 +1374,13 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
     This function computes how many loop steps will occur and how many pixels can be imaged for each loop step.
     So far this only works for static pixel_dwelltime, need to figure out how to make it work for varying dwell times
     per pixel or varying dwell times as in RESCue.
+    
     :param fwhm_step_sec_correspondance: a tuple containing how large in time steps the FWHM of the mean flash is at
                                          index 0 and how large in seconds we want the FWHM to be at index 1
     :param acquisition_time_sec: How long we want to acquire on the same datamap, in seconds. This will be used to
                                  determine how many loops we need to do (float? int?)
     :param pixel_dwelltime: The pixel dwell time used by the microscope (float)
+    
     :return: The number of pixels that can be imaged per loop and the number of loop iterations
     """
 
@@ -1320,10 +1403,12 @@ def compute_time_correspondances(fwhm_step_sec_correspondance, acquisition_time_
 def time_quantum_to_flash_tstep_correspondance(fwhm_step_sec_corresnpondance, time_quantum_us):
     """
     Computes the correspondance between the time quantum value (in us) and the flash time steps
+    
     :param fwhm_step_sec_corresnpondance: A tuple containing how large in time steps the FWHM of the mean flash is at
                                           index 0 and how large in useconds we want the FWHM to be at index 1
     :param time_quantum_us: Value of the time quantum used by the master clock (in us)
-    :return:
+    
+    :return: The number of time quantums per flash time step
     """
     fwhm_time_usecs, fwhm_time_steps = fwhm_step_sec_corresnpondance[1], fwhm_step_sec_corresnpondance[0]
     usec_per_time_step = fwhm_time_usecs / fwhm_time_steps
@@ -1341,6 +1426,7 @@ def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_id
     This function makes 1 step in a flash routine. It loops through all the synapses in a frame to determine whether
     they will start flashing (if they aren't already), or move the flash forward 1 time step if they are flashing, or
     reset the synapse if its flash is over.
+    
     :param synapses: A list of all the synapses in the datamap
     :param probability: The probability with which a synapse will start flashing
     :param synapse_flashing_dict: The dict listing whether each synapse is flashing or not
@@ -1349,6 +1435,7 @@ def flash_routine(synapses, probability, synapse_flashing_dict, synapse_flash_id
     :param synapse_flash_curve_dict: The dict listing the sampled flash curve for every synapse
     :param isolated_synapses_frames: The dict listing the isolated synapse frames
     :param datamap: The datamap on which the synapses lie
+    
     :return: The updated dicts and datamap
     """
     for idx_syn in range(len(synapses)):
@@ -1380,6 +1467,7 @@ def action_execution(action_selected, frame_shape, starting_pixel, pxsize, datam
     Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
     Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
     by a flash, for example.
+    
     :param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full
                             sted scan).
     :param frame_shape: The shape of the ROI
@@ -1393,6 +1481,7 @@ def action_execution(action_selected, frame_shape, starting_pixel, pxsize, datam
     :param p_sted: The STED power (either scalar or array of size frame_shape)
     :param intensity_map: The intensity map for the previous acquisition, in case it was interrupted
     :param bleach: Bool determining whether bleaching occurs or not
+    
     :return: acq, the acquisition (photons),
              bleached, the bleached datamap,
              datamap, the updated datamap,
@@ -1481,9 +1570,12 @@ def action_execution_2(action_selected, frame_shape, starting_pixel, pxsize, dat
 def action_execution_g(action_selected, frame_shape, starting_pixel, pxsize, datamap, frozen_datamap, microscope,
                        pdt, p_ex, p_sted, intensity_map, bleach, t_stack_idx):
     """
-    Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
+    Executes the selected action. 
+    
+    Handles matching the starting_pixel with the number of pixels for which we can image.
     Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
     by a flash, for example.
+    
     :param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full
                             sted scan).
     :param frame_shape: The shape of the ROI

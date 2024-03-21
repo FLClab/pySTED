@@ -1,5 +1,9 @@
 
 '''Cython implementations of the raster functions
+
+This module contains the Cython implementations of the raster functions. 
+These functions are used to simulate the acquisition of a STED microscopy image.
+The Cython implementation is used to speed up the calculation of the raster function.
 '''
 
 import time
@@ -28,6 +32,12 @@ def reset_prob(
     numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_ex,
     numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted
 ):
+    '''Resets the probability of survival of the fluorophores in the mask to 1.0
+
+    :param mask: list of tuples with the position of the fluorophores
+    :param prob_ex: 2D array with the probability of survival of the fluorophores under excitation
+    :param prob_sted: 2D array with the probability of survival of the fluorophores under sted
+    '''
     cdef int s, t
     for (s, t) in mask:
         prob_ex[s, t] = 1.0
@@ -56,7 +66,10 @@ def raster_func_c_self_bleach_split_g(
         object sample_func,
         list steps
 ):
-    """raster_func_c_self_bleach executes the simultaneous acquisition and bleaching routine for the case where the
+    '''
+    Raster and photobleaching implementation of a STED microscope acquisition.
+
+    ``raster_func_c_self_bleach`` executes the simultaneous acquisition and bleaching routine for the case where the
     excitation power (p_ex) AND/OR sted power (p_sted) AND/OR pixel dwell time vary through the sample. 
     This function thus requires these parameters to be passed as arrays of floats the same size as the ROI being imaged.
 
@@ -65,7 +78,26 @@ def raster_func_c_self_bleach_split_g(
 
     To speed up the calculation, the position of the emitters are kept in memory and only 
     those positions are updated by the bleaching method.
-    """
+
+    :param datamap: The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap
+    :param acquired_intensity: 2D array to store the acquired intensity
+    :param pixel_list: 2D array with the position of the pixels to be acquired
+    :param ratio: The ratio of the pixel size to the datamap pixel size
+    :param rows_pad: The number of rows to pad the datamap
+    :param cols_pad: The number of columns to pad the datamap
+    :param laser_pad: The number of pixels to pad the laser
+    :param prob_ex: 2D array with the probability of survival of the fluorophores under excitation
+    :param prob_sted: 2D array with the probability of survival of the fluorophores under sted
+    :param pdt_roi: 2D array with the pixel dwell time
+    :param p_ex_roi: 2D array with the excitation power
+    :param p_sted_roi: 2D array with the sted power
+    :param bleach: Boolean to indicate if the sample should be bleached
+    :param bleached_sub_datamaps_dict: Dictionary with the different parts of the datamap to be bleached
+    :param seed: Seed for the random number generator
+    :param bleach_func: Function to bleach the sample
+    :param sample_func: Function to sample the sample
+    :param steps: List with the different steps of the acquisition
+    '''
 
     cdef int row, col
     cdef int sprime, tprime
@@ -201,6 +233,25 @@ def raster_func_dymin(
 ):
     """
     Implements the raster scanning and photobleaching of DyMIN microscopy
+
+    :param datamap: The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap
+    :param acquired_intensity: 2D array to store the acquired intensity
+    :param pixel_list: 2D array with the position of the pixels to be acquired
+    :param ratio: The ratio of the pixel size to the datamap pixel size
+    :param rows_pad: The number of rows to pad the datamap
+    :param cols_pad: The number of columns to pad the datamap
+    :param laser_pad: The number of pixels to pad the laser
+    :param prob_ex: 2D array with the probability of survival of the fluorophores under excitation
+    :param prob_sted: 2D array with the probability of survival of the fluorophores under sted
+    :param pdt_roi: 2D array with the pixel dwell time
+    :param p_ex_roi: 2D array with the excitation power
+    :param p_sted_roi: 2D array with the sted power
+    :param bleach: Boolean to indicate if the sample should be bleached
+    :param bleached_sub_datamaps_dict: Dictionary with the different parts of the datamap to be bleached
+    :param seed: Seed for the random number generator
+    :param bleach_func: Function to bleach the sample
+    :param sample_func: Function to sample the sample
+    :param steps: List with the different steps of the acquisition    
     """
     cdef int row, col, i
     cdef int sprime, tprime
@@ -391,6 +442,25 @@ def raster_func_rescue(
 ):
     """
     Implements the raster scanning and photobleaching of RESCue microscopy
+
+    :param datamap: The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap
+    :param acquired_intensity: 2D array to store the acquired intensity
+    :param pixel_list: 2D array with the position of the pixels to be acquired
+    :param ratio: The ratio of the pixel size to the datamap pixel size
+    :param rows_pad: The number of rows to pad the datamap
+    :param cols_pad: The number of columns to pad the datamap
+    :param laser_pad: The number of pixels to pad the laser
+    :param prob_ex: 2D array with the probability of survival of the fluorophores under excitation
+    :param prob_sted: 2D array with the probability of survival of the fluorophores under sted
+    :param pdt_roi: 2D array with the pixel dwell time
+    :param p_ex_roi: 2D array with the excitation power
+    :param p_sted_roi: 2D array with the sted power
+    :param bleach: Boolean to indicate if the sample should be bleached
+    :param bleached_sub_datamaps_dict: Dictionary with the different parts of the datamap to be bleached
+    :param seed: Seed for the random number generator
+    :param bleach_func: Function to bleach the sample
+    :param sample_func: Function to sample the sample
+    :param steps: List with the different steps of the acquisition    
     """
     cdef int row, col, i
     cdef int sprime, tprime

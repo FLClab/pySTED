@@ -132,7 +132,7 @@ class GaussianBeam:
         :param transmission: The transmission ratio of the objective (given the
                              wavelength of the excitation beam).
         :param datamap_pixelsize: The size of an element in the intensity matrix (m).
-        :returns: A 2D array of the time averaged intensity (W/m^2).
+        :return: A 2D array of the time averaged intensity (W/m^2).
         '''
 
         def fun1(theta, kr):
@@ -222,7 +222,7 @@ class GaussianBeam:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are equal
+        :return : A `bool` wheter both objects are equal
         """
         if not isinstance(other, GaussianBeam):
             return False
@@ -237,7 +237,7 @@ class GaussianBeam:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are not equal
+        :return : A `bool` wheter both objects are not equal
         """
         return not self == other
 
@@ -298,7 +298,7 @@ class DonutBeam:
         :param transmission: The transmission ratio of the objective (given the
                              wavelength of the STED beam).
         :param datamap_pixelsize: The size of an element in the intensity matrix (m).
-        :returns: A 2D array of the instant intensity (W/m^2).
+        :return: A 2D array of the instant intensity (W/m^2).
         '''
 
         def fun1(theta, kr):
@@ -425,7 +425,7 @@ class DonutBeam:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are equal
+        :return : A `bool` wheter both objects are equal
         """
         if not isinstance(other, DonutBeam):
             return False
@@ -440,7 +440,7 @@ class DonutBeam:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are not equal
+        :return : A `bool` wheter both objects are not equal
         """
         return not self == other
 
@@ -519,7 +519,7 @@ class Detector:
         :param transmission: The transmission ratio of the objective for the
                              given fluorescence wavelength *lambda_*.
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
-        :returns: A 2D array.
+        :return: A 2D array.
         '''
         radius = self.n_airy * 0.61 * lambda_ / na
         pinhole = utils.pinhole(radius, datamap_pixelsize, psf.shape[0])
@@ -550,7 +550,7 @@ class Detector:
         :param photons: An array of number of emitted photons.
         :param dwelltime: The time spent to detect the emitted photons (s). It is
                           either a scalar or an array shaped like *nb_photons*.
-        :returns: An array shaped like *nb_photons*.
+        :return: An array shaped like *nb_photons*.
         '''
         if isinstance(photons, int):
             photons = numpy.array([photons], dtype=numpy.int64)
@@ -594,7 +594,7 @@ class Detector:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are equal
+        :return : A `bool` wheter both objects are equal
         """
         if not isinstance(other, Detector):
             return False
@@ -609,7 +609,7 @@ class Detector:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are not equal
+        :return : A `bool` wheter both objects are not equal
         """
         return not self == other
 
@@ -660,7 +660,7 @@ class Objective:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are equal
+        :return : A `bool` wheter both objects are equal
         """
         if not isinstance(other, Objective):
             return False
@@ -675,7 +675,7 @@ class Objective:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are not equal
+        :return : A `bool` wheter both objects are not equal
         """
         return not self == other
 
@@ -744,7 +744,7 @@ class Fluorescence:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are equal
+        :return : A `bool` wheter both objects are equal
         """
         if not isinstance(other, Fluorescence):
             return False
@@ -759,7 +759,7 @@ class Fluorescence:
 
         :param other: Any type of python objects
 
-        :returns : A `bool` wheter both objects are not equal
+        :return : A `bool` wheter both objects are not equal
         """
         return not self == other
 
@@ -768,7 +768,7 @@ class Fluorescence:
         molecule given the wavelength.
 
         :param lambda_: The STED wavelength (m).
-        :returns: The stimulated emission cross-section (m²).
+        :return: The stimulated emission cross-section (m²).
         '''
         return self.sigma_ste[int(lambda_ * 1e9)]
 
@@ -777,7 +777,7 @@ class Fluorescence:
         given the wavelength.
 
         :param lambda_: The STED wavelength (m).
-        :returns: The absorption cross-section (m²).
+        :return: The absorption cross-section (m²).
         '''
         return self.sigma_abs[int(lambda_ * 1e9)]
 
@@ -787,7 +787,7 @@ class Fluorescence:
 
         :param na: The numerical aperture of the objective.
         :param datamap_pixelsize: The size of an element in the intensity matrix (m).
-        :returns: A 2D array.
+        :return: A 2D array.
         '''
         diameter = 2.233 * self.lambda_ / (na * datamap_pixelsize)
         n_pixels = int(diameter / 2) * 2 + 1 # odd number of pixels
@@ -815,7 +815,8 @@ class Fluorescence:
 
         :param intensity: Light intensity (:math:`W/m^{-2}`).
         :param lambda_: Wavelenght. If None, default to the emission wavelenght.
-        :returns: Photon flux (:math:`m^{-2}s^{-1}`).
+
+        :return: Photon flux (:math:`m^{-2}s^{-1}`).
         '''
         if lambda_ is None:
             lambda_ = self.lambda_
@@ -825,6 +826,12 @@ class Fluorescence:
     def get_k_bleach(self, lambda_ex, lambda_sted, phi_ex, phi_sted, tau_sted, tau_rep, dwelltime):
         '''Compute a spatial map of the photobleaching rate.
 
+        The photobleaching rate for a 4 level system from [Oracz2017]_ is used. The
+        population of S1+S1*, from where the photobleaching happen, was estimated using
+        the simplified model used for eq. 3 in [Leutenegger2010]_. The triplet dynamic
+        (dependent on the dwelltime) was estimated from the tree level system rate
+        equations 2.14 in [Staudt2009]_, approximating that the population S1 is constant.        
+
         :param lambda_ex: Wavelength of the the excitation beam (m).
         :param lambda_sted: Wavelength of the STED beam (m).
         :param phi_ex: Spatial map of the excitation photon flux (:math:`m^{-2}s^{-1}`).
@@ -832,13 +839,8 @@ class Fluorescence:
         :param tau_sted: STED pulse temporal width (s).
         :param tau_rep: Period of the lasers (s).
         :param dwelltime: Time continuously passed centered on a pixel (s).
-        :returns: A 2D array of the bleaching rate d(Bleached)/dt (:math:`s^{-1}`).
 
-        The photobleaching rate for a 4 level system from [Oracz2017]_ is used. The
-        population of S1+S1*, from where the photobleaching happen, was estimated using
-        the simplified model used for eq. 3 in [Leutenegger2010]_. The triplet dynamic
-        (dependent on the dwelltime) was estimated from the tree level system rate
-        equations 2.14 in [Staudt2009]_, approximating that the population S1 is constant.
+        :return: A 2D array of the bleaching rate d(Bleached)/dt (:math:`s^{-1}`).
         '''
 
         exc_lambda_ = numpy.round(lambda_ex/1e-9)
@@ -938,13 +940,16 @@ class Microscope:
         self.time_bank = 0
 
     def __str__(self):
+        '''Return a string representation of the microscope setup.
+        '''
         return str(self.__cache.keys())
 
     def is_cached(self, datamap_pixelsize):
         '''Indicate the presence of a cache entry for the given pixel size.
 
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
-        :returns: A boolean.
+
+        :return: A boolean.
         '''
         datamap_pixelsize_nm = int(datamap_pixelsize * 1e9)
         return datamap_pixelsize_nm in self.__cache
@@ -959,7 +964,8 @@ class Microscope:
         :param datamap_pixelsize: The size of a pixel in the simulated image (m).
         :param save_cache: A bool which determines whether or not the lasers will be saved to allow for faster load
                            times for future experiments
-        :returns: A tuple containing:
+
+        :return: A tuple containing:
 
                   * A 2D array of the excitation intensity for a power of 1 W;
                   * A 2D array of the STED intensity for a a power of 1 W;
@@ -1039,18 +1045,19 @@ class Microscope:
         taking the sted de-excitation, anti-stoke excitation and the detector properties 
         (detection psf and gating) into account.
 
-        :param datamap_pixelsize: The size of one pixel of the simulated image (m).
-        :param p_ex: The time averaged power of the excitation beam (W).
-        :param p_sted: The power of the STED beam (W).
-        :param data_pixelsize: The size of one pixel of the raw data (m).
-        :returns: A 2D array of the intensity (W/molecule)
-
         The technique follows the method and equations described in
         [Willig2006]_, [Leutenegger2010]_ and [Holler2011]_. Notable approximations from [Leutenegger2010]_ include the assumption that the excitation pulse width is infinitely small and that the sted pulse is of perfect rectangular shape and starts at the beginning of the period. Also, a two energy levels (plus their vibrational sub-levels) with two rate equations is used. To include the vibrational decay dynamics (parametrized by the vibrational decay rate), an effective saturation factor is used.
 
         To account for the detection gating, the bounds in the integral from [Leutenegger2010]_ eq. 3 were adjusted.
 
-        Anti-stokes excitation at the beginnning of the period was by added by modeling the sted beam as an infinitely small pulse, similarly to the excitation pulse. This leads to an underestimation of its effect on the detected signal, since excitation by the STED beam near the end of the STED beam, for example, would have less time to be depleted.
+        Anti-stokes excitation at the beginnning of the period was by added by modeling the sted beam as an infinitely small pulse, similarly to the excitation pulse. This leads to an underestimation of its effect on the detected signal, since excitation by the STED beam near the end of the STED beam, for example, would have less time to be depleted.        
+
+        :param datamap_pixelsize: The size of one pixel of the simulated image (m).
+        :param p_ex: The time averaged power of the excitation beam (W).
+        :param p_sted: The power of the STED beam (W).
+        :param data_pixelsize: The size of one pixel of the raw data (m).
+
+        :return: A 2D array of the intensity (W/molecule)
         '''
 
         h, c = scipy.constants.h, scipy.constants.c
@@ -1129,7 +1136,7 @@ class Microscope:
         :param seed: Sets a seed for the random number generator.
         :param filter_bypass: Whether or not to filter the pixel list.
                               This is useful if you know your pixel list is adequate and ordered differently from a
-                              raster scan (i.e. a left to right, row by row scan), as filtering the list returns it
+                              raster scan (i.e. a left to right, row by row scan), as filtering the list return it
                               in raster order.
                               If pixel_list is none, this must be True then.
         :param bleach_func: The bleaching function to be applied.
@@ -1240,7 +1247,7 @@ class Microscope:
 
     def take_from_pixel_bank(self):
         """
-        Verifies the amount stored in the pixel_bank, returns the integer part if greater or equal to 1
+        Verifies the amount stored in the pixel_bank, return the integer part if greater or equal to 1
 
         :return: The integer part of the pixel_bank of the microscope
         """
@@ -1293,6 +1300,7 @@ class Datamap:
         Sets the Region of Interest for the acquisition. 
 
         Uses a laser generated by the microscope object to determine the biggest ROI allowed, sets the ROI if valid
+
         :param laser: An array of the same shape as the lasers which will be used on the datamap
         :param intervals: Values to set the ROI to. Either 'max', a dict like {'rows': [min_row, max_row],
                           'cols': [min_col, max_col]} or None. If 'max', the whole datamap will be padded with 0s, and
@@ -1366,6 +1374,7 @@ class Datamap:
         This functions updates the ``datamap.whole_datamap`` attribute to the bleached version. I put this in case the user
         does not want to update the datamap after bleaching it directly through the microscope's get_signal_and_bleach
         method, in order to do multiple experiments on the same setting.
+
         :param bleached_datamap: An array of the datamap after the lasers have passed over it (after it has bleached).
                                  Has to be of the same shape as self.whole_datamap
         """
@@ -1428,7 +1437,6 @@ class TemporalDatamap(Datamap):
                                              last. Usually (10, 1.5) is used. MODIFY THIS SO THIS IS A DEFAULT VALUE.
         :param curves_path: Path to the .npy file of the light curves being sampled in order to generate random
                             flashes.
-                           HUGE .tif FILE WHICH I WILL ONLY USE FOR EXTRACTING SMALL ROIs.
         :param probability: The probability of a flash starting on a synapse.
         """
         synapse_flashing_dict, synapse_flash_idx_dict, synapse_flash_curve_dict, isolated_synapses_frames = \
@@ -1483,7 +1491,7 @@ class TemporalDatamap(Datamap):
 
     def update_whole_datamap(self, flash_idx):
         """
-        This method will be used to update de whole datamap using the indices of the sub datamaps.
+        Method used to update the whole datamap using the indices of the sub datamaps.
 
         Whole datamap is the base datamap + all the sub datamaps (for flashes, diffusion, etc).
 
@@ -1504,11 +1512,10 @@ class TemporalDatamap(Datamap):
 
 class TemporalSynapseDmap(Datamap):
     """
-    Temporal Datamap of a Synaptic region with nanodomains for NeurIPS exps
+    Temporal Datamap of a Synaptic region with nanodomains.
     """
     def __init__(self, whole_datamap, datamap_pixelsize, synapse_obj):
         super().__init__(whole_datamap, datamap_pixelsize)
-        # faudrait que j'ajoute un attribut qui est l'objet synapse
         self.synapse = synapse_obj
         self.contains_sub_datamaps = {"base": True,
                                       "flashes": False}
@@ -1525,8 +1532,15 @@ class TemporalSynapseDmap(Datamap):
     def create_t_stack_dmap(self, decay_time_us, delay=2, n_decay_steps=10, n_molecules_multiplier=28, end_pad=0):
         """
         Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+
         Very similar implementation to TemporalDatamap's create_t_stack_dmap method
-        Assumes the roi is set
+        Assumes the roi is set.
+
+        :param decay_time_us: The time it takes for the flash to decay to 1/e of its initial value. (us)
+        :param delay: The delay before the flash starts. (us)
+        :param n_decay_steps: The number of time steps the flash will take to decay. (int)
+        :param n_molecules_multiplier: The multiplier for the number of molecules in the flash. (int)
+        :param end_pad: The number of time steps to pad the flash with at the end. (int)
         """
         self.decay_time_us = decay_time_us
         self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
@@ -1560,8 +1574,15 @@ class TemporalSynapseDmap(Datamap):
                                    end_pad=0, individual_flashes=False):
         """
         Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
-        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
-        Assumes the roi is set
+
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method.
+        Assumes the roi is set.
+
+        :param decay_time_us: The time it takes for the flash to decay to 1/e of its initial value. (us)
+        :param delay: The delay before the flash starts. (us)
+        :param n_decay_steps: The number of time steps the flash will take to decay. (int)
+        :param n_molecules_multiplier: The multiplier for the number of molecules in the flash. (int)
+        :param end_pad: The number of time steps to pad the flash with at the end. (int)        
         """
         self.decay_time_us = decay_time_us
         self.time_usec_between_flash_updates = int(numpy.round(self.decay_time_us / n_decay_steps))
@@ -1673,8 +1694,15 @@ class TemporalSynapseDmap(Datamap):
                                     individual_flashes=False):
         """
         Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
-        Very similar implementation to TemporalDatamap's create_t_stack_dmap method
-        Assumes the roi is set
+
+        Very similar implementation to TemporalDatamap's create_t_stack_dmap method.
+        Assumes the roi is set.
+
+        :param decay_time_us: The time it takes for the flash to decay to 1/e of its initial value. (us)
+        :param delay: The delay before the flash starts. (us)
+        :param n_decay_steps: The number of time steps the flash will take to decay. (int)
+        :param curves_path: Path to the .npy file of the light curves being sampled in order to generate random
+        :param individual_flashes: If True, each nanodomain will have its own flash curve
         """
         # even though in this case the decay_time_us and n_decay_steps wont help generate the light curve, they will
         # help define de frequency of updates
@@ -1728,6 +1756,7 @@ class TemporalSynapseDmap(Datamap):
         """
         Applies bleaching to the future flash subdatamaps according to the bleaching that occured to the current flash
         subdatamap
+
         :param indices: A dictionary containing the indices of the time steps we are currently at for the subdatamaps.
                         For now, as there is only the flash subdatamap implemented, the dictionary will simply be
                         indices = {"flashes": idx}, with idx being an >=0 integer.
@@ -1753,9 +1782,10 @@ class TemporalSynapseDmap(Datamap):
 
     def bleach_future_proportional(self, indices, bleached_sub_datamaps_dict, unbleached_whole_datamap):
         """
-        This function will apply bleaching to the future molecules proportional to what has bleached.
+        Photobleaches the future flash subdatamaps according to the bleaching that occured to the current flash
+
         For instance, if 3/5 molecules are left after bleaching, then the number of molecules in the subsequent
-        flashes will be multiplied by 3/5
+        flashes will be multiplied by 3/5.
         """
         bleached_whole_datamap = numpy.zeros(unbleached_whole_datamap.shape)
         for key in bleached_sub_datamaps_dict:
@@ -1773,7 +1803,8 @@ class TemporalSynapseDmap(Datamap):
 
     def update_whole_datamap(self, flash_idx):
         """
-        This method will be used to update de whole datamap using the indices of the sub datamaps.
+        Update de whole datamap using the indices of the sub datamaps.
+
         Whole datamap is the base datamap + all the sub datamaps (for flashes, diffusion, etc).
         :param flash_idx: The index of the flash for the most recent acquisition.
         """
@@ -1787,6 +1818,7 @@ class TemporalSynapseDmap(Datamap):
     def update_dicts(self, indices):
         """
         Method used to update the dicts of the temporal datamap
+
         :param indices: A dict containing the indices of the time step for the different temporal sub datamaps (so far
                         only flashes).
         """
@@ -1796,8 +1828,7 @@ class TemporalSynapseDmap(Datamap):
 
 class TestTemporalDmap(Datamap):
     """
-    This is a test class of a simple temporal Datamap of a cube flashing to verify if the stitching of temporal dmaps
-    works correctly
+    Test class for the TemporalDatamap class
     """
     def __init__(self, whole_datamap, datamap_pixelsize):
         super().__init__(whole_datamap, datamap_pixelsize)
@@ -1873,13 +1904,15 @@ class TestTemporalDmap(Datamap):
 class Clock():
     """
     Clock class to keep track of time in experiments involving time
+
     :param time_quantum_us: The minimal time increment on which the experiment loop will happen. All other time
                             increments in the experiment should be a multiple of this value (in micro seconds (us))
                             (int)
 
-    Note : The time_quantum_us is an int and so is the current_time attribute. This means the longest time an experiment
-           can last is determined by the size of the biggest int, which means it is 9223372036854775807 us, or
-           9223372036854.775807 s, which I think should be ample time :)
+    .. note:: 
+        The ``time_quantum_us`` is an ``int`` and so is the ``current_time`` attribute. This means the longest time an experiment
+        can last is determined by the size of the biggest ``int64``, which means it is 9223372036854775807 us, or
+        9223372036854.775807 s, which I think should be ample time :)
     """
     def __init__(self, time_quantum_us):
         if type(time_quantum_us) is not int:
@@ -1907,10 +1940,9 @@ class RandomActionSelector():
     1 - STED acquisition
     2 - Wait (for the time of 1 acquisition)
 
-    *** NOTE ***
+    ..note ::
     For now we have are pre setting the pdt, p_ex and p_sted that will be used for the actions.
     A real agent would select the powers / dwellit me individually
-    ************
 
     :param pdt: The pixel dwell time that will be used in the acquisitions
     :param p_ex: The excitation beam power that will be used when the selected action is confocal or sted

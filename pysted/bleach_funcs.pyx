@@ -37,8 +37,25 @@ def default_update_survival_probabilities(object self,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_ex=None,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] k_sted=None,):
-    """Updates the survival probabilities
-    """
+    '''
+    Update the survival probabilities of the fluorophores.
+
+    :param i_ex: The excitation intensity.
+    :param i_sted: The STED intensity.
+    :param p_ex: The excitation power.
+    :param p_sted: The STED power.
+    :param step: The time step.
+    :param bleached_sub_datamaps_dict: The datamaps of the bleached subregions.
+    :param row: The row of the datamap.
+    :param col: The column of the datamap.
+    :param h: The height of the datamap.
+    :param w: The width of the datamap.
+    :param mask: The mask of the subregion.
+    :param prob_ex: The excitation survival probability.
+    :param prob_sted: The STED survival probability.
+    :param k_ex: The excitation bleaching rate.
+    :param k_sted: The STED bleaching rate.
+    '''
     cdef numpy.ndarray[FLOATDTYPE_t, ndim=2] photons_ex, photons_sted
     cdef int s, sprime, t, tprime
     cdef float prob
@@ -74,7 +91,17 @@ def sample_molecules(object self,
                    list mask,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_ex,
                    numpy.ndarray[FLOATDTYPE_t, ndim=2] prob_sted):
-    """Binomial sampling of the number of molecules at each position within the datamap.
+    """
+    Binomial sampling of the number of molecules at each position within the datamap.
+
+    :param bleached_sub_datamaps_dict: The datamaps of the bleached subregions.
+    :param row: The row of the datamap.
+    :param col: The column of the datamap.
+    :param h: The height of the datamap.
+    :param w: The width of the datamap.
+    :param mask: The mask of the subregion.
+    :param prob_ex: The excitation survival probability.
+    :param prob_sted: The STED survival probability.
     """
     cdef int s, sprime, t, tprime, o
     cdef int sampled_value

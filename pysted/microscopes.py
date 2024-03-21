@@ -76,8 +76,9 @@ class DyMINMicroscope(base.Microscope):
                                   bleach_func=bleach_funcs.default_update_survival_probabilities,
                                   sample_func=bleach_funcs.sample_molecules):
         """
-        This function acquires the signal and bleaches simultaneously. It makes a call to compiled C code for speed,
-        so make sure the raster.pyx file is compiled!
+        This function acquires the signal and bleaches simultaneously.
+        
+        It makes a call to compiled C code for speed, so make sure the raster.pyx file is compiled!
 
         :param datamap: The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap
         :param pixelsize: The pixelsize of the acquisition. (m)
@@ -99,7 +100,7 @@ class DyMINMicroscope(base.Microscope):
         :param seed: Sets a seed for the random number generator.
         :param filter_bypass: Whether or not to filter the pixel list.
                               This is useful if you know your pixel list is adequate and ordered differently from a
-                              raster scan (i.e. a left to right, row by row scan), as filtering the list returns it
+                              raster scan (i.e. a left to right, row by row scan), as filtering the list return it
                               in raster order.
                               If pixel_list is none, this must be True then.
         :param bleach_func: The bleaching function to be applied.
@@ -237,7 +238,7 @@ class DyMINRESCueMicroscope(base.Microscope):
         :param seed: Sets a seed for the random number generator.
         :param filter_bypass: Whether or not to filter the pixel list.
                               This is useful if you know your pixel list is adequate and ordered differently from a
-                              raster scan (i.e. a left to right, row by row scan), as filtering the list returns it
+                              raster scan (i.e. a left to right, row by row scan), as filtering the list return it
                               in raster order.
                               If pixel_list is none, this must be True then.
         :param bleach_func: The bleaching function to be applied.
@@ -406,8 +407,9 @@ class RESCueMicroscope(base.Microscope):
                                   bleach_func=bleach_funcs.default_update_survival_probabilities,
                                   sample_func=bleach_funcs.sample_molecules):
         """
-        This function acquires the signal and bleaches simultaneously. It makes a call to compiled C code for speed,
-        so make sure the raster.pyx file is compiled!
+        This function acquires the signal and bleaches simultaneously. 
+        
+        It makes a call to compiled C code for speed, so make sure the raster.pyx file is compiled!
 
         :param datamap: The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap
         :param pixelsize: The pixelsize of the acquisition. (m)
@@ -429,7 +431,7 @@ class RESCueMicroscope(base.Microscope):
         :param seed: Sets a seed for the random number generator.
         :param filter_bypass: Whether or not to filter the pixel list.
                               This is useful if you know your pixel list is adequate and ordered differently from a
-                              raster scan (i.e. a left to right, row by row scan), as filtering the list returns it
+                              raster scan (i.e. a left to right, row by row scan), as filtering the list return it
                               in raster order.
                               If pixel_list is none, this must be True then.
         :param bleach_func: The bleaching function to be applied.
