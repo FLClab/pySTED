@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pysted.temporal.Ensemble.update &#8212; pySTED 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=e3a6060d"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysted.temporal.Fiber" href="pysted.temporal.Fiber.html" />
+    <link rel="prev" title="pysted.temporal.Ensemble.spawn" href="pysted.temporal.Ensemble.spawn.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pysted-temporal-ensemble-update">
+<h1>pysted.temporal.Ensemble.update<a class="headerlink" href="#pysted-temporal-ensemble-update" title="Link to this heading">¶</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.temporal.Ensemble.update">
+<span class="sig-prename descclassname"><span class="pre">Ensemble.</span></span><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">0.1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jitter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">0.01)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.temporal.Ensemble.update" title="Link to this definition">¶</a></dt>
+<dd><p>Updates all objects in the <code class="docutils literal notranslate"><span class="pre">Ensemble</span></code>.</p>
+<p>If an object is out of the region of interest then it is simply removed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prob</strong> – The probability of applying a force</p></li>
+<li><p><strong>force</strong> – A <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of the force to apply</p></li>
+<li><p><strong>jitter</strong> – A <code class="docutils literal notranslate"><span class="pre">tuple</span></code> of the jitter to apply</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pySTED</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pysted.html">pysted</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysted.base.html">pysted.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.bleach_funcs.html">pysted.bleach_funcs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.cUtils.html">pysted.cUtils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.data.html">pysted.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.exp_data_gen.html">pysted.exp_data_gen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.microscopes.html">pysted.microscopes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.raster.html">pysted.raster</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysted.temporal.html">pysted.temporal</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pysted.temporal.Ensemble.html">pysted.temporal.Ensemble</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pysted.temporal.Ensemble.html#pysted.temporal.Ensemble"><code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pysted.temporal.Ensemble.append.html">pysted.temporal.Ensemble.append</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pysted.temporal.Ensemble.generate_objects_dict.html">pysted.temporal.Ensemble.generate_objects_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pysted.temporal.Ensemble.generate_sequence.html">pysted.temporal.Ensemble.generate_sequence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pysted.temporal.Ensemble.reset_force.html">pysted.temporal.Ensemble.reset_force</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pysted.temporal.Ensemble.reset_speed.html">pysted.temporal.Ensemble.reset_speed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pysted.temporal.Ensemble.return_frame.html">pysted.temporal.Ensemble.return_frame</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pysted.temporal.Ensemble.show.html">pysted.temporal.Ensemble.show</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pysted.temporal.Ensemble.spawn.html">pysted.temporal.Ensemble.spawn</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">pysted.temporal.Ensemble.update</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#pysted.temporal.Ensemble.update"><code class="docutils literal notranslate"><span class="pre">Ensemble.update()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.Fiber.html">pysted.temporal.Fiber</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.Nodes.html">pysted.temporal.Nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.NodesCombiner.html">pysted.temporal.NodesCombiner</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.Polygon.html">pysted.temporal.Polygon</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.Synapse.html">pysted.temporal.Synapse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.html#pysted.temporal.Ensemble"><code class="docutils literal notranslate"><span class="pre">Ensemble</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.html#pysted.temporal.Fiber"><code class="docutils literal notranslate"><span class="pre">Fiber</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.html#pysted.temporal.Nodes"><code class="docutils literal notranslate"><span class="pre">Nodes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.html#pysted.temporal.NodesCombiner"><code class="docutils literal notranslate"><span class="pre">NodesCombiner</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.html#pysted.temporal.Polygon"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.temporal.html#pysted.temporal.Synapse"><code class="docutils literal notranslate"><span class="pre">Synapse</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.utils.html">pysted.utils</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="pysted.html">pysted</a><ul>
+  <li><a href="pysted.temporal.html">pysted.temporal</a><ul>
+  <li><a href="pysted.temporal.Ensemble.html">pysted.temporal.Ensemble</a><ul>
+      <li>Previous: <a href="pysted.temporal.Ensemble.spawn.html" title="previous chapter">pysted.temporal.Ensemble.spawn</a></li>
+      <li>Next: <a href="pysted.temporal.Fiber.html" title="next chapter">pysted.temporal.Fiber</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Audrey Durand and Flavie Lavoie-Cardinal.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/modules/pysted.temporal.Ensemble.update.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pySTED &#8212; pySTED 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=e3a6060d"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pysted" href="modules/pysted.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <p><span class="raw-html-m2r"><img src="docs/img/figure0_v0.png"></span></p>
+<section id="pysted">
+<h1>pySTED<a class="headerlink" href="#pysted" title="Link to this heading">¶</a></h1>
+<dl class="simple">
+<dt>:raw-html-m2r:<a href="#id1"><span class="problematic" id="id2">`</span></a>&lt;a target=”_blank” href=”<a class="reference external" href="https://colab.research.google.com/drive/128pOe4KwnZ7MH6HFcd-mG1HjwDWvohnq?usp=sharing">https://colab.research.google.com/drive/128pOe4KwnZ7MH6HFcd-mG1HjwDWvohnq?usp=sharing</a>”&gt;</dt><dd><p>&lt;img src=”<a class="reference external" href="https://colab.research.google.com/assets/colab-badge.svg">https://colab.research.google.com/assets/colab-badge.svg</a>” alt=”Open In Colab”/&gt;</p>
+</dd>
+</dl>
+<p>&lt;/a&gt;`</p>
+<p>We have built a realistic STED simulation platform within the Python environment, namely pysted. pysted breaks down a STED acquisition into its main constituents: wavelength dependent focusing properties of the objective lens, fluorophore excitation and depletion, and fluorescence detection. Each step of the acquisition process corresponds to an independent component of the pipeline and is created with its own parameters that users can modify according to their experimental requirements. Generating a synthetic image with the pysted simulator requires the user to specify the positions of the emitters in the field of view (referred to as datamap) and to provide the characteristics of the fluorophore). The emission and photobleaching properties of the fluorophores that are implemented in pysted and inspired from previous theoretical and experimental models. As in a real experiment, the datamap is continuously being updated during the simulation process to realistically simulate point-scanning acquisition schemes.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
+<p>We recommend using a virtual environment in which to install pySTED. <a class="reference external" href="https://docs.anaconda.com/anaconda/install/index.html">Anaconda</a> facilitates the creation of a virtual environment on most operating system. For exemple, a virtual environment can be created using</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>pysted<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10
+conda<span class="w"> </span>activate<span class="w"> </span>pysted
+</pre></div>
+</div>
+<section id="using-pip">
+<h3>Using pip<a class="headerlink" href="#using-pip" title="Link to this heading">¶</a></h3>
+<p>We do not provide a pypi installation package (yet). The user can however install pySTED using the url of the current repository</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pysted
+</pre></div>
+</div>
+</section>
+<section id="from-source">
+<h3>From source<a class="headerlink" href="#from-source" title="Link to this heading">¶</a></h3>
+<p>Clone the repository on your computer</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/FLClab/pySTED.git
+</pre></div>
+</div>
+<p>To install the necessary public libraries, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>pySTED/requirements.txt
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>pySTED
+</pre></div>
+</div>
+<p><em>Note.</em> Using the local install will require to compile the cython code that are required in pySTED.</p>
+</section>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>We highly recommend to run the provided notebook to get some insight about how to use pySTED.</p>
+<section id="notebook">
+<h3>Notebook<a class="headerlink" href="#notebook" title="Link to this heading">¶</a></h3>
+<p>A <a class="reference external" href="https://colab.research.google.com/drive/128pOe4KwnZ7MH6HFcd-mG1HjwDWvohnq?usp=sharing">Google Colab</a> jupyter notebook is provided to learn the basics of <code class="docutils literal notranslate"><span class="pre">pysted</span></code>.</p>
+</section>
+<section id="local">
+<h3>Local<a class="headerlink" href="#local" title="Link to this heading">¶</a></h3>
+<p>Once <code class="docutils literal notranslate"><span class="pre">pysted</span></code> is installed, running the example script should be possible.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>pySTED_tutorial.py
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="modules/pysted.html#module-pysted" title="pysted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pysted</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">pySTED</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/pysted.html">pysted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="modules/pysted.html" title="next chapter">pysted</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Audrey Durand and Flavie Lavoie-Cardinal.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

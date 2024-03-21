@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pysted.raster.raster_func_dymin &#8212; pySTED 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=e3a6060d"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysted.raster.raster_func_rescue" href="pysted.raster.raster_func_rescue.html" />
+    <link rel="prev" title="pysted.raster.raster_func_c_self_bleach_split_g" href="pysted.raster.raster_func_c_self_bleach_split_g.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="pysted-raster-raster-func-dymin">
+<h1>pysted.raster.raster_func_dymin<a class="headerlink" href="#pysted-raster-raster-func-dymin" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.raster.raster_func_dymin">
+<span class="sig-prename descclassname"><span class="pre">pysted.raster.</span></span><span class="sig-name descname"><span class="pre">raster_func_dymin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquired_intensity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rows_pad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols_pad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laser_pad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returned_photons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaled_power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdt_roi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex_roi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted_roi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleached_sub_datamaps_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.raster.raster_func_dymin" title="Link to this definition">¶</a></dt>
+<dd><p>Implements the raster scanning and photobleaching of DyMIN microscopy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap</strong> – The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap</p></li>
+<li><p><strong>acquired_intensity</strong> – 2D array to store the acquired intensity</p></li>
+<li><p><strong>pixel_list</strong> – 2D array with the position of the pixels to be acquired</p></li>
+<li><p><strong>ratio</strong> – The ratio of the pixel size to the datamap pixel size</p></li>
+<li><p><strong>rows_pad</strong> – The number of rows to pad the datamap</p></li>
+<li><p><strong>cols_pad</strong> – The number of columns to pad the datamap</p></li>
+<li><p><strong>laser_pad</strong> – The number of pixels to pad the laser</p></li>
+<li><p><strong>prob_ex</strong> – 2D array with the probability of survival of the fluorophores under excitation</p></li>
+<li><p><strong>prob_sted</strong> – 2D array with the probability of survival of the fluorophores under sted</p></li>
+<li><p><strong>pdt_roi</strong> – 2D array with the pixel dwell time</p></li>
+<li><p><strong>p_ex_roi</strong> – 2D array with the excitation power</p></li>
+<li><p><strong>p_sted_roi</strong> – 2D array with the sted power</p></li>
+<li><p><strong>bleach</strong> – Boolean to indicate if the sample should be bleached</p></li>
+<li><p><strong>bleached_sub_datamaps_dict</strong> – Dictionary with the different parts of the datamap to be bleached</p></li>
+<li><p><strong>seed</strong> – Seed for the random number generator</p></li>
+<li><p><strong>bleach_func</strong> – Function to bleach the sample</p></li>
+<li><p><strong>sample_func</strong> – Function to sample the sample</p></li>
+<li><p><strong>steps</strong> – List with the different steps of the acquisition</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pySTED</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pysted.html">pysted</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysted.base.html">pysted.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.bleach_funcs.html">pysted.bleach_funcs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.cUtils.html">pysted.cUtils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.data.html">pysted.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.exp_data_gen.html">pysted.exp_data_gen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.microscopes.html">pysted.microscopes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pysted.raster.html">pysted.raster</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pysted.raster.raster_func_c_self_bleach_split_g.html">pysted.raster.raster_func_c_self_bleach_split_g</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pysted.raster.raster_func_dymin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.raster.raster_func_dymin"><code class="docutils literal notranslate"><span class="pre">raster_func_dymin()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.raster.raster_func_rescue.html">pysted.raster.raster_func_rescue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.raster.reset_prob.html">pysted.raster.reset_prob</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.raster.html#pysted.raster.raster_func_c_self_bleach_split_g"><code class="docutils literal notranslate"><span class="pre">raster_func_c_self_bleach_split_g()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.raster.html#pysted.raster.raster_func_dymin"><code class="docutils literal notranslate"><span class="pre">raster_func_dymin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.raster.html#pysted.raster.raster_func_rescue"><code class="docutils literal notranslate"><span class="pre">raster_func_rescue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.raster.html#pysted.raster.reset_prob"><code class="docutils literal notranslate"><span class="pre">reset_prob()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.temporal.html">pysted.temporal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.utils.html">pysted.utils</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="pysted.html">pysted</a><ul>
+  <li><a href="pysted.raster.html">pysted.raster</a><ul>
+      <li>Previous: <a href="pysted.raster.raster_func_c_self_bleach_split_g.html" title="previous chapter">pysted.raster.raster_func_c_self_bleach_split_g</a></li>
+      <li>Next: <a href="pysted.raster.raster_func_rescue.html" title="next chapter">pysted.raster.raster_func_rescue</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Audrey Durand and Flavie Lavoie-Cardinal.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/modules/pysted.raster.raster_func_dymin.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

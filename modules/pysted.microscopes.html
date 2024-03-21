@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pysted.microscopes &#8212; pySTED 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=e3a6060d"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysted.microscopes.DyMINMicroscope" href="pysted.microscopes.DyMINMicroscope.html" />
+    <link rel="prev" title="pysted.exp_data_gen.Synapse.rotate_and_translate" href="pysted.exp_data_gen.Synapse.rotate_and_translate.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pysted.microscopes">
+<span id="pysted-microscopes"></span><h1>pysted.microscopes<a class="headerlink" href="#module-pysted.microscopes" title="Link to this heading">¶</a></h1>
+<p>This modules implements different configuration of a <code class="docutils literal notranslate"><span class="pre">base.Microscope</span></code>.</p>
+<p>Currently implemented microscopes are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DyMINMicroscope</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DyMINRESCueMicroscope</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RESCueMicroscope</span></code></p></li>
+</ul>
+<p>Implementing their own microscope requires to reimplement the <code class="docutils literal notranslate"><span class="pre">get_signal_and_bleach</span></code> 
+method of a <code class="docutils literal notranslate"><span class="pre">base.Microscope</span></code>.</p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="heine2017" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Heine2017<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<p>Heine, J. et al. Adaptive-illumination STED nanoscopy. PNAS 114, 9797–9802 (2017).</p>
+</div>
+<div class="citation" id="staudt2011" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">Staudt2011</a><span class="fn-bracket">]</span></span>
+<p>Staudt, T. et al. Far-field optical nanoscopy with reduced number of state transition cycles. Opt. Express, OE 19, 5644–5657 (2011).</p>
+</div>
+</div>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.microscopes.DyMINMicroscope.html#pysted.microscopes.DyMINMicroscope" title="pysted.microscopes.DyMINMicroscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DyMINMicroscope</span></code></a>(excitation, sted, detector, ...)</p></td>
+<td><p>Implements a <code class="docutils literal notranslate"><span class="pre">DyMINMicroscope</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.microscopes.DyMINRESCueMicroscope.html#pysted.microscopes.DyMINRESCueMicroscope" title="pysted.microscopes.DyMINRESCueMicroscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DyMINRESCueMicroscope</span></code></a>(excitation, sted, ...)</p></td>
+<td><p>Implements a <cite>DyMINRESCueMicroscope</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.microscopes.RESCueMicroscope.html#pysted.microscopes.RESCueMicroscope" title="pysted.microscopes.RESCueMicroscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RESCueMicroscope</span></code></a>(excitation, sted, detector, ...)</p></td>
+<td><p>Implements a <cite>RESCueMicroscope</cite>.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.microscopes.DyMINMicroscope">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.microscopes.</span></span><span class="sig-name descname"><span class="pre">DyMINMicroscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">excitation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.microscopes.DyMINMicroscope" title="Link to this definition">¶</a></dt>
+<dd><p>Implements a <code class="docutils literal notranslate"><span class="pre">DyMINMicroscope</span></code>.</p>
+<p>Refer to <a class="reference internal" href="#heine2017" id="id1"><span>[Heine2017]</span></a> for details about DyMIN microscopy.</p>
+<p>The DyMIN acquisition parameters are controlled with the <cite>opts</cite> variable. Other number 
+of DyMIN steps can be implemented by simply changing the length of each parameters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;scale_power&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># Percentage of STED power </span>
+    <span class="s2">&quot;decision_time&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mf">10e-6</span><span class="p">,</span> <span class="mf">10e-6</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># Time to acquire photons</span>
+    <span class="s2">&quot;threshold_count&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># Minimal number of photons for next step</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.microscopes.DyMINMicroscope.get_signal_and_bleach">
+<span class="sig-name descname"><span class="pre">get_signal_and_bleach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquired_intensity=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_list=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_bypass=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach_func=&lt;cyfunction</span> <span class="pre">default_update_survival_probabilities&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_func=&lt;cyfunction</span> <span class="pre">sample_molecules&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.microscopes.DyMINMicroscope.get_signal_and_bleach" title="Link to this definition">¶</a></dt>
+<dd><p>This function acquires the signal and bleaches simultaneously.</p>
+<p>It makes a call to compiled C code for speed, so make sure the raster.pyx file is compiled!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap</strong> – The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap</p></li>
+<li><p><strong>pixelsize</strong> – The pixelsize of the acquisition. (m)</p></li>
+<li><p><strong>pdt</strong> – The pixel dwelltime. Can be either a single float value or an array of the same size as the ROI
+being imaged. (s)</p></li>
+<li><p><strong>p_ex</strong> – The excitation beam power. Can be either a single float value or an array of the same size as the
+ROI being imaged. (W)</p></li>
+<li><p><strong>p_sted</strong> – The depletion beam power. Can be either a single float value or an array of the same size as the
+ROI being imaged. (W)</p></li>
+<li><p><strong>indices</strong> – A dictionary containing the indices of the subdatamaps used. This is used to apply bleaching to
+the future subdatamaps. If acquiring on a static Datamap, leave as None.</p></li>
+<li><p><strong>acquired_intensity</strong> – The result of the last incomplete acquisition. This is useful in a time routine where
+flashes can occur mid acquisition. Leave as None if it is not the case. (array)</p></li>
+<li><p><strong>pixel_list</strong> – The list of pixels to be iterated on. If none, a pixel_list of a raster scan will be
+generated. (list of tuples (row, col))</p></li>
+<li><p><strong>bleach</strong> – Determines whether bleaching is active or not. (Bool)</p></li>
+<li><p><strong>update</strong> – Determines whether the datamap is updated in place. If set to false, the datamap can still be
+updated later with the returned bleached datamap. (Bool)</p></li>
+<li><p><strong>seed</strong> – Sets a seed for the random number generator.</p></li>
+<li><p><strong>filter_bypass</strong> – Whether or not to filter the pixel list.
+This is useful if you know your pixel list is adequate and ordered differently from a
+raster scan (i.e. a left to right, row by row scan), as filtering the list return it
+in raster order.
+If pixel_list is none, this must be True then.</p></li>
+<li><p><strong>bleach_func</strong> – The bleaching function to be applied.</p></li>
+<li><p><strong>steps</strong> – list containing the pixeldwelltimes for the sub steps of an acquisition. Is none by default.
+Should be used if trying to implement a DyMin type acquisition, where decisions are made
+after some time on whether or not to continue the acq.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>returned_acquired_photons, the acquired photon for the acquisition.
+bleached_sub_datamaps_dict, a dict containing the results of bleaching on the subdatamaps
+acquired_intensity, the intensity of the acquisition, used for interrupted acquisitions</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.microscopes.DyMINRESCueMicroscope">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.microscopes.</span></span><span class="sig-name descname"><span class="pre">DyMINRESCueMicroscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">excitation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.microscopes.DyMINRESCueMicroscope" title="Link to this definition">¶</a></dt>
+<dd><p>Implements a <cite>DyMINRESCueMicroscope</cite>.</p>
+<p>Refer to <a class="reference internal" href="#heine2017" id="id2"><span>[Heine2017]</span></a> for details about DyMIN microscopy. In this particular case, the 
+last step of the DyMIN acquisition is a RESCue acquisition.
+This microscope was not implemented in cython.</p>
+<p>The DyMINRESCUe acquisition parameters are controlled with the <cite>opts</cite> variable. Other number 
+of DyMIN steps can be implemented by simply changing the length of each parameters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;scale_power&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># Percentage of STED power </span>
+    <span class="s2">&quot;decision_time&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mf">10e-6</span><span class="p">,</span> <span class="mf">10e-6</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># Time to acquire photons</span>
+    <span class="s2">&quot;threshold_count&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># Minimal number of photons for next step</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.microscopes.DyMINRESCueMicroscope.get_signal_and_bleach">
+<span class="sig-name descname"><span class="pre">get_signal_and_bleach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquired_intensity=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_list=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_bypass=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach_func=&lt;cyfunction</span> <span class="pre">default_update_survival_probabilities&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_func=&lt;cyfunction</span> <span class="pre">sample_molecules&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.microscopes.DyMINRESCueMicroscope.get_signal_and_bleach" title="Link to this definition">¶</a></dt>
+<dd><p>This function acquires the signal and bleaches simultaneously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap</strong> – The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap</p></li>
+<li><p><strong>pixelsize</strong> – The pixelsize of the acquisition. (m)</p></li>
+<li><p><strong>pdt</strong> – The pixel dwelltime. Can be either a single float value or an array of the same size as the ROI
+being imaged. (s)</p></li>
+<li><p><strong>p_ex</strong> – The excitation beam power. Can be either a single float value or an array of the same size as the
+ROI being imaged. (W)</p></li>
+<li><p><strong>p_sted</strong> – The depletion beam power. Can be either a single float value or an array of the same size as the
+ROI being imaged. (W)</p></li>
+<li><p><strong>indices</strong> – A dictionary containing the indices of the subdatamaps used. This is used to apply bleaching to
+the future subdatamaps. If acquiring on a static Datamap, leave as None.</p></li>
+<li><p><strong>acquired_intensity</strong> – The result of the last incomplete acquisition. This is useful in a time routine where
+flashes can occur mid acquisition. Leave as None if it is not the case. (array)</p></li>
+<li><p><strong>pixel_list</strong> – The list of pixels to be iterated on. If none, a pixel_list of a raster scan will be
+generated. (list of tuples (row, col))</p></li>
+<li><p><strong>bleach</strong> – Determines whether bleaching is active or not. (Bool)</p></li>
+<li><p><strong>update</strong> – Determines whether the datamap is updated in place. If set to false, the datamap can still be
+updated later with the returned bleached datamap. (Bool)</p></li>
+<li><p><strong>seed</strong> – Sets a seed for the random number generator.</p></li>
+<li><p><strong>filter_bypass</strong> – Whether or not to filter the pixel list.
+This is useful if you know your pixel list is adequate and ordered differently from a
+raster scan (i.e. a left to right, row by row scan), as filtering the list return it
+in raster order.
+If pixel_list is none, this must be True then.</p></li>
+<li><p><strong>bleach_func</strong> – The bleaching function to be applied.</p></li>
+<li><p><strong>steps</strong> – list containing the pixeldwelltimes for the sub steps of an acquisition. Is none by default.
+Should be used if trying to implement a DyMin type acquisition, where decisions are made
+after some time on whether or not to continue the acq.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>returned_acquired_photons, the acquired photon for the acquisition.
+bleached_sub_datamaps_dict, a dict containing the results of bleaching on the subdatamaps
+acquired_intensity, the intensity of the acquisition, used for interrupted acquisitions</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.microscopes.RESCueMicroscope">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.microscopes.</span></span><span class="sig-name descname"><span class="pre">RESCueMicroscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">excitation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.microscopes.RESCueMicroscope" title="Link to this definition">¶</a></dt>
+<dd><p>Implements a <cite>RESCueMicroscope</cite>.</p>
+<p>Refer to <a class="reference internal" href="#staudt2011" id="id3"><span>[Staudt2011]</span></a> for details about RESCue microscopy.</p>
+<p>The RESCue acquisition parameters are controlled with the <cite>opts</cite> variable. Other number 
+of steps can be implemented by simply changing the length of each parameters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">opts</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;lower_treshold&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># Lower threshold on the number of photons</span>
+    <span class="s2">&quot;upper_threshold&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># Upper threshold on the maximum number of photons</span>
+    <span class="s2">&quot;decision_time&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mf">10e-6</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Time spent for the decision</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.microscopes.RESCueMicroscope.get_signal_and_bleach">
+<span class="sig-name descname"><span class="pre">get_signal_and_bleach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquired_intensity=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_list=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_bypass=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach_func=&lt;cyfunction</span> <span class="pre">default_update_survival_probabilities&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_func=&lt;cyfunction</span> <span class="pre">sample_molecules&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.microscopes.RESCueMicroscope.get_signal_and_bleach" title="Link to this definition">¶</a></dt>
+<dd><p>This function acquires the signal and bleaches simultaneously.</p>
+<p>It makes a call to compiled C code for speed, so make sure the raster.pyx file is compiled!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap</strong> – The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap</p></li>
+<li><p><strong>pixelsize</strong> – The pixelsize of the acquisition. (m)</p></li>
+<li><p><strong>pdt</strong> – The pixel dwelltime. Can be either a single float value or an array of the same size as the ROI
+being imaged. (s)</p></li>
+<li><p><strong>p_ex</strong> – The excitation beam power. Can be either a single float value or an array of the same size as the
+ROI being imaged. (W)</p></li>
+<li><p><strong>p_sted</strong> – The depletion beam power. Can be either a single float value or an array of the same size as the
+ROI being imaged. (W)</p></li>
+<li><p><strong>indices</strong> – A dictionary containing the indices of the subdatamaps used. This is used to apply bleaching to
+the future subdatamaps. If acquiring on a static Datamap, leave as None.</p></li>
+<li><p><strong>acquired_intensity</strong> – The result of the last incomplete acquisition. This is useful in a time routine where
+flashes can occur mid acquisition. Leave as None if it is not the case. (array)</p></li>
+<li><p><strong>pixel_list</strong> – The list of pixels to be iterated on. If none, a pixel_list of a raster scan will be
+generated. (list of tuples (row, col))</p></li>
+<li><p><strong>bleach</strong> – Determines whether bleaching is active or not. (Bool)</p></li>
+<li><p><strong>update</strong> – Determines whether the datamap is updated in place. If set to false, the datamap can still be
+updated later with the returned bleached datamap. (Bool)</p></li>
+<li><p><strong>seed</strong> – Sets a seed for the random number generator.</p></li>
+<li><p><strong>filter_bypass</strong> – Whether or not to filter the pixel list.
+This is useful if you know your pixel list is adequate and ordered differently from a
+raster scan (i.e. a left to right, row by row scan), as filtering the list return it
+in raster order.
+If pixel_list is none, this must be True then.</p></li>
+<li><p><strong>bleach_func</strong> – The bleaching function to be applied.</p></li>
+<li><p><strong>steps</strong> – list containing the pixeldwelltimes for the sub steps of an acquisition. Is none by default.
+Should be used if trying to implement a DyMin type acquisition, where decisions are made
+after some time on whether or not to continue the acq.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>returned_acquired_photons, the acquired photon for the acquisition.
+bleached_sub_datamaps_dict, a dict containing the results of bleaching on the subdatamaps
+acquired_intensity, the intensity of the acquisition, used for interrupted acquisitions</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pySTED</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pysted.html">pysted</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysted.base.html">pysted.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.bleach_funcs.html">pysted.bleach_funcs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.cUtils.html">pysted.cUtils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.data.html">pysted.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.exp_data_gen.html">pysted.exp_data_gen</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pysted.microscopes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pysted.microscopes.DyMINMicroscope.html">pysted.microscopes.DyMINMicroscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.microscopes.DyMINRESCueMicroscope.html">pysted.microscopes.DyMINRESCueMicroscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.microscopes.RESCueMicroscope.html">pysted.microscopes.RESCueMicroscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.microscopes.DyMINMicroscope"><code class="docutils literal notranslate"><span class="pre">DyMINMicroscope</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.microscopes.DyMINMicroscope.get_signal_and_bleach"><code class="docutils literal notranslate"><span class="pre">DyMINMicroscope.get_signal_and_bleach()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.microscopes.DyMINRESCueMicroscope"><code class="docutils literal notranslate"><span class="pre">DyMINRESCueMicroscope</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.microscopes.DyMINRESCueMicroscope.get_signal_and_bleach"><code class="docutils literal notranslate"><span class="pre">DyMINRESCueMicroscope.get_signal_and_bleach()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.microscopes.RESCueMicroscope"><code class="docutils literal notranslate"><span class="pre">RESCueMicroscope</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.microscopes.RESCueMicroscope.get_signal_and_bleach"><code class="docutils literal notranslate"><span class="pre">RESCueMicroscope.get_signal_and_bleach()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.raster.html">pysted.raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.temporal.html">pysted.temporal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.utils.html">pysted.utils</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="pysted.html">pysted</a><ul>
+      <li>Previous: <a href="pysted.exp_data_gen.Synapse.rotate_and_translate.html" title="previous chapter">pysted.exp_data_gen.Synapse.rotate_and_translate</a></li>
+      <li>Next: <a href="pysted.microscopes.DyMINMicroscope.html" title="next chapter">pysted.microscopes.DyMINMicroscope</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Audrey Durand and Flavie Lavoie-Cardinal.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/modules/pysted.microscopes.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

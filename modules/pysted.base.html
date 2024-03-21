@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pysted.base &#8212; pySTED 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=e3a6060d"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysted.base.Clock" href="pysted.base.Clock.html" />
+    <link rel="prev" title="pysted" href="pysted.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pysted.base">
+<span id="pysted-base"></span><h1>pysted.base<a class="headerlink" href="#module-pysted.base" title="Link to this heading">¶</a></h1>
+<p>This module implements the essential components of a microscopy setup. By
+assembling an excitation beam, a STED beam, a detector, and fluorescence
+molecules, to obtain a microscope setup. The following code gives an example of
+how to create such setup and use it to measure and plot the detected signal
+given some <code class="docutils literal notranslate"><span class="pre">data_model</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">laser_ex</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">GaussianBeam</span><span class="p">(</span><span class="mf">488e-9</span><span class="p">)</span>
+<span class="n">laser_sted</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">DonutBeam</span><span class="p">(</span><span class="mf">575e-9</span><span class="p">,</span> <span class="n">zero_residual</span><span class="o">=</span><span class="mf">0.04</span><span class="p">)</span>
+<span class="n">detector</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">Detector</span><span class="p">(</span><span class="n">def</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+<span class="n">objective</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">Objective</span><span class="p">()</span>
+<span class="n">fluo</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">Fluorescence</span><span class="p">(</span><span class="mf">535e-9</span><span class="p">)</span>
+<span class="n">microscope</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">Microscope</span><span class="p">(</span><span class="n">laser_ex</span><span class="p">,</span> <span class="n">laser_sted</span><span class="p">,</span> <span class="n">detector</span><span class="p">,</span> <span class="n">objective</span><span class="p">,</span> <span class="n">fluo</span><span class="p">)</span>
+
+<span class="n">data_map</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_data_map</span><span class="p">(</span><span class="n">data_model</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># imaging parameters</span>
+<span class="n">pdt</span> <span class="o">=</span> <span class="mf">10e-6</span>
+<span class="n">p_ex</span> <span class="o">=</span> <span class="mf">1e-6</span>
+<span class="n">p_sted</span> <span class="o">=</span> <span class="mf">30e-3</span>
+
+<span class="n">signal</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">microscope</span><span class="o">.</span><span class="n">get_signal_and_bleach</span><span class="p">(</span><span class="n">data_map</span><span class="p">,</span> <span class="mf">10e-9</span><span class="p">,</span> <span class="n">pdt</span><span class="p">,</span> <span class="n">p_ex</span><span class="p">,</span> <span class="n">p_sted</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">signal</span><span class="p">)</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">pyplot</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Code written by Benoit Turcotte, Albert Michaud-Gagnon, Anthony Bilodeau, Audrey Durand, and Flavie Lavoie-Cardinal</p>
+<p class="rubric">References</p>
+<div role="list" class="citation-list">
+<div class="citation" id="deng2010" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Deng2010<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id7">1</a>,<a role="doc-backlink" href="#id16">2</a>)</span>
+<p>Deng, S., Liu, L., Cheng, Y., Li, R., &amp; Xu, Z. (2010).
+Effects of primary aberrations on the fluorescence depletion patterns
+of STED microscopy. Optics Express, 18(2), 1657–1666.</p>
+</div>
+<div class="citation" id="garcia2000" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Garcia2000<span class="fn-bracket">]</span></span>
+<p>Garcia-Parajo, M. F., Segers-Nolten, G. M. J., Veerman, J.-A-.,
+Greve, J., &amp; Van Hulst, N. F. (2000).
+Real-time light-driven dynamics of the fluorescence emission in single green
+fluorescent protein molecules.
+Proceedings of the National Academy of Sciences, 97(13), 7237-7242.</p>
+</div>
+<div class="citation" id="holler2011" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id20">Holler2011</a><span class="fn-bracket">]</span></span>
+<p>Höller, M. (2011).
+Advanced fluorescence fluctuation spectroscopy with pulsed
+interleaved excitation. PhD thesis, LMU, Munich (Germany).</p>
+</div>
+<div class="citation" id="jerker1999" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Jerker1999<span class="fn-bracket">]</span></span>
+<p>Jerker, W., Ülo, M., &amp; Rudolf, R. (1999).
+Photodynamic properties of green fluorescent proteins investigated by
+fluorescence correlation spectroscopy. Chemical Physics, 250(2), 171-186.</p>
+</div>
+<div class="citation" id="leutenegger2010" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Leutenegger2010<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id13">1</a>,<a role="doc-backlink" href="#id19">2</a>,<a role="doc-backlink" href="#id21">3</a>,<a role="doc-backlink" href="#id22">4</a>)</span>
+<p>Leutenegger, M., Eggeling, C., &amp; Hell, S. W. (2010).
+Analytical description of STED microscopy performance.
+Optics Express, 18(25), 26417–26429.</p>
+</div>
+<div class="citation" id="rpphoto2015" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>RPPhoto2015<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id8">1</a>,<a role="doc-backlink" href="#id17">2</a>)</span>
+<p>RP Photonics Consulting GmbH (Accessed 2015).
+Optical intensity. Encyclopedia of laser physics and technology at
+&lt;<a class="reference external" href="https://www.rp-photonics.com/optical_intensity.html">https://www.rp-photonics.com/optical_intensity.html</a>&gt;.</p>
+</div>
+<div class="citation" id="oracz2017" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Oracz2017<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id11">1</a>,<a role="doc-backlink" href="#id12">2</a>)</span>
+<p>Oracz, Joanna, et al. (2017)
+Photobleaching in STED Nanoscopy and Its Dependence on the Photon Flux
+Applied for Reversible Silencing of the Fluorophore.
+Scientific Reports, vol. 7, no. 1, Sept. 2017, p. 11354.
+www.nature.com.</p>
+</div>
+<div class="citation" id="staudt2009" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id14">Staudt2009</a><span class="fn-bracket">]</span></span>
+<p>Staudt, T. M. (2009).
+Strategies to reduce photobleaching, dark state transitions and phototoxicity
+in subdiffraction optical microscopy. Dissertation, University of Heidelberg,
+Heidelberg (Germany).</p>
+</div>
+<div class="citation" id="willig2006" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Willig2006<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id5">1</a>,<a role="doc-backlink" href="#id18">2</a>)</span>
+<p>Willig, K. I., Keller, J., Bossi, M., &amp; Hell, S. W. (2006).
+STED microscopy resolves nanoparticle assemblies.
+New Journal of Physics, 8(6), 106.</p>
+</div>
+<div class="citation" id="xie2013" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Xie2013<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id6">1</a>,<a role="doc-backlink" href="#id15">2</a>)</span>
+<p>Xie, H., Liu, Y., Jin, D., Santangelo, P. J., &amp; Xi, P. (2013).
+Analytical description of high-aperture STED resolution with 0–2pi
+vortex phase modulation.
+Journal of the Optical Society of America A (JOSA A), 30(8), 1640–1645.</p>
+</div>
+</div>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.base.Clock.html#pysted.base.Clock" title="pysted.base.Clock"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Clock</span></code></a>(time_quantum_us)</p></td>
+<td><p>Clock class to keep track of time in experiments involving time</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.base.Datamap.html#pysted.base.Datamap" title="pysted.base.Datamap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Datamap</span></code></a>(whole_datamap, datamap_pixelsize)</p></td>
+<td><p>This class implements a datamap, containing a disposition of molecules and a ROI to image.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.base.Detector.html#pysted.base.Detector" title="pysted.base.Detector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Detector</span></code></a>(**kwargs)</p></td>
+<td><p>This class implements the photon detector component.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.base.DonutBeam.html#pysted.base.DonutBeam" title="pysted.base.DonutBeam"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DonutBeam</span></code></a>(lambda_, **kwargs)</p></td>
+<td><p>This class implements a donut beam (STED).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.base.Fluorescence.html#pysted.base.Fluorescence" title="pysted.base.Fluorescence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fluorescence</span></code></a>(lambda_, **kwargs)</p></td>
+<td><p>This class implements a fluorescence molecule.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.base.GaussianBeam.html#pysted.base.GaussianBeam" title="pysted.base.GaussianBeam"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GaussianBeam</span></code></a>(lambda_, **kwargs)</p></td>
+<td><p>This class implements a Gaussian beam (excitation).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.base.Microscope.html#pysted.base.Microscope" title="pysted.base.Microscope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Microscope</span></code></a>(excitation, sted, detector, ...)</p></td>
+<td><p>This class implements a microscopy setup described by an excitation beam, a STED (depletion) beam, a detector, some fluorescence molecules, and the parameters of the objective.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.base.Objective.html#pysted.base.Objective" title="pysted.base.Objective"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Objective</span></code></a>(**kwargs)</p></td>
+<td><p>This class implements the microscope objective component.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.base.RandomActionSelector.html#pysted.base.RandomActionSelector" title="pysted.base.RandomActionSelector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RandomActionSelector</span></code></a>(pdt, p_ex, p_sted, ...)</p></td>
+<td><p>Class which selects a random action from : 0 - Confocal acquisition 1 - STED acquisition 2 - Wait (for the time of 1 acquisition)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.base.TemporalDatamap.html#pysted.base.TemporalDatamap" title="pysted.base.TemporalDatamap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TemporalDatamap</span></code></a>(whole_datamap, ...)</p></td>
+<td><p>Implements a dynamic datamap</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.base.TemporalExperiment.html#pysted.base.TemporalExperiment" title="pysted.base.TemporalExperiment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TemporalExperiment</span></code></a>(clock, microscope, ...[, ...])</p></td>
+<td><p>This temporal experiment will run on a loop based on the action selections instead of on the time to make it easier to integrate the agent/gym stuff :)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.base.TemporalSynapseDmap.html#pysted.base.TemporalSynapseDmap" title="pysted.base.TemporalSynapseDmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TemporalSynapseDmap</span></code></a>(whole_datamap, ...)</p></td>
+<td><p>Temporal Datamap of a Synaptic region with nanodomains.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.base.TestTemporalDmap.html#pysted.base.TestTemporalDmap" title="pysted.base.TestTemporalDmap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TestTemporalDmap</span></code></a>(whole_datamap, ...)</p></td>
+<td><p>Test class for the TemporalDatamap class</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.Clock">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">Clock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_quantum_us</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Clock" title="Link to this definition">¶</a></dt>
+<dd><p>Clock class to keep track of time in experiments involving time</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>time_quantum_us</strong> – The minimal time increment on which the experiment loop will happen. All other time
+increments in the experiment should be a multiple of this value (in micro seconds (us))
+(int)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">time_quantum_us</span></code> is an <code class="docutils literal notranslate"><span class="pre">int</span></code> and so is the <code class="docutils literal notranslate"><span class="pre">current_time</span></code> attribute. This means the longest time an experiment
+can last is determined by the size of the biggest <code class="docutils literal notranslate"><span class="pre">int64</span></code>, which means it is 9223372036854775807 us, or
+9223372036854.775807 s, which I think should be ample time :)</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Clock.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Clock.reset" title="Link to this definition">¶</a></dt>
+<dd><p>Resets the current_time to 0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Clock.update_time">
+<span class="sig-name descname"><span class="pre">update_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Clock.update_time" title="Link to this definition">¶</a></dt>
+<dd><p>Updates the current_time by 1 time_quantum_us</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.Datamap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">Datamap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">whole_datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Datamap" title="Link to this definition">¶</a></dt>
+<dd><p>This class implements a datamap, containing a disposition of molecules and a ROI to image.</p>
+<p>The Datamap can be a composition of multiple parts, for instance, a ‘base’, which is static, a ‘flashes’ part,
+which represents only the flashes occuring in the Datamap, or a ‘diffusing’ part, which would represent only
+the moving molecules in the Datamap.
+The ROI represents the portion of the Datamap that will be imaged. Since the microscope’s lasers are represented by
+arrays, we must ensure that the laser array’s edges are contained within the whole Datamap array for every pixel
+of the ROI. To facilitated this, the ROI can be set to ‘max’, which will simply 0 pad the passed whole_datamap so
+the laser stays confined when scanning over the pixels of the whole_datamap.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>whole_datamap</strong> – The disposition of the molecules in the sample. This represents the whole sample, from which
+only a region will be imaged (roi). (numpy array)</p></li>
+<li><p><strong>datamap_pixelsize</strong> – The size of a pixel of the datamap. (m)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Datamap.set_bleached_datamap">
+<span class="sig-name descname"><span class="pre">set_bleached_datamap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bleached_datamap</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Datamap.set_bleached_datamap" title="Link to this definition">¶</a></dt>
+<dd><p>Updates the datamap.</p>
+<p>This functions updates the <code class="docutils literal notranslate"><span class="pre">datamap.whole_datamap</span></code> attribute to the bleached version. I put this in case the user
+does not want to update the datamap after bleaching it directly through the microscope’s get_signal_and_bleach
+method, in order to do multiple experiments on the same setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bleached_datamap</strong> – An array of the datamap after the lasers have passed over it (after it has bleached).
+Has to be of the same shape as self.whole_datamap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Datamap.set_roi">
+<span class="sig-name descname"><span class="pre">set_roi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">laser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intervals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Datamap.set_roi" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the Region of Interest for the acquisition.</p>
+<p>Uses a laser generated by the microscope object to determine the biggest ROI allowed, sets the ROI if valid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>laser</strong> – An array of the same shape as the lasers which will be used on the datamap</p></li>
+<li><p><strong>intervals</strong> – Values to set the ROI to. Either ‘max’, a dict like {‘rows’: [min_row, max_row],
+‘cols’: [min_col, max_col]} or None. If ‘max’, the whole datamap will be padded with 0s, and
+the original array will be used as ROI. If None, will prompt the user to enter an ROI.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.Detector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">Detector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Detector" title="Link to this definition">¶</a></dt>
+<dd><p>This class implements the photon detector component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameters</strong> – One or more parameters as described in the following
+table, optional.</p>
+</dd>
+</dl>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Details</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_airy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.7</span></code></p></td>
+<td><p>The number of airy disks used to
+compute the pinhole radius
+<span class="math notranslate nohighlight">\(r_b = n_{airy} 0.61 \lambda/NA\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">noise</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+<td><p>Whether to add poisson noise to the
+signal (boolean).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">background</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>The average number of photon counts per
+second due to the background <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">darkcount</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>The average number of photon counts per
+second due to dark counts.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pcef</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></td>
+<td><p>The photon collection efficiency factor
+is the ratio of emitted photons that
+could be detected (ratio).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pdef</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.5</span></code> <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>The photon detection efficiency factor
+is the ratio of collected photons that
+are perceived by the detector (ratio).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">det_delay</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">750e-12</span></code></p></td>
+<td><p>Delay between the beginning of a period
+the start of the detection</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">det_width</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">8e-9</span></code></p></td>
+<td><p>Detection duration</p></td>
+</tr>
+</tbody>
+</table>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>The actual number is sampled from a poisson distribution with given
+mean.</p>
+</aside>
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>Excelitas Technologies. (2011). Photon Detection Solutions.</p>
+</aside>
+</aside>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Detector.get_detection_psf">
+<span class="sig-name descname"><span class="pre">get_detection_psf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lambda_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">na</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmission</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Detector.get_detection_psf" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the detection PSF as a convolution between the fluorscence
+PSF and a pinhole, as described by the equation from <a class="reference internal" href="#willig2006" id="id5"><span>[Willig2006]</span></a>.</p>
+<p>The pinhole radius is determined using the <code class="xref py py-attr docutils literal notranslate"><span class="pre">n_airy</span></code>, the fluorescence 
+wavelength, and the numerical aperture of the objective.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda</strong> – The fluorescence wavelength (m).</p></li>
+<li><p><strong>psf</strong> – The fluorescence PSF that can the obtained using
+<a class="reference internal" href="pysted.base.Fluorescence.get_psf.html#pysted.base.Fluorescence.get_psf" title="pysted.base.Fluorescence.get_psf"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_psf()</span></code></a>.</p></li>
+<li><p><strong>na</strong> – The numerical aperture of the objective.</p></li>
+<li><p><strong>transmission</strong> – The transmission ratio of the objective for the
+given fluorescence wavelength <em>lambda_</em>.</p></li>
+<li><p><strong>datamap_pixelsize</strong> – The size of a pixel in the simulated image (m).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Detector.get_signal">
+<span class="sig-name descname"><span class="pre">get_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">photons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dwelltime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Detector.get_signal" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the detected signal (in photons) given the number of emitted
+photons and the time spent by the detector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>photons</strong> – An array of number of emitted photons.</p></li>
+<li><p><strong>dwelltime</strong> – The time spent to detect the emitted photons (s). It is
+either a scalar or an array shaped like <em>nb_photons</em>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array shaped like <em>nb_photons</em>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.DonutBeam">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">DonutBeam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lambda_</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.DonutBeam" title="Link to this definition">¶</a></dt>
+<dd><p>This class implements a donut beam (STED).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda</strong> – The wavelength of the beam (m).</p></li>
+<li><p><strong>parameters</strong> – One or more parameters as described in the following
+table, optional.</p></li>
+</ul>
+</dd>
+</dl>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Details</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">polarization</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pi/2</span></code></p></td>
+<td><p>The phase difference between <span class="math notranslate nohighlight">\(x\)</span>
+and <span class="math notranslate nohighlight">\(y\)</span> oscillations (rad).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">beta</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pi/4</span></code></p></td>
+<td><p>The beam incident angle, in
+<span class="math notranslate nohighlight">\([0, \pi/2]\)</span> (rad).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tau</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">400e-12</span></code></p></td>
+<td><p>The beam pulse length (s).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rate</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">40e6</span></code></p></td>
+<td><p>The beam pulse rate (Hz).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">zero_residual</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>The ratio between minimum and maximum
+intensity (ratio).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">anti_stoke</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Presence of anti-stoke (sted beam)
+excitation</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="simple">
+<dt>Polarization :</dt><dd><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\pi/2\)</span> is left-circular</p></li>
+<li><p><span class="math notranslate nohighlight">\(0\)</span> is linear</p></li>
+<li><p><span class="math notranslate nohighlight">\(-\pi/2\)</span> is right-circular</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.DonutBeam.get_intensity">
+<span class="sig-name descname"><span class="pre">get_intensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">na</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmission</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.DonutBeam.get_intensity" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the transmitted STED intensity field (W/m²). The technique
+essentially follows the method described in <a class="reference internal" href="#xie2013" id="id6"><span>[Xie2013]</span></a>, where
+<span class="math notranslate nohighlight">\(z = 0\)</span>, along with some equations from <a class="reference internal" href="#deng2010" id="id7"><span>[Deng2010]</span></a>, and
+<a class="reference internal" href="#rpphoto2015" id="id8"><span>[RPPhoto2015]</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>power</strong> – The power of the beam (W).</p></li>
+<li><p><strong>f</strong> – The focal length of the objective (m).</p></li>
+<li><p><strong>n</strong> – The refractive index of the objective.</p></li>
+<li><p><strong>na</strong> – The numerical aperture.</p></li>
+<li><p><strong>transmission</strong> – The transmission ratio of the objective (given the
+wavelength of the STED beam).</p></li>
+<li><p><strong>datamap_pixelsize</strong> – The size of an element in the intensity matrix (m).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array of the instant intensity (W/m^2).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.Fluorescence">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">Fluorescence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lambda_</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Fluorescence" title="Link to this definition">¶</a></dt>
+<dd><p>This class implements a fluorescence molecule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda</strong> – The fluorescence wavelength (m).</p></li>
+<li><p><strong>parameters</strong> – One or more parameters as described in the following
+table, optional.</p></li>
+</ul>
+</dd>
+</dl>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default <a class="footnote-reference brackets" href="#id10" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></th>
+<th class="head"><p>Details</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sigma_ste</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">575:</span> <span class="pre">1e-21</span></code></p></td>
+<td><p>A dictionnary mapping STED wavelengths
+as integer (nm) to stimulated emission
+cross-section (m²).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sigma_abs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">488:</span> <span class="pre">3e-20</span></code></p></td>
+<td><p>A dictionnary mapping excitation
+wavelengths as integer (nm) to
+absorption cross-section (m²).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tau</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3e-9</span></code></p></td>
+<td><p>The fluorescence lifetime (s).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tau_vib</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1e-12</span></code></p></td>
+<td><p>The vibrational relaxation (s).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tau_tri</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5e-6</span></code></p></td>
+<td><p>The triplet state lifetime (s).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">qy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.6</span></code></p></td>
+<td><p>The quantum yield (ratio).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">k0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Coefficient of the first first order
+term of the photobleaching rate</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">k1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.3e-15</span></code></p></td>
+<td><p>Coefficient of the <span class="math notranslate nohighlight">\(b^{th}\)</span> first
+order term of the photobleaching rate</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">b</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.4</span></code></p></td>
+<td><p>The intersystem crossing rate (s⁻¹).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">triplet_dynamics_frac</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Fraction of the bleaching which is due
+to the (very long) triplets dynamics.
+Caution: not based on rigorous theory</p></td>
+</tr>
+</tbody>
+</table>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id10" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">3</a><span class="fn-bracket">]</span></span>
+<p>EGFP (k1 and b for ATTO647N from <a class="reference internal" href="#oracz2017" id="id11"><span>[Oracz2017]</span></a>)</p>
+</aside>
+</aside>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Fluorescence.get_k_bleach">
+<span class="sig-name descname"><span class="pre">get_k_bleach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lambda_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambda_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_rep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dwelltime</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Fluorescence.get_k_bleach" title="Link to this definition">¶</a></dt>
+<dd><p>Compute a spatial map of the photobleaching rate.</p>
+<p>The photobleaching rate for a 4 level system from <a class="reference internal" href="#oracz2017" id="id12"><span>[Oracz2017]</span></a> is used. The
+population of S1+S1*, from where the photobleaching happen, was estimated using
+the simplified model used for eq. 3 in <a class="reference internal" href="#leutenegger2010" id="id13"><span>[Leutenegger2010]</span></a>. The triplet dynamic
+(dependent on the dwelltime) was estimated from the tree level system rate
+equations 2.14 in <a class="reference internal" href="#staudt2009" id="id14"><span>[Staudt2009]</span></a>, approximating that the population S1 is constant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda_ex</strong> – Wavelength of the the excitation beam (m).</p></li>
+<li><p><strong>lambda_sted</strong> – Wavelength of the STED beam (m).</p></li>
+<li><p><strong>phi_ex</strong> – Spatial map of the excitation photon flux (<span class="math notranslate nohighlight">\(m^{-2}s^{-1}\)</span>).</p></li>
+<li><p><strong>phi_sted</strong> – Spatial map of the STED photon flux (<span class="math notranslate nohighlight">\(m^{-2}s^{-1}\)</span>).</p></li>
+<li><p><strong>tau_sted</strong> – STED pulse temporal width (s).</p></li>
+<li><p><strong>tau_rep</strong> – Period of the lasers (s).</p></li>
+<li><p><strong>dwelltime</strong> – Time continuously passed centered on a pixel (s).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array of the bleaching rate d(Bleached)/dt (<span class="math notranslate nohighlight">\(s^{-1}\)</span>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Fluorescence.get_photons">
+<span class="sig-name descname"><span class="pre">get_photons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">intensity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambda_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Fluorescence.get_photons" title="Link to this definition">¶</a></dt>
+<dd><p>Translate a light intensity to a photon flux.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>intensity</strong> – Light intensity (<span class="math notranslate nohighlight">\(W/m^{-2}\)</span>).</p></li>
+<li><p><strong>lambda</strong> – Wavelenght. If None, default to the emission wavelenght.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Photon flux (<span class="math notranslate nohighlight">\(m^{-2}s^{-1}\)</span>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Fluorescence.get_psf">
+<span class="sig-name descname"><span class="pre">get_psf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">na</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Fluorescence.get_psf" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the Gaussian-shaped fluorescence PSF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>na</strong> – The numerical aperture of the objective.</p></li>
+<li><p><strong>datamap_pixelsize</strong> – The size of an element in the intensity matrix (m).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Fluorescence.get_sigma_abs">
+<span class="sig-name descname"><span class="pre">get_sigma_abs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lambda_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Fluorescence.get_sigma_abs" title="Link to this definition">¶</a></dt>
+<dd><p>Return the absorption cross-section of the fluorescence molecule
+given the wavelength.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lambda</strong> – The STED wavelength (m).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The absorption cross-section (m²).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Fluorescence.get_sigma_ste">
+<span class="sig-name descname"><span class="pre">get_sigma_ste</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lambda_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Fluorescence.get_sigma_ste" title="Link to this definition">¶</a></dt>
+<dd><p>Return the stimulated emission cross-section of the fluorescence
+molecule given the wavelength.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lambda</strong> – The STED wavelength (m).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The stimulated emission cross-section (m²).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.GaussianBeam">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">GaussianBeam</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lambda_</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.GaussianBeam" title="Link to this definition">¶</a></dt>
+<dd><p>This class implements a Gaussian beam (excitation).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lambda</strong> – The wavelength of the beam (m).</p></li>
+<li><p><strong>kwargs</strong> – One or more parameters as described in the following table,
+optional.</p></li>
+</ul>
+</dd>
+</dl>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Details</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">polarization</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pi/2</span></code></p></td>
+<td><p>The phase difference between <span class="math notranslate nohighlight">\(x\)</span>
+and <span class="math notranslate nohighlight">\(y\)</span> oscillations (rad).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">beta</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pi/4</span></code></p></td>
+<td><p>The beam incident angle, in
+<span class="math notranslate nohighlight">\([0, \pi/2]\)</span> (rad).</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="simple">
+<dt>Polarization :</dt><dd><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\pi/2\)</span> is left-circular</p></li>
+<li><p><span class="math notranslate nohighlight">\(0\)</span> is linear</p></li>
+<li><p><span class="math notranslate nohighlight">\(-\pi/2\)</span> is right-circular</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.GaussianBeam.get_intensity">
+<span class="sig-name descname"><span class="pre">get_intensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">na</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmission</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.GaussianBeam.get_intensity" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the transmitted excitation intensity field (W/m²). The
+technique essentially follows the method described in <a class="reference internal" href="#xie2013" id="id15"><span>[Xie2013]</span></a>,
+where <span class="math notranslate nohighlight">\(z = 0\)</span>, along with some equations from <a class="reference internal" href="#deng2010" id="id16"><span>[Deng2010]</span></a>, and
+<a class="reference internal" href="#rpphoto2015" id="id17"><span>[RPPhoto2015]</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>power</strong> – The time averaged power of the beam (W).</p></li>
+<li><p><strong>f</strong> – The focal length of the objective (m).</p></li>
+<li><p><strong>n</strong> – The refractive index of the objective.</p></li>
+<li><p><strong>na</strong> – The numerical aperture of the objective.</p></li>
+<li><p><strong>transmission</strong> – The transmission ratio of the objective (given the
+wavelength of the excitation beam).</p></li>
+<li><p><strong>datamap_pixelsize</strong> – The size of an element in the intensity matrix (m).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array of the time averaged intensity (W/m^2).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.Microscope">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">Microscope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">excitation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Microscope" title="Link to this definition">¶</a></dt>
+<dd><p>This class implements a microscopy setup described by an excitation beam,
+a STED (depletion) beam, a detector, some fluorescence molecules, and the
+parameters of the objective.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>excitation</strong> – A <a class="reference internal" href="pysted.base.GaussianBeam.html#pysted.base.GaussianBeam" title="pysted.base.GaussianBeam"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianBeam</span></code></a> object
+representing the excitation laser beam.</p></li>
+<li><p><strong>sted</strong> – A <a class="reference internal" href="pysted.base.DonutBeam.html#pysted.base.DonutBeam" title="pysted.base.DonutBeam"><code class="xref py py-class docutils literal notranslate"><span class="pre">DonutBeam</span></code></a> object representing the
+STED laser beam.</p></li>
+<li><p><strong>detector</strong> – A <a class="reference internal" href="pysted.base.Detector.html#pysted.base.Detector" title="pysted.base.Detector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Detector</span></code></a> object describing the
+microscope detector.</p></li>
+<li><p><strong>objective</strong> – A <a class="reference internal" href="pysted.base.Objective.html#pysted.base.Objective" title="pysted.base.Objective"><code class="xref py py-class docutils literal notranslate"><span class="pre">Objective</span></code></a> object describing the
+microscope objective.</p></li>
+<li><p><strong>fluo</strong> – A <a class="reference internal" href="pysted.base.Fluorescence.html#pysted.base.Fluorescence" title="pysted.base.Fluorescence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fluorescence</span></code></a> object describing the
+fluorescence molecules to be used.</p></li>
+<li><p><strong>load_cache</strong> – A bool which determines whether or not the microscope’s lasers will be generated from scratch
+(load_cache=False) or if they will be loaded from the previous save (load_cache=True). Generating
+the lasers from scratch can take a long time (takes longer as the pixel_size decreases), so
+loading the cache can save time when doing multiple experiments using the same pixel_size.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Microscope.add_to_pixel_bank">
+<span class="sig-name descname"><span class="pre">add_to_pixel_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_pixels_per_tstep</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Microscope.add_to_pixel_bank" title="Link to this definition">¶</a></dt>
+<dd><p>Adds the residual pixels to the pixel bank</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_pixels_per_tstep</strong> – The number of pixels which the microscope has the time to acquire during 1
+time step of the Ca2+ flash event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Microscope.cache">
+<span class="sig-name descname"><span class="pre">cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Microscope.cache" title="Link to this definition">¶</a></dt>
+<dd><p>Compute and cache the excitation and STED intensities, and the
+fluorescence PSF.</p>
+<p>These intensities are computed with a power of 1 W such that they can 
+serve as a basis to compute intensities with any power.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap_pixelsize</strong> – The size of a pixel in the simulated image (m).</p></li>
+<li><p><strong>save_cache</strong> – A bool which determines whether or not the lasers will be saved to allow for faster load
+times for future experiments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>A tuple containing:</p>
+<ul class="simple">
+<li><p>A 2D array of the excitation intensity for a power of 1 W;</p></li>
+<li><p>A 2D array of the STED intensity for a a power of 1 W;</p></li>
+<li><p>A 2D array of the detection PSF.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Microscope.clear_cache">
+<span class="sig-name descname"><span class="pre">clear_cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Microscope.clear_cache" title="Link to this definition">¶</a></dt>
+<dd><p>Empty the cache.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>It is important to empty the cache if any of the components
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">excitation</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">sted</span></code>, <code class="xref py py-attr docutils literal notranslate"><span class="pre">detector</span></code>,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">objective</span></code>, or <code class="xref py py-attr docutils literal notranslate"><span class="pre">fluorescence</span></code> are internally modified
+or replaced.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Microscope.empty_pixel_bank">
+<span class="sig-name descname"><span class="pre">empty_pixel_bank</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Microscope.empty_pixel_bank" title="Link to this definition">¶</a></dt>
+<dd><p>Empties the pixel bank</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Microscope.get_effective">
+<span class="sig-name descname"><span class="pre">get_effective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Microscope.get_effective" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the effective point spread function.</p>
+<p>Defined here as the spatial map of time averaged detected power per molecule, 
+taking the sted de-excitation, anti-stoke excitation and the detector properties 
+(detection psf and gating) into account.</p>
+<p>The technique follows the method and equations described in
+<a class="reference internal" href="#willig2006" id="id18"><span>[Willig2006]</span></a>, <a class="reference internal" href="#leutenegger2010" id="id19"><span>[Leutenegger2010]</span></a> and <a class="reference internal" href="#holler2011" id="id20"><span>[Holler2011]</span></a>. Notable approximations from <a class="reference internal" href="#leutenegger2010" id="id21"><span>[Leutenegger2010]</span></a> include the assumption that the excitation pulse width is infinitely small and that the sted pulse is of perfect rectangular shape and starts at the beginning of the period. Also, a two energy levels (plus their vibrational sub-levels) with two rate equations is used. To include the vibrational decay dynamics (parametrized by the vibrational decay rate), an effective saturation factor is used.</p>
+<p>To account for the detection gating, the bounds in the integral from <a class="reference internal" href="#leutenegger2010" id="id22"><span>[Leutenegger2010]</span></a> eq. 3 were adjusted.</p>
+<p>Anti-stokes excitation at the beginnning of the period was by added by modeling the sted beam as an infinitely small pulse, similarly to the excitation pulse. This leads to an underestimation of its effect on the detected signal, since excitation by the STED beam near the end of the STED beam, for example, would have less time to be depleted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap_pixelsize</strong> – The size of one pixel of the simulated image (m).</p></li>
+<li><p><strong>p_ex</strong> – The time averaged power of the excitation beam (W).</p></li>
+<li><p><strong>p_sted</strong> – The power of the STED beam (W).</p></li>
+<li><p><strong>data_pixelsize</strong> – The size of one pixel of the raw data (m).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array of the intensity (W/molecule)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Microscope.get_signal_and_bleach">
+<span class="sig-name descname"><span class="pre">get_signal_and_bleach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquired_intensity=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_list=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_bypass=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach_func=&lt;cyfunction</span> <span class="pre">default_update_survival_probabilities&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob_ex=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob_sted=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach_mode='default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Microscope.get_signal_and_bleach" title="Link to this definition">¶</a></dt>
+<dd><p>Acquires the signal and bleaches simultaneously.</p>
+<p>It makes a call to compiled C code for speed, so make sure the raster.pyx file is compiled!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap</strong> – The datamap on which the acquisition is done, either a Datamap object or TemporalDatamap</p></li>
+<li><p><strong>pixelsize</strong> – The pixelsize of the acquisition. (m)</p></li>
+<li><p><strong>pdt</strong> – The pixel dwelltime. Can be either a single float value or an array of the same size as the ROI
+being imaged. (s)</p></li>
+<li><p><strong>p_ex</strong> – The excitation beam power. Can be either a single float value or an array of the same size as the
+ROI being imaged. (W)</p></li>
+<li><p><strong>p_sted</strong> – The depletion beam power. Can be either a single float value or an array of the same size as the
+ROI being imaged. (W)</p></li>
+<li><p><strong>indices</strong> – A dictionary containing the indices of the subdatamaps used. This is used to apply bleaching to
+the future subdatamaps. If acquiring on a static Datamap, leave as None.</p></li>
+<li><p><strong>acquired_intensity</strong> – The result of the last incomplete acquisition. This is useful in a time routine where
+flashes can occur mid acquisition. Leave as None if it is not the case. (array)</p></li>
+<li><p><strong>pixel_list</strong> – The list of pixels to be iterated on. If none, a pixel_list of a raster scan will be
+generated. (list of tuples (row, col))</p></li>
+<li><p><strong>bleach</strong> – Determines whether bleaching is active or not. (Bool)</p></li>
+<li><p><strong>update</strong> – Determines whether the datamap is updated in place. If set to false, the datamap can still be
+updated later with the returned bleached datamap. (Bool)</p></li>
+<li><p><strong>seed</strong> – Sets a seed for the random number generator.</p></li>
+<li><p><strong>filter_bypass</strong> – Whether or not to filter the pixel list.
+This is useful if you know your pixel list is adequate and ordered differently from a
+raster scan (i.e. a left to right, row by row scan), as filtering the list return it
+in raster order.
+If pixel_list is none, this must be True then.</p></li>
+<li><p><strong>bleach_func</strong> – The bleaching function to be applied.</p></li>
+<li><p><strong>steps</strong> – list containing the pixeldwelltimes for the sub steps of an acquisition. Is none by default.
+Should be used if trying to implement a DyMin type acquisition, where decisions are made
+after some time on whether or not to continue the acq.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>returned_acquired_photons, the acquired photon for the acquisition.
+bleached_sub_datamaps_dict, a dict containing the results of bleaching on the subdatamaps
+acquired_intensity, the intensity of the acquisition, used for interrupted acquisitions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Microscope.is_cached">
+<span class="sig-name descname"><span class="pre">is_cached</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Microscope.is_cached" title="Link to this definition">¶</a></dt>
+<dd><p>Indicate the presence of a cache entry for the given pixel size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>datamap_pixelsize</strong> – The size of a pixel in the simulated image (m).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A boolean.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.Microscope.take_from_pixel_bank">
+<span class="sig-name descname"><span class="pre">take_from_pixel_bank</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Microscope.take_from_pixel_bank" title="Link to this definition">¶</a></dt>
+<dd><p>Verifies the amount stored in the pixel_bank, return the integer part if greater or equal to 1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The integer part of the pixel_bank of the microscope</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.Objective">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">Objective</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.Objective" title="Link to this definition">¶</a></dt>
+<dd><p>This class implements the microscope objective component.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameters</strong> – One or more parameters as described in the following
+table, optional.</p>
+</dd>
+</dl>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default <a class="footnote-reference brackets" href="#id24" id="id23" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></th>
+<th class="head"><p>Details</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">f</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2e-3</span></code></p></td>
+<td><p>The objective focal length (m).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.5</span></code></p></td>
+<td><p>The refractive index.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">na</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.4</span></code></p></td>
+<td><p>The numerical aperture.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">transmission</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">488:</span> <span class="pre">0.84,</span></code>
+<code class="docutils literal notranslate"><span class="pre">535:</span> <span class="pre">0.85,</span></code>
+<code class="docutils literal notranslate"><span class="pre">550:</span> <span class="pre">0.86,</span></code>
+<code class="docutils literal notranslate"><span class="pre">585:</span> <span class="pre">0.85,</span></code>
+<code class="docutils literal notranslate"><span class="pre">575:</span> <span class="pre">0.85</span></code></p></td>
+<td><p>A dictionary mapping wavelengths
+(nm), as integer, to objective
+transmission factors (ratio).</p></td>
+</tr>
+</tbody>
+</table>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id24" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id23">4</a><span class="fn-bracket">]</span></span>
+<p>Leica 100x tube lense</p>
+</aside>
+</aside>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.RandomActionSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">RandomActionSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi_shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.RandomActionSelector" title="Link to this definition">¶</a></dt>
+<dd><p>Class which selects a random action from :
+0 - Confocal acquisition
+1 - STED acquisition
+2 - Wait (for the time of 1 acquisition)</p>
+<p>..note ::
+For now we have are pre setting the pdt, p_ex and p_sted that will be used for the actions.
+A real agent would select the powers / dwellit me individually</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pdt</strong> – The pixel dwell time that will be used in the acquisitions</p></li>
+<li><p><strong>p_ex</strong> – The excitation beam power that will be used when the selected action is confocal or sted</p></li>
+<li><p><strong>p_sted</strong> – The STED beam power that will be used when the selected action is sted</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.RandomActionSelector.select_action">
+<span class="sig-name descname"><span class="pre">select_action</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.RandomActionSelector.select_action" title="Link to this definition">¶</a></dt>
+<dd><p>selects a random action from the current actions</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.TemporalDatamap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">TemporalDatamap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">whole_datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synapses</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalDatamap" title="Link to this definition">¶</a></dt>
+<dd><p>Implements a dynamic datamap</p>
+<p>This class inherits from Datamap, adding the t dimension to it for managing Ca2+ flashes and diffusion.
+The TemporalDatamap object is split into subdatamaps. In the simplest case, the only subdatamap is the base, which
+does not change with time (unless being acquired on with bleaching). In the case of Ca2+ flashes, we can add a
+subdatamap containing the flashes separately from the base datamap. Thus, for a certain time step t, the
+whole_datamap is the sum of the base and the flash at idx t.</p>
+<p>Currently, as there is only the Ca2+ flash dynamics implemented, the TemporalDatamap is initialized by passing
+the whole molecule disposition and the pixelsize, as for Datamap, with the addition of a list containing all of
+the synapse objects in the Datamap.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>whole_datamap</strong> – The disposition of the molecules in the sample. This represents the whole sample, from which
+only a region will be imaged (roi). (numpy array)</p></li>
+<li><p><strong>datamap_pixelsize</strong> – The size of a pixel of the datamap. (m)</p></li>
+<li><p><strong>synapses</strong> – The list of synapses present in the whole_datamap</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalDatamap.bleach_future">
+<span class="sig-name descname"><span class="pre">bleach_future</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleached_sub_datamaps_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalDatamap.bleach_future" title="Link to this definition">¶</a></dt>
+<dd><p>Applies bleaching to the future flash subdatamaps according to the bleaching that occured to the current flash
+subdatamap</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>indices</strong> – A dictionary containing the indices of the time steps we are currently at for the subdatamaps.
+For now, as there is only the flash subdatamap implemented, the dictionary will simply be
+indices = {“flashes”: idx}, with idx being an &gt;=0 integer.</p></li>
+<li><p><strong>bleached_sub_datamaps_dict</strong> – A dictionary containing the bleached subdatamaps (base, flashes)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalDatamap.create_t_stack_dmap">
+<span class="sig-name descname"><span class="pre">create_t_stack_dmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acq_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhm_step_sec_correspondance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curves_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probability</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalDatamap.create_t_stack_dmap" title="Link to this definition">¶</a></dt>
+<dd><p>Generates the flashes for the TemporalDatamap.</p>
+<p>Updates the dictionnaries to confirm that flash subdatamaps exist
+and to initialize the flash time step at 0. Generates a flash_tstack, a 3D array containing the evolution
+of the flashes for every time step. For time step t, the whole_datamap is thus base + flash_tstack[t]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>acq_time</strong> – The time for which the acquisition will last, determines how many flash steps will occur. (s)</p></li>
+<li><p><strong>min_timestep</strong> – The smallest discrete time steps on which the experiment will be run. For instance, if we
+want an experiment to last 10 seconds, we need to define a loop that will iterate through
+minimal time increments, which could be 1s, 0.1s, …</p></li>
+<li><p><strong>fwhm_step_sec_correspondance</strong> – Tuple containing the correspondance between the width of the FWHM of a
+a flash in arbitrary time step units, and how long we want that FWHM to
+last. Usually (10, 1.5) is used. MODIFY THIS SO THIS IS A DEFAULT VALUE.</p></li>
+<li><p><strong>curves_path</strong> – Path to the .npy file of the light curves being sampled in order to generate random
+flashes.</p></li>
+<li><p><strong>probability</strong> – The probability of a flash starting on a synapse.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalDatamap.update_dicts">
+<span class="sig-name descname"><span class="pre">update_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalDatamap.update_dicts" title="Link to this definition">¶</a></dt>
+<dd><p>Method used to update the dicts of the temporal datamap.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indices</strong> – A dict containing the indices of the time step for the different temporal sub datamaps (so far
+only flashes).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalDatamap.update_whole_datamap">
+<span class="sig-name descname"><span class="pre">update_whole_datamap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flash_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalDatamap.update_whole_datamap" title="Link to this definition">¶</a></dt>
+<dd><p>Method used to update the whole datamap using the indices of the sub datamaps.</p>
+<p>Whole datamap is the base datamap + all the sub datamaps (for flashes, diffusion, etc).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>flash_idx</strong> – The index of the flash for the most recent acquisition.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.TemporalExperiment">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">TemporalExperiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_runtime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalExperiment" title="Link to this definition">¶</a></dt>
+<dd><p>This temporal experiment will run on a loop based on the action selections instead of on the time to make it easier
+to integrate the agent/gym stuff :)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalExperiment.play_action">
+<span class="sig-name descname"><span class="pre">play_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pdt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalExperiment.play_action" title="Link to this definition">¶</a></dt>
+<dd><p>l’idée va comme ça
+fait une loop sur X épisodes</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>quand un épisode commence on crée un objet TemporalExperimentV2p1 avec un certain exp_runtime</p></li>
+<li><dl class="simple">
+<dt>l’agent choisit une action et la joue</dt><dd><ul>
+<li><p>dans la méthode de jouer l’action (ici) on fait toute la gestion des updates de flash mid acq si c’est
+le cas, finir l’action early si on run out de temps, …</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p><strong>* pdt can be a float value, I will convert it into an array filled with that value if this is the case *</strong></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.TemporalSynapseDmap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">TemporalSynapseDmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">whole_datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synapse_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalSynapseDmap" title="Link to this definition">¶</a></dt>
+<dd><p>Temporal Datamap of a Synaptic region with nanodomains.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalSynapseDmap.bleach_future">
+<span class="sig-name descname"><span class="pre">bleach_future</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleached_sub_datamaps_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalSynapseDmap.bleach_future" title="Link to this definition">¶</a></dt>
+<dd><p>Applies bleaching to the future flash subdatamaps according to the bleaching that occured to the current flash
+subdatamap</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>indices</strong> – A dictionary containing the indices of the time steps we are currently at for the subdatamaps.
+For now, as there is only the flash subdatamap implemented, the dictionary will simply be
+indices = {“flashes”: idx}, with idx being an &gt;=0 integer.</p></li>
+<li><p><strong>bleached_sub_datamaps_dict</strong> – A dictionary containing the bleached subdatamaps (base, flashes)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalSynapseDmap.bleach_future_proportional">
+<span class="sig-name descname"><span class="pre">bleach_future_proportional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleached_sub_datamaps_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unbleached_whole_datamap</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalSynapseDmap.bleach_future_proportional" title="Link to this definition">¶</a></dt>
+<dd><p>Photobleaches the future flash subdatamaps according to the bleaching that occured to the current flash</p>
+<p>For instance, if 3/5 molecules are left after bleaching, then the number of molecules in the subsequent
+flashes will be multiplied by 3/5.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalSynapseDmap.create_t_stack_dmap">
+<span class="sig-name descname"><span class="pre">create_t_stack_dmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decay_time_us</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_decay_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">28</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalSynapseDmap.create_t_stack_dmap" title="Link to this definition">¶</a></dt>
+<dd><p>Creates the t stack for the evolution of the flash of the nanodmains in the synapse.</p>
+<p>Very similar implementation to TemporalDatamap’s create_t_stack_dmap method
+Assumes the roi is set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decay_time_us</strong> – The time it takes for the flash to decay to 1/e of its initial value. (us)</p></li>
+<li><p><strong>delay</strong> – The delay before the flash starts. (us)</p></li>
+<li><p><strong>n_decay_steps</strong> – The number of time steps the flash will take to decay. (int)</p></li>
+<li><p><strong>n_molecules_multiplier</strong> – The multiplier for the number of molecules in the flash. (int)</p></li>
+<li><p><strong>end_pad</strong> – The number of time steps to pad the flash with at the end. (int)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalSynapseDmap.create_t_stack_dmap_sampled">
+<span class="sig-name descname"><span class="pre">create_t_stack_dmap_sampled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decay_time_us</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_decay_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curves_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">individual_flashes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalSynapseDmap.create_t_stack_dmap_sampled" title="Link to this definition">¶</a></dt>
+<dd><p>Creates the t stack for the evolution of the flash of the nanodmains in the synapse.</p>
+<p>Very similar implementation to TemporalDatamap’s create_t_stack_dmap method.
+Assumes the roi is set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decay_time_us</strong> – The time it takes for the flash to decay to 1/e of its initial value. (us)</p></li>
+<li><p><strong>delay</strong> – The delay before the flash starts. (us)</p></li>
+<li><p><strong>n_decay_steps</strong> – The number of time steps the flash will take to decay. (int)</p></li>
+<li><p><strong>curves_path</strong> – Path to the .npy file of the light curves being sampled in order to generate random</p></li>
+<li><p><strong>individual_flashes</strong> – If True, each nanodomain will have its own flash curve</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalSynapseDmap.create_t_stack_dmap_smooth">
+<span class="sig-name descname"><span class="pre">create_t_stack_dmap_smooth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decay_time_us</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_decay_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">individual_flashes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalSynapseDmap.create_t_stack_dmap_smooth" title="Link to this definition">¶</a></dt>
+<dd><p>Creates the t stack for the evolution of the flash of the nanodmains in the synapse.</p>
+<p>Very similar implementation to TemporalDatamap’s create_t_stack_dmap method.
+Assumes the roi is set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>decay_time_us</strong> – The time it takes for the flash to decay to 1/e of its initial value. (us)</p></li>
+<li><p><strong>delay</strong> – The delay before the flash starts. (us)</p></li>
+<li><p><strong>n_decay_steps</strong> – The number of time steps the flash will take to decay. (int)</p></li>
+<li><p><strong>n_molecules_multiplier</strong> – The multiplier for the number of molecules in the flash. (int)</p></li>
+<li><p><strong>end_pad</strong> – The number of time steps to pad the flash with at the end. (int)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalSynapseDmap.update_dicts">
+<span class="sig-name descname"><span class="pre">update_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalSynapseDmap.update_dicts" title="Link to this definition">¶</a></dt>
+<dd><p>Method used to update the dicts of the temporal datamap</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indices</strong> – A dict containing the indices of the time step for the different temporal sub datamaps (so far
+only flashes).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TemporalSynapseDmap.update_whole_datamap">
+<span class="sig-name descname"><span class="pre">update_whole_datamap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flash_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TemporalSynapseDmap.update_whole_datamap" title="Link to this definition">¶</a></dt>
+<dd><p>Update de whole datamap using the indices of the sub datamaps.</p>
+<p>Whole datamap is the base datamap + all the sub datamaps (for flashes, diffusion, etc).
+:param flash_idx: The index of the flash for the most recent acquisition.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pysted.base.TestTemporalDmap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pysted.base.</span></span><span class="sig-name descname"><span class="pre">TestTemporalDmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">whole_datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap_pixelsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TestTemporalDmap" title="Link to this definition">¶</a></dt>
+<dd><p>Test class for the TemporalDatamap class</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TestTemporalDmap.bleach_future">
+<span class="sig-name descname"><span class="pre">bleach_future</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleached_sub_datamaps_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TestTemporalDmap.bleach_future" title="Link to this definition">¶</a></dt>
+<dd><p>pass for now</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pysted.base.TestTemporalDmap.create_t_stack_dmap">
+<span class="sig-name descname"><span class="pre">create_t_stack_dmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decay_time_us</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_decay_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">28</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.base.TestTemporalDmap.create_t_stack_dmap" title="Link to this definition">¶</a></dt>
+<dd><p>Creates the t stack for the evolution of the flash of the nanodmains in the synapse.
+Very similar implementation to TemporalDatamap’s create_t_stack_dmap method
+Assumes the roi is set</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pySTED</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pysted.html">pysted</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pysted.base</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.Clock.html">pysted.base.Clock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.Datamap.html">pysted.base.Datamap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.Detector.html">pysted.base.Detector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.DonutBeam.html">pysted.base.DonutBeam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.Fluorescence.html">pysted.base.Fluorescence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.GaussianBeam.html">pysted.base.GaussianBeam</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.Microscope.html">pysted.base.Microscope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.Objective.html">pysted.base.Objective</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.RandomActionSelector.html">pysted.base.RandomActionSelector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.TemporalDatamap.html">pysted.base.TemporalDatamap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.TemporalExperiment.html">pysted.base.TemporalExperiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.TemporalSynapseDmap.html">pysted.base.TemporalSynapseDmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.base.TestTemporalDmap.html">pysted.base.TestTemporalDmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.Clock"><code class="docutils literal notranslate"><span class="pre">Clock</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Clock.reset"><code class="docutils literal notranslate"><span class="pre">Clock.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Clock.update_time"><code class="docutils literal notranslate"><span class="pre">Clock.update_time()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.Datamap"><code class="docutils literal notranslate"><span class="pre">Datamap</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Datamap.set_bleached_datamap"><code class="docutils literal notranslate"><span class="pre">Datamap.set_bleached_datamap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Datamap.set_roi"><code class="docutils literal notranslate"><span class="pre">Datamap.set_roi()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.Detector"><code class="docutils literal notranslate"><span class="pre">Detector</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Detector.get_detection_psf"><code class="docutils literal notranslate"><span class="pre">Detector.get_detection_psf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Detector.get_signal"><code class="docutils literal notranslate"><span class="pre">Detector.get_signal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.DonutBeam"><code class="docutils literal notranslate"><span class="pre">DonutBeam</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.DonutBeam.get_intensity"><code class="docutils literal notranslate"><span class="pre">DonutBeam.get_intensity()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.Fluorescence"><code class="docutils literal notranslate"><span class="pre">Fluorescence</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Fluorescence.get_k_bleach"><code class="docutils literal notranslate"><span class="pre">Fluorescence.get_k_bleach()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Fluorescence.get_photons"><code class="docutils literal notranslate"><span class="pre">Fluorescence.get_photons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Fluorescence.get_psf"><code class="docutils literal notranslate"><span class="pre">Fluorescence.get_psf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Fluorescence.get_sigma_abs"><code class="docutils literal notranslate"><span class="pre">Fluorescence.get_sigma_abs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Fluorescence.get_sigma_ste"><code class="docutils literal notranslate"><span class="pre">Fluorescence.get_sigma_ste()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.GaussianBeam"><code class="docutils literal notranslate"><span class="pre">GaussianBeam</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.GaussianBeam.get_intensity"><code class="docutils literal notranslate"><span class="pre">GaussianBeam.get_intensity()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.Microscope"><code class="docutils literal notranslate"><span class="pre">Microscope</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Microscope.add_to_pixel_bank"><code class="docutils literal notranslate"><span class="pre">Microscope.add_to_pixel_bank()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Microscope.cache"><code class="docutils literal notranslate"><span class="pre">Microscope.cache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Microscope.clear_cache"><code class="docutils literal notranslate"><span class="pre">Microscope.clear_cache()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Microscope.empty_pixel_bank"><code class="docutils literal notranslate"><span class="pre">Microscope.empty_pixel_bank()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Microscope.get_effective"><code class="docutils literal notranslate"><span class="pre">Microscope.get_effective()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Microscope.get_signal_and_bleach"><code class="docutils literal notranslate"><span class="pre">Microscope.get_signal_and_bleach()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Microscope.is_cached"><code class="docutils literal notranslate"><span class="pre">Microscope.is_cached()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.Microscope.take_from_pixel_bank"><code class="docutils literal notranslate"><span class="pre">Microscope.take_from_pixel_bank()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.Objective"><code class="docutils literal notranslate"><span class="pre">Objective</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.RandomActionSelector"><code class="docutils literal notranslate"><span class="pre">RandomActionSelector</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.RandomActionSelector.select_action"><code class="docutils literal notranslate"><span class="pre">RandomActionSelector.select_action()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.TemporalDatamap"><code class="docutils literal notranslate"><span class="pre">TemporalDatamap</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalDatamap.bleach_future"><code class="docutils literal notranslate"><span class="pre">TemporalDatamap.bleach_future()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalDatamap.create_t_stack_dmap"><code class="docutils literal notranslate"><span class="pre">TemporalDatamap.create_t_stack_dmap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalDatamap.update_dicts"><code class="docutils literal notranslate"><span class="pre">TemporalDatamap.update_dicts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalDatamap.update_whole_datamap"><code class="docutils literal notranslate"><span class="pre">TemporalDatamap.update_whole_datamap()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.TemporalExperiment"><code class="docutils literal notranslate"><span class="pre">TemporalExperiment</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalExperiment.play_action"><code class="docutils literal notranslate"><span class="pre">TemporalExperiment.play_action()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.TemporalSynapseDmap"><code class="docutils literal notranslate"><span class="pre">TemporalSynapseDmap</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalSynapseDmap.bleach_future"><code class="docutils literal notranslate"><span class="pre">TemporalSynapseDmap.bleach_future()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalSynapseDmap.bleach_future_proportional"><code class="docutils literal notranslate"><span class="pre">TemporalSynapseDmap.bleach_future_proportional()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalSynapseDmap.create_t_stack_dmap"><code class="docutils literal notranslate"><span class="pre">TemporalSynapseDmap.create_t_stack_dmap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalSynapseDmap.create_t_stack_dmap_sampled"><code class="docutils literal notranslate"><span class="pre">TemporalSynapseDmap.create_t_stack_dmap_sampled()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalSynapseDmap.create_t_stack_dmap_smooth"><code class="docutils literal notranslate"><span class="pre">TemporalSynapseDmap.create_t_stack_dmap_smooth()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalSynapseDmap.update_dicts"><code class="docutils literal notranslate"><span class="pre">TemporalSynapseDmap.update_dicts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TemporalSynapseDmap.update_whole_datamap"><code class="docutils literal notranslate"><span class="pre">TemporalSynapseDmap.update_whole_datamap()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.base.TestTemporalDmap"><code class="docutils literal notranslate"><span class="pre">TestTemporalDmap</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TestTemporalDmap.bleach_future"><code class="docutils literal notranslate"><span class="pre">TestTemporalDmap.bleach_future()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pysted.base.TestTemporalDmap.create_t_stack_dmap"><code class="docutils literal notranslate"><span class="pre">TestTemporalDmap.create_t_stack_dmap()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.bleach_funcs.html">pysted.bleach_funcs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.cUtils.html">pysted.cUtils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.data.html">pysted.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.exp_data_gen.html">pysted.exp_data_gen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.microscopes.html">pysted.microscopes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.raster.html">pysted.raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.temporal.html">pysted.temporal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.utils.html">pysted.utils</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="pysted.html">pysted</a><ul>
+      <li>Previous: <a href="pysted.html" title="previous chapter">pysted</a></li>
+      <li>Next: <a href="pysted.base.Clock.html" title="next chapter">pysted.base.Clock</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Audrey Durand and Flavie Lavoie-Cardinal.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/modules/pysted.base.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

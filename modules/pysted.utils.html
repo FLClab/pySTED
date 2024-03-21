@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pysted.utils &#8212; pySTED 0.0.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=12dfc556" />
+    <script src="../_static/documentation_options.js?v=e3a6060d"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pysted.utils.action_execution" href="pysted.utils.action_execution.html" />
+    <link rel="prev" title="pysted.temporal.Synapse.update" href="pysted.temporal.Synapse.update.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pysted.utils">
+<span id="pysted-utils"></span><h1>pysted.utils<a class="headerlink" href="#module-pysted.utils" title="Link to this heading">¶</a></h1>
+<p>This module contains utilitary functions that used across pySTED.</p>
+<p>Code written by Benoit Turcotte, <a class="reference external" href="mailto:benoit&#46;turcotte&#46;4&#37;&#52;&#48;ulaval&#46;ca">benoit<span>&#46;</span>turcotte<span>&#46;</span>4<span>&#64;</span>ulaval<span>&#46;</span>ca</a>, October 2020
+For use by FLClab (&#64;CERVO) authorized people</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.action_execution.html#pysted.utils.action_execution" title="pysted.utils.action_execution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">action_execution</span></code></a>(action_selected, ...)</p></td>
+<td><p>Executes the selected action.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.action_execution_2.html#pysted.utils.action_execution_2" title="pysted.utils.action_execution_2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">action_execution_2</span></code></a>(action_selected, ...)</p></td>
+<td><p>Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image. Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted by a flash, for example. :param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full                         sted scan). :param frame_shape: The shape of the ROI :param starting_pixel: The pixel at which the scan starts :param pxsize: The acquisition pixel size :param datamap: The datamap being imaged :param frozen_datamap: A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS :param microscope: The microscope imageing the datamap :param pdt: The pixel dwelltime (either scalar or array of size frame_shape) :param p_ex: The excitation power (either scalar or array of size frame_shape) :param p_sted: The STED power (either scalar or array of size frame_shape) :param intensity_map: The intensity map for the previous acquisition, in case it was interrupted :param bleach: Bool determining whether bleaching occurs or not :param t_stack_idx: The time step at which we are in our experiment :return: acq, the acquisition (photons),          bleached, the bleached datamap,          datamap, the updated datamap,          pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next          acquisition should start.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.action_execution_g.html#pysted.utils.action_execution_g" title="pysted.utils.action_execution_g"><code class="xref py py-obj docutils literal notranslate"><span class="pre">action_execution_g</span></code></a>(action_selected, ...)</p></td>
+<td><p>Executes the selected action.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.add_event.html#pysted.utils.add_event" title="pysted.utils.add_event"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_event</span></code></a>(file, start_frame, end_frame, ...)</p></td>
+<td><p>Function that allows a user to easily store an event in a file, which can later be read with the event_reader func.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.approx_binomial.html#pysted.utils.approx_binomial" title="pysted.utils.approx_binomial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">approx_binomial</span></code></a>(n, p[, size])</p></td>
+<td><p>Sample (64-bit) from a binomial distribution using the normal approximation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.array_padder.html#pysted.utils.array_padder" title="pysted.utils.array_padder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array_padder</span></code></a>(base, laser[, pad_value])</p></td>
+<td><p>Function used to pad an array (base) according to the size of the secondary array being iterated over it (laser).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.array_unpadder.html#pysted.utils.array_unpadder" title="pysted.utils.array_unpadder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array_unpadder</span></code></a>(padded_base, laser)</p></td>
+<td><p>Unpads an array according to the size of the secondary array being iterated over it.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.cart2pol.html#pysted.utils.cart2pol" title="pysted.utils.cart2pol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cart2pol</span></code></a>(x, y)</p></td>
+<td><p>Convert the polar coordinates corresponding to the given cartesian coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.complex_quadrature.html#pysted.utils.complex_quadrature" title="pysted.utils.complex_quadrature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">complex_quadrature</span></code></a>(func, a, b, args)</p></td>
+<td><p>Integrate a complex integrand using the Gauss-Kronrod quadrature.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.compute_time_correspondances.html#pysted.utils.compute_time_correspondances" title="pysted.utils.compute_time_correspondances"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_time_correspondances</span></code></a>(...[, mode])</p></td>
+<td><p>This function computes how many loop steps will occur and how many pixels can be imaged for each loop step.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.datamap_generator.html#pysted.utils.datamap_generator" title="pysted.utils.datamap_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datamap_generator</span></code></a>(shape, sources, molecules)</p></td>
+<td><p>Function to generate a datamap with randomly located molecules.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.dict_write_func.html#pysted.utils.dict_write_func" title="pysted.utils.dict_write_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict_write_func</span></code></a>(file, dictio)</p></td>
+<td><p>Write a dict to a text file in a good way :)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.event_reader.html#pysted.utils.event_reader" title="pysted.utils.event_reader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_reader</span></code></a>(file)</p></td>
+<td><p>Read events from a file containing event dictionaries and return the dicts to a list</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.exponential.html#pysted.utils.exponential" title="pysted.utils.exponential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exponential</span></code></a>(x, a)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.flash_generator.html#pysted.utils.flash_generator" title="pysted.utils.flash_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flash_generator</span></code></a>(events_curves_path[, seed])</p></td>
+<td><p>Generates a flash by sampling from statistics built from save light curves</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.flash_routine.html#pysted.utils.flash_routine" title="pysted.utils.flash_routine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">flash_routine</span></code></a>(synapses, probability, ...)</p></td>
+<td><p>This function makes 1 step in a flash routine.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.float_to_array_verifier.html#pysted.utils.float_to_array_verifier" title="pysted.utils.float_to_array_verifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float_to_array_verifier</span></code></a>(float_or_array, shape)</p></td>
+<td><p>Verify if a given input is a float or an array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.fwhm.html#pysted.utils.fwhm" title="pysted.utils.fwhm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fwhm</span></code></a>(values)</p></td>
+<td><p>Compute the full width at half maximum of the Gaussian-shaped values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.fwhm_donut.html#pysted.utils.fwhm_donut" title="pysted.utils.fwhm_donut"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fwhm_donut</span></code></a>(values)</p></td>
+<td><p>Compute the full width at half maximum of the donut-shaped values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.generate_fiber_with_synapses.html#pysted.utils.generate_fiber_with_synapses" title="pysted.utils.generate_fiber_with_synapses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_fiber_with_synapses</span></code></a>(datamap_shape, ...)</p></td>
+<td><p>This func allows a user to generate a fiber object and synapses attached to it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.generate_raster_pixel_list.html#pysted.utils.generate_raster_pixel_list" title="pysted.utils.generate_raster_pixel_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_raster_pixel_list</span></code></a>(n_pixels_to_add, ...)</p></td>
+<td><p>Generates a pixel list of a raster scan of n_pixels_to_add pixels starting from starting_pixel</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.generate_secondary_fibers.html#pysted.utils.generate_secondary_fibers" title="pysted.utils.generate_secondary_fibers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_secondary_fibers</span></code></a>(datamap_shape, ...)</p></td>
+<td><p>This function allows to spawn secondary fibers branching from a main fiber</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.generate_synapse_flash_dicts.html#pysted.utils.generate_synapse_flash_dicts" title="pysted.utils.generate_synapse_flash_dicts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_synapse_flash_dicts</span></code></a>(synapses_list, ...)</p></td>
+<td><p>This function is used to generate the dictionnaries needed to keep track of which synapses are flashing and where they are situatied in the flash and such</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.generate_synapses_on_fiber.html#pysted.utils.generate_synapses_on_fiber" title="pysted.utils.generate_synapses_on_fiber"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_synapses_on_fiber</span></code></a>(datamap_shape, ...)</p></td>
+<td><p>Generates polygon objects (representing synapses) on the main fiber</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.generate_synaptic_fibers.html#pysted.utils.generate_synaptic_fibers" title="pysted.utils.generate_synaptic_fibers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_synaptic_fibers</span></code></a>(image_shape, ...[, ...])</p></td>
+<td><p>This function wraps up the generation of fibers with secondary branches and synapses in a stand-alone function</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.get_avg_lightcurve.html#pysted.utils.get_avg_lightcurve" title="pysted.utils.get_avg_lightcurve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_avg_lightcurve</span></code></a>(light_curves)</p></td>
+<td><p>This function takes as input a list of light curves and processes them so they are rescaled and shifted to align their peaks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.get_light_curve.html#pysted.utils.get_light_curve" title="pysted.utils.get_light_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_light_curve</span></code></a>(video_path, event)</p></td>
+<td><p>Use a tif video of Ca2+ flashes along with a ROI (spatial and temporal) to convert the data to an intensity/photon count curve.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.hand_crafted_light_curve.html#pysted.utils.hand_crafted_light_curve" title="pysted.utils.hand_crafted_light_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hand_crafted_light_curve</span></code></a>([delay, ...])</p></td>
+<td><p>Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.inverse.html#pysted.utils.inverse" title="pysted.utils.inverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse</span></code></a>(x[, a])</p></td>
+<td><p>Evaluate the inverse function <span class="math notranslate nohighlight">\(1 / (a x + 1)\)</span>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.inverse_exponential.html#pysted.utils.inverse_exponential" title="pysted.utils.inverse_exponential"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inverse_exponential</span></code></a>(x[, a])</p></td>
+<td><p>Evaluate the inverse function <span class="math notranslate nohighlight">\(1 / e^{ax}\)</span>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.make_path_sane.html#pysted.utils.make_path_sane" title="pysted.utils.make_path_sane"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_path_sane</span></code></a>(p)</p></td>
+<td><p>Function to uniformly return a real, absolute filesystem path.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.molecules_survival.html#pysted.utils.molecules_survival" title="pysted.utils.molecules_survival"><code class="xref py py-obj docutils literal notranslate"><span class="pre">molecules_survival</span></code></a>(pre_bleach, post_bleach)</p></td>
+<td><p>Return the ratio of surviving molecules</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.molecules_symmetry.html#pysted.utils.molecules_symmetry" title="pysted.utils.molecules_symmetry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">molecules_symmetry</span></code></a>(pre_bleach, post_bleach)</p></td>
+<td><p>Function to compare the ratio of surviving molecules in the upper vs lower half of a datamap.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.mse_calculator.html#pysted.utils.mse_calculator" title="pysted.utils.mse_calculator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mse_calculator</span></code></a>(array1, array2)</p></td>
+<td><p>Compute the RMS between two arrays.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.pad_values.html#pysted.utils.pad_values" title="pysted.utils.pad_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pad_values</span></code></a>(laser)</p></td>
+<td><p>Pad values for the array_padder function</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.pinhole.html#pysted.utils.pinhole" title="pysted.utils.pinhole"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pinhole</span></code></a>(radius, pixelsize[, n_pixels])</p></td>
+<td><p>Return a pinhole mask.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.pixel_list_filter.html#pysted.utils.pixel_list_filter" title="pysted.utils.pixel_list_filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pixel_list_filter</span></code></a>(datamap, pixel_list, ...)</p></td>
+<td><p>Function to pre-filter a pixel list.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.pixel_sampling.html#pysted.utils.pixel_sampling" title="pysted.utils.pixel_sampling"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pixel_sampling</span></code></a>(datamap[, mode])</p></td>
+<td><p>Function to test different pixel sampling methods, instead of simply imaging pixel by pixel</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.pxsize_comp2.html#pysted.utils.pxsize_comp2" title="pysted.utils.pxsize_comp2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pxsize_comp2</span></code></a>(img_pixelsize, data_pixelsize)</p></td>
+<td><p>Try number 2 for my float comparison function that hopefully will give the right values this time :)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.pxsize_comp_array_maker.html#pysted.utils.pxsize_comp_array_maker" title="pysted.utils.pxsize_comp_array_maker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pxsize_comp_array_maker</span></code></a>(img_pixelsize, ...)</p></td>
+<td><p>Compare the pixel sizes of the image and the datamap and return the appropriate pixel sizes for the acquisition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.pxsize_grid.html#pysted.utils.pxsize_grid" title="pysted.utils.pxsize_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pxsize_grid</span></code></a>(img_pixelsize, data_pixelsize, ...)</p></td>
+<td><p>Function which creates a grid of the pixels.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.pxsize_ratio.html#pysted.utils.pxsize_ratio" title="pysted.utils.pxsize_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pxsize_ratio</span></code></a>(img_pixelsize, data_pixelsize)</p></td>
+<td><p>Computes the ratio between the acquisition pixel size and the datamap pixel size</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.rescale.html#pysted.utils.rescale" title="pysted.utils.rescale"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rescale</span></code></a>(data, factor)</p></td>
+<td><p>Rescale the <em>data</em> container (and content) given the ratio between the current container unit size and the new container unit size.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.rescale_data.html#pysted.utils.rescale_data" title="pysted.utils.rescale_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rescale_data</span></code></a>(data[, to_int, divider])</p></td>
+<td><p>Function to rescale the data (made for light curves, might be of use elsewhere) between 1 and max-min</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.resize.html#pysted.utils.resize" title="pysted.utils.resize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resize</span></code></a>(*images)</p></td>
+<td><p>Resize images to the shape of the largest (pad with zeros).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.sample_light_curve.html#pysted.utils.sample_light_curve" title="pysted.utils.sample_light_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sample_light_curve</span></code></a>(light_curves)</p></td>
+<td><p>This function allows to sample from a distribution of light curves and handles the smoothing and correcting values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.sampled_flash_manipulations.html#pysted.utils.sampled_flash_manipulations" title="pysted.utils.sampled_flash_manipulations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sampled_flash_manipulations</span></code></a>(...[, rescale, seed])</p></td>
+<td><p>Samples a light curve and modifies it to make it more prettier for training (i.e. more like the hand crafted light curves).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.savitzky_golay.html#pysted.utils.savitzky_golay" title="pysted.utils.savitzky_golay"><code class="xref py py-obj docutils literal notranslate"><span class="pre">savitzky_golay</span></code></a>(y, window_size, order[, ...])</p></td>
+<td><p>Smooth (and optionally differentiate) data with a Savitzky-Golay filter. The Savitzky-Golay filter removes high frequency noise from data. It has the advantage of preserving the original shape and features of the signal better than other types of filtering approaches, such as moving averages techniques. Parameters ---------- y : array_like, shape (N,)     the values of the time history of the signal. window_size : int     the length of the window. Must be an odd integer number. order : int     the order of the polynomial used in the filtering. Must be less then <cite>window_size</cite> - 1. deriv: int     the order of the derivative to compute (default = 0 means only smoothing) Return ------- ys : ndarray, shape (N)     the smoothed signal (or it's n-th derivative). Notes ----- The Savitzky-Golay is a type of low-pass filter, particularly suited for smoothing noisy data. The main idea behind this approach is to make for each point a least-square fit with a polynomial of high order over a odd-sized window centered at the point. Examples -------- t = np.linspace(-4, 4, 500) y = np.exp( -t**2 ) + np.random.normal(0, 0.05, t.shape) ysg = savitzky_golay(y, window_size=31, order=4) import matplotlib.pyplot as plt plt.plot(t, y, label='Noisy signal') plt.plot(t, np.exp(-t**2), 'k', lw=1.5, label='Original signal') plt.plot(t, ysg, 'r', label='Filtered signal') plt.legend() plt.show() References ---------- .. [1] A. Savitzky, M. J. E. Golay, Smoothing and Differentiation of    Data by Simplified Least Squares Procedures. Analytical    Chemistry, 1964, 36 (8), pp 1627-1639. .. [2] Numerical Recipes 3rd Edition: The Art of Scientific Computing    W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery    Cambridge University Press ISBN-13: 9780521880688 ----------.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.set_starting_pixel.html#pysted.utils.set_starting_pixel" title="pysted.utils.set_starting_pixel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_starting_pixel</span></code></a>(previous_pixel, image_shape)</p></td>
+<td><p>Return a value 1 pixel further from the last pixel of an acquisition list in an normal raster scan fashion.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.shift_data.html#pysted.utils.shift_data" title="pysted.utils.shift_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shift_data</span></code></a>(data[, peak_idx])</p></td>
+<td><p>Function to shift the data (made for light curves, might be of use elsewhere) so the peak is on idx 5</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.smooth_ramp_hand_crafted_light_curve.html#pysted.utils.smooth_ramp_hand_crafted_light_curve" title="pysted.utils.smooth_ramp_hand_crafted_light_curve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smooth_ramp_hand_crafted_light_curve</span></code></a>([...])</p></td>
+<td><p>Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.smooth_ramp_hand_crafted_light_curve_2.html#pysted.utils.smooth_ramp_hand_crafted_light_curve_2" title="pysted.utils.smooth_ramp_hand_crafted_light_curve_2"><code class="xref py py-obj docutils literal notranslate"><span class="pre">smooth_ramp_hand_crafted_light_curve_2</span></code></a>([...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.stack.html#pysted.utils.stack" title="pysted.utils.stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack</span></code></a>(datamap, data)</p></td>
+<td><p>Compute a new frame consisting in a replication of the given <em>data</em> centered at every positions and multiplied by the factors given in the <em>datamap</em>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.stack_btmod_definitive.html#pysted.utils.stack_btmod_definitive" title="pysted.utils.stack_btmod_definitive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack_btmod_definitive</span></code></a>(datamap, data, ...)</p></td>
+<td><p>Compute a new frame consisting in a replication of the given <em>data</em> centered at every positions and multiplied by the factors given in the <em>datamap</em>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="pysted.utils.symmetry_verifier.html#pysted.utils.symmetry_verifier" title="pysted.utils.symmetry_verifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">symmetry_verifier</span></code></a>(array[, direction, plot])</p></td>
+<td><p>Verifies if the given array is symmetrical along the vertical or horizontal direction</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="pysted.utils.time_quantum_to_flash_tstep_correspondance.html#pysted.utils.time_quantum_to_flash_tstep_correspondance" title="pysted.utils.time_quantum_to_flash_tstep_correspondance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">time_quantum_to_flash_tstep_correspondance</span></code></a>(...)</p></td>
+<td><p>Computes the correspondance between the time quantum value (in us) and the flash time steps</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.action_execution">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">action_execution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action_selected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pxsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen_datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.action_execution" title="Link to this definition">¶</a></dt>
+<dd><p>Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
+Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
+by a flash, for example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action_selected</strong> – The selected action (for now, either a full confocal scan (at lower resolution) or a full
+sted scan).</p></li>
+<li><p><strong>frame_shape</strong> – The shape of the ROI</p></li>
+<li><p><strong>starting_pixel</strong> – The pixel at which the scan starts</p></li>
+<li><p><strong>pxsize</strong> – The acquisition pixel size</p></li>
+<li><p><strong>datamap</strong> – The datamap being imaged</p></li>
+<li><p><strong>frozen_datamap</strong> – A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS</p></li>
+<li><p><strong>microscope</strong> – The microscope imageing the datamap</p></li>
+<li><p><strong>pdt</strong> – The pixel dwelltime (either scalar or array of size frame_shape)</p></li>
+<li><p><strong>p_ex</strong> – The excitation power (either scalar or array of size frame_shape)</p></li>
+<li><p><strong>p_sted</strong> – The STED power (either scalar or array of size frame_shape)</p></li>
+<li><p><strong>intensity_map</strong> – The intensity map for the previous acquisition, in case it was interrupted</p></li>
+<li><p><strong>bleach</strong> – Bool determining whether bleaching occurs or not</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>acq, the acquisition (photons),
+bleached, the bleached datamap,
+datamap, the updated datamap,
+pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next
+acquisition should start</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.action_execution_2">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">action_execution_2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action_selected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pxsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen_datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_stack_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.action_execution_2" title="Link to this definition">¶</a></dt>
+<dd><p>Executes the selected action. Handles matching the starting_pixel with the number of pixels for which we can image.
+Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
+by a flash, for example.
+:param action_selected: The selected action (for now, either a full confocal scan (at lower resolution) or a full</p>
+<blockquote>
+<div><p>sted scan).</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame_shape</strong> – The shape of the ROI</p></li>
+<li><p><strong>starting_pixel</strong> – The pixel at which the scan starts</p></li>
+<li><p><strong>pxsize</strong> – The acquisition pixel size</p></li>
+<li><p><strong>datamap</strong> – The datamap being imaged</p></li>
+<li><p><strong>frozen_datamap</strong> – A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS</p></li>
+<li><p><strong>microscope</strong> – The microscope imageing the datamap</p></li>
+<li><p><strong>pdt</strong> – The pixel dwelltime (either scalar or array of size frame_shape)</p></li>
+<li><p><strong>p_ex</strong> – The excitation power (either scalar or array of size frame_shape)</p></li>
+<li><p><strong>p_sted</strong> – The STED power (either scalar or array of size frame_shape)</p></li>
+<li><p><strong>intensity_map</strong> – The intensity map for the previous acquisition, in case it was interrupted</p></li>
+<li><p><strong>bleach</strong> – Bool determining whether bleaching occurs or not</p></li>
+<li><p><strong>t_stack_idx</strong> – The time step at which we are in our experiment</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>acq, the acquisition (photons),
+bleached, the bleached datamap,
+datamap, the updated datamap,
+pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next
+acquisition should start</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.action_execution_g">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">action_execution_g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action_selected</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pxsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frozen_datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microscope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bleach</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_stack_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.action_execution_g" title="Link to this definition">¶</a></dt>
+<dd><p>Executes the selected action.</p>
+<p>Handles matching the starting_pixel with the number of pixels for which we can image.
+Combines this acquisition with the previously computed intensity_map in the case where a full scan was interupted
+by a flash, for example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action_selected</strong> – The selected action (for now, either a full confocal scan (at lower resolution) or a full
+sted scan).</p></li>
+<li><p><strong>frame_shape</strong> – The shape of the ROI</p></li>
+<li><p><strong>starting_pixel</strong> – The pixel at which the scan starts</p></li>
+<li><p><strong>pxsize</strong> – The acquisition pixel size</p></li>
+<li><p><strong>datamap</strong> – The datamap being imaged</p></li>
+<li><p><strong>frozen_datamap</strong> – A static version of the datamap roi, NOT SURE WHY THIS IS USED IN THE WAY IT IS</p></li>
+<li><p><strong>microscope</strong> – The microscope imageing the datamap</p></li>
+<li><p><strong>pdt</strong> – The pixel dwelltime (either scalar or array of size frame_shape)</p></li>
+<li><p><strong>p_ex</strong> – The excitation power (either scalar or array of size frame_shape)</p></li>
+<li><p><strong>p_sted</strong> – The STED power (either scalar or array of size frame_shape)</p></li>
+<li><p><strong>intensity_map</strong> – The intensity map for the previous acquisition, in case it was interrupted</p></li>
+<li><p><strong>bleach</strong> – Bool determining whether bleaching occurs or not</p></li>
+<li><p><strong>t_stack_idx</strong> – The time step at which we are in our experiment</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>acq, the acquisition (photons),
+bleached, the bleached datamap,
+datamap, the updated datamap,
+pixel_list, the pixel_list on which the acquisition was occuring, useful to figure out where the next
+acquisition should start</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.add_event">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">add_event</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_row</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_col</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.add_event" title="Link to this definition">¶</a></dt>
+<dd><p>Function that allows a user to easily store an event in a file, which can later be read with the event_reader func.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> – File to write the dict to. The goal is to use 1 text file to which we will write all the vents for
+1 video.</p></li>
+<li><p><strong>start_frame</strong> – Frame number for the start of the event</p></li>
+<li><p><strong>start_row</strong> – Frame number for the end of the event</p></li>
+<li><p><strong>start_col</strong> – Starting column for the left of the event</p></li>
+<li><p><strong>end_frame</strong> – Ending column for the right of the event</p></li>
+<li><p><strong>end_row</strong> – Starting row for the top of the event</p></li>
+<li><p><strong>end_col</strong> – Ending row for the bottom of the event</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.approx_binomial">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">approx_binomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.approx_binomial" title="Link to this definition">¶</a></dt>
+<dd><p>Sample (64-bit) from a binomial distribution using the normal approximation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – The number of trials (int or array of ints).</p></li>
+<li><p><strong>p</strong> – The probability of success (float).</p></li>
+<li><p><strong>size</strong> – The shape of the output (int or tuple of ints, optional).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>64-bit int or array of 64-bit ints.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.array_padder">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">array_padder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.array_padder" title="Link to this definition">¶</a></dt>
+<dd><p>Function used to pad an array (base) according to the size of the secondary array being iterated over it (laser).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base</strong> – Base array on which we wish to iterate another array.</p></li>
+<li><p><strong>laser</strong> – Secondary array which will be iterated over the base array. Axes have to be of odd lengths in order
+for it to have a well defined single pixel center.</p></li>
+<li><p><strong>pad_value</strong> – Value of the padded region.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Padded version of the base array, along with the number of added rows and columns</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.array_unpadder">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">array_unpadder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padded_base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.array_unpadder" title="Link to this definition">¶</a></dt>
+<dd><p>Unpads an array according to the size of the secondary array being iterated over it.</p>
+<p>Function used to unpad a padded array (padded_base) according to the size of the secondary array being iterated over
+it (laser).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>padded_base</strong> – Padded Base array which we wish to unpad.</p></li>
+<li><p><strong>laser</strong> – Secondary array which has been iterated over padded_base. Axes have to be of odd lengths in order for
+it to have a well defined single pixel center.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An unpadded version of the padded_base.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.cart2pol">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">cart2pol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.cart2pol" title="Link to this definition">¶</a></dt>
+<dd><p>Convert the polar coordinates corresponding to the given cartesian
+coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – The <span class="math notranslate nohighlight">\(x\)</span> cartesian coordinate.</p></li>
+<li><p><strong>y</strong> – The <span class="math notranslate nohighlight">\(y\)</span> cartesian coordinate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of the angle <span class="math notranslate nohighlight">\(\theta\)</span> and the lenght <span class="math notranslate nohighlight">\(rho\)</span>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.complex_quadrature">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">complex_quadrature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.complex_quadrature" title="Link to this definition">¶</a></dt>
+<dd><p>Integrate a complex integrand using the Gauss-Kronrod quadrature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – The function to integrate.</p></li>
+<li><p><strong>a</strong> – The lower bound of the integration.</p></li>
+<li><p><strong>b</strong> – The upper bound of the integration.</p></li>
+<li><p><strong>args</strong> – Additionals arguments of the function to integrate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The integration result as a complex number.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.compute_time_correspondances">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">compute_time_correspondances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwhm_step_sec_correspondance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_time_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_dwelltime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flash'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.compute_time_correspondances" title="Link to this definition">¶</a></dt>
+<dd><p>This function computes how many loop steps will occur and how many pixels can be imaged for each loop step.
+So far this only works for static pixel_dwelltime, need to figure out how to make it work for varying dwell times
+per pixel or varying dwell times as in RESCue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fwhm_step_sec_correspondance</strong> – a tuple containing how large in time steps the FWHM of the mean flash is at
+index 0 and how large in seconds we want the FWHM to be at index 1</p></li>
+<li><p><strong>acquisition_time_sec</strong> – How long we want to acquire on the same datamap, in seconds. This will be used to
+determine how many loops we need to do (float? int?)</p></li>
+<li><p><strong>pixel_dwelltime</strong> – The pixel dwell time used by the microscope (float)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of pixels that can be imaged per loop and the number of loop iterations</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.datamap_generator">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">datamap_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sources</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecules</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.datamap_generator" title="Link to this definition">¶</a></dt>
+<dd><p>Function to generate a datamap with randomly located molecules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> – A tuple representing the shape of the datamap. If only 1 number is passed, a square datamap will be
+generated.</p></li>
+<li><p><strong>sources</strong> – Number of molecule sources to be randomly placed on the datamap.</p></li>
+<li><p><strong>molecules</strong> – Average number of molecules contained on each source. The actual number of molecules will be
+determined by poisson sampling.</p></li>
+<li><p><strong>random_state</strong> – Sets the seed of the random number generator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A datamap containing the randomly placed molecules</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.dict_write_func">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">dict_write_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictio</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.dict_write_func" title="Link to this definition">¶</a></dt>
+<dd><p>Write a dict to a text file in a good way :)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> – path of the file to write to</p></li>
+<li><p><strong>dictio</strong> – the dictionnary we wish to write to a txt file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.event_reader">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">event_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.event_reader" title="Link to this definition">¶</a></dt>
+<dd><p>Read events from a file containing event dictionaries and return the dicts to a list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> – Path to the txt file containing the dict for the events</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing the dicts of every identified event in a video</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.flash_generator">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">flash_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events_curves_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.flash_generator" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a flash by sampling from statistics built from save light curves</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>events_curves_path</strong> – Path to the .npy file containing the light curves</p></li>
+<li><p><strong>seed</strong> – Sets the seed for random sampling :)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A sampled light curve</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.flash_routine">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">flash_routine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synapses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synapse_flashing_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synapse_flash_idx_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curves_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synapse_flash_curve_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isolated_synapses_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.flash_routine" title="Link to this definition">¶</a></dt>
+<dd><p>This function makes 1 step in a flash routine. It loops through all the synapses in a frame to determine whether
+they will start flashing (if they aren’t already), or move the flash forward 1 time step if they are flashing, or
+reset the synapse if its flash is over.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>synapses</strong> – A list of all the synapses in the datamap</p></li>
+<li><p><strong>probability</strong> – The probability with which a synapse will start flashing</p></li>
+<li><p><strong>synapse_flashing_dict</strong> – The dict listing whether each synapse is flashing or not</p></li>
+<li><p><strong>synapse_flash_idx_dict</strong> – The dict listing where in their flash each synapse is</p></li>
+<li><p><strong>curves_path</strong> – Path to the .npy file of the light curves being sampled</p></li>
+<li><p><strong>synapse_flash_curve_dict</strong> – The dict listing the sampled flash curve for every synapse</p></li>
+<li><p><strong>isolated_synapses_frames</strong> – The dict listing the isolated synapse frames</p></li>
+<li><p><strong>datamap</strong> – The datamap on which the synapses lie</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated dicts and datamap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.float_to_array_verifier">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">float_to_array_verifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">float_or_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.float_to_array_verifier" title="Link to this definition">¶</a></dt>
+<dd><p>Verify if a given input is a float or an array.</p>
+<p>If it is a float, it will return an array of shape (shape) filled. 
+If it is an array, it will verify if it is of the appropriate shape.
+If it is neither, it will return an error</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>float_or_array</strong> – Either a float or an array containing floats</p></li>
+<li><p><strong>shape</strong> – The shape we want for our array (tuple)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array of the appropriate shape</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.fwhm">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">fwhm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.fwhm" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the full width at half maximum of the Gaussian-shaped values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – An array of values describing a Gaussian shape.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The full width at half maximum.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.fwhm_donut">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">fwhm_donut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.fwhm_donut" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the full width at half maximum of the donut-shaped values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – An array of values describing a donut shape.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of the outer and inner width at half maximum.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.generate_fiber_with_synapses">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">generate_fiber_with_synapses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fibre_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fibre_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_synapses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">10)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.generate_fiber_with_synapses" title="Link to this definition">¶</a></dt>
+<dd><p>This func allows a user to generate a fiber object and synapses attached to it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap_shape</strong> – shape of the image to which we will add the fiber and synapses</p></li>
+<li><p><strong>fibre_min</strong> – min position for the fibre to start at</p></li>
+<li><p><strong>fibre_max</strong> – max position for the fibre to start at</p></li>
+<li><p><strong>n_synapses</strong> – number of synapses to put on the fiber</p></li>
+<li><p><strong>min_dist</strong> – min distance we want to have between the synapses. this is to make sure we don’t have overlapping
+synapses</p></li>
+<li><p><strong>polygon_scale</strong> – values from which the polygon size will be sampled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the fiber object and the polygon objects representing the synapses</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.generate_raster_pixel_list">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">generate_raster_pixel_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_pixels_to_add</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">starting_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.generate_raster_pixel_list" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a pixel list of a raster scan of n_pixels_to_add pixels starting from starting_pixel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_pixels_to_add</strong> – The number of pixels for which we want to image</p></li>
+<li><p><strong>starting_pixel</strong> – The starting point of our raster scan</p></li>
+<li><p><strong>img</strong> – the img in which the raster scan occurs</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pixel list for the raster scan starting at starting_pixel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.generate_secondary_fibers">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">generate_secondary_fibers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_fiber</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2,</span> <span class="pre">6)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.generate_secondary_fibers" title="Link to this definition">¶</a></dt>
+<dd><p>This function allows to spawn secondary fibers branching from a main fiber</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap_shape</strong> – The shape of the datamap in which the main fiber resides</p></li>
+<li><p><strong>main_fiber</strong> – The main fiber object to which we will add secondary fiber branches</p></li>
+<li><p><strong>n_sec</strong> – The interval for the number of secondary branches we wish to spawn (tuple)</p></li>
+<li><p><strong>min_dist</strong> – The min distance between spawned secondary fiber, to ensure they are not all clumped</p></li>
+<li><p><strong>sec_len</strong> – The interval for the length of the secondary fibers (tuple)</p></li>
+<li><p><strong>seed</strong> – Random number generator seed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list containing the secondary fiber objects</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.generate_synapse_flash_dicts">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">generate_synapse_flash_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synapses_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roi_shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.generate_synapse_flash_dicts" title="Link to this definition">¶</a></dt>
+<dd><p>This function is used to generate the dictionnaries needed to keep track of which synapses are flashing and where
+they are situatied in the flash and such</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>synapses_list</strong> – The list of all the synapses in the frame (flattenened)</p></li>
+<li><p><strong>roi_shape</strong> – The shape of the frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>synapse_flashing_dict, a dict corresponding the synapses to whether they are currently flashing or not,
+synapse_flash_idx_dict, a dict corresponding each flash to where in the light curve they are at,
+synapse_flash_curve_dict, a dict containing the light curve sampled for the flash of this synapse,
+isolated_synapses_frames, a dict containing a frame for each synapse in which only it appears and the rest</p>
+<blockquote>
+<div><p>is 0</p>
+</div></blockquote>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.generate_synapses_on_fiber">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">generate_synapses_on_fiber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_fiber</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_syn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synapse_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">10)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.generate_synapses_on_fiber" title="Link to this definition">¶</a></dt>
+<dd><p>Generates polygon objects (representing synapses) on the main fiber</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap_shape</strong> – The shape of the datamap on which the main_fiber lies</p></li>
+<li><p><strong>main_fiber</strong> – Fiber object representing the main branch</p></li>
+<li><p><strong>n_syn</strong> – The interval from which we will sample the number of synapses to spawn (tuple)</p></li>
+<li><p><strong>min_dist</strong> – The minimal distance between 2 synapses, to prevent clumping</p></li>
+<li><p><strong>synapse_scale</strong> – The interval form which we will sample each synapses’ size</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing all the synapses on the main fiber</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.generate_synaptic_fibers">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">generate_synaptic_fibers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sec_fibers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_synapses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_fiber_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_synapse_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_fiber_len</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">20)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">synapse_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.generate_synaptic_fibers" title="Link to this definition">¶</a></dt>
+<dd><p>This function wraps up the generation of fibers with secondary branches and synapses in a stand-alone function</p>
+<p>TODO:
+- Add variable number of synapses, distances, 
+- Add “position identifiers” to the synapses so I can easily make them flash after</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>image_shape</strong> – The shape of the ROI in which we want to spawn stuff</p></li>
+<li><p><strong>main_nodes</strong> – <p>???</p>
+</p></li>
+<li><p><strong>n_sec_fibers</strong> – The interval for the number of secondary fibers branching from the main fiber (tuple)</p></li>
+<li><p><strong>n_synapses</strong> – The interval for the number of synapses (tuple)</p></li>
+<li><p><strong>min_fiber_dist</strong> – The minimum distance separating the secondary fibers</p></li>
+<li><p><strong>min_synapse_dist</strong> – The minimum distance separating the synapses</p></li>
+<li><p><strong>sec_fiber_len</strong> – The interval for the lengths of the secondary fibers</p></li>
+<li><p><strong>synapse_scale</strong> – The interval for the size of the synapses</p></li>
+<li><p><strong>seed</strong> – Random number generator seed</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array containing the disposition of molecules corresponding to the generated shape and a list
+containing all the synapses (Polygon objects)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.get_avg_lightcurve">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">get_avg_lightcurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">light_curves</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.get_avg_lightcurve" title="Link to this definition">¶</a></dt>
+<dd><p>This function takes as input a list of light curves and processes them so they are rescaled and shifted to align
+their peaks. It then return the avg light curve as well as its standard deviation, so we can sample a light curve
+for event simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>light_curves</strong> – list of light curves of Ca2+ flash events</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the avg light curve and std of the light curve</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.get_light_curve">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">get_light_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">video_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.get_light_curve" title="Link to this definition">¶</a></dt>
+<dd><p>Use a tif video of Ca2+ flashes along with a ROI (spatial and temporal) to convert the data to an intensity/photon
+count curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>video_path</strong> – The path to the video file from which we want to extract an event light curve (str)</p></li>
+<li><p><strong>event</strong> – A dictionary containing the start and end info for frames, rows, columns of an event (dict)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A vector representing the mean intensity accros the frames of the event</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.hand_crafted_light_curve">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">hand_crafted_light_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_decay_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">28</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.hand_crafted_light_curve" title="Link to this definition">¶</a></dt>
+<dd><p>Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delay</strong> – The number of steps before the peak of the light curve.</p></li>
+<li><p><strong>n_decay_steps</strong> – The number of steps for the light curve to return to 1</p></li>
+<li><p><strong>n_molecules_multiplier</strong> – The value of the light curve at it’s peak</p></li>
+<li><p><strong>end_pad</strong> – The number of steps where the curve stays flat at 1 after the end of the exponential decay.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
+then decays back to 1 over t = n_decay_steps steps, and stays flat at 1 for end_pad + 1 steps</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.inverse">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.inverse" title="Link to this definition">¶</a></dt>
+<dd><p>Evaluate the inverse function <span class="math notranslate nohighlight">\(1 / (a x + 1)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – An integer or array.</p></li>
+<li><p><strong>a</strong> – The scale of <em>x</em>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The result of the function, same shape as <em>x</em>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.inverse_exponential">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">inverse_exponential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.inverse_exponential" title="Link to this definition">¶</a></dt>
+<dd><p>Evaluate the inverse function <span class="math notranslate nohighlight">\(1 / e^{ax}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – An integer or array.</p></li>
+<li><p><strong>a</strong> – The scale of <em>x</em>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The result of the function, same shape as <em>x</em>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.make_path_sane">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">make_path_sane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.make_path_sane" title="Link to this definition">¶</a></dt>
+<dd><p>Function to uniformly return a real, absolute filesystem path.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.molecules_survival">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">molecules_survival</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pre_bleach</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_bleach</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.molecules_survival" title="Link to this definition">¶</a></dt>
+<dd><p>Return the ratio of surviving molecules</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pre_bleach</strong> – The datamap before bleaching it.</p></li>
+<li><p><strong>post_bleach</strong> – The datamap after bleaching it.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Ratio of molecules surviving bleach</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.molecules_symmetry">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">molecules_symmetry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pre_bleach</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_bleach</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.molecules_symmetry" title="Link to this definition">¶</a></dt>
+<dd><p>Function to compare the ratio of surviving molecules in the upper vs lower half of a datamap.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pre_bleach</strong> – The datamap before bleaching it.</p></li>
+<li><p><strong>post_bleach</strong> – The datamap after bleaching it.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Ratio of molecules surviving bleach, split between upper half and lower half</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.mse_calculator">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">mse_calculator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.mse_calculator" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the RMS between two arrays. Must be of same size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array1</strong> – First array</p></li>
+<li><p><strong>array2</strong> – Second array</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mean squarred error of the 2 arrays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.pad_values">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">pad_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">laser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.pad_values" title="Link to this definition">¶</a></dt>
+<dd><p>Pad values for the array_padder function</p>
+<p>Return the minimum necessary rows, cols to pad an array with if we want to iterated over all of it with a laser</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>laser</strong> – Array of the shape of the laser which we want to iterated over a datamap.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>rows_pad, cols_pad, the number of rows and columns we need to pad the array with.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.pinhole">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">pinhole</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_pixels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.pinhole" title="Link to this definition">¶</a></dt>
+<dd><p>Return a pinhole mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>radius</strong> – The radius of the pinhole (m).</p></li>
+<li><p><strong>pixelsize</strong> – The size of a pixel (m).</p></li>
+<li><p><strong>n_pixels</strong> – The (optional) number of pixels (default: size of the
+pinhole).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.pixel_list_filter">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">pixel_list_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.pixel_list_filter" title="Link to this definition">¶</a></dt>
+<dd><p>Function to pre-filter a pixel list. Depending on the ratio between the data_pixelsize and acquisition pixelsize,
+a certain number of pixels must be skipped between laser applications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pixel_list</strong> – The list of pixels passed to the acquisition function, which needs to be filtered</p></li>
+<li><p><strong>img_pixelsize</strong> – The acquisition pixelsize (m)</p></li>
+<li><p><strong>data_pixelsize</strong> – The data pixelsize (m)</p></li>
+<li><p><strong>output_empty</strong> – Bool to allow (or not) this function to return an empty pixel list</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A filtered version of the input pixel_list, from which the pixels which can’t be iterated over due to the
+pixel sizes have been removed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.pixel_sampling">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">pixel_sampling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.pixel_sampling" title="Link to this definition">¶</a></dt>
+<dd><p>Function to test different pixel sampling methods, instead of simply imaging pixel by pixel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap</strong> – A 2D array of the data to be imaged, used for its shape.</p></li>
+<li><p><strong>mode</strong> – A keyword to determine the order of pixels in the returned list. By default, all pixels are added in a
+raster scan (left to right, row by row) order.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing all the pixels in the order in which we want them to be imaged.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.pxsize_comp2">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">pxsize_comp2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_pixelsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.pxsize_comp2" title="Link to this definition">¶</a></dt>
+<dd><p>Try number 2 for my float comparison function that hopefully will give the right values this time :)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_pixelsize</strong> – Acquisition pixel size. Has to be a multiple of data_pixelsize (m).</p></li>
+<li><p><strong>data_pixelsize</strong> – Raw data pixelsize (m).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Integer values of the pixelsizes which can later be used to compute ratios and stuff :)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.pxsize_comp_array_maker">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">pxsize_comp_array_maker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.pxsize_comp_array_maker" title="Link to this definition">¶</a></dt>
+<dd><p>Compare the pixel sizes of the image and the datamap and return the appropriate pixel sizes for the acquisition.</p>
+<p>Function which utilizes the ratio between the image pixelsize and the datamap pixelsize to create an appropriatly
+sized output datamap for a normal raster scan acquisition with ratio jumps between laser applications. This assures
+that the laser application is placed in the appropriate acquisition output pixel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_pixelsize</strong> – The image pixelsize (m)</p></li>
+<li><p><strong>data_pixelsize</strong> – The datamap pixelsize (m)</p></li>
+<li><p><strong>datamap</strong> – The datamap on which the acquisition is made</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An empty datamap of shape (ceil(datamap.shape[0] / ratio), ceil(datamap.shape[1] / ratio))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.pxsize_grid">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">pxsize_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.pxsize_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Function which creates a grid of the pixels.</p>
+<p>This can be iterated on based on the ratio between img_pixelsize and
+data_pixelsize. Imagine the laser is fixed on a grid and can only make discrete movements, and this grid size is
+determined by the ratio</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_pixelsize</strong> – Size of the minimum distance the laser must do between acquisitions (m). Must be a multiple of
+data_pixelsize.</p></li>
+<li><p><strong>data_pixelsize</strong> – Size of a pixel of the datamap (m).</p></li>
+<li><p><strong>datamap</strong> – Raw molecule dispotion on which we wish to do an acquisition.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of the pixels which can be iterated on (?)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.pxsize_ratio">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">pxsize_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_pixelsize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.pxsize_ratio" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the ratio between the acquisition pixel size and the datamap pixel size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_pixelsize</strong> – Minimum distance the laser must move during application. Multiple of data_pixelsize (m).</p></li>
+<li><p><strong>data_pixelsize</strong> – Size of a pixel in the datamap (m).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the ratio between pixel sizes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.rescale">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">rescale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.rescale" title="Link to this definition">¶</a></dt>
+<dd><p>Rescale the <em>data</em> container (and content) given the ratio between the
+current container unit size and the new container unit size.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data_10nm</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="go">                             [0, 1, 0, 0],</span>
+<span class="go">                             [0, 0, 0, 0],</span>
+<span class="go">                             [0, 0, 0, 0]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rescale</span><span class="p">(</span><span class="n">data_10nm</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># rescale to 20 nm size</span>
+<span class="go">numpy.array([[2, 0],</span>
+<span class="go">             [0, 0]])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – A 2D array.</p></li>
+<li><p><strong>factor</strong> – The ratio between the original container units and the new
+container units.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.rescale_data">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">rescale_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_int</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">divider</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.rescale_data" title="Link to this definition">¶</a></dt>
+<dd><p>Function to rescale the data (made for light curves, might be of use elsewhere) between 1 and max-min</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – data to rescale.</p></li>
+<li><p><strong>to_int</strong> – Determines whether the data is truncated to ints after being normalized. Useful for using the
+fast acquisition function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The data rescaled between 1 and max(data) - min(data)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.resize">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">images</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.resize" title="Link to this definition">¶</a></dt>
+<dd><p>Resize images to the shape of the largest (pad with zeros).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>images</strong> – Square shaped images.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of copies of the given <em>images</em> resized to the size of the
+largest input image.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.sample_light_curve">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">sample_light_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">light_curves</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.sample_light_curve" title="Link to this definition">¶</a></dt>
+<dd><p>This function allows to sample from a distribution of light curves and handles the smoothing and correcting values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>light_curves</strong> – list containing the light curves we wish to do stats and sample from</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A smoothed curve sampled from the distribution</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.sampled_flash_manipulations">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">sampled_flash_manipulations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events_curves_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.sampled_flash_manipulations" title="Link to this definition">¶</a></dt>
+<dd><p>Samples a light curve and modifies it to make it more prettier for training (i.e. more like the hand crafted light
+curves)</p>
+<ul class="simple">
+<li><p>converts the values to ints</p></li>
+<li><p>add variable delay at the start of the curve to delay the flash</p></li>
+<li><p>(optional) rescales the values between [1, 28]</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>events_curves_path</strong> – Path to the .npy file containing the light curves</p></li>
+<li><p><strong>delay</strong> – Number of steps where the flash value stays ctw at 1 before the flash starts</p></li>
+<li><p><strong>rescale</strong> – Whether or not the light curve will be rescaled. For now, if true, simply rescales between [1, 28]
+because this is the value range for</p></li>
+<li><p><strong>seed</strong> – Sets the seed for random sampling :)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.savitzky_golay">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">savitzky_golay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deriv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.savitzky_golay" title="Link to this definition">¶</a></dt>
+<dd><p>Smooth (and optionally differentiate) data with a Savitzky-Golay filter.
+The Savitzky-Golay filter removes high frequency noise from data.
+It has the advantage of preserving the original shape and
+features of the signal better than other types of filtering
+approaches, such as moving averages techniques.
+Parameters
+———-
+y : array_like, shape (N,)</p>
+<blockquote>
+<div><p>the values of the time history of the signal.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>window_size<span class="classifier">int</span></dt><dd><p>the length of the window. Must be an odd integer number.</p>
+</dd>
+<dt>order<span class="classifier">int</span></dt><dd><p>the order of the polynomial used in the filtering.
+Must be less then <cite>window_size</cite> - 1.</p>
+</dd>
+<dt>deriv: int</dt><dd><p>the order of the derivative to compute (default = 0 means only smoothing)</p>
+</dd>
+</dl>
+<section id="return">
+<h2>Return<a class="headerlink" href="#return" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>ys<span class="classifier">ndarray, shape (N)</span></dt><dd><p>the smoothed signal (or it’s n-th derivative).</p>
+</dd>
+</dl>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
+<p>The Savitzky-Golay is a type of low-pass filter, particularly
+suited for smoothing noisy data. The main idea behind this
+approach is to make for each point a least-square fit with a
+polynomial of high order over a odd-sized window centered at
+the point.
+Examples
+——–
+t = np.linspace(-4, 4, 500)
+y = np.exp( -t**2 ) + np.random.normal(0, 0.05, t.shape)
+ysg = savitzky_golay(y, window_size=31, order=4)
+import matplotlib.pyplot as plt
+plt.plot(t, y, label=’Noisy signal’)
+plt.plot(t, np.exp(-t**2), ‘k’, lw=1.5, label=’Original signal’)
+plt.plot(t, ysg, ‘r’, label=’Filtered signal’)
+plt.legend()
+plt.show()
+References
+———-
+.. [1] A. Savitzky, M. J. E. Golay, Smoothing and Differentiation of</p>
+<blockquote>
+<div><p>Data by Simplified Least Squares Procedures. Analytical
+Chemistry, 1964, 36 (8), pp 1627-1639.</p>
+</div></blockquote>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>Numerical Recipes 3rd Edition: The Art of Scientific Computing
+W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
+Cambridge University Press ISBN-13: 9780521880688</p>
+</aside>
+</aside>
+</section>
+</dd></dl>
+
+<hr class="docutils" />
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.set_starting_pixel">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">set_starting_pixel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">previous_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.set_starting_pixel" title="Link to this definition">¶</a></dt>
+<dd><p>Return a value 1 pixel further from the last pixel of an acquisition list in an normal raster scan fashion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>previous_pixel</strong> – The pixel on which the previous raster scan stopped</p></li>
+<li><p><strong>image_shape</strong> – the shape of the ROI on which the raster scan is occuring</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The pixel on which the next raster scan should start</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.shift_data">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">shift_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">peak_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.shift_data" title="Link to this definition">¶</a></dt>
+<dd><p>Function to shift the data (made for light curves, might be of use elsewhere) so the peak is on idx 5</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – data to shift</p></li>
+<li><p><strong>peak_idx</strong> – idx at which we want the peak to be</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The shifted data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.smooth_ramp_hand_crafted_light_curve">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">smooth_ramp_hand_crafted_light_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_decay_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_molecules_multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.smooth_ramp_hand_crafted_light_curve" title="Link to this definition">¶</a></dt>
+<dd><p>Hand crafted light curve that has a more abrupt rise than sampling a light curve from real data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delay</strong> – The number of steps before the peak of the light curve.</p></li>
+<li><p><strong>n_decay_steps</strong> – The number of steps for the light curve to return to 1</p></li>
+<li><p><strong>n_molecules_multiplier</strong> – The value of the light curve at it’s peak</p></li>
+<li><p><strong>end_pad</strong> – The number of steps where the curve stays flat at 1 after the end of the exponential decay.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The hand crafted light curve, which is flat at 1 until t = delay, where it peaks to n_molecs_multiplier,
+then decays back to 1 over t = n_decay_steps steps, and stays flat at 1 for end_pad + 1 steps</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.stack">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.stack" title="Link to this definition">¶</a></dt>
+<dd><p>Compute a new frame consisting in a replication of the given <em>data</em>
+centered at every positions and multiplied by the factors given in the
+<em>datamap</em>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">datamap</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="go">                           [0, 0, 0, 0],</span>
+<span class="go">                           [0, 0, 0, 0],</span>
+<span class="go">                           [0, 0, 0, 0]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="go">                        [2, 3, 2],</span>
+<span class="go">                        [1, 2, 1]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">utils</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">datamap</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="go">numpy.array([[6, 4, 0, 0],</span>
+<span class="go">             [4, 2, 0, 0],</span>
+<span class="go">             [0, 0, 0, 0],</span>
+<span class="go">             [0, 0, 0, 0]])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap</strong> – A 2D array indicating how many data are positioned in every</p></li>
+<li><p><strong>data</strong> – A 2D array containing the data to replicate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array shaped like <em>datamap</em>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.stack_btmod_definitive">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">stack_btmod_definitive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datamap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_pixelsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.stack_btmod_definitive" title="Link to this definition">¶</a></dt>
+<dd><p>Compute a new frame consisting in a replication of the given <em>data</em>
+centered at every positions and multiplied by the factors given in the
+<em>datamap</em>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">datamap</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="go">                           [0, 0, 0, 0],</span>
+<span class="go">                           [0, 0, 0, 0],</span>
+<span class="go">                           [0, 0, 0, 0]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="go">                        [2, 3, 2],</span>
+<span class="go">                        [1, 2, 1]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">utils</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">datamap</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="go">numpy.array([[6, 4, 0, 0],</span>
+<span class="go">             [4, 2, 0, 0],</span>
+<span class="go">             [0, 0, 0, 0],</span>
+<span class="go">             [0, 0, 0, 0]])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datamap</strong> – A 2D array indicating how many data are positioned in every</p></li>
+<li><p><strong>data</strong> – A 2D array containing the data to replicate.</p></li>
+<li><p><strong>data_pixelsize</strong> – Length of a pixel in the datamap (m)</p></li>
+<li><p><strong>img_pixelsize</strong> – Distance the laser moves in between each application of data. Must be a multiple of the
+data_pixelsize (m)</p></li>
+<li><p><strong>pixel_list</strong> – List of pixels on which we want to do the acquisition.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array shaped like <em>datamap</em>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.symmetry_verifier">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">symmetry_verifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vertical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.symmetry_verifier" title="Link to this definition">¶</a></dt>
+<dd><p>Verifies if the given array is symmetrical along the vertical or horizontal direction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> – Array to be verified for symmetry</p></li>
+<li><p><strong>direction</strong> – Direction along which to verify the symmetry. Vertical to see upper vs lower half, Horizontal to
+see left vs right half.</p></li>
+<li><p><strong>plot</strong> – Determines whether or not graphs of array and its symmetry will be displayed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array(s) displaying the symmetry</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pysted.utils.time_quantum_to_flash_tstep_correspondance">
+<span class="sig-prename descclassname"><span class="pre">pysted.utils.</span></span><span class="sig-name descname"><span class="pre">time_quantum_to_flash_tstep_correspondance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fwhm_step_sec_corresnpondance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_quantum_us</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pysted.utils.time_quantum_to_flash_tstep_correspondance" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the correspondance between the time quantum value (in us) and the flash time steps</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fwhm_step_sec_corresnpondance</strong> – A tuple containing how large in time steps the FWHM of the mean flash is at
+index 0 and how large in useconds we want the FWHM to be at index 1</p></li>
+<li><p><strong>time_quantum_us</strong> – Value of the time quantum used by the master clock (in us)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of time quantums per flash time step</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">pySTED</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pysted.html">pysted</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pysted.base.html">pysted.base</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.bleach_funcs.html">pysted.bleach_funcs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.cUtils.html">pysted.cUtils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.data.html">pysted.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.exp_data_gen.html">pysted.exp_data_gen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.microscopes.html">pysted.microscopes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.raster.html">pysted.raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pysted.temporal.html">pysted.temporal</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">pysted.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.action_execution.html">pysted.utils.action_execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.action_execution_2.html">pysted.utils.action_execution_2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.action_execution_g.html">pysted.utils.action_execution_g</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.add_event.html">pysted.utils.add_event</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.approx_binomial.html">pysted.utils.approx_binomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.array_padder.html">pysted.utils.array_padder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.array_unpadder.html">pysted.utils.array_unpadder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.cart2pol.html">pysted.utils.cart2pol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.complex_quadrature.html">pysted.utils.complex_quadrature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.compute_time_correspondances.html">pysted.utils.compute_time_correspondances</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.datamap_generator.html">pysted.utils.datamap_generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.dict_write_func.html">pysted.utils.dict_write_func</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.event_reader.html">pysted.utils.event_reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.exponential.html">pysted.utils.exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.flash_generator.html">pysted.utils.flash_generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.flash_routine.html">pysted.utils.flash_routine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.float_to_array_verifier.html">pysted.utils.float_to_array_verifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.fwhm.html">pysted.utils.fwhm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.fwhm_donut.html">pysted.utils.fwhm_donut</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.generate_fiber_with_synapses.html">pysted.utils.generate_fiber_with_synapses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.generate_raster_pixel_list.html">pysted.utils.generate_raster_pixel_list</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.generate_secondary_fibers.html">pysted.utils.generate_secondary_fibers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.generate_synapse_flash_dicts.html">pysted.utils.generate_synapse_flash_dicts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.generate_synapses_on_fiber.html">pysted.utils.generate_synapses_on_fiber</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.generate_synaptic_fibers.html">pysted.utils.generate_synaptic_fibers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.get_avg_lightcurve.html">pysted.utils.get_avg_lightcurve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.get_light_curve.html">pysted.utils.get_light_curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.hand_crafted_light_curve.html">pysted.utils.hand_crafted_light_curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.inverse.html">pysted.utils.inverse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.inverse_exponential.html">pysted.utils.inverse_exponential</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.make_path_sane.html">pysted.utils.make_path_sane</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.molecules_survival.html">pysted.utils.molecules_survival</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.molecules_symmetry.html">pysted.utils.molecules_symmetry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.mse_calculator.html">pysted.utils.mse_calculator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.pad_values.html">pysted.utils.pad_values</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.pinhole.html">pysted.utils.pinhole</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.pixel_list_filter.html">pysted.utils.pixel_list_filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.pixel_sampling.html">pysted.utils.pixel_sampling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.pxsize_comp2.html">pysted.utils.pxsize_comp2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.pxsize_comp_array_maker.html">pysted.utils.pxsize_comp_array_maker</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.pxsize_grid.html">pysted.utils.pxsize_grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.pxsize_ratio.html">pysted.utils.pxsize_ratio</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.rescale.html">pysted.utils.rescale</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.rescale_data.html">pysted.utils.rescale_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.resize.html">pysted.utils.resize</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.sample_light_curve.html">pysted.utils.sample_light_curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.sampled_flash_manipulations.html">pysted.utils.sampled_flash_manipulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.savitzky_golay.html">pysted.utils.savitzky_golay</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.set_starting_pixel.html">pysted.utils.set_starting_pixel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.shift_data.html">pysted.utils.shift_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.smooth_ramp_hand_crafted_light_curve.html">pysted.utils.smooth_ramp_hand_crafted_light_curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.smooth_ramp_hand_crafted_light_curve_2.html">pysted.utils.smooth_ramp_hand_crafted_light_curve_2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.stack.html">pysted.utils.stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.stack_btmod_definitive.html">pysted.utils.stack_btmod_definitive</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.symmetry_verifier.html">pysted.utils.symmetry_verifier</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pysted.utils.time_quantum_to_flash_tstep_correspondance.html">pysted.utils.time_quantum_to_flash_tstep_correspondance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.action_execution"><code class="docutils literal notranslate"><span class="pre">action_execution()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.action_execution_2"><code class="docutils literal notranslate"><span class="pre">action_execution_2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.action_execution_g"><code class="docutils literal notranslate"><span class="pre">action_execution_g()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.add_event"><code class="docutils literal notranslate"><span class="pre">add_event()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.approx_binomial"><code class="docutils literal notranslate"><span class="pre">approx_binomial()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.array_padder"><code class="docutils literal notranslate"><span class="pre">array_padder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.array_unpadder"><code class="docutils literal notranslate"><span class="pre">array_unpadder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.cart2pol"><code class="docutils literal notranslate"><span class="pre">cart2pol()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.complex_quadrature"><code class="docutils literal notranslate"><span class="pre">complex_quadrature()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.compute_time_correspondances"><code class="docutils literal notranslate"><span class="pre">compute_time_correspondances()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.datamap_generator"><code class="docutils literal notranslate"><span class="pre">datamap_generator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.dict_write_func"><code class="docutils literal notranslate"><span class="pre">dict_write_func()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.event_reader"><code class="docutils literal notranslate"><span class="pre">event_reader()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.flash_generator"><code class="docutils literal notranslate"><span class="pre">flash_generator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.flash_routine"><code class="docutils literal notranslate"><span class="pre">flash_routine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.float_to_array_verifier"><code class="docutils literal notranslate"><span class="pre">float_to_array_verifier()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.fwhm"><code class="docutils literal notranslate"><span class="pre">fwhm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.fwhm_donut"><code class="docutils literal notranslate"><span class="pre">fwhm_donut()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.generate_fiber_with_synapses"><code class="docutils literal notranslate"><span class="pre">generate_fiber_with_synapses()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.generate_raster_pixel_list"><code class="docutils literal notranslate"><span class="pre">generate_raster_pixel_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.generate_secondary_fibers"><code class="docutils literal notranslate"><span class="pre">generate_secondary_fibers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.generate_synapse_flash_dicts"><code class="docutils literal notranslate"><span class="pre">generate_synapse_flash_dicts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.generate_synapses_on_fiber"><code class="docutils literal notranslate"><span class="pre">generate_synapses_on_fiber()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.generate_synaptic_fibers"><code class="docutils literal notranslate"><span class="pre">generate_synaptic_fibers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.get_avg_lightcurve"><code class="docutils literal notranslate"><span class="pre">get_avg_lightcurve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.get_light_curve"><code class="docutils literal notranslate"><span class="pre">get_light_curve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.hand_crafted_light_curve"><code class="docutils literal notranslate"><span class="pre">hand_crafted_light_curve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.inverse"><code class="docutils literal notranslate"><span class="pre">inverse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.inverse_exponential"><code class="docutils literal notranslate"><span class="pre">inverse_exponential()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.make_path_sane"><code class="docutils literal notranslate"><span class="pre">make_path_sane()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.molecules_survival"><code class="docutils literal notranslate"><span class="pre">molecules_survival()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.molecules_symmetry"><code class="docutils literal notranslate"><span class="pre">molecules_symmetry()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.mse_calculator"><code class="docutils literal notranslate"><span class="pre">mse_calculator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.pad_values"><code class="docutils literal notranslate"><span class="pre">pad_values()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.pinhole"><code class="docutils literal notranslate"><span class="pre">pinhole()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.pixel_list_filter"><code class="docutils literal notranslate"><span class="pre">pixel_list_filter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.pixel_sampling"><code class="docutils literal notranslate"><span class="pre">pixel_sampling()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.pxsize_comp2"><code class="docutils literal notranslate"><span class="pre">pxsize_comp2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.pxsize_comp_array_maker"><code class="docutils literal notranslate"><span class="pre">pxsize_comp_array_maker()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.pxsize_grid"><code class="docutils literal notranslate"><span class="pre">pxsize_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.pxsize_ratio"><code class="docutils literal notranslate"><span class="pre">pxsize_ratio()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.rescale"><code class="docutils literal notranslate"><span class="pre">rescale()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.rescale_data"><code class="docutils literal notranslate"><span class="pre">rescale_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.resize"><code class="docutils literal notranslate"><span class="pre">resize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.sample_light_curve"><code class="docutils literal notranslate"><span class="pre">sample_light_curve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.sampled_flash_manipulations"><code class="docutils literal notranslate"><span class="pre">sampled_flash_manipulations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.savitzky_golay"><code class="docutils literal notranslate"><span class="pre">savitzky_golay()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.set_starting_pixel"><code class="docutils literal notranslate"><span class="pre">set_starting_pixel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.shift_data"><code class="docutils literal notranslate"><span class="pre">shift_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.smooth_ramp_hand_crafted_light_curve"><code class="docutils literal notranslate"><span class="pre">smooth_ramp_hand_crafted_light_curve()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.stack"><code class="docutils literal notranslate"><span class="pre">stack()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.stack_btmod_definitive"><code class="docutils literal notranslate"><span class="pre">stack_btmod_definitive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.symmetry_verifier"><code class="docutils literal notranslate"><span class="pre">symmetry_verifier()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pysted.utils.time_quantum_to_flash_tstep_correspondance"><code class="docutils literal notranslate"><span class="pre">time_quantum_to_flash_tstep_correspondance()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="pysted.html">pysted</a><ul>
+      <li>Previous: <a href="pysted.temporal.Synapse.update.html" title="previous chapter">pysted.temporal.Synapse.update</a></li>
+      <li>Next: <a href="pysted.utils.action_execution.html" title="next chapter">pysted.utils.action_execution</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Audrey Durand and Flavie Lavoie-Cardinal.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="../_sources/modules/pysted.utils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
