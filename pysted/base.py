@@ -1940,9 +1940,9 @@ class RandomActionSelector():
     1 - STED acquisition
     2 - Wait (for the time of 1 acquisition)
 
-    ..note ::
-    For now we have are pre setting the pdt, p_ex and p_sted that will be used for the actions.
-    A real agent would select the powers / dwellit me individually
+    ..note::
+        For now we have are pre setting the pdt, p_ex and p_sted that will be used for the actions.
+        A real agent would select the powers / dwellit me individually
 
     :param pdt: The pixel dwell time that will be used in the acquisitions
     :param p_ex: The excitation beam power that will be used when the selected action is confocal or sted
