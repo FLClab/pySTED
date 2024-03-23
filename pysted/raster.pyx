@@ -122,7 +122,7 @@ def raster_func_c_self_bleach_split_g(
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
-        srand(int(str(time.time_ns())[-5:-1]))
+        srand(int(str(time.time_ns())[15:]))
     else:
         srand(seed)
 
@@ -281,7 +281,7 @@ def raster_func_dymin(
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
-        srand(int(str(time.time_ns())[-5:-1]))
+        srand(int(str(time.time_ns())[15:]))
     else:
         srand(seed)
 
@@ -490,7 +490,7 @@ def raster_func_rescue(
 
     if seed == 0:
         # if no seed is passed, calculates a 'pseudo-random' seed form the time in ns
-        srand(int(str(time.time_ns())[-5:-1]))
+        srand(int(str(time.time_ns())[15:]))
     else:
         srand(seed)
 

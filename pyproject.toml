@@ -47,7 +47,7 @@ classifiers = [
 
 [tool.setuptools.dynamic]
 version = {attr = "pysted.VERSION"}
-readme = {file = ["REAME.md"]}
+readme = {file = ["README.md"]}
 
 [tool.setuptools]
 # ...
