@@ -16,7 +16,8 @@ authors = [
     {name = "Anthony Bilodeau"},
     {name = "Albert Michaud-Gagnon"}
 ]
-dynamic = ["version", "readme"]
+dynamic = ["version"]
+readme = "README.md"
 description = "STED image simulator in Python"
 keywords = ["microscopy", "sted", "simulation"]
 requires-python = ">=3.8"
@@ -47,7 +48,6 @@ classifiers = [
 
 [tool.setuptools.dynamic]
 version = {attr = "pysted.VERSION"}
-readme = {file = ["README.md"]}
 
 [tool.setuptools]
 # ...
