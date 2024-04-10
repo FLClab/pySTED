@@ -52,3 +52,17 @@ Once `pysted` is installed, running the example script should be possible.
 ```bash 
 python pySTED_tutorial.py
 ```
+
+## Citation
+
+If you use any material from this repository please cite the following
+```bibtex
+@article{bilodeau2024development,
+  title={Development of AI-assisted microscopy frameworks through realistic simulation in pySTED},
+  author={Bilodeau, Anthony and Michaud-Gagnon, Albert and Chabbert, Julia and Turcotte, Benoit and Heine, J{\"o}rn and Durand, Audrey and Lavoie-Cardinal, Flavie},
+  journal={bioRxiv},
+  pages={2024--03},
+  year={2024},
+  publisher={Cold Spring Harbor Laboratory}
+}
+```
