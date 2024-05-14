@@ -457,7 +457,7 @@ class Detector:
     |                  |              | compute the pinhole radius             |
     |                  |              | :math:`r_b = n_{airy} 0.61 \lambda/NA`.|
     +------------------+--------------+----------------------------------------+
-    | ``noise``        | ``False``    | Whether to add poisson noise to the    |
+    | ``noise``        | ``True``     | Whether to add poisson noise to the    |
     |                  |              | signal (boolean).                      |
     +------------------+--------------+----------------------------------------+
     | ``background``   | ``0``        | The average number of photon counts per|
@@ -492,7 +492,7 @@ class Detector:
         self.n_airy = kwargs.get("n_airy", 0.7)
 
         # detection noise
-        self.noise = kwargs.get("noise", False)
+        self.noise = kwargs.get("noise", True)
         self.background = kwargs.get("background", 0)
         self.darkcount = kwargs.get("darkcount", 0)
 
