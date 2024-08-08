@@ -8,6 +8,8 @@
 
 We have built a realistic STED simulation platform within the Python environment, namely pysted. pysted breaks down a STED acquisition into its main constituents: wavelength dependent focusing properties of the objective lens, fluorophore excitation and depletion, and fluorescence detection. Each step of the acquisition process corresponds to an independent component of the pipeline and is created with its own parameters that users can modify according to their experimental requirements. Generating a synthetic image with the pysted simulator requires the user to specify the positions of the emitters in the field of view (referred to as datamap) and to provide the characteristics of the fluorophore). The emission and photobleaching properties of the fluorophores that are implemented in pysted and inspired from previous theoretical and experimental models. As in a real experiment, the datamap is continuously being updated during the simulation process to realistically simulate point-scanning acquisition schemes.
 
+In this repository, we provide a few datamaps that can be loaded using the provided tools. However, if the user wants to create their own datamaps, we also provide the code to generate their datamaps at this [repository](https://github.com/FLClab/unet_dmap_gen).
+
 ## Installation
 
 We recommend using a virtual environment in which to install pySTED. [Anaconda](https://docs.anaconda.com/anaconda/install/index.html) facilitates the creation of a virtual environment on most operating system. For exemple, a virtual environment can be created using
