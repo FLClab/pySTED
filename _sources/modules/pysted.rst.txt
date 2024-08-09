@@ -28,13 +28,13 @@
    :toctree:
    :recursive:
 
-   pysted.base
-   pysted.bleach_funcs
-   pysted.cUtils
-   pysted.data
-   pysted.exp_data_gen
-   pysted.microscopes
-   pysted.raster
-   pysted.temporal
-   pysted.utils
+   base
+   bleach_funcs
+   cUtils
+   data
+   exp_data_gen
+   microscopes
+   raster
+   temporal
+   utils
 

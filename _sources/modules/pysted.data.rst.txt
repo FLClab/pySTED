@@ -28,5 +28,5 @@ pysted.data
    :toctree:
    :recursive:
 
-   pysted.data.loader
+   loader
 
