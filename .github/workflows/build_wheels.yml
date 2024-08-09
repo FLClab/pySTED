@@ -18,6 +18,8 @@ jobs:
       matrix:
         # macos-13 is an intel runner, macos-14 is apple silicon
         os: [ubuntu-latest, windows-latest, macos-latest]
+        env:
+          CIBW_BUILD: cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp39-win_amd64 cp310-win_amd64 cp311-win_amd64 cp312-win_amd64 cp39-macosx_x86_64 cp310-macosx_x86_64 cp311-macosx_x86_64 cp312-macosx_x86_64
 
     steps:
       - uses: actions/checkout@v4
