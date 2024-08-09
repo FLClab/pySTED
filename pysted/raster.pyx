@@ -10,6 +10,7 @@ import time
 import numpy
 from matplotlib import pyplot as plt
 cimport numpy
+numpy.import_array()
 import scipy
 cimport cython
 

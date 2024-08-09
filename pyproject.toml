@@ -2,8 +2,10 @@
 # Minimum requirements for the build system to execute.
 requires = [
     "setuptools>=61.0",
+    "ruff>=0.4.8",
     "wheel",
-    "cython",
+    "cython>=3",
+    "numpy>=2",
     "oldest-supported-numpy"
 ]
 build-backend = "setuptools.build_meta"
@@ -11,16 +13,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pysted"
 authors = [
-    {name = "Audrey Durand"},
-    {name = "Benoit Turcotte"},
     {name = "Anthony Bilodeau"},
-    {name = "Albert Michaud-Gagnon"}
+    {name = "Benoit Turcotte"},
+    {name = "Albert Michaud-Gagnon"},
+    {name = "Audrey Durand"},    
 ]
 dynamic = ["version"]
 readme = "README.md"
 description = "STED image simulator in Python"
 keywords = ["microscopy", "sted", "simulation"]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "certifi",
     "cycler",
@@ -69,7 +71,7 @@ Homepage = "https://github.com/FLClab/pySTED"
 Issues = "https://github.com/FLClab/pySTED/issues"
 
 [tool.cibuildwheel]
-build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*"]
+build = ["cp39-*", "cp310-*", "cp311-*", "cp312-*"]
 
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "manylinux2014"
@@ -79,3 +81,7 @@ archs = ["x86_64", "arm64"]
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
+
+# Linting configuration for Ruff since numpy 2.0
+[tool.ruff.lint]
+select = ["NPY201"]

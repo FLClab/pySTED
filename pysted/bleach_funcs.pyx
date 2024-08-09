@@ -5,6 +5,7 @@
 import time
 import numpy
 cimport numpy
+numpy.import_array()
 cimport cython
 import copy
 
