@@ -25,7 +25,11 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.17.0
         env:
-          CIBW_BUILD: cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp39-win_amd64 cp310-win_amd64 cp311-win_amd64 cp312-win_amd64 cp39-macosx_x86_64 cp310-macosx_x86_64 cp311-macosx_x86_64 cp312-macosx_x86_64
+          CIBW_BUILD: | # Only build for some specific images
+            cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 \
+            cp39-win_amd64 cp310-win_amd64 cp311-win_amd64 cp312-win_amd64 \
+            cp39-macosx_x86_64 cp310-macosx_x86_64 cp311-macosx_x86_64 cp312-macosx_x86_64 \
+            cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
 
       - uses: actions/upload-artifact@v4
         with:
