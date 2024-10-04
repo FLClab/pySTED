@@ -60,11 +60,11 @@ python pySTED_tutorial.py
 If you use any material from this repository please cite the following
 ```bibtex
 @article{bilodeau2024development,
-  title={Development of AI-assisted microscopy frameworks through realistic simulation in pySTED},
+  title={Development of AI-assisted microscopy frameworks through realistic simulation with pySTED},
   author={Bilodeau, Anthony and Michaud-Gagnon, Albert and Chabbert, Julia and Turcotte, Benoit and Heine, J{\"o}rn and Durand, Audrey and Lavoie-Cardinal, Flavie},
-  journal={bioRxiv},
-  pages={2024--03},
+  journal={Nature Machine Intelligence},
+  pages={1--19},
   year={2024},
-  publisher={Cold Spring Harbor Laboratory}
+  publisher={Nature Publishing Group UK London}
 }
 ```
